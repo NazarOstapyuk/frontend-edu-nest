@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>Login Page Mockup</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Inter", "Roboto", sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 40px 36px;
+      width: 380px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    }
+    .logo-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+    .logo-circle {
+      width: 56px;
+      height: 56px;
+      background: #1a237e;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+    .logo-circle svg {
+      width: 28px;
+      height: 28px;
+      fill: #fff;
+    }
+    .logo-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1a237e;
+      letter-spacing: 0.5px;
+    }
+    .logo-sub {
+      font-size: 13px;
+      color: #757575;
+      margin-top: 2px;
+    }
+    .field {
+      margin-bottom: 16px;
+    }
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #424242;
+      margin-bottom: 5px;
+      letter-spacing: 0.3px;
+    }
+    .field input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #212121;
+      outline: none;
+      transition: border-color .2s;
+      background: #fafafa;
+    }
+    .field input:focus {
+      border-color: #1a237e;
+      background: #fff;
+    }
+    .field-password {
+      position: relative;
+    }
+    .field-password input {
+      padding-right: 40px;
+    }
+    .eye-icon {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9e9e9e;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: #1a237e;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      letter-spacing: 0.3px;
+      transition: background .2s;
+    }
+    .btn:hover { background: #283593; }
+    .error-hint {
+      background: #ffebee;
+      border: 1px solid #ef9a9a;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: #c62828;
+      margin-bottom: 14px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo-wrap">
+      <div class="logo-circle">
+        <svg viewBox="0 0 24 24"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+      </div>
+      <div class="logo-title">EduNest</div>
+      <div class="logo-sub">Вхід до системи</div>
+    </div>
+
+    <div class="error-hint" id="err">Невірний логін або пароль</div>
+
+    <div class="field">
+      <label>Логін</label>
+      <input type="text" placeholder="Введіть логін" />
+    </div>
+    <div class="field">
+      <label>Пароль</label>
+      <div class="field-password">
+        <input type="password" placeholder="Введіть пароль" />
+        <span class="eye-icon">👁</span>
+      </div>
+    </div>
+    <button class="btn">Увійти</button>
+  </div>
+</body>
+</html>

@@ -5,28 +5,16 @@ import * as yup from 'yup'
 import {
     Dialog,
     DialogTitle,
-    DialogContent,
-    DialogActions,
     Button,
     TextField,
     MenuItem,
-    Stack,
     IconButton,
-    InputAdornment,
+    InputAdornment, Box,
 } from '@mui/material'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
-import type {UserRole} from "../../../entities/user";
 import {RHFTextField} from "../../../shared/ui/RHFTextField.tsx";
 import {useUsersStore} from "../model/usersStore.ts";
-
-interface FormValues {
-    firstName: string
-    lastName: string
-    role: UserRole
-    login: string
-    password: string
-}
 
 const schema = yup.object({
     firstName: yup.string().min(3, 'Мінімум 3 символи').required("Обов'язкове поле"),
@@ -38,11 +26,11 @@ const schema = yup.object({
 
 export const CreateUserModal = () => {
     const createUser = useUsersStore((s) => s.createUser)
+    const isCreating = useUsersStore((s) => s.isCreating)
     const {isOpen} = useUsersStore((s) => s.createUserModal)
     const setCreateUserModal = useUsersStore((s) => s.setCreateUserModal)
 
     const [showPassword, setShowPassword] = useState(false)
-    const [isLoading, setIsLoading] = useState(false)
 
     const methods = useForm({
         mode: 'all',
@@ -62,13 +50,8 @@ export const CreateUserModal = () => {
     }
 
     const onSubmit = async (values) => {
-        setIsLoading(true)
-        try {
-            await createUser(values)
-            handleClose()
-        } finally {
-            setIsLoading(false)
-        }
+        await createUser(values)
+        handleClose()
     }
 
     return (
@@ -76,9 +59,16 @@ export const CreateUserModal = () => {
             <DialogTitle sx={{fontWeight: 700}}>Новий користувач</DialogTitle>
 
             <FormProvider {...methods}>
-                <DialogContent>
-                    <Stack spacing={2.5} sx={{pt: 0.5}}>
-                        <Stack direction="row" spacing={2}>
+                    <Box sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '25px',
+                        padding: '20px',
+                    }}>
+                        <Box sx={{
+                            display: 'flex',
+                            gap: '10px',
+                        }}>
                             <RHFTextField
                                 name="firstName"
                                 control={methods.control}
@@ -93,7 +83,7 @@ export const CreateUserModal = () => {
                                 fullWidth
                                 autoComplete="username"
                             />
-                        </Stack>
+                        </Box>
 
                         <Controller
                             name="role"
@@ -140,19 +130,28 @@ export const CreateUserModal = () => {
                                 },
                             }}
                         />
-                    </Stack>
-                </DialogContent>
 
-                <DialogActions sx={{px: 3, pb: 2.5, gap: 1}}>
-                    <Button onClick={handleClose} color="inherit">Скасувати</Button>
-                    <Button
-                        onClick={methods.handleSubmit(onSubmit)}
-                        variant="contained"
-                        disabled={isLoading}
-                    >
-                        Зберегти
-                    </Button>
-                </DialogActions>
+                        <Box sx={{
+                            display: 'flex',
+                            gap: '10px',
+                        }}>
+                            <Button
+                                onClick={handleClose}
+                                color="inherit"
+                                sx={{width: '100%'}}
+                            >
+                                Скасувати
+                            </Button>
+                            <Button
+                                onClick={methods.handleSubmit(onSubmit)}
+                                variant="contained"
+                                disabled={isCreating}
+                                sx={{width: '100%'}}
+                            >
+                                Зберегти
+                            </Button>
+                        </Box>
+                    </Box>
             </FormProvider>
         </Dialog>
     )

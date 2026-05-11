@@ -6,7 +6,7 @@ type RHFTextFieldProps<T extends FieldValues> = Omit<TextFieldProps, 'name'> & {
   control: Control<T>
 }
 
-export const RHFTextField = <T extends FieldValues>({ name, control, ...props }: RHFTextFieldProps<T>) => {
+export const RHFTextField = <T extends FieldValues>({ name, control, sx, slotProps, ...props }: RHFTextFieldProps<T>) => {
   const { field, fieldState } = useController({ name, control })
 
   return (
@@ -15,6 +15,14 @@ export const RHFTextField = <T extends FieldValues>({ name, control, ...props }:
       {...field}
       error={!!fieldState.error}
       helperText={fieldState.error?.message}
+      sx={{ position: 'relative', ...sx }}
+      slotProps={{
+        ...slotProps,
+        formHelperText: {
+          ...slotProps?.formHelperText,
+          sx: { position: 'absolute', bottom: '-20px', mx: 0, ...(slotProps?.formHelperText as { sx?: object })?.sx },
+        },
+      }}
     />
   )
 }

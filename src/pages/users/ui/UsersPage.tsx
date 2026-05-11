@@ -16,9 +16,11 @@ import {
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { roleLabels } from '../../../entities/user'
 import { useUsersStore } from '../model/usersStore'
-import {CreateUserModal} from "./CreateUserModal.tsx";
+import { CreateUserModal } from './CreateUserModal.tsx'
+import { EditUserModal } from './EditUserModal.tsx'
 
 const roleColors: Record<string, 'primary' | 'secondary'> = {
   teacher: 'primary',
@@ -29,6 +31,7 @@ export const UsersPage = () => {
   const users = useUsersStore((s) => s.users)
   const fetchUsers = useUsersStore((s) => s.fetchUsers)
   const setCreateUserModal = useUsersStore((s) => s.setCreateUserModal)
+  const setEditUserModal = useUsersStore((s) => s.setEditUserModal)
   const deleteUser = useUsersStore((s) => s.deleteUser)
 
   useEffect(() => {
@@ -98,6 +101,11 @@ export const UsersPage = () => {
                   <TableCell sx={{ fontFamily: 'monospace' }}>{user.login}</TableCell>
                   <TableCell sx={{ color: 'text.secondary' }}>{user.createdAt}</TableCell>
                   <TableCell align="right">
+                    <Tooltip title="Редагувати">
+                      <IconButton size="small" onClick={() => setEditUserModal({ isOpen: true, user })}>
+                        <EditOutlinedIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                     <Tooltip title="Видалити">
                       <IconButton size="small" color="error" onClick={() => deleteUser(user.id)}>
                         <DeleteOutlineIcon fontSize="small" />
@@ -112,6 +120,7 @@ export const UsersPage = () => {
       </TableContainer>
 
       <CreateUserModal />
+      <EditUserModal />
     </Box>
   )
 }

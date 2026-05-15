@@ -3,6 +3,7 @@ import { AdminLayout } from '../layouts/AdminLayout'
 import { RequireAuth } from './RequireAuth'
 import { DashboardPage } from '../../pages/dashboard'
 import { UsersPage } from '../../pages/users'
+import { GroupsPage } from '../../pages/groups'
 import { EmptyPage } from '../../shared/ui/EmptyPage'
 import { LoginPage } from '../../pages/login'
 
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
         children: [
           { index: true,       element: <DashboardPage /> },
           { path: 'users',     element: <UsersPage /> },
+          { path: 'groups',    element: <GroupsPage /> },
           { path: 'students',  element: <EmptyPage title="Учні" /> },
           { path: 'teachers',  element: <EmptyPage title="Вчителі" /> },
           { path: 'classes',   element: <EmptyPage title="Класи" /> },

@@ -7,6 +7,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import AssignmentIcon from '@mui/icons-material/Assignment'
 import BarChartIcon from '@mui/icons-material/BarChart'
 import SettingsIcon from '@mui/icons-material/Settings'
+import GroupsIcon from '@mui/icons-material/Groups'
 import type { SvgIconComponent } from '@mui/icons-material'
 
 export interface NavItem {
@@ -17,8 +18,9 @@ export interface NavItem {
 
 export const navItems: NavItem[] = [
   { path: '/',          label: 'Дашборд',    icon: DashboardIcon },
-  { path: '/users',     label: 'Користувачі',icon: ManageAccountsIcon },
-  { path: '/students',  label: 'Учні',       icon: PeopleIcon },
+  { path: '/users',     label: 'Користувачі', icon: ManageAccountsIcon },
+  { path: '/groups',    label: 'Групи',       icon: GroupsIcon },
+  { path: '/students',  label: 'Учні',        icon: PeopleIcon },
   { path: '/teachers',  label: 'Вчителі',    icon: SchoolIcon },
   { path: '/classes',   label: 'Класи',      icon: ClassIcon },
   { path: '/schedule',  label: 'Розклад',    icon: CalendarMonthIcon },

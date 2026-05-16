@@ -21,11 +21,6 @@ export const navItems: NavItem[] = [
   { path: '/users',     label: 'Користувачі', icon: ManageAccountsIcon },
   { path: '/groups',    label: 'Групи',       icon: GroupsIcon },
   { path: '/students',  label: 'Учні',        icon: PeopleIcon },
-  { path: '/teachers',  label: 'Вчителі',    icon: SchoolIcon },
-  { path: '/classes',   label: 'Класи',      icon: ClassIcon },
-  { path: '/schedule',  label: 'Розклад',    icon: CalendarMonthIcon },
-  { path: '/grades',    label: 'Оцінки',     icon: AssignmentIcon },
-  { path: '/reports',   label: 'Звіти',      icon: BarChartIcon },
 ]
 
 export const bottomNavItems: NavItem[] = [

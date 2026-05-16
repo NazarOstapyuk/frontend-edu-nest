@@ -18,7 +18,7 @@ export interface Child {
   gender: Gender;
   group: Group | null;
   parents: User[];
-  subscriptions: SubscriptionInChild[];
+  subscriptions: Subscription[];
   createdAt: string;
 }
 

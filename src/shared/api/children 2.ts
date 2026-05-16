@@ -1,6 +1,6 @@
 import type { User } from '../../entities/user';
 import type { Group } from './groups';
-import type { SubscriptionInChild } from './subscriptions';
+import type { Subscription } from './subscriptions';
 import { axiosInstance } from './axiosInstance';
 
 export type Gender = 'male' | 'female'
@@ -18,7 +18,7 @@ export interface Child {
   gender: Gender;
   group: Group | null;
   parents: User[];
-  subscriptions: SubscriptionInChild[];
+  subscriptions: Subscription[];
   createdAt: string;
 }
 

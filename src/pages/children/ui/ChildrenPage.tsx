@@ -20,6 +20,7 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { useChildrenStore } from '../model/childrenStore'
 import { useUsersStore } from '../../users/model/usersStore'
 import { useGroupsStore } from '../../groups/model/groupsStore'
+import { genderLabels } from '../../../shared/api'
 import { CreateChildModal } from './CreateChildModal'
 import { EditChildModal } from './EditChildModal'
 
@@ -64,6 +65,7 @@ export const ChildrenPage = () => {
               <TableCell>#</TableCell>
               <TableCell>Ім'я та прізвище</TableCell>
               <TableCell>Дата народження</TableCell>
+              <TableCell>Стать</TableCell>
               <TableCell>Група</TableCell>
               <TableCell>Батьки</TableCell>
               <TableCell align="right">Дії</TableCell>
@@ -73,7 +75,7 @@ export const ChildrenPage = () => {
           <TableBody>
             {children.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                <TableCell colSpan={7} align="center" sx={{ py: 6, color: 'text.secondary' }}>
                   Учнів ще немає. Натисніть «Створити учня».
                 </TableCell>
               </TableRow>
@@ -86,6 +88,9 @@ export const ChildrenPage = () => {
                   </TableCell>
                   <TableCell sx={{ color: 'text.secondary' }}>
                     {new Date(child.birthDate).toLocaleDateString('uk-UA')}
+                  </TableCell>
+                  <TableCell sx={{ color: 'text.secondary' }}>
+                    {genderLabels[child.gender]}
                   </TableCell>
                   <TableCell>
                     {child.group ? (

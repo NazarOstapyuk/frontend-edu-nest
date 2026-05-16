@@ -7,16 +7,19 @@ import {
   Button,
   Dialog,
   DialogTitle,
+  MenuItem,
   TextField,
 } from '@mui/material'
 import { useChildrenStore } from '../model/childrenStore'
 import { useUsersStore } from '../../users/model/usersStore'
 import { useGroupsStore } from '../../groups/model/groupsStore'
+import { genderLabels, type Gender } from '../../../shared/api'
 
 const schema = yup.object({
   firstName: yup.string().min(2, 'Мінімум 2 символи').required("Обов'язкове поле"),
   lastName: yup.string().min(2, 'Мінімум 2 символи').required("Обов'язкове поле"),
   birthDate: yup.string().required("Обов'язкове поле"),
+  gender: yup.mixed<Gender>().oneOf(['male', 'female']).required("Обов'язкове поле"),
   groupId: yup.string().required("Обов'язкове поле"),
   parentIds: yup.array().of(yup.string().required()).default([]),
 })
@@ -35,7 +38,7 @@ export const CreateChildModal = () => {
 
   const { control, handleSubmit, reset } = useForm<FormValues>({
     mode: 'all',
-    defaultValues: { firstName: '', lastName: '', birthDate: '', groupId: '', parentIds: [] },
+    defaultValues: { firstName: '', lastName: '', birthDate: '', gender: 'male', groupId: '', parentIds: [] },
     resolver: yupResolver(schema),
   })
 
@@ -49,6 +52,7 @@ export const CreateChildModal = () => {
       firstName: values.firstName,
       lastName: values.lastName,
       birthDate: values.birthDate,
+      gender: values.gender as Gender,
       groupId: values.groupId,
       parentIds: values.parentIds ?? [],
     })
@@ -96,10 +100,29 @@ export const CreateChildModal = () => {
               label="Дата народження"
               type="date"
               fullWidth
-              InputLabelProps={{ shrink: true }}
+              slotProps={{ inputLabel: { shrink: true } }}
               error={!!error}
               helperText={error?.message}
             />
+          )}
+        />
+
+        <Controller
+          name="gender"
+          control={control}
+          render={({ field, fieldState: { error } }) => (
+            <TextField
+              {...field}
+              select
+              label="Стать"
+              fullWidth
+              error={!!error}
+              helperText={error?.message}
+            >
+              {(Object.keys(genderLabels) as Gender[]).map((key) => (
+                <MenuItem key={key} value={key}>{genderLabels[key]}</MenuItem>
+              ))}
+            </TextField>
           )}
         />
 

@@ -10,6 +10,8 @@ import { SubscriptionsPage } from '../../pages/subscriptions'
 import { ChildFinancePage, FinanceBalancesPage } from '../../pages/finance'
 import { TariffsPage } from '../../pages/tariffs'
 import { ClassesPage } from '../../pages/classes'
+import { ClassGroupPage, MarkLessonPage } from '../../pages/classGroup'
+import { MyClassesPage } from '../../pages/myClasses'
 import { EmptyPage } from '../../shared/ui/EmptyPage'
 import { LoginPage } from '../../pages/login'
 
@@ -36,6 +38,9 @@ export const router = createBrowserRouter([
           { path: 'tariffs',             element: <TariffsPage /> },
           { path: 'teachers',            element: <EmptyPage title="Вчителі" /> },
           { path: 'classes',   element: <ClassesPage /> },
+          { path: 'classes/:groupId',               element: <ClassGroupPage /> },
+          { path: 'classes/:groupId/lessons/:date', element: <MarkLessonPage /> },
+          { path: 'my-classes',                     element: <MyClassesPage /> },
           { path: 'schedule',  element: <EmptyPage title="Розклад" /> },
           { path: 'grades',    element: <EmptyPage title="Оцінки" /> },
           { path: 'reports',   element: <EmptyPage title="Звіти" /> },

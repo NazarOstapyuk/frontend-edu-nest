@@ -11,6 +11,8 @@ import { PaymentsTable } from './PaymentsTable'
 import { HistoryTable } from './HistoryTable'
 import { CreateChargeModal } from './CreateChargeModal'
 import { VoidModal } from './VoidModal'
+import { CreatePaymentModal } from './CreatePaymentModal'
+import { AllocateModal } from './AllocateModal'
 
 export const ChildFinancePage = () => {
   const { childId } = useParams<{ childId: string }>()
@@ -74,6 +76,8 @@ export const ChildFinancePage = () => {
       {tab === 2 && <HistoryTable events={history} />}
       <CreateChargeModal />
       <VoidModal />
+      <CreatePaymentModal />
+      <AllocateModal />
     </Box>
   )
 }

@@ -13,6 +13,7 @@ import { CreateChargeModal } from './CreateChargeModal'
 import { VoidModal } from './VoidModal'
 import { CreatePaymentModal } from './CreatePaymentModal'
 import { AllocateModal } from './AllocateModal'
+import { EnrollmentsTab } from './EnrollmentsTab'
 
 export const ChildFinancePage = () => {
   const { childId } = useParams<{ childId: string }>()
@@ -68,12 +69,15 @@ export const ChildFinancePage = () => {
       <Tabs value={tab} onChange={(_, value: number) => setTab(value)} sx={{ mb: 2 }}>
         <Tab label={`Нарахування (${finance.charges.length})`} />
         <Tab label={`Оплати (${finance.payments.length})`} />
+        <Tab label="Абонементи" />
+        <Tab label="Адаптація" />
         <Tab label="Історія" />
       </Tabs>
 
       {tab === 0 && <ChargesTable charges={finance.charges} />}
       {tab === 1 && <PaymentsTable payments={finance.payments} />}
-      {tab === 2 && <HistoryTable events={history} />}
+      {tab === 2 && <EnrollmentsTab childId={finance.child.id} />}
+      {tab === 4 && <HistoryTable events={history} />}
       <CreateChargeModal />
       <VoidModal />
       <CreatePaymentModal />

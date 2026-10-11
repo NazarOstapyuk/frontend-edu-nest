@@ -32,6 +32,7 @@ export interface Tariff {
   category: FinanceCategory;
   unit: TariffUnit;
   packageSize: number | null;
+  validityDays: number | null;
   billingMode: BillingMode;
   isActive: boolean;
   currentPrice: string | null;
@@ -43,6 +44,7 @@ export interface CreateTariffDto {
   category: FinanceCategory;
   unit: TariffUnit;
   packageSize?: number;
+  validityDays?: number;
   billingMode: BillingMode;
   price: string;
   effectiveFrom: string;
@@ -50,6 +52,7 @@ export interface CreateTariffDto {
 
 export interface UpdateTariffDto {
   name?: string;
+  validityDays?: number | null;
   billingMode?: BillingMode;
   isActive?: boolean;
 }

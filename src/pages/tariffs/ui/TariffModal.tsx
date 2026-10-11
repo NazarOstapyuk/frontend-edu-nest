@@ -75,6 +75,11 @@ export const TariffModal = () => {
             {financeCategoryLabels[tariff.category]} · {tariffUnitLabels[tariff.unit]}
             {tariff.packageSize ? ` (${tariff.packageSize})` : ''} · {billingModeLabels[tariff.billingMode]}
           </Typography>
+          {tariff.unit === 'package' && (
+            <Typography variant="body2" color="text.secondary">
+              Термін дії: {tariff.validityDays ? `${tariff.validityDays} дн.` : 'без терміну'}
+            </Typography>
+          )}
           <FormControlLabel
             control={
               <Switch

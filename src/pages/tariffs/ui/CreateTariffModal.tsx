@@ -29,6 +29,11 @@ const schema = yup.object({
     const size = Number(value)
     return Number.isInteger(size) && size >= 2 && size <= 100
   }),
+  validityDays: yup.string().default('').test('validity', 'Від 1 до 3650 днів або порожньо', (value) => {
+    if (!value) return true
+    const days = Number(value)
+    return Number.isInteger(days) && days >= 1 && days <= 3650
+  }),
   billingMode: yup.mixed<BillingMode>().oneOf(billingModes).required("Обов'язкове поле"),
   price: yup
     .string()
@@ -46,6 +51,7 @@ const defaults: FormValues = {
   category: 'tuition',
   unit: 'month',
   packageSize: '',
+  validityDays: '',
   billingMode: 'calendar_full',
   price: '',
   effectiveFrom: '',
@@ -75,6 +81,7 @@ export const CreateTariffModal = () => {
       category: values.category,
       unit: values.unit,
       packageSize: values.unit === 'package' ? Number(values.packageSize) : undefined,
+      validityDays: values.unit === 'package' && values.validityDays ? Number(values.validityDays) : undefined,
       billingMode: values.billingMode,
       price: normalizeAmount(values.price),
       effectiveFrom: values.effectiveFrom,
@@ -126,6 +133,15 @@ export const CreateTariffModal = () => {
             />
           )}
         </Box>
+        {unit === 'package' && (
+          <Controller
+            name="validityDays"
+            control={control}
+            render={({ field, fieldState: { error } }) => (
+              <TextField {...field} label="Діє днів (порожньо — без терміну)" fullWidth error={!!error} helperText={error?.message} />
+            )}
+          />
+        )}
         <Controller
           name="billingMode"
           control={control}

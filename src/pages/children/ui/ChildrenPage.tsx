@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Box,
   Button,
@@ -15,6 +16,7 @@ import {
   Typography,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
+import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { useChildrenStore } from '../model/childrenStore'
@@ -30,6 +32,7 @@ export const ChildrenPage = () => {
   const setCreateChildModal = useChildrenStore((s) => s.setCreateChildModal)
   const setEditChildModal = useChildrenStore((s) => s.setEditChildModal)
   const deleteChild = useChildrenStore((s) => s.deleteChild)
+  const navigate = useNavigate()
   const fetchUsers = useUsersStore((s) => s.fetchUsers)
   const fetchGroups = useGroupsStore((s) => s.fetchGroups)
 
@@ -134,6 +137,11 @@ export const ChildrenPage = () => {
                     </Box>
                   </TableCell>
                   <TableCell align="right">
+                    <Tooltip title="Фінанси">
+                      <IconButton size="small" onClick={() => navigate(`/finance/${child.id}`)}>
+                        <AccountBalanceWalletOutlinedIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                     <Tooltip title="Редагувати">
                       <IconButton
                         size="small"

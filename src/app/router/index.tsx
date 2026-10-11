@@ -7,6 +7,7 @@ import { GroupsPage } from '../../pages/groups'
 import { ChildrenPage } from '../../pages/children'
 import { SubscriptionTypesPage } from '../../pages/subscriptionTypes'
 import { SubscriptionsPage } from '../../pages/subscriptions'
+import { FinanceBalancesPage } from '../../pages/finance'
 import { EmptyPage } from '../../shared/ui/EmptyPage'
 import { LoginPage } from '../../pages/login'
 
@@ -28,6 +29,7 @@ export const router = createBrowserRouter([
           { path: 'students',            element: <ChildrenPage /> },
           { path: 'subscriptions',       element: <SubscriptionsPage /> },
           { path: 'subscription-types',  element: <SubscriptionTypesPage /> },
+          { path: 'finance',             element: <FinanceBalancesPage /> },
           { path: 'teachers',            element: <EmptyPage title="Вчителі" /> },
           { path: 'classes',   element: <EmptyPage title="Класи" /> },
           { path: 'schedule',  element: <EmptyPage title="Розклад" /> },

@@ -10,6 +10,7 @@ import SettingsIcon from '@mui/icons-material/Settings'
 import GroupsIcon from '@mui/icons-material/Groups'
 import CardMembershipIcon from '@mui/icons-material/CardMembership'
 import StyleIcon from '@mui/icons-material/Style'
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet'
 import type { SvgIconComponent } from '@mui/icons-material'
 
 export interface NavItem {
@@ -25,6 +26,7 @@ export const navItems: NavItem[] = [
   { path: '/students',            label: 'Учні',              icon: PeopleIcon },
   { path: '/subscriptions',       label: 'Абонементи',        icon: CardMembershipIcon },
   { path: '/subscription-types',  label: 'Типи абонементів',  icon: StyleIcon },
+  { path: '/finance',             label: 'Фінанси',           icon: AccountBalanceWalletIcon },
 ]
 
 export const bottomNavItems: NavItem[] = [

@@ -5,8 +5,6 @@ import { DashboardPage } from '../../pages/dashboard'
 import { UsersPage } from '../../pages/users'
 import { GroupsPage } from '../../pages/groups'
 import { ChildrenPage } from '../../pages/children'
-import { SubscriptionTypesPage } from '../../pages/subscriptionTypes'
-import { SubscriptionsPage } from '../../pages/subscriptions'
 import { ChildFinancePage, FinanceBalancesPage } from '../../pages/finance'
 import { TariffsPage } from '../../pages/tariffs'
 import { ClassesPage } from '../../pages/classes'
@@ -31,8 +29,6 @@ export const router = createBrowserRouter([
           { path: 'users',     element: <UsersPage /> },
           { path: 'groups',    element: <GroupsPage /> },
           { path: 'students',            element: <ChildrenPage /> },
-          { path: 'subscriptions',       element: <SubscriptionsPage /> },
-          { path: 'subscription-types',  element: <SubscriptionTypesPage /> },
           { path: 'finance',             element: <FinanceBalancesPage /> },
           { path: 'finance/:childId',    element: <ChildFinancePage /> },
           { path: 'tariffs',             element: <TariffsPage /> },

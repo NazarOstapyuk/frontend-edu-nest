@@ -66,3 +66,43 @@ export { billingApi } from './billing';
 export type { BillingProblem, BillResult, BillingSettings } from './billing';
 export { adaptationApi } from './adaptation';
 export type { AdaptationVisit, CreateAdaptationVisitDto } from './adaptation';
+
+export {
+  directionsApi,
+  classGroupsApi,
+  packagesApi,
+  missedRuleLabels,
+  classFormatLabels,
+  attendanceStatusLabels,
+  packageStateLabels,
+  reconcileOutcomeLabels,
+  missedRules,
+  classFormats,
+  attendanceStatuses,
+  localToday,
+  formatDay,
+} from './classes';
+export type {
+  MissedLessonRule,
+  ClassFormat,
+  AttendanceStatus,
+  PackageState,
+  ReconcileOutcome,
+  TariffRef,
+  ClassGroupSummary,
+  Direction,
+  ClassGroupMember,
+  LessonSummary,
+  ClassGroupDetail,
+  MyClassGroup,
+  RosterRow,
+  LessonRoster,
+  ChildPackage,
+  ReconciliationItem,
+  DirectionDto,
+  ClassGroupDto,
+  MarkLessonDto,
+  PurchasePackageDto,
+  ReconcileDto,
+} from './classes';
+export { translateError } from './errorMessages';

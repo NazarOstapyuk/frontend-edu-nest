@@ -37,15 +37,15 @@ export const TariffsPage = () => {
   const runBilling = useTariffsStore((s) => s.runBilling)
   const setCreateTariffModal = useTariffsStore((s) => s.setCreateTariffModal)
   const setTariffModal = useTariffsStore((s) => s.setTariffModal)
-  const [leadInput, setLeadInput] = useState('')
+  const [leadInput, setLeadInput] = useState<string | null>(null)
 
   useEffect(() => {
     fetchAll()
   }, [fetchAll])
 
-  const leadValue = leadInput === '' ? (leadDays ?? '') : leadInput
+  const leadValue = leadInput ?? (leadDays === null ? '' : String(leadDays))
   const parsedLead = Number(leadValue)
-  const leadValid = Number.isInteger(parsedLead) && parsedLead >= 0 && parsedLead <= 60
+  const leadValid = /^\d{1,2}$/.test(leadValue.trim()) && parsedLead <= 60
 
   return (
     <Box>
@@ -58,15 +58,15 @@ export const TariffsPage = () => {
           label="Нараховувати за N днів"
           value={leadValue}
           onChange={(e) => setLeadInput(e.target.value)}
-          error={!leadValid}
+          error={leadInput !== null && !leadValid}
           sx={{ width: 200 }}
         />
         <Button
           variant="outlined"
-          disabled={isSaving || !leadValid || parsedLead === leadDays}
+          disabled={isSaving || leadDays === null || leadInput === null || !leadValid || parsedLead === leadDays}
           onClick={async () => {
             await setLeadDays(parsedLead)
-            setLeadInput('')
+            setLeadInput(null)
           }}
         >
           Зберегти

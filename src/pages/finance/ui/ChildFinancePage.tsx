@@ -9,6 +9,8 @@ import { CategoryTiles } from './CategoryTiles'
 import { ChargesTable } from './ChargesTable'
 import { PaymentsTable } from './PaymentsTable'
 import { HistoryTable } from './HistoryTable'
+import { CreateChargeModal } from './CreateChargeModal'
+import { VoidModal } from './VoidModal'
 
 export const ChildFinancePage = () => {
   const { childId } = useParams<{ childId: string }>()
@@ -70,6 +72,8 @@ export const ChildFinancePage = () => {
       {tab === 0 && <ChargesTable charges={finance.charges} />}
       {tab === 1 && <PaymentsTable payments={finance.payments} />}
       {tab === 2 && <HistoryTable events={history} />}
+      <CreateChargeModal />
+      <VoidModal />
     </Box>
   )
 }

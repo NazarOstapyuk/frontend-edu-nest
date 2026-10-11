@@ -5,6 +5,8 @@ import { DashboardPage } from '../../pages/dashboard'
 import { UsersPage } from '../../pages/users'
 import { GroupsPage } from '../../pages/groups'
 import { ChildrenPage } from '../../pages/children'
+import { SubscriptionTypesPage } from '../../pages/subscriptionTypes'
+import { SubscriptionsPage } from '../../pages/subscriptions'
 import { EmptyPage } from '../../shared/ui/EmptyPage'
 import { LoginPage } from '../../pages/login'
 
@@ -23,8 +25,10 @@ export const router = createBrowserRouter([
           { index: true,       element: <DashboardPage /> },
           { path: 'users',     element: <UsersPage /> },
           { path: 'groups',    element: <GroupsPage /> },
-          { path: 'students',  element: <ChildrenPage /> },
-          { path: 'teachers',  element: <EmptyPage title="Вчителі" /> },
+          { path: 'students',            element: <ChildrenPage /> },
+          { path: 'subscriptions',       element: <SubscriptionsPage /> },
+          { path: 'subscription-types',  element: <SubscriptionTypesPage /> },
+          { path: 'teachers',            element: <EmptyPage title="Вчителі" /> },
           { path: 'classes',   element: <EmptyPage title="Класи" /> },
           { path: 'schedule',  element: <EmptyPage title="Розклад" /> },
           { path: 'grades',    element: <EmptyPage title="Оцінки" /> },

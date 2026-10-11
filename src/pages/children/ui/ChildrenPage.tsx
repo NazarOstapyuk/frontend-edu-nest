@@ -68,6 +68,7 @@ export const ChildrenPage = () => {
               <TableCell>Стать</TableCell>
               <TableCell>Група</TableCell>
               <TableCell>Батьки</TableCell>
+              <TableCell>Абонементи</TableCell>
               <TableCell align="right">Дії</TableCell>
             </TableRow>
           </TableHead>
@@ -75,7 +76,7 @@ export const ChildrenPage = () => {
           <TableBody>
             {children.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                <TableCell colSpan={8} align="center" sx={{ py: 6, color: 'text.secondary' }}>
                   Учнів ще немає. Натисніть «Створити учня».
                 </TableCell>
               </TableRow>
@@ -110,6 +111,23 @@ export const ChildrenPage = () => {
                             label={`${parent.lastName} ${parent.firstName}`}
                             size="small"
                             variant="outlined"
+                          />
+                        ))
+                      )}
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {child.subscriptions.length === 0 ? (
+                        <Typography variant="body2" color="text.secondary">—</Typography>
+                      ) : (
+                        child.subscriptions.map((sub) => (
+                          <Chip
+                            key={sub.id}
+                            label={`${sub.subscriptionType.name}: ${sub.remainingSessions}/${sub.totalSessions}`}
+                            size="small"
+                            variant="outlined"
+                            color={sub.status === 'active' ? 'success' : 'default'}
                           />
                         ))
                       )}

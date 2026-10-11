@@ -37,8 +37,10 @@ export const AllocateModal = () => {
 
   useEffect(() => {
     if (!isOpen || !payment || !childId) return
-    suggestAllocation(childId, { amount: payment.free, category: payment.category ?? undefined }).then(
-      (data) => {
+    let active = true
+    suggestAllocation(childId, { amount: payment.free, category: payment.category ?? undefined })
+      .then((data) => {
+        if (!active) return
         setLines(data.lines)
         setValue(
           'allocations',
@@ -47,13 +49,19 @@ export const AllocateModal = () => {
             amount: Number(line.suggestedAmount) > 0 ? line.suggestedAmount : '',
           })),
         )
-      },
-    )
+      })
+      .catch(() => {})
+    return () => {
+      active = false
+    }
   }, [isOpen, payment, childId, suggestAllocation, setValue])
 
   const total = toKopecks(payment?.free ?? '0')
   const distributed = watch('allocations').reduce((acc, item) => acc + toKopecks(item.amount), 0)
   const rest = total - distributed
+  const isOver = (index: number, amount: string | undefined) =>
+    toKopecks(amount ?? '') > toKopecks(lines[index]?.remaining ?? '0')
+  const anyOver = watch('allocations').some((item, index) => isOver(index, item.amount))
 
   const handleClose = () => {
     reset({ allocations: [] })
@@ -84,7 +92,12 @@ export const AllocateModal = () => {
               name={`allocations.${index}.amount`}
               control={control}
               render={({ field, fieldState: { error } }) => (
-                <TextField {...field} size="small" error={!!error} helperText={error?.message} />
+                <TextField
+                  {...field}
+                  size="small"
+                  error={!!error || isOver(index, field.value)}
+                  helperText={error?.message ?? (isOver(index, field.value) ? 'Більше за залишок' : undefined)}
+                />
               )}
             />
           )}
@@ -100,7 +113,7 @@ export const AllocateModal = () => {
           <Button
             onClick={handleSubmit(onSubmit)}
             variant="contained"
-            disabled={isSaving || rest < 0 || distributed === 0}
+            disabled={isSaving || rest < 0 || distributed === 0 || anyOver}
             sx={{ width: '100%' }}
           >
             Зберегти

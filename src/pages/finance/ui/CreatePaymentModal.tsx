@@ -33,7 +33,12 @@ const schema = yup.object({
 
 type FormValues = yup.InferType<typeof schema>
 
-const today = () => new Date().toISOString().slice(0, 10)
+const today = () => {
+  const now = new Date()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${now.getFullYear()}-${month}-${day}`
+}
 
 export const CreatePaymentModal = () => {
   const finance = useChildFinanceStore((s) => s.finance)
@@ -68,7 +73,7 @@ export const CreatePaymentModal = () => {
   }
 
   const handleClose = () => {
-    reset()
+    reset({ amount: '', method: 'cash', reference: '', receivedAt: today(), category: '', note: '', allocations: [] })
     setLines([])
     setCreatePaymentModal({ isOpen: false })
   }
@@ -105,6 +110,9 @@ export const CreatePaymentModal = () => {
   }
 
   const rest = total - distributed
+  const isOver = (index: number, amount: string | undefined) =>
+    toKopecks(amount ?? '') > toKopecks(lines[index]?.remaining ?? '0')
+  const anyOver = watch('allocations').some((item, index) => isOver(index, item.amount))
 
   return (
     <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="md">
@@ -213,7 +221,12 @@ export const CreatePaymentModal = () => {
                   name={`allocations.${index}.amount`}
                   control={control}
                   render={({ field, fieldState: { error } }) => (
-                    <TextField {...field} size="small" error={!!error} helperText={error?.message} />
+                    <TextField
+                      {...field}
+                      size="small"
+                      error={!!error || isOver(index, field.value)}
+                      helperText={error?.message ?? (isOver(index, field.value) ? 'Більше за залишок' : undefined)}
+                    />
                   )}
                 />
               )}
@@ -233,7 +246,7 @@ export const CreatePaymentModal = () => {
           <Button
             onClick={handleSubmit(onSubmit)}
             variant="contained"
-            disabled={isSaving || rest < 0}
+            disabled={isSaving || rest < 0 || anyOver}
             sx={{ width: '100%' }}
           >
             Зберегти

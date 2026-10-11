@@ -53,7 +53,7 @@ export const CreateAdaptationVisitModal = () => {
   const rate = watch('ratePerHour')
   const selected = hourTariffs.find((t) => t.id === tariffId)
   const effectiveRate = rate || selected?.currentPrice || ''
-  const total = (toKopecks(hours) * toKopecks(effectiveRate)) / 1000000
+  const total = (toKopecks(hours) * toKopecks(effectiveRate)) / 10000
 
   const handleClose = () => {
     reset({ tariffId: '', date: localToday(), hours: '', ratePerHour: '', note: '' })

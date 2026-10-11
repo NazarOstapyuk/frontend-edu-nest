@@ -49,3 +49,20 @@ export type {
   AllocationSuggestionDto,
   VoidDto,
 } from './finance';
+export { tariffsApi, tariffUnitLabels, billingModeLabels, tariffUnits, billingModes } from './tariffs';
+export type { TariffUnit, BillingMode, Tariff, TariffPrice, CreateTariffDto, UpdateTariffDto, AddTariffPriceDto } from './tariffs';
+export { enrollmentsApi, adjustmentTypeLabels, adjustmentTypes } from './enrollments';
+export type {
+  AdjustmentType,
+  Enrollment,
+  EnrollmentAdjustment,
+  BilledPeriod,
+  NextPeriod,
+  CreateEnrollmentDto,
+  EndEnrollmentDto,
+  CreateAdjustmentDto,
+} from './enrollments';
+export { billingApi } from './billing';
+export type { BillingProblem, BillResult, BillingSettings } from './billing';
+export { adaptationApi } from './adaptation';
+export type { AdaptationVisit, CreateAdaptationVisitDto } from './adaptation';

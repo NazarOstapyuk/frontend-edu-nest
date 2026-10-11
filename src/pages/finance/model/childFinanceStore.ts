@@ -45,8 +45,13 @@ export const useChildFinanceStore = create<ChildFinanceState>((set) => {
     set({ isSaving: true });
     try {
       const { data } = await request();
-      const { data: history } = await financeApi.getHistory(data.child.id);
-      set({ finance: data, history });
+      set({ finance: data });
+      try {
+        const { data: history } = await financeApi.getHistory(data.child.id);
+        set({ history });
+      } catch {
+        // History refresh is best-effort; the mutation already succeeded.
+      }
     } finally {
       set({ isSaving: false });
     }

@@ -95,7 +95,7 @@ export const TariffModal = () => {
             <TableBody>
               {tariff.prices.map((p) => (
                 <TableRow key={p.id}>
-                  <TableCell>{new Date(p.effectiveFrom).toLocaleDateString('uk-UA')}</TableCell>
+                  <TableCell>{new Date(p.effectiveFrom).toLocaleDateString('uk-UA', { timeZone: 'UTC' })}</TableCell>
                   <TableCell align="right">{formatMoney(p.price)}</TableCell>
                 </TableRow>
               ))}

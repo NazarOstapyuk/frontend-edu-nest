@@ -38,7 +38,7 @@ export const EndEnrollmentModal = () => {
       <DialogTitle sx={{ fontWeight: 700 }}>Завершити запис</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         <Typography variant="body2" color="text.secondary">
-          {enrollment?.tariff.name}. Останній період буде пораховано пропорційно до дати завершення.
+          {enrollment?.tariff.name}. Наступні періоди не нараховуватимуться. Якщо поточний період уже нараховано, натисніть «Перерахувати» біля нього — сума стане пропорційною до дати завершення.
         </Typography>
         <Controller
           name="endDate"

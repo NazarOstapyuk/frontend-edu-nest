@@ -32,7 +32,7 @@ import { CreateEnrollmentModal } from './CreateEnrollmentModal'
 import { EndEnrollmentModal } from './EndEnrollmentModal'
 import { AdjustmentModal } from './AdjustmentModal'
 
-const formatDate = (value: string) => new Date(value).toLocaleDateString('uk-UA')
+const formatDate = (value: string) => new Date(value).toLocaleDateString('uk-UA', { timeZone: 'UTC' })
 
 const adjustmentLabel = (a: EnrollmentAdjustment) => {
   const value =
@@ -42,7 +42,7 @@ const adjustmentLabel = (a: EnrollmentAdjustment) => {
 }
 
 const EnrollmentRow = ({ enrollment }: { enrollment: Enrollment }) => {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(() => enrollment.billedPeriods.some((p) => p.needsRecalculation))
   const setEndEnrollmentModal = useEnrollmentsStore((s) => s.setEndEnrollmentModal)
   const setAdjustmentModal = useEnrollmentsStore((s) => s.setAdjustmentModal)
   const setReasonTarget = useEnrollmentsStore((s) => s.setReasonTarget)
@@ -58,7 +58,12 @@ const EnrollmentRow = ({ enrollment }: { enrollment: Enrollment }) => {
             {open ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
           </IconButton>
         </TableCell>
-        <TableCell sx={{ fontWeight: 500 }}>{enrollment.tariff.name}</TableCell>
+        <TableCell sx={{ fontWeight: 500 }}>
+          {enrollment.tariff.name}
+          {enrollment.billedPeriods.some((p) => p.needsRecalculation) && (
+            <Chip size="small" color="warning" label="Потрібен перерахунок" sx={{ ml: 1 }} />
+          )}
+        </TableCell>
         <TableCell>
           {formatDate(enrollment.startDate)} – {enrollment.endDate ? formatDate(enrollment.endDate) : '…'}
         </TableCell>
@@ -228,7 +233,7 @@ export const EnrollmentsTab = ({ childId }: EnrollmentsTabProps) => {
         title={reasonTarget?.title ?? ''}
         subtitle={
           reasonTarget?.kind === 'recalculate'
-            ? 'Поточне нарахування буде сторновано і створено нове за актуальними умовами.'
+            ? 'Поточне нарахування буде сторновано і створено нове за актуальними умовами. Оплати, розподілені на старе нарахування, повернуться в передоплату — їх треба розподілити знову.'
             : 'Умова перестане діяти для ще не нарахованих періодів.'
         }
         isSaving={isSaving}

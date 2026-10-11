@@ -20,7 +20,7 @@ import { ReasonDialog } from '../../../shared/ui/ReasonDialog'
 import { chargeStateLabels, formatMoney } from '../../../shared/api'
 import { CreateAdaptationVisitModal } from './CreateAdaptationVisitModal'
 
-const formatDate = (value: string) => new Date(value).toLocaleDateString('uk-UA')
+const formatDate = (value: string) => new Date(value).toLocaleDateString('uk-UA', { timeZone: 'UTC' })
 const voidedSx = { '& td': { color: 'text.disabled', textDecoration: 'line-through' } }
 
 interface AdaptationTabProps {

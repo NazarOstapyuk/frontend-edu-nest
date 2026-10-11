@@ -25,12 +25,14 @@ interface AdaptationState {
 
 export const useAdaptationStore = create<AdaptationState>((set, get) => {
   const mutate = async (request: () => Promise<AdaptationVisit[]>) => {
+    const childId = get().childId;
     set({ isSaving: true });
     try {
       const visits = await request();
-      set({ visits });
-      const { childId } = get();
-      if (childId) await useChildFinanceStore.getState().fetchFinance(childId).catch(() => undefined);
+      if (get().childId === childId) {
+        set({ visits });
+        if (childId) await useChildFinanceStore.getState().fetchFinance(childId).catch(() => undefined);
+      }
     } finally {
       set({ isSaving: false });
     }

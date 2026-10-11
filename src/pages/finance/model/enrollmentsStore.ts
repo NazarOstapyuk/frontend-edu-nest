@@ -37,12 +37,14 @@ interface EnrollmentsState {
 
 export const useEnrollmentsStore = create<EnrollmentsState>((set, get) => {
   const mutate = async (request: () => Promise<Enrollment[]>) => {
+    const childId = get().childId;
     set({ isSaving: true });
     try {
       const enrollments = await request();
-      set({ enrollments });
-      const { childId } = get();
-      if (childId) await useChildFinanceStore.getState().fetchFinance(childId).catch(() => undefined);
+      if (get().childId === childId) {
+        set({ enrollments });
+        if (childId) await useChildFinanceStore.getState().fetchFinance(childId).catch(() => undefined);
+      }
     } finally {
       set({ isSaving: false });
     }

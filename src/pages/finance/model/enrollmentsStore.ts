@@ -42,7 +42,7 @@ export const useEnrollmentsStore = create<EnrollmentsState>((set, get) => {
       const enrollments = await request();
       set({ enrollments });
       const { childId } = get();
-      if (childId) await useChildFinanceStore.getState().fetchFinance(childId);
+      if (childId) await useChildFinanceStore.getState().fetchFinance(childId).catch(() => undefined);
     } finally {
       set({ isSaving: false });
     }
@@ -77,13 +77,13 @@ export const useEnrollmentsStore = create<EnrollmentsState>((set, get) => {
     setReasonTarget: (target) => set({ reasonTarget: target }),
 
     fetchEnrollments: async (childId) => {
-      set({ isLoading: true, childId });
+      set({ isLoading: true, childId, enrollments: [] });
       try {
         const [{ data: enrollments }, { data: tariffs }] = await Promise.all([
           enrollmentsApi.getByChild(childId),
           tariffsApi.getList(),
         ]);
-        set({ enrollments, tariffOptions: tariffs });
+        if (get().childId === childId) set({ enrollments, tariffOptions: tariffs });
       } finally {
         set({ isLoading: false });
       }

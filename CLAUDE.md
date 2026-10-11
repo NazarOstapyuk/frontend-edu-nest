@@ -78,16 +78,23 @@ Backend error contract (backend repo `backend-edu-nest`, see its CLAUDE.md):
 - `message` is in **English** (`'Child not found'`, `'Login already taken'`). The backend keeps these strings stable; the frontend maps them to Ukrainian texts in one shared place, not per module.
 - For `ValidationPipe` errors (400) `message` is an **array** of English class-validator strings, not a single string.
 - If no translation is found, show a generic Ukrainian fallback (e.g. «Сталася помилка. Спробуйте ще раз.»), never the raw English text.
+- Don't translate `ValidationPipe` arrays: they are field-specific class-validator strings (`firstName should not be empty`) and mapping them is brittle. Forms already validate with yup, so a 400 with an array `message` gets the generic fallback. Translate only the single-string business messages.
 
 ### 401 / session
 
 - `RequireAuth` calls `fetchMe()` once on startup; if there is no profile, it redirects to `/login`.
 - An expired session during work (401 on any request) is currently not handled; `authApi.refresh` exists but is never called (see Roadmap).
+- Backend contract for `POST /auth/login`:
+  - Success: `201`, body `{ message: 'Login successful' }`, `accessToken` + `refreshToken` cookies set.
+  - Unknown login or wrong password: `401` `{ statusCode: 401, message: 'Invalid credentials', error: 'Unauthorized' }` (show «Невірний логін або пароль»).
+  - Inactive user: `401` `{ statusCode: 401, message: 'Account is disabled', error: 'Unauthorized' }`.
+  - Empty `login`/`password`: `400` with an array `message` (prevented by yup).
 - Backend contract for `POST /auth/refresh` (auth is httpOnly cookies `accessToken` + `refreshToken`):
   - Success: `201`, body `{ message: 'Token refreshed' }`, both cookies replaced (refresh token is rotated, the old one becomes invalid).
   - Missing, invalid, expired or already-rotated refresh cookie, or inactive user: `401` `{ statusCode: 401, message: 'Invalid refresh token', error: 'Unauthorized' }`. Cookies are not cleared. Don't retry refresh on this 401: log out / redirect to `/login`.
   - Any other guarded route with an expired or missing access cookie: `401` `{ statusCode: 401, message: 'Unauthorized' }`.
   - Since the refresh token rotates, concurrent 401s must share one in-flight refresh request.
+- Don't run refresh for 401s from `/auth/login`, `/auth/refresh` and `/auth/logout`: a 401 from login is wrong credentials (or a disabled account), from refresh it means log out, from logout the session is already gone (finish logout locally).
 - Don't catch 401 in stores or components. There must be a single handler: the interceptor in `shared/api/axiosInstance.ts`.
 
 ### Comments

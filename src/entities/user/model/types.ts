@@ -1,5 +1,7 @@
 export type UserRole = 'teacher' | 'parent'
 
+export type SessionRole = 'root' | 'admin' | 'teacher' | 'parent'
+
 export interface User {
   id: string
   firstName: string

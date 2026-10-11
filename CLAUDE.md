@@ -71,7 +71,7 @@ UI:
 
 ### API errors
 
-In children, server errors are currently not shown to the user: `await createChild(...)` throws, `handleClose()` is not called, the modal stays open. There is no shared mechanism yet (see Roadmap). Don't invent per-module error display.
+Server errors are shown centrally: the axios response interceptor (`shared/api/axiosInstance.ts`) pushes a snackbar with `translateError(data)` for every non-401 error and still rejects with `error.response.data`. Translations live in `shared/api/errorMessages.ts` (backend English `message` → Ukrainian; unknown messages and `ValidationPipe` arrays → «Сталася помилка. Спробуйте ще раз.»). When the backend adds a message, add its translation there. Stores and components do not show server errors themselves; they only keep modals open on failure.
 
 Backend error contract (backend repo `backend-edu-nest`, see its CLAUDE.md):
 - Body is the NestJS default `{ statusCode, message, error }`, which is what the interceptor rejects with.
@@ -109,12 +109,11 @@ This is the team's plan, not a task list for the agent. Don't start Roadmap item
 
 The intent is to close the two gaps before implementing new modules, so the stub modules don't inherit them:
 
-1. **Shared error display**: snackbar for general errors + `setError` for field errors. Full superpowers cycle.
-2. **Refresh / logout in the interceptor** (`shared/api/axiosInstance.ts`).
-3. After each step, replace the "API errors" / "401 / session" section above with how to do it now, linking to the reference code.
-4. Update `pages/children` to use both, so it is a complete reference again.
-5. Move the "New module" checklist into a `new-module` skill.
-6. Implement the stubs one by one: `teachers`, `classes`, `schedule`, `grades`, `reports`, `settings`.
+1. **Refresh / logout in the interceptor** (`shared/api/axiosInstance.ts`).
+2. After each step, replace the "API errors" / "401 / session" section above with how to do it now, linking to the reference code.
+3. Update `pages/children` to use both, so it is a complete reference again.
+4. Move the "New module" checklist into a `new-module` skill.
+5. Implement the stubs one by one: `teachers`, `classes`, `schedule`, `grades`, `reports`, `settings`.
 
 ## New module checklist
 

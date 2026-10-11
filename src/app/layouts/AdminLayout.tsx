@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom'
 import { Box, Toolbar } from '@mui/material'
 import { Sidebar, SIDEBAR_WIDTH } from '../../widgets/sidebar'
 import { Header } from '../../widgets/header'
+import { Notifier } from '../../shared/ui/Notifier'
 
 export const AdminLayout = () => (
   <Box sx={{ display: 'flex', minHeight: '100vh' }}>
@@ -24,5 +25,7 @@ export const AdminLayout = () => (
         <Outlet />
       </Box>
     </Box>
+
+    <Notifier />
   </Box>
 )

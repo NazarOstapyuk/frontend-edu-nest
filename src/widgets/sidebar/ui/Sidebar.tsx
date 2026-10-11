@@ -12,6 +12,8 @@ import {
 import SchoolIcon from '@mui/icons-material/School'
 import { navItems, bottomNavItems } from '../model/nav-items'
 import type { NavItem } from '../model/nav-items'
+import { useAuthStore } from '../../../entities/user'
+import type { SessionRole } from '../../../entities/user'
 
 export const SIDEBAR_WIDTH = 240
 
@@ -42,6 +44,9 @@ const NavButton = ({ item }: { item: NavItem }) => (
 )
 
 export const Sidebar = () => {
+  const role = useAuthStore((s) => s.profile?.role) as SessionRole | undefined
+  const visible = (item: NavItem) => !item.roles || (role !== undefined && item.roles.includes(role))
+
   return (
     <Drawer
       variant="permanent"
@@ -67,7 +72,7 @@ export const Sidebar = () => {
       <Divider sx={{ borderColor: 'rgba(255,255,255,0.12)', mx: 2 }} />
 
       <List sx={{ flex: 1, pt: 1.5 }}>
-        {navItems.map(item => (
+        {navItems.filter(visible).map(item => (
           <NavButton key={item.path} item={item} />
         ))}
       </List>
@@ -75,7 +80,7 @@ export const Sidebar = () => {
       <Divider sx={{ borderColor: 'rgba(255,255,255,0.12)', mx: 2 }} />
 
       <List sx={{ pb: 1 }}>
-        {bottomNavItems.map(item => (
+        {bottomNavItems.filter(visible).map(item => (
           <NavButton key={item.path} item={item} />
         ))}
       </List>

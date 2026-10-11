@@ -79,6 +79,7 @@ Backend error contract (backend repo `backend-edu-nest`, see its CLAUDE.md):
 - For `ValidationPipe` errors (400) `message` is an **array** of English class-validator strings, not a single string.
 - If no translation is found, show a generic Ukrainian fallback (e.g. «Сталася помилка. Спробуйте ще раз.»), never the raw English text.
 - Don't translate `ValidationPipe` arrays: they are field-specific class-validator strings (`firstName should not be empty`) and mapping them is brittle. Forms already validate with yup, so a 400 with an array `message` gets the generic fallback. Translate only the single-string business messages.
+- Finance messages to translate when the shared error display (Roadmap step 1) is built: `Charge not found`, `Payment not found`, `Allocation not found`, `Charge is voided`, `Payment is voided`, `Allocation is voided`, `Payment is not confirmed`, `Charge belongs to another child`, `Charge category does not match payment category`, `Allocation exceeds payment free amount`, `Allocation exceeds charge remaining amount`, `Amount must be greater than 0`, `Duplicate charge in allocations`, `Period end must not be before period start`, `Cannot delete: child has financial records`, `Cannot delete: user has financial records, deactivate instead`.
 
 ### 401 / session
 

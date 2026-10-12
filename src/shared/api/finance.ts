@@ -106,6 +106,14 @@ export interface CategorySummary {
 
 export interface ChildFinance {
   child: PersonRef;
+  parents: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    middleName: string | null;
+    phone: string | null;
+    email: string | null;
+  }[];
   totals: { totalDue: string; unallocated: string };
   categories: CategorySummary[];
   charges: FinanceCharge[];

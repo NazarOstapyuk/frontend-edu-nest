@@ -64,6 +64,7 @@ export const UsersPage = () => {
               <TableCell>#</TableCell>
               <TableCell>Ім'я та прізвище</TableCell>
               <TableCell>Роль</TableCell>
+              <TableCell>Телефон</TableCell>
               <TableCell>Логін</TableCell>
               <TableCell>Дата створення</TableCell>
               <TableCell align="right">Дії</TableCell>
@@ -73,7 +74,7 @@ export const UsersPage = () => {
           <TableBody>
             {users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                <TableCell colSpan={7} align="center" sx={{ py: 6, color: 'text.secondary' }}>
                   Користувачів ще немає. Натисніть «Створити користувача».
                 </TableCell>
               </TableRow>
@@ -88,7 +89,7 @@ export const UsersPage = () => {
                     {index + 1}
                   </TableCell>
                   <TableCell sx={{ fontWeight: 500 }}>
-                    {user.lastName} {user.firstName}
+                    {[user.lastName, user.firstName, user.middleName].filter(Boolean).join(' ')}
                   </TableCell>
                   <TableCell>
                     <Chip
@@ -97,6 +98,12 @@ export const UsersPage = () => {
                       size="small"
                       variant="outlined"
                     />
+                  </TableCell>
+                  <TableCell>
+                    {user.phone ?? '—'}
+                    {user.role === 'parent' && !user.phone && (
+                      <Chip size="small" color="warning" label="немає телефону" sx={{ ml: 1 }} />
+                    )}
                   </TableCell>
                   <TableCell sx={{ fontFamily: 'monospace' }}>{user.login}</TableCell>
                   <TableCell sx={{ color: 'text.secondary' }}>{user.createdAt}</TableCell>

@@ -11,11 +11,15 @@ import {
   IconButton,
   InputAdornment,
   Box,
+  Typography,
 } from '@mui/material'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import { RHFTextField } from '../../../shared/ui/RHFTextField.tsx'
 import { useUsersStore } from '../model/usersStore.ts'
+import { isValidPhone, normalizePhone } from '../../../shared/lib/phone.ts'
+import type { UpdateUserDto } from '../../../shared/api'
+import type { UserRole } from '../../../entities/user'
 
 const schema = yup.object({
   firstName: yup.string().min(3, 'Мінімум 3 символи').required("Обов'язкове поле"),
@@ -23,6 +27,12 @@ const schema = yup.object({
   role: yup.string().required("Обов'язкове поле"),
   login: yup.string().min(3, 'Мінімум 3 символи').required("Обов'язкове поле"),
   password: yup.string().transform((v) => v === '' ? undefined : v).min(6, 'Мінімум 6 символів').optional(),
+  middleName: yup.string().default('').max(100, 'Максимум 100 символів'),
+  phone: yup.string().default('').when('role', {
+      is: 'parent',
+      then: (s) => s.required('Для батьків потрібен телефон'),
+  }).test('phone', 'Формат +380XXXXXXXXX', (value) => !value || isValidPhone(normalizePhone(value))),
+  email: yup.string().default('').email('Невірний email').max(200, 'Максимум 200 символів'),
 })
 
 export const EditUserModal = () => {
@@ -41,6 +51,9 @@ export const EditUserModal = () => {
       role: 'teacher',
       login: '',
       password: '',
+      middleName: '',
+      phone: '',
+      email: '',
     },
     resolver: yupResolver(schema),
   })
@@ -53,6 +66,9 @@ export const EditUserModal = () => {
         role: user.role,
         login: user.login,
         password: '',
+        middleName: user.middleName ?? '',
+        phone: user.phone ?? '',
+        email: user.email ?? '',
       })
     }
   }, [user, methods])
@@ -62,11 +78,18 @@ export const EditUserModal = () => {
     setEditUserModal({ isOpen: false, user: null })
   }
 
-  const onSubmit = async (values) => {
+  const onSubmit = async (values: yup.InferType<typeof schema>) => {
     if (!user) return
-    const dto = values.password
-      ? values
-      : { firstName: values.firstName, lastName: values.lastName, role: values.role, login: values.login }
+    const dto: UpdateUserDto = {
+      firstName: values.firstName,
+      lastName: values.lastName,
+      role: values.role as UserRole,
+      login: values.login,
+      middleName: values.middleName.trim() || null,
+      phone: values.phone ? normalizePhone(values.phone) : null,
+      email: values.email.trim() || null,
+    }
+    if (values.password) dto.password = values.password
     await updateUser(user.id, dto)
     handleClose()
   }
@@ -92,6 +115,13 @@ export const EditUserModal = () => {
             />
           </Box>
 
+          <RHFTextField
+            name="middleName"
+            control={methods.control}
+            label="По батькові"
+            fullWidth
+          />
+
           <Controller
             name="role"
             control={methods.control}
@@ -108,6 +138,21 @@ export const EditUserModal = () => {
                 <MenuItem value="parent">Батьки</MenuItem>
               </TextField>
             )}
+          />
+
+          <RHFTextField
+            name="phone"
+            control={methods.control}
+            label="Телефон"
+            placeholder="+380671234567"
+            fullWidth
+          />
+
+          <RHFTextField
+            name="email"
+            control={methods.control}
+            label="Email"
+            fullWidth
           />
 
           <RHFTextField
@@ -136,6 +181,10 @@ export const EditUserModal = () => {
               },
             }}
           />
+
+          <Typography variant="caption" color="text.secondary" sx={{ mt: '-15px' }}>
+            Після зміни пароля користувач має задати свій при вході
+          </Typography>
 
           <Box sx={{ display: 'flex', gap: '10px' }}>
             <Button onClick={handleClose} color="inherit" sx={{ width: '100%' }}>

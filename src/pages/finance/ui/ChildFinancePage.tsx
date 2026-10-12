@@ -43,9 +43,19 @@ export const ChildFinancePage = () => {
         <IconButton onClick={() => navigate('/finance')}>
           <ArrowBackIcon />
         </IconButton>
-        <Typography variant="h6" sx={{ fontWeight: 700 }}>
-          {finance.child.lastName} {finance.child.firstName}
-        </Typography>
+        <Box>
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            {finance.child.lastName} {finance.child.firstName}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Батьки:{' '}
+            {finance.parents.length === 0
+              ? 'не вказано'
+              : finance.parents
+                  .map((p) => `${p.lastName} ${p.firstName}${p.phone ? ` (${p.phone})` : ''}`)
+                  .join(', ')}
+          </Typography>
+        </Box>
         <Box sx={{ ml: 'auto', textAlign: 'right' }}>
           <Typography sx={{ fontWeight: 700, color: totalDue > 0 ? 'error.main' : 'success.main' }}>
             {totalDue >= 0

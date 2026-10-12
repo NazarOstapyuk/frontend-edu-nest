@@ -18,6 +18,7 @@ import { genderLabels, type Gender } from '../../../shared/api'
 const schema = yup.object({
   firstName: yup.string().min(2, 'Мінімум 2 символи').required("Обов'язкове поле"),
   lastName: yup.string().min(2, 'Мінімум 2 символи').required("Обов'язкове поле"),
+  middleName: yup.string().default('').max(100, 'Максимум 100 символів'),
   birthDate: yup.string().required("Обов'язкове поле"),
   gender: yup.mixed<Gender>().oneOf(['male', 'female']).required("Обов'язкове поле"),
   groupId: yup.string().required("Обов'язкове поле"),
@@ -38,7 +39,7 @@ export const CreateChildModal = () => {
 
   const { control, handleSubmit, reset } = useForm<FormValues>({
     mode: 'all',
-    defaultValues: { firstName: '', lastName: '', birthDate: '', gender: 'male', groupId: '', parentIds: [] },
+    defaultValues: { firstName: '', lastName: '', middleName: '', birthDate: '', gender: 'male', groupId: '', parentIds: [] },
     resolver: yupResolver(schema),
   })
 
@@ -51,6 +52,7 @@ export const CreateChildModal = () => {
     await createChild({
       firstName: values.firstName,
       lastName: values.lastName,
+      middleName: values.middleName.trim() || undefined,
       birthDate: values.birthDate,
       gender: values.gender as Gender,
       groupId: values.groupId,
@@ -84,6 +86,20 @@ export const CreateChildModal = () => {
             <TextField
               {...field}
               label="Ім'я"
+              fullWidth
+              error={!!error}
+              helperText={error?.message}
+            />
+          )}
+        />
+
+        <Controller
+          name="middleName"
+          control={control}
+          render={({ field, fieldState: { error } }) => (
+            <TextField
+              {...field}
+              label="По батькові"
               fullWidth
               error={!!error}
               helperText={error?.message}

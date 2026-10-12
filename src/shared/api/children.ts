@@ -14,6 +14,7 @@ export interface Child {
   id: string;
   firstName: string;
   lastName: string;
+  middleName: string | null;
   birthDate: string;
   gender: Gender;
   group: Group | null;
@@ -25,6 +26,7 @@ export interface Child {
 export interface CreateChildDto {
   firstName: string;
   lastName: string;
+  middleName?: string;
   birthDate: string;
   gender: Gender;
   groupId: string;
@@ -34,6 +36,7 @@ export interface CreateChildDto {
 export interface UpdateChildDto {
   firstName: string;
   lastName: string;
+  middleName?: string | null;
   birthDate: string;
   gender: Gender;
   groupId: string;

@@ -42,6 +42,8 @@ docs/superpowers/      # specs/ and plans/
 
 Classes and packages: `pages/classes` (Гуртки: directions, class groups, packages), `pages/classGroup` (group page + mark lesson), `pages/myClasses` (teacher view), `shared/model` (notify store). Nav items in `widgets/sidebar/model/nav-items.ts` declare `roles`; items without `roles` are visible to everyone.
 
+Parent cabinet: `pages/family` (children list), `pages/familyChild` (child card and finance), `pages/profile`, `pages/changePassword`. Routing in `app/router/index.tsx`: role gates `RoleGate` and `PasswordGate` (forced password change), `RoleLayout` for routes shared between roles. Session refresh lives in `shared/api/axiosInstance.ts`.
+
 Imports go top-down: `app → pages → widgets → entities → shared`. From outside a module, import through its `index.ts`.
 
 Legacy: `pages/children` and `pages/groups` import `pages/users/model/usersStore` and `pages/groups/model/groupsStore` directly. Don't add new cross-page store imports. Data needed by several pages (lists of users, groups, etc.) goes to `entities/<entity>/model/`.
@@ -86,7 +88,7 @@ Backend error contract (backend repo `backend-edu-nest`, see its CLAUDE.md):
 ### 401 / session
 
 - `RequireAuth` calls `fetchMe()` once on startup; if there is no profile, it redirects to `/login`.
-- An expired session during work (401 on any request) is currently not handled; `authApi.refresh` exists but is never called (see Roadmap).
+- An expired session during work (401 on any request) is handled by the interceptor in `shared/api/axiosInstance.ts` (shared in-flight refresh, then retry).
 - Backend contract for `POST /auth/login`:
   - Success: `201`, body `{ message: 'Login successful' }`, `accessToken` + `refreshToken` cookies set.
   - Unknown login or wrong password: `401` `{ statusCode: 401, message: 'Invalid credentials', error: 'Unauthorized' }` (show «Невірний логін або пароль»).
@@ -108,13 +110,12 @@ Don't write code comments. Exceptions: lint directives required by the codebase,
 
 This is the team's plan, not a task list for the agent. Don't start Roadmap items on your own and don't refuse other requests because of it; at most mention once that a requested module will inherit the gaps. Remove items from this list as soon as they are done.
 
-The intent is to close the two gaps before implementing new modules, so the stub modules don't inherit them:
+The intent is to close the gap before implementing new modules, so the stub modules don't inherit it:
 
-1. **Refresh / logout in the interceptor** (`shared/api/axiosInstance.ts`).
-2. After each step, replace the "API errors" / "401 / session" section above with how to do it now, linking to the reference code.
-3. Update `pages/children` to use both, so it is a complete reference again.
-4. Move the "New module" checklist into a `new-module` skill.
-5. Implement the stubs one by one: `teachers`, `classes`, `schedule`, `grades`, `reports`, `settings`.
+1. Replace the "API errors" / "401 / session" section above with how to do it now, linking to the reference code.
+2. Update `pages/children` to use it, so it is a complete reference again.
+3. Move the "New module" checklist into a `new-module` skill.
+4. Implement the stubs one by one: `teachers`, `classes`, `schedule`, `grades`, `reports`, `settings`.
 
 ## New module checklist
 
@@ -147,7 +148,7 @@ Bug fixes and changes touching one or two files: no brainstorming or plan, imple
 
 ## Rules
 
-- Don't change `axiosInstance`, `theme.ts`, `RequireAuth` without an explicit request. A user request to do Roadmap step 1 or 2 is such a request; the Roadmap itself is not.
+- Don't change `axiosInstance`, `theme.ts`, `RequireAuth` without an explicit request. A user request to do Roadmap step 1 is such a request; the Roadmap itself is not.
 - Don't add dependencies without approval.
 - Don't commit `.env` or secrets; add new env vars to `.env.example` with the `VITE_` prefix.
 - Don't touch `README.md` without a request.

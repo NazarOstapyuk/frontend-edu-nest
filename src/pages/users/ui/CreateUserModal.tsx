@@ -14,7 +14,9 @@ import {
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import {RHFTextField} from "../../../shared/ui/RHFTextField.tsx";
+import type {UserRole} from "../../../entities/user";
 import {useUsersStore} from "../model/usersStore.ts";
+import {isValidPhone, normalizePhone} from "../../../shared/lib/phone.ts";
 
 const schema = yup.object({
     firstName: yup.string().min(3, 'Мінімум 3 символи').required("Обов'язкове поле"),
@@ -22,6 +24,12 @@ const schema = yup.object({
     role: yup.string().required("Обов'язкове поле"),
     login: yup.string().min(3, 'Мінімум 3 символи').required("Обов'язкове поле"),
     password: yup.string().min(6, 'Мінімум 6 символів').required("Обов'язкове поле"),
+    middleName: yup.string().default('').max(100, 'Максимум 100 символів'),
+    phone: yup.string().default('').when('role', {
+        is: 'parent',
+        then: (s) => s.required('Для батьків потрібен телефон'),
+    }).test('phone', 'Формат +380XXXXXXXXX', (value) => !value || isValidPhone(normalizePhone(value))),
+    email: yup.string().default('').email('Невірний email').max(200, 'Максимум 200 символів'),
 })
 
 export const CreateUserModal = () => {
@@ -40,6 +48,9 @@ export const CreateUserModal = () => {
             role: 'teacher',
             login: '',
             password: '',
+            middleName: '',
+            phone: '',
+            email: '',
         },
         resolver: yupResolver(schema),
     });
@@ -49,8 +60,17 @@ export const CreateUserModal = () => {
         setCreateUserModal({ isOpen: false })
     }
 
-    const onSubmit = async (values) => {
-        await createUser(values)
+    const onSubmit = async (values: yup.InferType<typeof schema>) => {
+        await createUser({
+            firstName: values.firstName,
+            lastName: values.lastName,
+            role: values.role as UserRole,
+            login: values.login,
+            password: values.password,
+            middleName: values.middleName.trim() || undefined,
+            phone: values.phone ? normalizePhone(values.phone) : undefined,
+            email: values.email.trim() || undefined,
+        })
         handleClose()
     }
 
@@ -85,6 +105,13 @@ export const CreateUserModal = () => {
                             />
                         </Box>
 
+                        <RHFTextField
+                            name="middleName"
+                            control={methods.control}
+                            label="По батькові"
+                            fullWidth
+                        />
+
                         <Controller
                             name="role"
                             control={methods.control}
@@ -101,6 +128,21 @@ export const CreateUserModal = () => {
                                     <MenuItem value="parent">Батьки</MenuItem>
                                 </TextField>
                             )}
+                        />
+
+                        <RHFTextField
+                            name="phone"
+                            control={methods.control}
+                            label="Телефон"
+                            placeholder="+380671234567"
+                            fullWidth
+                        />
+
+                        <RHFTextField
+                            name="email"
+                            control={methods.control}
+                            label="Email"
+                            fullWidth
                         />
 
                         <RHFTextField

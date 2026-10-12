@@ -87,7 +87,7 @@ export const ChildrenPage = () => {
                 <TableRow key={child.id} hover sx={{ '&:last-child td': { borderBottom: 0 } }}>
                   <TableCell sx={{ color: 'text.secondary', width: 40 }}>{index + 1}</TableCell>
                   <TableCell sx={{ fontWeight: 500 }}>
-                    {child.lastName} {child.firstName}
+                    {[child.lastName, child.firstName, child.middleName].filter(Boolean).join(' ')}
                   </TableCell>
                   <TableCell sx={{ color: 'text.secondary' }}>
                     {new Date(child.birthDate).toLocaleDateString('uk-UA')}

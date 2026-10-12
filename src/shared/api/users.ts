@@ -7,6 +7,9 @@ export interface CreateUserDto {
   login: string;
   password: string;
   role: UserRole;
+  middleName?: string;
+  phone?: string;
+  email?: string;
 }
 
 export interface UpdateUserDto {
@@ -15,6 +18,9 @@ export interface UpdateUserDto {
   login: string;
   password?: string;
   role: UserRole;
+  middleName?: string | null;
+  phone?: string | null;
+  email?: string | null;
 }
 
 export const usersApi = {

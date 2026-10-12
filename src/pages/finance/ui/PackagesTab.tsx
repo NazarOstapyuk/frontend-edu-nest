@@ -68,7 +68,7 @@ const PackageRow = ({ pkg }: { pkg: ChildPackage }) => {
               Звірити
             </Button>
           )}
-          {!voided && (
+          {!voided && pkg.expiresAt !== null && (
             <Button size="small" onClick={() => setExtendTarget(pkg)}>
               Продовжити
             </Button>

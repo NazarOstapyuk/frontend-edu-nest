@@ -68,6 +68,22 @@ export const errorMessages: Record<string, string> = {
   'Package does not need reconciliation': 'Пакет не потребує звірки',
   'Invalid paid amount': 'Невірна сума оплати',
   'Login already taken': 'Логін уже зайнятий',
+  'User not found': 'Користувача не знайдено',
+  'Cannot delete root user': 'Не можна видалити головного адміністратора',
+  'Group not found': 'Групу не знайдено',
+  'Group name already taken': 'Група з такою назвою вже існує',
+  'Access denied': 'Доступ заборонено',
+  'Forbidden': 'Недостатньо прав для цієї дії',
+  'Account is disabled': 'Обліковий запис вимкнено',
+  'Subscription not found': 'Абонемент не знайдено',
+  'Subscription type not found': 'Тип абонемента не знайдено',
+  'Subscription type with this name already exists': 'Тип абонемента з такою назвою вже існує',
+  'Cannot delete: subscriptions exist for this type': 'Не можна видалити: існують абонементи цього типу',
+  'Attendance not found': 'Відвідування не знайдено',
+  'Attendance does not belong to this subscription': 'Відвідування не належить цьому абонементу',
+  'Cannot mark attendance on a non-active subscription': 'Не можна відмітити відвідування в неактивному абонементі',
+  'Only active subscriptions can be cancelled': 'Скасувати можна лише активний абонемент',
+  'Only active subscriptions can be updated': 'Змінити можна лише активний абонемент',
 };
 
 export const translateError = (error: unknown): string => {

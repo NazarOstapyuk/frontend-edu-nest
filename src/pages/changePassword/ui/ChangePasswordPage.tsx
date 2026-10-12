@@ -1,12 +1,19 @@
 import { useNavigate } from 'react-router-dom'
-import { Box, Typography } from '@mui/material'
+import { Box, Button, Typography } from '@mui/material'
 import { homePath, useAuthStore } from '../../../entities/user'
 import { PasswordFields } from '../../../shared/ui/PasswordFields'
 import { Notifier } from '../../../shared/ui/Notifier'
 
 export const ChangePasswordPage = () => {
   const changePassword = useAuthStore((s) => s.changePassword)
+  const logout = useAuthStore((s) => s.logout)
   const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+      .catch(() => undefined)
+      .finally(() => navigate('/login', { replace: true }))
+  }
 
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.default', p: 2 }}>
@@ -24,6 +31,9 @@ export const ChangePasswordPage = () => {
             navigate(homePath(profile), { replace: true })
           }}
         />
+        <Button variant="text" onClick={handleLogout} sx={{ mt: 1 }}>
+          Вийти
+        </Button>
       </Box>
       <Notifier />
     </Box>

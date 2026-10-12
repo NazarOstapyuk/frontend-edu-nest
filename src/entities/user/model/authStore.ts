@@ -40,7 +40,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     try {
-      await authApi.logout();
+      try {
+        await authApi.logout();
+      } catch (error) {
+        if ((error as { statusCode?: number })?.statusCode !== 401) throw error;
+        await authApi.refresh();
+        await authApi.logout().catch(() => undefined);
+      }
     } finally {
       set({ profile: null });
     }

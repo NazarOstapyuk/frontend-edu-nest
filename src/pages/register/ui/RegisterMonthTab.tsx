@@ -2,13 +2,14 @@ import { useMemo } from 'react'
 import { Alert, Box, Button, Paper, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@mui/material'
 import { useRegisterStore } from '../model/registerStore'
 import { cellView, legend } from './monthCodes'
-import { dayStateLabels } from '../../../shared/api'
+import { dayStateLabels, localToday } from '../../../shared/api'
 
 export const RegisterMonthTab = ({ onOpenDay }: { onOpenDay: (date: string) => void }) => {
   const monthData = useRegisterStore((s) => s.monthData)
-  const reasons = useRegisterStore((s) => s.reasons)
+  const reasons = useRegisterStore((s) => s.allReasons)
   const monthError = useRegisterStore((s) => s.monthError)
   const loadMonth = useRegisterStore((s) => s.loadMonth)
+  const today = localToday()
   const reasonMap = useMemo(() => new Map(reasons.map((r) => [r.id, r])), [reasons])
 
   if (monthError) {
@@ -52,7 +53,7 @@ export const RegisterMonthTab = ({ onOpenDay }: { onOpenDay: (date: string) => v
                     {row.child.lastName} {row.child.firstName}
                   </TableCell>
                   {row.days.map((cell) => {
-                    const view = cellView(cell, reasonMap)
+                    const view = cellView(cell, reasonMap, today)
                     const reason = cell.reasonId ? reasonMap.get(cell.reasonId)?.name : undefined
                     return (
                       <TableCell

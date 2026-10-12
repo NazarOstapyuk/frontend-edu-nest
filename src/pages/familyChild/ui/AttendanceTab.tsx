@@ -9,6 +9,7 @@ import {
   dailyStatusLabels,
   dayStateLabels,
   formatDay,
+  localToday,
   monthLabel,
   noticeStatusLabels,
   shiftMonth,
@@ -28,6 +29,7 @@ const stateColor: Record<DayState, string> = {
 const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд']
 
 const MonthGrid = ({ register }: { register: ChildRegisterMonth }) => {
+  const today = localToday()
   const offset = (new Date(`${register.days[0].date}T00:00:00Z`).getUTCDay() + 6) % 7
   return (
     <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 0.5 }}>
@@ -39,7 +41,7 @@ const MonthGrid = ({ register }: { register: ChildRegisterMonth }) => {
         <Box
           key={d.date}
           title={`${dayStateLabels[d.state]}${d.reasonName ? `: ${d.reasonName}` : ''}${d.title ? ` (${d.title})` : ''}`}
-          sx={{ bgcolor: stateColor[d.state], borderRadius: 1, py: 1, textAlign: 'center', fontSize: 14 }}
+          sx={{ bgcolor: d.state === 'unmarked' && d.date > today ? 'transparent' : stateColor[d.state], borderRadius: 1, py: 1, textAlign: 'center', fontSize: 14 }}
         >
           {Number(d.date.slice(8))}
         </Box>

@@ -6,8 +6,9 @@ export interface CellView {
   bg: string
 }
 
-export const cellView = (cell: MonthCell, reasons: Map<string, AbsenceReason>): CellView => {
+export const cellView = (cell: MonthCell, reasons: Map<string, AbsenceReason>, today: string): CellView => {
   if (cell.state === 'non_working') return { code: '—', color: 'text.disabled', bg: 'grey.100' }
+  if (cell.state === 'unmarked' && cell.date > today) return { code: '', color: 'text.secondary', bg: 'transparent' }
   if (cell.state === 'unmarked') return { code: '?', color: 'text.secondary', bg: 'transparent' }
   if (cell.state === 'expected_absent') return { code: '(В)', color: 'warning.dark', bg: 'transparent' }
   if (cell.state === 'absent') {

@@ -20,7 +20,7 @@ import { dailyStatusLabels, dailyStatuses, formatDay, type DailyStatus } from '.
 export const RegisterDayTab = () => {
   const day = useRegisterStore((s) => s.day)
   const draft = useRegisterStore((s) => s.draft)
-  const reasons = useRegisterStore((s) => s.reasons)
+  const allReasons = useRegisterStore((s) => s.allReasons)
   const isSaving = useRegisterStore((s) => s.isSaving)
   const dayError = useRegisterStore((s) => s.dayError)
   const loadDay = useRegisterStore((s) => s.loadDay)
@@ -44,8 +44,8 @@ export const RegisterDayTab = () => {
   }
 
   const dirty = day.children.some((row) => draft[row.child.id] && !sameDraft(draft[row.child.id], rowDraft(row)))
-  const reasonName = (id: string | null) => reasons.find((r) => r.id === id)?.name ?? ''
-  const requiresDocument = (id: string | null) => reasons.find((r) => r.id === id)?.requiresDocument ?? false
+  const reasonName = (id: string | null) => allReasons.find((r) => r.id === id)?.name ?? ''
+  const requiresDocument = (id: string | null) => allReasons.find((r) => r.id === id)?.requiresDocument ?? false
 
   const handleSave = () => {
     if (day.needsReason) {
@@ -125,7 +125,9 @@ export const RegisterDayTab = () => {
                     sx={{ minWidth: 200 }}
                   >
                     <MenuItem value="">Не вказано</MenuItem>
-                    {reasons.map((r) => <MenuItem key={r.id} value={r.id}>{r.name}</MenuItem>)}
+                    {allReasons
+                      .filter((r) => r.active || r.id === d.reasonId)
+                      .map((r) => <MenuItem key={r.id} value={r.id}>{r.name}</MenuItem>)}
                   </TextField>
                   {requiresDocument(d.reasonId) && (
                     <FormControlLabel

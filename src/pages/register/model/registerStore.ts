@@ -40,6 +40,7 @@ const draftsOf = (day: RegisterDay) =>
 interface RegisterState {
   groups: RegisterGroup[];
   reasons: AbsenceReason[];
+  allReasons: AbsenceReason[];
   groupId: string | null;
   date: string;
   month: string;
@@ -66,6 +67,7 @@ interface RegisterState {
 export const useRegisterStore = create<RegisterState>((set, get) => ({
   groups: [],
   reasons: [],
+  allReasons: [],
   groupId: null,
   date: localToday(),
   month: localToday().slice(0, 7),
@@ -88,6 +90,7 @@ export const useRegisterStore = create<RegisterState>((set, get) => ({
       set((state) => ({
         groups,
         reasons: reasons.filter((r) => r.active),
+        allReasons: reasons,
         groupId: groups.some((g) => g.id === state.groupId) ? state.groupId : (groups[0]?.id ?? null),
       }));
     } catch {
@@ -141,7 +144,7 @@ export const useRegisterStore = create<RegisterState>((set, get) => ({
     if (!groupId || !day) return;
     const marks: RegisterMarkDto[] = day.children.flatMap((row) => {
       const d = draft[row.child.id];
-      if (!d?.status) return [];
+      if (!d?.status || sameDraft(d, rowDraft(row))) return [];
       const absent = d.status === 'absent';
       return [{
         childId: row.child.id,
@@ -151,6 +154,7 @@ export const useRegisterStore = create<RegisterState>((set, get) => ({
         documentProvided: absent ? d.documentProvided : undefined,
       }];
     });
+    if (marks.length === 0) return;
     set({ isSaving: true });
     try {
       const { data } = await registerApi.saveDay(groupId, { date: day.date, reason, marks });

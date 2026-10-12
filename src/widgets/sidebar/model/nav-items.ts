@@ -9,6 +9,7 @@ import CastleIcon from '@mui/icons-material/Castle'
 import EventAvailableIcon from '@mui/icons-material/EventAvailable'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
+import FactCheckIcon from '@mui/icons-material/FactCheck'
 import type { SvgIconComponent } from '@mui/icons-material'
 import type { SessionRole } from '../../../entities/user'
 
@@ -23,6 +24,7 @@ const ADMIN: SessionRole[] = ['root', 'admin']
 
 export const navItems: NavItem[] = [
   { path: '/',                    label: 'Дашборд',           icon: DashboardIcon },
+  { path: '/register',            label: 'Журнал',            icon: FactCheckIcon,      roles: ['root', 'admin', 'teacher'] },
   { path: '/users',               label: 'Користувачі',       icon: ManageAccountsIcon, roles: ADMIN },
   { path: '/groups',              label: 'Групи',             icon: GroupsIcon,         roles: ADMIN },
   { path: '/students',            label: 'Учні',              icon: PeopleIcon,         roles: ADMIN },

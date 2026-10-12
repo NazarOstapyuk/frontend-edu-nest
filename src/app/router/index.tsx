@@ -15,6 +15,7 @@ import { ClassesPage } from '../../pages/classes'
 import { ClassGroupPage, MarkLessonPage } from '../../pages/classGroup'
 import { AbsenceReasonsPage } from '../../pages/absenceReasons'
 import { CalendarPage } from '../../pages/calendar'
+import { RegisterPage } from '../../pages/register'
 import { MyClassesPage } from '../../pages/myClasses'
 import { ProfilePage } from '../../pages/profile'
 import { ChangePasswordPage } from '../../pages/changePassword'
@@ -60,6 +61,7 @@ export const router = createBrowserRouter([
                 element: <AdminLayout />,
                 children: [
                   { index: true,       element: <DashboardPage /> },
+                  { path: 'register',  element: <RegisterPage /> },
                   { path: 'users',     element: <UsersPage /> },
                   { path: 'groups',    element: <GroupsPage /> },
                   { path: 'students',            element: <ChildrenPage /> },

@@ -6,6 +6,7 @@ import { SIDEBAR_WIDTH } from '../../sidebar/ui/Sidebar'
 
 const pageTitles: Record<string, string> = {
   '/':          'Дашборд',
+  '/register':  'Журнал',
   '/users':     'Користувачі',
   '/groups':    'Групи',
   '/students':  'Учні',

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import { authApi } from '../../../shared/api';
-import type { User } from './types';
+import { authApi, setSessionHandlers, type ContactsDto } from '../../../shared/api';
+import { useNotifyStore } from '../../../shared/model/notifyStore';
+import type { SessionProfile } from './types';
 
 interface LoginCredentials {
   login: string;
@@ -8,16 +9,19 @@ interface LoginCredentials {
 }
 
 interface AuthState {
-  profile: User | null;
+  profile: SessionProfile | null;
   isLoading: boolean;
   isInitialized: boolean;
-  login: (credentials: LoginCredentials) => Promise<void>;
+  login: (credentials: LoginCredentials) => Promise<SessionProfile>;
   logout: () => Promise<void>;
   fetchMe: () => Promise<void>;
-  refresh: () => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<SessionProfile>;
+  updateContacts: (dto: ContactsDto) => Promise<void>;
+  markPasswordChangeRequired: () => void;
+  expireSession: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   profile: null,
   isLoading: false,
   isInitialized: false,
@@ -25,16 +29,21 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (credentials) => {
     set({ isLoading: true });
     try {
-      const { data } = await authApi.login(credentials);
-      set({ profile: data });
+      await authApi.login(credentials);
+      const { data } = await authApi.me();
+      set({ profile: data, isInitialized: true });
+      return data;
     } finally {
       set({ isLoading: false });
     }
   },
 
   logout: async () => {
-    await authApi.logout();
-    set({ profile: null });
+    try {
+      await authApi.logout();
+    } finally {
+      set({ profile: null });
+    }
   },
 
   fetchMe: async () => {
@@ -42,12 +51,37 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const { data } = await authApi.me();
       set({ profile: data });
+    } catch {
+      set({ profile: null });
     } finally {
       set({ isLoading: false, isInitialized: true });
     }
   },
 
-  refresh: async () => {
-    await authApi.refresh();
+  changePassword: async (currentPassword, newPassword) => {
+    await authApi.changePassword(currentPassword, newPassword);
+    const { data } = await authApi.me();
+    set({ profile: data });
+    return data;
+  },
+
+  updateContacts: async (dto) => {
+    const { data } = await authApi.updateContacts(dto);
+    set({ profile: data });
+  },
+
+  markPasswordChangeRequired: () => {
+    const profile = get().profile;
+    if (profile && !profile.mustChangePassword) set({ profile: { ...profile, mustChangePassword: true } });
+  },
+
+  expireSession: () => {
+    if (get().profile) useNotifyStore.getState().push('Сесія завершилась, увійдіть знову');
+    set({ profile: null, isInitialized: true });
   },
 }));
+
+setSessionHandlers({
+  onExpired: () => useAuthStore.getState().expireSession(),
+  onPasswordChangeRequired: () => useAuthStore.getState().markPasswordChangeRequired(),
+});

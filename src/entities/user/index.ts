@@ -1,3 +1,3 @@
-export type { User, UserRole, SessionRole } from './model/types'
-export { roleLabels } from './model/types'
+export type { User, UserRole, SessionRole, SessionProfile } from './model/types'
+export { roleLabels, homePath } from './model/types'
 export { useAuthStore } from './model/authStore'

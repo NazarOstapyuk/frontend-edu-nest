@@ -1,6 +1,11 @@
 export const GENERIC_ERROR = 'Сталася помилка. Спробуйте ще раз.';
 
 export const errorMessages: Record<string, string> = {
+  'Invalid credentials': 'Невірний логін або пароль',
+  'Password change required': 'Спочатку змініть пароль',
+  'Invalid current password': 'Невірний поточний пароль',
+  'New password must differ from the current one': 'Новий пароль має відрізнятися від поточного',
+  'Phone is required for parents': 'Для батьків потрібен телефон',
   'Forbidden resource': 'Недостатньо прав для цієї дії',
   'Child not found': 'Дитину не знайдено',
   'Charge not found': 'Нарахування не знайдено',

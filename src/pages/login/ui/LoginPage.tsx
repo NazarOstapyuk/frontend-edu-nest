@@ -7,7 +7,8 @@ import {Box, Button, IconButton, InputAdornment, Typography} from '@mui/material
 import SchoolIcon from '@mui/icons-material/School'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
-import {useAuthStore} from '../../../entities/user'
+import {homePath, useAuthStore} from '../../../entities/user'
+import {translateError} from '../../../shared/api'
 import {RHFTextField} from '../../../shared/ui/RHFTextField'
 
 const schema = yup.object({
@@ -34,10 +35,10 @@ export const LoginPage = () => {
 
     const onSubmit = async (data: FormData) => {
         try {
-            await login(data)
-            navigate('/')
+            const profile = await login(data)
+            navigate(homePath(profile))
         } catch (error) {
-            const {message} = error as { message: string }
+            methods.setError('password', {message: translateError(error)})
         }
     }
 

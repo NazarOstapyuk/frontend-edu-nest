@@ -14,6 +14,8 @@ const pageTitles: Record<string, string> = {
   '/teachers':  'Вчителі',
   '/classes':   'Гуртки',
   '/my-classes': 'Мої заняття',
+  '/calendar':  'Календар',
+  '/absence-reasons': 'Причини відсутності',
   '/profile':   'Профіль',
   '/schedule':  'Розклад',
   '/grades':    'Оцінки',

@@ -106,6 +106,44 @@ export type {
   PurchasePackageDto,
   ReconcileDto,
 } from './classes';
+export {
+  registerApi,
+  groupKindLabels,
+  groupKinds,
+  dailyStatusLabels,
+  dailyStatuses,
+  dayStateLabels,
+  calendarDayTypeLabels,
+  calendarScopeLabels,
+  noticeStatusLabels,
+  shiftMonth,
+  monthLabel,
+} from './register';
+export type {
+  GroupKind,
+  DailyStatus,
+  DayState,
+  CalendarDayType,
+  CalendarScope,
+  NoticeStatus,
+  AbsenceReason,
+  AbsenceReasonDto,
+  UpdateAbsenceReasonDto,
+  CalendarEntry,
+  CreateCalendarDayDto,
+  RegisterGroup,
+  RegisterRow,
+  RegisterDay,
+  RegisterMarkDto,
+  SaveRegisterDto,
+  DaySummary,
+  MonthCell,
+  RegisterMonth,
+  AdminNotice,
+  ParentNotice,
+  CreateNoticeDto,
+  ChildRegisterMonth,
+} from './register';
 export { translateError } from './errorMessages';
 export { parentCabinetApi } from './parentCabinet';
 export type {

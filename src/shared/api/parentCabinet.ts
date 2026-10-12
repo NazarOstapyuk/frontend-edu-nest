@@ -1,6 +1,7 @@
 import { axiosInstance } from './axiosInstance';
 import type { FinanceCategory, PaymentMethod, ChargeState } from './finance';
 import type { AttendanceStatus, PackageState } from './classes';
+import type { ChildRegisterMonth, CreateNoticeDto, ParentNotice } from './register';
 
 export interface FamilyChild {
   id: string;
@@ -81,4 +82,11 @@ export const parentCabinetApi = {
   getFamily: () => axiosInstance.get<Family>('/me/family'),
   getChild: (id: string) => axiosInstance.get<ChildCard>(`/me/children/${id}`),
   getFinance: (id: string) => axiosInstance.get<CabinetFinance>(`/me/children/${id}/finance`),
+  getRegister: (id: string, month: string) =>
+    axiosInstance.get<ChildRegisterMonth>(`/me/children/${id}/register`, { params: { month } }),
+  getNotices: (id: string) => axiosInstance.get<ParentNotice[]>(`/me/children/${id}/absence-notices`),
+  createNotice: (id: string, dto: CreateNoticeDto) =>
+    axiosInstance.post<ParentNotice>(`/me/children/${id}/absence-notices`, dto),
+  cancelNotice: (id: string, noticeId: string) =>
+    axiosInstance.post<ParentNotice>(`/me/children/${id}/absence-notices/${noticeId}/cancel`),
 };

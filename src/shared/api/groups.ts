@@ -1,20 +1,24 @@
 import type { User } from '../../entities/user';
 import { axiosInstance } from './axiosInstance';
+import type { GroupKind } from './register';
 
 export interface Group {
   id: string;
   name: string;
+  kind: GroupKind;
   teachers: User[];
   createdAt: string;
 }
 
 export interface CreateGroupDto {
   name: string;
+  kind: GroupKind;
   teacherIds: string[];
 }
 
 export interface UpdateGroupDto {
   name: string;
+  kind: GroupKind;
   teacherIds: string[];
 }
 

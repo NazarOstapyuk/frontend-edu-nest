@@ -16,6 +16,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { useGroupsStore } from '../model/groupsStore'
 import { useUsersStore } from '../../users/model/usersStore'
+import { groupKindLabels } from '../../../shared/api'
 import { CreateGroupModal } from './CreateGroupModal'
 import { EditGroupModal } from './EditGroupModal'
 
@@ -63,6 +64,7 @@ export const GroupsPage = () => {
                   <Typography variant="h6" fontWeight={700} gutterBottom>
                     {group.name}
                   </Typography>
+                  <Chip size="small" label={groupKindLabels[group.kind]} sx={{ mb: 1 }} />
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                     {group.teachers.length === 0 ? (
                       <Typography variant="body2" color="text.secondary">

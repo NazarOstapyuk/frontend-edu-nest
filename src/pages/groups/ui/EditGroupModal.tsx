@@ -8,13 +8,16 @@ import {
   Button,
   Dialog,
   DialogTitle,
+  MenuItem,
   TextField,
 } from '@mui/material'
 import { useGroupsStore } from '../model/groupsStore'
 import { useUsersStore } from '../../users/model/usersStore'
+import { groupKinds, groupKindLabels, type GroupKind } from '../../../shared/api'
 
 const schema = yup.object({
   name: yup.string().min(2, 'Мінімум 2 символи').required("Обов'язкове поле"),
+  kind: yup.mixed<GroupKind>().oneOf(groupKinds).required("Обов'язкове поле"),
   teacherIds: yup.array().of(yup.string().required()).default([]),
 })
 
@@ -31,7 +34,7 @@ export const EditGroupModal = () => {
 
   const { control, handleSubmit, reset } = useForm<FormValues>({
     mode: 'all',
-    defaultValues: { name: '', teacherIds: [] },
+    defaultValues: { name: '', kind: 'kindergarten', teacherIds: [] },
     resolver: yupResolver(schema),
   })
 
@@ -39,6 +42,7 @@ export const EditGroupModal = () => {
     if (group) {
       reset({
         name: group.name,
+        kind: group.kind,
         teacherIds: group.teachers.map((t) => t.id),
       })
     }
@@ -51,7 +55,7 @@ export const EditGroupModal = () => {
 
   const onSubmit = async (values: FormValues) => {
     if (!group) return
-    await updateGroup(group.id, { name: values.name, teacherIds: values.teacherIds ?? [] })
+    await updateGroup(group.id, { name: values.name, kind: values.kind, teacherIds: values.teacherIds ?? [] })
     handleClose()
   }
 
@@ -70,6 +74,18 @@ export const EditGroupModal = () => {
               error={!!error}
               helperText={error?.message}
             />
+          )}
+        />
+
+        <Controller
+          name="kind"
+          control={control}
+          render={({ field, fieldState: { error } }) => (
+            <TextField {...field} select label="Тип" fullWidth error={!!error} helperText={error?.message}>
+              {groupKinds.map((kind) => (
+                <MenuItem key={kind} value={kind}>{groupKindLabels[kind]}</MenuItem>
+              ))}
+            </TextField>
           )}
         />
 

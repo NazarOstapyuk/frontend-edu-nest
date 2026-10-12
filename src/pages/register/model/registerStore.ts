@@ -49,6 +49,9 @@ interface RegisterState {
   monthData: RegisterMonth | null;
   monthKey: string | null;
   isSaving: boolean;
+  metaError: boolean;
+  dayError: boolean;
+  monthError: boolean;
   loadMeta: () => Promise<void>;
   selectGroup: (groupId: string) => void;
   setDate: (date: string) => void;
@@ -72,16 +75,24 @@ export const useRegisterStore = create<RegisterState>((set, get) => ({
   monthData: null,
   monthKey: null,
   isSaving: false,
+  metaError: false,
+  dayError: false,
+  monthError: false,
   loadMeta: async () => {
-    const [{ data: groups }, { data: reasons }] = await Promise.all([
-      registerApi.getGroups(),
-      registerApi.getReasons(),
-    ]);
-    set((state) => ({
-      groups,
-      reasons: reasons.filter((r) => r.active),
-      groupId: state.groupId ?? groups[0]?.id ?? null,
-    }));
+    set({ metaError: false });
+    try {
+      const [{ data: groups }, { data: reasons }] = await Promise.all([
+        registerApi.getGroups(),
+        registerApi.getReasons(),
+      ]);
+      set((state) => ({
+        groups,
+        reasons: reasons.filter((r) => r.active),
+        groupId: groups.some((g) => g.id === state.groupId) ? state.groupId : (groups[0]?.id ?? null),
+      }));
+    } catch {
+      set({ metaError: true });
+    }
   },
   selectGroup: (groupId) => set({ groupId }),
   setDate: (date) => set({ date, month: date.slice(0, 7) }),
@@ -90,17 +101,25 @@ export const useRegisterStore = create<RegisterState>((set, get) => ({
     const { groupId, date } = get();
     if (!groupId) return;
     const key = `${groupId}/${date}`;
-    set({ dayKey: key, day: null, draft: {} });
-    const { data } = await registerApi.getDay(groupId, date);
-    if (get().dayKey === key) set({ day: data, draft: draftsOf(data) });
+    set({ dayKey: key, day: null, draft: {}, dayError: false });
+    try {
+      const { data } = await registerApi.getDay(groupId, date);
+      if (get().dayKey === key) set({ day: data, draft: draftsOf(data) });
+    } catch {
+      if (get().dayKey === key) set({ dayError: true });
+    }
   },
   loadMonth: async () => {
     const { groupId, month } = get();
     if (!groupId) return;
     const key = `${groupId}/${month}`;
-    set({ monthKey: key, monthData: null });
-    const { data } = await registerApi.getMonth(groupId, month);
-    if (get().monthKey === key) set({ monthData: data });
+    set({ monthKey: key, monthData: null, monthError: false });
+    try {
+      const { data } = await registerApi.getMonth(groupId, month);
+      if (get().monthKey === key) set({ monthData: data });
+    } catch {
+      if (get().monthKey === key) set({ monthError: true });
+    }
   },
   setDraft: (childId, patch) =>
     set((state) => {

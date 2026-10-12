@@ -22,10 +22,20 @@ export const RegisterDayTab = () => {
   const draft = useRegisterStore((s) => s.draft)
   const reasons = useRegisterStore((s) => s.reasons)
   const isSaving = useRegisterStore((s) => s.isSaving)
+  const dayError = useRegisterStore((s) => s.dayError)
+  const loadDay = useRegisterStore((s) => s.loadDay)
   const setDraft = useRegisterStore((s) => s.setDraft)
   const markAllPresent = useRegisterStore((s) => s.markAllPresent)
   const save = useRegisterStore((s) => s.save)
   const [reasonOpen, setReasonOpen] = useState(false)
+
+  if (dayError) {
+    return (
+      <Alert severity="error" action={<Button color="inherit" size="small" onClick={() => loadDay().catch(() => undefined)}>Спробувати ще</Button>}>
+        Не вдалося завантажити дані.
+      </Alert>
+    )
+  }
 
   if (!day) return <Typography color="text.secondary">Завантаження…</Typography>
 

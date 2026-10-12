@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Box, IconButton, MenuItem, Tab, Tabs, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, IconButton, MenuItem, Tab, Tabs, TextField, Typography } from '@mui/material'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { useRegisterStore } from '../model/registerStore'
@@ -12,6 +12,7 @@ export const RegisterPage = () => {
   const groupId = useRegisterStore((s) => s.groupId)
   const date = useRegisterStore((s) => s.date)
   const month = useRegisterStore((s) => s.month)
+  const metaError = useRegisterStore((s) => s.metaError)
   const loadMeta = useRegisterStore((s) => s.loadMeta)
   const selectGroup = useRegisterStore((s) => s.selectGroup)
   const setDate = useRegisterStore((s) => s.setDate)
@@ -31,6 +32,14 @@ export const RegisterPage = () => {
   useEffect(() => {
     if (groupId && tab === 1) loadMonth().catch(() => undefined)
   }, [groupId, month, tab, loadMonth])
+
+  if (metaError) {
+    return (
+      <Alert severity="error" action={<Button color="inherit" size="small" onClick={() => loadMeta().catch(() => undefined)}>Спробувати ще</Button>}>
+        Не вдалося завантажити дані.
+      </Alert>
+    )
+  }
 
   if (groups.length === 0) {
     return <Typography color="text.secondary">Немає груп, доступних для журналу.</Typography>

@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Box, Paper, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@mui/material'
+import { Alert, Box, Button, Paper, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@mui/material'
 import { useRegisterStore } from '../model/registerStore'
 import { cellView, legend } from './monthCodes'
 import { dayStateLabels } from '../../../shared/api'
@@ -7,7 +7,17 @@ import { dayStateLabels } from '../../../shared/api'
 export const RegisterMonthTab = ({ onOpenDay }: { onOpenDay: (date: string) => void }) => {
   const monthData = useRegisterStore((s) => s.monthData)
   const reasons = useRegisterStore((s) => s.reasons)
+  const monthError = useRegisterStore((s) => s.monthError)
+  const loadMonth = useRegisterStore((s) => s.loadMonth)
   const reasonMap = useMemo(() => new Map(reasons.map((r) => [r.id, r])), [reasons])
+
+  if (monthError) {
+    return (
+      <Alert severity="error" action={<Button color="inherit" size="small" onClick={() => loadMonth().catch(() => undefined)}>Спробувати ще</Button>}>
+        Не вдалося завантажити дані.
+      </Alert>
+    )
+  }
 
   if (!monthData) return <Typography color="text.secondary">Завантаження…</Typography>
 

@@ -107,3 +107,14 @@ export type {
   ReconcileDto,
 } from './classes';
 export { translateError } from './errorMessages';
+export { parentCabinetApi } from './parentCabinet';
+export type {
+  FamilyChild,
+  Family,
+  ParentContact,
+  Visit,
+  ChildCard,
+  CabinetCharge,
+  CabinetPayment,
+  CabinetFinance,
+} from './parentCabinet';

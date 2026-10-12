@@ -4,7 +4,7 @@ import { Box, Button, IconButton, Tab, Tabs, Typography } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useFamilyChildStore } from '../model/familyChildStore'
 import { ChildCardTab } from './ChildCardTab'
-import { VisitsTab } from './VisitsTab'
+import { AttendanceTab } from './AttendanceTab'
 import { ChildFinanceTab } from './ChildFinanceTab'
 
 export const FamilyChildPage = () => {
@@ -52,7 +52,7 @@ export const FamilyChildPage = () => {
         <Tab label="Фінанси" />
       </Tabs>
       {tab === 0 && <ChildCardTab card={card} />}
-      {tab === 1 && <VisitsTab visits={card.visits} />}
+      {tab === 1 && <AttendanceTab childId={card.id} visits={card.visits} />}
       {tab === 2 && <ChildFinanceTab finance={finance} />}
     </Box>
   )

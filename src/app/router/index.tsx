@@ -16,6 +16,7 @@ import { ClassGroupPage, MarkLessonPage } from '../../pages/classGroup'
 import { AbsenceReasonsPage } from '../../pages/absenceReasons'
 import { CalendarPage } from '../../pages/calendar'
 import { RegisterPage } from '../../pages/register'
+import { AbsenceNoticesPage } from '../../pages/absenceNotices'
 import { MyClassesPage } from '../../pages/myClasses'
 import { ProfilePage } from '../../pages/profile'
 import { ChangePasswordPage } from '../../pages/changePassword'
@@ -62,6 +63,7 @@ export const router = createBrowserRouter([
                 children: [
                   { index: true,       element: <DashboardPage /> },
                   { path: 'register',  element: <RegisterPage /> },
+                  { path: 'absence-notices', element: <AbsenceNoticesPage /> },
                   { path: 'users',     element: <UsersPage /> },
                   { path: 'groups',    element: <GroupsPage /> },
                   { path: 'students',            element: <ChildrenPage /> },

@@ -8,7 +8,7 @@ const describe = (v: Visit) => {
 }
 
 export const VisitsTab = ({ visits }: { visits: Visit[] }) => {
-  if (visits.length === 0) return <Typography color="text.secondary">Відвідувань ще немає.</Typography>
+  if (visits.length === 0) return <Typography color="text.secondary">Немає записів за цей місяць.</Typography>
   return (
     <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflowX: 'auto' }}>
       <Table size="small">

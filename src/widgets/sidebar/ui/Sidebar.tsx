@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
+  Badge,
   Box,
   Drawer,
   List,
@@ -14,10 +16,13 @@ import { navItems, bottomNavItems } from '../model/nav-items'
 import type { NavItem } from '../model/nav-items'
 import { useAuthStore } from '../../../entities/user'
 import type { SessionRole } from '../../../entities/user'
+import { usePendingNoticesStore } from '../../../shared/model/pendingNoticesStore'
 
 export const SIDEBAR_WIDTH = 240
 
-const NavButton = ({ item }: { item: NavItem }) => (
+const NavButton = ({ item }: { item: NavItem }) => {
+  const pending = usePendingNoticesStore((s) => s.count)
+  return (
   <NavLink to={item.path} end={item.path === '/'} style={{ textDecoration: 'none' }}>
     {({ isActive }) => (
       <ListItemButton
@@ -32,7 +37,11 @@ const NavButton = ({ item }: { item: NavItem }) => (
         }}
       >
         <ListItemIcon sx={{ minWidth: 38, color: 'inherit' }}>
-          <item.icon fontSize="small" />
+          {item.badge === 'pendingNotices' && pending > 0 ? (
+            <Badge badgeContent={pending} color="error"><item.icon fontSize="small" /></Badge>
+          ) : (
+            <item.icon fontSize="small" />
+          )}
         </ListItemIcon>
         <ListItemText
           primary={item.label}
@@ -41,10 +50,15 @@ const NavButton = ({ item }: { item: NavItem }) => (
       </ListItemButton>
     )}
   </NavLink>
-)
+  )
+}
 
 export const Sidebar = () => {
   const role = useAuthStore((s) => s.profile?.role) as SessionRole | undefined
+  const refreshPending = usePendingNoticesStore((s) => s.refresh)
+  useEffect(() => {
+    if (role === 'root' || role === 'admin') refreshPending().catch(() => undefined)
+  }, [role, refreshPending])
   const visible = (item: NavItem) => !item.roles || (role !== undefined && item.roles.includes(role))
 
   return (

@@ -1,30 +1,45 @@
-import { useLocation } from 'react-router-dom'
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  IconButton,
-  Avatar,
-  Box,
-  Badge,
-} from '@mui/material'
-import NotificationsIcon from '@mui/icons-material/Notifications'
+import { useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { AppBar, Avatar, Box, Menu, MenuItem, Toolbar, Typography } from '@mui/material'
+import { useAuthStore } from '../../../entities/user'
 import { SIDEBAR_WIDTH } from '../../sidebar/ui/Sidebar'
 
 const pageTitles: Record<string, string> = {
   '/':          'Дашборд',
   '/users':     'Користувачі',
+  '/groups':    'Групи',
   '/students':  'Учні',
+  '/finance':   'Фінанси',
+  '/tariffs':   'Тарифи',
   '/teachers':  'Вчителі',
-  '/classes':   'Класи',
+  '/classes':   'Гуртки',
+  '/my-classes': 'Мої заняття',
+  '/profile':   'Профіль',
   '/schedule':  'Розклад',
   '/grades':    'Оцінки',
   '/reports':   'Звіти',
   '/settings':  'Налаштування',
 }
 
+const roleCaption = { root: 'Адміністратор', admin: 'Адміністратор', teacher: 'Педагог', parent: 'Батьки' } as const
+
 export const Header = () => {
   const { pathname } = useLocation()
+  const navigate = useNavigate()
+  const profile = useAuthStore((s) => s.profile)
+  const logout = useAuthStore((s) => s.logout)
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null)
+
+  const go = (path: string) => {
+    setAnchor(null)
+    navigate(path)
+  }
+
+  const handleLogout = async () => {
+    setAnchor(null)
+    await logout().catch(() => undefined)
+    navigate('/login')
+  }
 
   return (
     <AppBar
@@ -44,27 +59,28 @@ export const Header = () => {
           {pageTitles[pathname] ?? 'EduNest'}
         </Typography>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <IconButton size="small">
-            <Badge badgeContent={3} color="error">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
-
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }}>
+        {profile && (
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }}
+            onClick={(e) => setAnchor(e.currentTarget)}
+          >
             <Avatar sx={{ width: 34, height: 34, bgcolor: 'primary.main', fontSize: 14 }}>
-              АД
+              {`${profile.firstName[0] ?? ''}${profile.lastName[0] ?? ''}`}
             </Avatar>
             <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
               <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
-                Адміністратор
+                {profile.lastName} {profile.firstName}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                admin@school.ua
+                {roleCaption[profile.role]}
               </Typography>
             </Box>
           </Box>
-        </Box>
+        )}
+        <Menu anchorEl={anchor} open={Boolean(anchor)} onClose={() => setAnchor(null)}>
+          <MenuItem onClick={() => go('/profile')}>Профіль</MenuItem>
+          <MenuItem onClick={handleLogout}>Вийти</MenuItem>
+        </Menu>
       </Toolbar>
     </AppBar>
   )

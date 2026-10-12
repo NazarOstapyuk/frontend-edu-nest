@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Box, IconButton, Tab, Tabs, Typography } from '@mui/material'
+import { Box, Button, IconButton, Tab, Tabs, Typography } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useFamilyChildStore } from '../model/familyChildStore'
 import { ChildCardTab } from './ChildCardTab'
@@ -13,7 +13,7 @@ export const FamilyChildPage = () => {
   const card = useFamilyChildStore((s) => s.card)
   const finance = useFamilyChildStore((s) => s.finance)
   const storeChildId = useFamilyChildStore((s) => s.childId)
-  const isLoading = useFamilyChildStore((s) => s.isLoading)
+  const error = useFamilyChildStore((s) => s.error)
   const fetchChild = useFamilyChildStore((s) => s.fetchChild)
   const [tab, setTab] = useState(0)
 
@@ -22,11 +22,18 @@ export const FamilyChildPage = () => {
   }, [childId, fetchChild])
 
   if (!card || !finance || storeChildId !== childId) {
-    return (
-      <Typography color="text.secondary">
-        {isLoading || storeChildId !== childId ? 'Завантаження…' : 'Дитину не знайдено.'}
-      </Typography>
-    )
+    if (storeChildId === childId && error === 'notFound') {
+      return <Typography color="text.secondary">Дитину не знайдено.</Typography>
+    }
+    if (storeChildId === childId && error === 'failed') {
+      return (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'flex-start' }}>
+          <Typography color="text.secondary">Не вдалося завантажити дані.</Typography>
+          <Button variant="outlined" onClick={() => childId && fetchChild(childId).catch(() => undefined)}>Спробувати ще</Button>
+        </Box>
+      )
+    }
+    return <Typography color="text.secondary">Завантаження…</Typography>
   }
 
   return (

@@ -9,6 +9,7 @@ const fullName = (c: { lastName: string; firstName: string; middleName: string |
 
 export const FamilyPage = () => {
   const family = useFamilyStore((s) => s.family)
+  const hasError = useFamilyStore((s) => s.hasError)
   const fetchFamily = useFamilyStore((s) => s.fetchFamily)
   const navigate = useNavigate()
 
@@ -16,7 +17,17 @@ export const FamilyPage = () => {
     fetchFamily().catch(() => undefined)
   }, [fetchFamily])
 
-  if (!family) return <Typography color="text.secondary">Завантаження…</Typography>
+  if (!family) {
+    if (hasError) {
+      return (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'flex-start' }}>
+          <Typography color="text.secondary">Не вдалося завантажити дані.</Typography>
+          <Button variant="outlined" onClick={() => fetchFamily().catch(() => undefined)}>Спробувати ще</Button>
+        </Box>
+      )
+    }
+    return <Typography color="text.secondary">Завантаження…</Typography>
+  }
 
   const due = Number(family.totals.due)
   const overdue = Number(family.totals.overdue)

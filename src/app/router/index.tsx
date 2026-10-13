@@ -16,6 +16,7 @@ import { ClassGroupPage, MarkLessonPage } from '../../pages/classGroup'
 import { AbsenceReasonsPage } from '../../pages/absenceReasons'
 import { CalendarPage } from '../../pages/calendar'
 import { ScheduleSetupPage } from '../../pages/scheduleSetup'
+import { SchedulePage } from '../../pages/schedule'
 import { RegisterPage } from '../../pages/register'
 import { AbsenceNoticesPage } from '../../pages/absenceNotices'
 import { MyClassesPage } from '../../pages/myClasses'
@@ -79,7 +80,7 @@ export const router = createBrowserRouter([
                   { path: 'calendar',        element: <CalendarPage /> },
                   { path: 'schedule-setup', element: <ScheduleSetupPage /> },
                   { path: 'absence-reasons', element: <AbsenceReasonsPage /> },
-                  { path: 'schedule',  element: <EmptyPage title="Розклад" /> },
+                  { path: 'schedule',  element: <SchedulePage /> },
                   { path: 'grades',    element: <EmptyPage title="Оцінки" /> },
                   { path: 'reports',   element: <EmptyPage title="Звіти" /> },
                   { path: 'settings',  element: <EmptyPage title="Налаштування" /> },

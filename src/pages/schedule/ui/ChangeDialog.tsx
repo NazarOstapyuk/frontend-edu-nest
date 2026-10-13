@@ -1,0 +1,92 @@
+import { useEffect } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from 'yup'
+import { Box, Button, Dialog, DialogTitle, MenuItem, TextField } from '@mui/material'
+import { useScheduleStore } from '../model/scheduleStore'
+import { formatDay, type LessonChangeDto, type ScheduleSlot } from '../../../shared/api'
+
+const schema = yup.object({
+  period: yup.string().default(''),
+  subgroupId: yup.string().default(''),
+  subjectId: yup.string().default(''),
+  teacherId: yup.string().default(''),
+  roomId: yup.string().default(''),
+  reason: yup.string().trim().required('Вкажіть причину').max(500, 'Максимум 500 символів'),
+})
+
+type FormValues = yup.InferType<typeof schema>
+
+interface ChangeDialogProps {
+  mode: 'replace' | 'extra'
+  date: string
+  slot: ScheduleSlot | null
+  onClose: () => void
+}
+
+export const ChangeDialog = ({ mode, date, slot, onClose }: ChangeDialogProps) => {
+  const subjects = useScheduleStore((s) => s.subjects)
+  const teachers = useScheduleStore((s) => s.teachers)
+  const rooms = useScheduleStore((s) => s.rooms)
+  const subgroups = useScheduleStore((s) => s.subgroups)
+  const periods = useScheduleStore((s) => s.weekData?.periods ?? null)
+  const isSaving = useScheduleStore((s) => s.isSaving)
+  const createChange = useScheduleStore((s) => s.createChange)
+  const { control, handleSubmit, reset } = useForm<FormValues>({ mode: 'all', resolver: yupResolver(schema) })
+
+  useEffect(() => {
+    reset({ period: slot ? String(slot.period) : '', subgroupId: '', subjectId: '', teacherId: '', roomId: '', reason: '' })
+  }, [slot, reset])
+
+  const submit = async (values: FormValues) => {
+    const dto: LessonChangeDto = {
+      date,
+      period: slot ? slot.period : Number(values.period),
+      subgroupId: slot ? (slot.subgroupId ?? undefined) : values.subgroupId || undefined,
+      type: mode,
+      subjectId: values.subjectId || undefined,
+      teacherId: values.teacherId || undefined,
+      roomId: values.roomId || undefined,
+      reason: values.reason.trim(),
+    }
+    await createChange(dto)
+    onClose()
+  }
+
+  const select = (name: keyof FormValues, label: string, options: { id: string; label: string }[]) => (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field, fieldState: { error } }) => (
+        <TextField {...field} select label={label} error={!!error} helperText={error?.message}>
+          <MenuItem value="">{mode === 'replace' ? 'Без змін' : 'Не вказано'}</MenuItem>
+          {options.map((o) => <MenuItem key={o.id} value={o.id}>{o.label}</MenuItem>)}
+        </TextField>
+      )}
+    />
+  )
+
+  return (
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle sx={{ fontWeight: 700 }}>
+        {mode === 'replace' ? `Заміна: ${formatDay(date)}, ${slot?.period}-й урок` : `Додатковий урок: ${formatDay(date)}`}
+      </DialogTitle>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: '20px' }}>
+        {mode === 'extra' && select('period', 'Урок', (periods ?? []).map((p) => ({ id: String(p.number), label: `${p.number}-й (${p.startTime}–${p.endTime})` })))}
+        {mode === 'extra' && select('subgroupId', 'Підгрупа', subgroups.filter((g) => g.active).map((g) => ({ id: g.id, label: g.name })))}
+        {select('subjectId', 'Предмет', subjects.filter((s) => s.active).map((s) => ({ id: s.id, label: s.name })))}
+        {select('teacherId', 'Вчитель', teachers.map((t) => ({ id: t.id, label: `${t.lastName} ${t.firstName}` })))}
+        {select('roomId', 'Кабінет', rooms.filter((r) => r.active).map((r) => ({ id: r.id, label: r.name })))}
+        <Controller
+          name="reason"
+          control={control}
+          render={({ field, fieldState: { error } }) => <TextField {...field} label="Причина" error={!!error} helperText={error?.message} />}
+        />
+        <Box sx={{ display: 'flex', gap: '10px' }}>
+          <Button onClick={onClose} color="inherit" sx={{ width: '100%' }}>Скасувати</Button>
+          <Button onClick={handleSubmit((v) => submit(v).catch(() => undefined))} variant="contained" disabled={isSaving} sx={{ width: '100%' }}>Зберегти</Button>
+        </Box>
+      </Box>
+    </Dialog>
+  )
+}

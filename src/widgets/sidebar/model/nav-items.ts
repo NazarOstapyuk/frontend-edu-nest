@@ -11,6 +11,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
 import FactCheckIcon from '@mui/icons-material/FactCheck'
 import MarkEmailUnreadIcon from '@mui/icons-material/MarkEmailUnread'
+import ViewWeekIcon from '@mui/icons-material/ViewWeek'
 import TuneIcon from '@mui/icons-material/Tune'
 import type { SvgIconComponent } from '@mui/icons-material'
 import type { SessionRole } from '../../../entities/user'
@@ -28,6 +29,7 @@ const ADMIN: SessionRole[] = ['root', 'admin']
 export const navItems: NavItem[] = [
   { path: '/',                    label: 'Дашборд',           icon: DashboardIcon },
   { path: '/register',            label: 'Журнал',            icon: FactCheckIcon,      roles: ['root', 'admin', 'teacher'] },
+  { path: '/schedule',           label: 'Розклад',           icon: ViewWeekIcon,       roles: ADMIN },
   { path: '/absence-notices',     label: 'Повідомлення',      icon: MarkEmailUnreadIcon, roles: ADMIN, badge: 'pendingNotices' },
   { path: '/users',               label: 'Користувачі',       icon: ManageAccountsIcon, roles: ADMIN },
   { path: '/groups',              label: 'Групи',             icon: GroupsIcon,         roles: ADMIN },

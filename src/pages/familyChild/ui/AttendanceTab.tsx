@@ -5,6 +5,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { useChildAttendanceStore } from '../model/childAttendanceStore'
 import { NoticeDialog } from './NoticeDialog'
 import { VisitsTab } from './VisitsTab'
+import { LessonsBlock } from './LessonsBlock'
 import {
   dailyStatusLabels,
   dayStateLabels,
@@ -54,6 +55,7 @@ export const AttendanceTab = ({ childId, visits }: { childId: string; visits: Vi
   const storeChildId = useChildAttendanceStore((s) => s.childId)
   const month = useChildAttendanceStore((s) => s.month)
   const register = useChildAttendanceStore((s) => s.register)
+  const lessons = useChildAttendanceStore((s) => s.lessons)
   const notices = useChildAttendanceStore((s) => s.notices)
   const isSaving = useChildAttendanceStore((s) => s.isSaving)
   const loadFailed = useChildAttendanceStore((s) => s.loadFailed)
@@ -99,6 +101,7 @@ export const AttendanceTab = ({ childId, visits }: { childId: string; visits: Vi
           <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: 1.5 }}>
             <MonthGrid register={register} />
           </Paper>
+          {lessons && <LessonsBlock lessons={lessons} />}
           {absences.length > 0 && (
             <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: 1.5 }}>
               <Typography sx={{ fontWeight: 600, mb: 1 }}>Пропуски</Typography>

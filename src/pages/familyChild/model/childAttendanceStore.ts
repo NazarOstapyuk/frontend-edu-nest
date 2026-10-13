@@ -6,6 +6,7 @@ import {
   type AbsenceReason,
   type ChildRegisterMonth,
   type CreateNoticeDto,
+  type ParentLessons,
   type ParentNotice,
 } from '../../../shared/api';
 
@@ -13,6 +14,7 @@ interface ChildAttendanceState {
   childId: string | null;
   month: string;
   register: ChildRegisterMonth | null;
+  lessons: ParentLessons | null;
   registerKey: string | null;
   notices: ParentNotice[];
   reasons: AbsenceReason[];
@@ -28,13 +30,14 @@ export const useChildAttendanceStore = create<ChildAttendanceState>((set, get) =
   childId: null,
   month: localToday().slice(0, 7),
   register: null,
+  lessons: null,
   registerKey: null,
   notices: [],
   reasons: [],
   isSaving: false,
   loadFailed: false,
   open: async (childId) => {
-    set({ childId, notices: [], register: null, registerKey: null, loadFailed: false });
+    set({ childId, notices: [], register: null, lessons: null, registerKey: null, loadFailed: false });
     try {
       const [, { data: notices }, { data: reasons }] = await Promise.all([
         get().setMonth(get().month),
@@ -51,10 +54,13 @@ export const useChildAttendanceStore = create<ChildAttendanceState>((set, get) =
     const { childId } = get();
     if (!childId) return;
     const key = `${childId}/${month}`;
-    set({ month, registerKey: key, register: null, loadFailed: false });
+    set({ month, registerKey: key, register: null, lessons: null, loadFailed: false });
     try {
-      const { data } = await parentCabinetApi.getRegister(childId, month);
-      if (get().registerKey === key) set({ register: data });
+      const [{ data }, { data: lessons }] = await Promise.all([
+        parentCabinetApi.getRegister(childId, month),
+        parentCabinetApi.getLessons(childId, month),
+      ]);
+      if (get().registerKey === key) set({ register: data, lessons });
     } catch (error) {
       if (get().registerKey === key) set({ loadFailed: true });
       throw error;

@@ -19,6 +19,8 @@ import { ScheduleSetupPage } from '../../pages/scheduleSetup'
 import { SchedulePage } from '../../pages/schedule'
 import { RegisterPage } from '../../pages/register'
 import { AbsenceNoticesPage } from '../../pages/absenceNotices'
+import { MyLessonsPage } from '../../pages/myLessons'
+import { LessonPage } from '../../pages/lesson'
 import { MyClassesPage } from '../../pages/myClasses'
 import { ProfilePage } from '../../pages/profile'
 import { ChangePasswordPage } from '../../pages/changePassword'
@@ -77,6 +79,8 @@ export const router = createBrowserRouter([
                   { path: 'classes/:groupId',               element: <ClassGroupPage /> },
                   { path: 'classes/:groupId/lessons/:date', element: <MarkLessonPage /> },
                   { path: 'my-classes',                     element: <MyClassesPage /> },
+                  { path: 'my-lessons',                     element: <MyLessonsPage /> },
+                  { path: 'lessons/:groupId/:date/:period', element: <LessonPage /> },
                   { path: 'calendar',        element: <CalendarPage /> },
                   { path: 'schedule-setup', element: <ScheduleSetupPage /> },
                   { path: 'absence-reasons', element: <AbsenceReasonsPage /> },

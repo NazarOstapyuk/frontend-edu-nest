@@ -46,6 +46,8 @@ Parent cabinet: `pages/family` (children list), `pages/familyChild` (child card 
 
 Attendance register: `pages/register` (day register + month grid, staff), `pages/absenceNotices` (admin approval, menu badge via `shared/model/pendingNoticesStore`), `pages/calendar` (working-day calendar + teacher edit window), `pages/absenceReasons`; parent tab «Відвідування» is `pages/familyChild/ui/AttendanceTab.tsx`. API in `shared/api/register.ts`. Day states come from the backend; never compute them on the frontend.
 
+School timetable: `pages/scheduleSetup` (subjects, rooms, bell schedules, subgroups), `pages/schedule` (timetable versions grid + week with cancel/replace/extra changes; 409 `Schedule conflict` lists `conflicts`), `pages/myLessons` and `pages/lesson` (teacher records attendance, topic, homework, НУШ levels; only changed rows are sent), parent tabs «Розклад» and the «Уроки» block in «Відвідування». API in `shared/api/timetable.ts`. Lesson slots and pupil states come from the backend; never compute them on the frontend.
+
 Imports go top-down: `app → pages → widgets → entities → shared`. From outside a module, import through its `index.ts`.
 
 Legacy: `pages/children` and `pages/groups` import `pages/users/model/usersStore` and `pages/groups/model/groupsStore` directly. Don't add new cross-page store imports. Data needed by several pages (lists of users, groups, etc.) goes to `entities/<entity>/model/`.

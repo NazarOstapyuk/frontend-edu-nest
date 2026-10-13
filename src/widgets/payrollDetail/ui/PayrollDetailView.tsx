@@ -31,6 +31,7 @@ interface Props {
   detail: PayrollDetail
   onVoidAdjustment?: (id: string) => void
   onVoidPayment?: (id: string) => void
+  showWarnings?: boolean
 }
 
 const lessonTypes: PayrollLessonType[] = ['school_lesson', 'class_group', 'individual']
@@ -92,7 +93,7 @@ const Voided = ({ reason }: { reason: string | null }) => (
   <Chip size="small" label={reason ? `Анульовано: ${reason}` : 'Анульовано'} sx={{ ml: 1 }} />
 )
 
-export const PayrollDetailView = ({ detail, onVoidAdjustment, onVoidPayment }: Props) => {
+export const PayrollDetailView = ({ detail, onVoidAdjustment, onVoidPayment, showWarnings = true }: Props) => {
   const fixed = detail.lines.filter((line) => line.type === 'base' || line.type === 'allowance')
   const lessons = detail.lines.filter((line) => line.type === 'lesson')
   const corrections = detail.lines.filter((line) => line.type === 'correction')
@@ -100,10 +101,10 @@ export const PayrollDetailView = ({ detail, onVoidAdjustment, onVoidPayment }: P
 
   return (
     <Stack spacing={2}>
-      {detail.warnings.noRate > 0 && (
-        <Alert severity="warning">Заняття без ставки: {detail.warnings.noRate}. Додайте ставку в умовах оплати.</Alert>
+      {showWarnings && detail.warnings.noRate > 0 && (
+        <Alert severity="warning">Заняття без ставки: {detail.warnings.noRate}. Ставку можна додати лише в новій версії умов; за минулі заняття нарахуйте доплату вручну.</Alert>
       )}
-      {detail.warnings.lessonsWithoutTerms > 0 && (
+      {showWarnings && detail.warnings.lessonsWithoutTerms > 0 && (
         <Alert severity="warning">
           Заняття поза періодом умов: {detail.warnings.lessonsWithoutTerms}. Вони не враховані.
         </Alert>

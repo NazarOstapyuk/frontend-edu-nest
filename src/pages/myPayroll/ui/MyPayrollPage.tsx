@@ -123,7 +123,7 @@ export const MyPayrollPage = () => {
               {detail.status === 'draft' && (
                 <Alert severity="info">Чернетка: суми можуть змінитися до затвердження.</Alert>
               )}
-              <PayrollDetailView detail={detail} />
+              <PayrollDetailView detail={detail} showWarnings={false} />
             </Stack>
           ) : (
             <Typography color="text.secondary">Завантаження…</Typography>

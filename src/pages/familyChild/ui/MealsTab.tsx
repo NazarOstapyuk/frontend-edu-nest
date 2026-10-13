@@ -20,6 +20,11 @@ const choiceCourses = (day: ParentMenuDay, complexId: string) =>
 const isComplete = (day: ParentMenuDay, s: Selection | undefined) =>
   !!s && !!s.complexId && choiceCourses(day, s.complexId).every((c) => s.picks[c.id])
 
+const issueTexts = {
+  no_group: 'Дитина ще не в групі, харчування недоступне.',
+  no_price_category: 'Для групи ще не налаштовано ціни харчування.',
+}
+
 const Week = ({ childId, data }: { childId: string; data: ParentMenu }) => {
   const isSaving = useChildMealsStore((s) => s.isSaving)
   const order = useChildMealsStore((s) => s.order)
@@ -42,17 +47,23 @@ const Week = ({ childId, data }: { childId: string; data: ParentMenu }) => {
       .then(() => setSelection({}))
       .catch(() => undefined)
 
-  if (data.days.length === 0) return <Typography color="text.secondary">Меню на цей тиждень ще не опубліковано.</Typography>
+  const issue = data.issue ? <Alert severity="info">{issueTexts[data.issue]}</Alert> : null
+
+  if (data.days.length === 0)
+    return issue ?? <Typography color="text.secondary">Меню на цей тиждень ще не опубліковано.</Typography>
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+      {issue}
       <Typography variant="body2" color="text.secondary">Замовити або скасувати можна до {data.deadline} у день харчування.</Typography>
       {data.days.map((day) => {
         const s = selection[day.date]
+        const placed = day.order
         return (
           <Paper key={day.date} elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: 1.5 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
               <Typography sx={{ fontWeight: 700 }}>{weekdayOf(day.date)} {formatDay(day.date)}</Typography>
+              {!day.working && <Chip size="small" color="warning" label="Неробочий день" />}
               {day.open ? (
                 <Chip size="small" label={`до ${timeOf(day.deadlineAt)}`} />
               ) : (
@@ -62,12 +73,12 @@ const Week = ({ childId, data }: { childId: string; data: ParentMenu }) => {
             {day.dishes.map((d) => (
               <Typography key={d.id} variant="body2">{d.course.name}: {d.name}</Typography>
             ))}
-            {day.order && (
+            {placed && (
               <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                <Chip color="success" label={`Замовлено: ${day.order.complex.name}, ${day.order.price} грн`} />
-                <Typography variant="body2">{day.order.items.map((i) => i.dishName).join(', ')}</Typography>
+                <Chip color="success" label={`Замовлено: ${placed.complex.name}, ${placed.price} грн`} />
+                <Typography variant="body2">{placed.items.map((i) => i.dishName).join(', ')}</Typography>
                 {day.canCancel && (
-                  <Button size="small" color="error" disabled={isSaving} onClick={() => cancel(childId, day.order!.id).catch(() => undefined)}>
+                  <Button size="small" color="error" disabled={isSaving} onClick={() => cancel(childId, placed.id).catch(() => undefined)}>
                     Скасувати
                   </Button>
                 )}

@@ -73,7 +73,14 @@ export const MenuTab = () => {
               >
                 <Typography variant="body2" sx={{ fontWeight: 700 }}>{isoWeekdayLabels[i]} {formatDay(day.date)}</Typography>
                 {!day.working ? (
-                  <Typography variant="caption" color="text.secondary">Неробочий{day.title ? `: ${day.title}` : ''}</Typography>
+                  <>
+                    <Typography variant="caption" color="text.secondary">Неробочий{day.title ? `: ${day.title}` : ''}</Typography>
+                    {day.menu && day.menu.activeOrders > 0 && (
+                      <Box sx={{ mt: 0.5 }}>
+                        <Chip size="small" color="warning" label={`Замовлень: ${day.menu.activeOrders} — день неробочий`} />
+                      </Box>
+                    )}
+                  </>
                 ) : !day.menu ? (
                   <Typography variant="caption" color="text.secondary">Меню немає</Typography>
                 ) : (

@@ -161,6 +161,7 @@ export const errorMessages: Record<string, string> = {
   'Menu day not found': 'Меню на цей день не знайдено',
   'Menu template not found': 'Шаблон не знайдено',
   'Menu template already exists': 'Такий шаблон уже існує',
+  'Menu template is inactive': 'Шаблон вимкнено',
   'Template week out of range': 'Тиждень поза циклом шаблону',
   'Order already exists': 'Замовлення на цей день уже є',
   'Order not found': 'Замовлення не знайдено',

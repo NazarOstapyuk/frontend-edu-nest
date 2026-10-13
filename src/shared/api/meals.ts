@@ -174,6 +174,7 @@ export interface ParentMenuDay {
   date: string;
   deadlineAt: string;
   open: boolean;
+  working: boolean;
   dishes: { id: string; name: string; course: CourseRef }[];
   complexes: ParentMenuComplex[];
   order: MealOrder | null;
@@ -183,6 +184,7 @@ export interface ParentMenuDay {
 
 export interface ParentMenu {
   deadline: string;
+  issue: 'no_group' | 'no_price_category' | null;
   days: ParentMenuDay[];
 }
 

@@ -48,6 +48,8 @@ Attendance register: `pages/register` (day register + month grid, staff), `pages
 
 School timetable: `pages/scheduleSetup` (subjects, rooms, bell schedules, subgroups), `pages/schedule` (timetable versions grid + week with cancel/replace/extra changes; 409 `Schedule conflict` lists `conflicts`), `pages/myLessons` and `pages/lesson` (teacher records attendance, topic, homework, НУШ levels; only changed rows are sent), parent tabs «Розклад» and the «Уроки» block in «Відвідування». API in `shared/api/timetable.ts`. Lesson slots and pupil states come from the backend; never compute them on the frontend.
 
+Meals: `pages/meals` (tabs «Меню» calendar by kind with publish/copy/apply template, «Замовлення» day list with portion summary and cancel, «Шаблони» N-week cycle editor, «Довідники» courses, dishes, price categories, complexes with prices and the order deadline), teacher block «Харчування сьогодні» on the register page (`pages/register/ui/MealsTodayBlock.tsx`), parent tab «Харчування» (`pages/familyChild/ui/MealsTab.tsx`). API in `shared/api/meals.ts`. Prices, availability and deadlines come from the backend; never compute them on the frontend (the parent total is display only). Multi-day order errors arrive as `YYYY-MM-DD: <message>`; `translateError` turns them into `DD.MM.YYYY: <переклад>`.
+
 Imports go top-down: `app → pages → widgets → entities → shared`. From outside a module, import through its `index.ts`.
 
 Legacy: `pages/children` and `pages/groups` import `pages/users/model/usersStore` and `pages/groups/model/groupsStore` directly. Don't add new cross-page store imports. Data needed by several pages (lists of users, groups, etc.) goes to `entities/<entity>/model/`.

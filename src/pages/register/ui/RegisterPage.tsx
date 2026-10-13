@@ -4,6 +4,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { useRegisterStore } from '../model/registerStore'
 import { RegisterDayTab } from './RegisterDayTab'
+import { MealsTodayBlock } from './MealsTodayBlock'
 import { RegisterMonthTab } from './RegisterMonthTab'
 import { groupKindLabels, localToday, monthLabel, shiftMonth } from '../../../shared/api'
 
@@ -75,6 +76,7 @@ export const RegisterPage = () => {
         <Tab label="Табель" />
       </Tabs>
       {tab === 0 && <RegisterDayTab />}
+      {tab === 0 && groupId && date === localToday() && <MealsTodayBlock groupId={groupId} />}
       {tab === 1 && (
         <RegisterMonthTab
           onOpenDay={(day) => {

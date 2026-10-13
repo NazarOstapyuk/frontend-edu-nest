@@ -1,20 +1,27 @@
 import { create } from 'zustand';
 import {
   addDaysIso,
+  childrenApi,
+  groupsApi,
   localToday,
   mealsApi,
   weekStart,
+  type AdminMealOrder,
+  type Child,
   type ComplexPriceDto,
   type Dish,
   type DishDto,
   type FillResult,
+  type Group,
   type GroupKind,
   type MealComplex,
   type MealComplexDto,
   type MealCourse,
   type MealPriceCategory,
+  type MealSummary,
   type MenuDayView,
   type MenuTemplate,
+  type OrderDay,
   type SortedNamedDto,
 } from '../../../shared/api';
 
@@ -23,6 +30,18 @@ interface MealsState {
   dishes: Dish[];
   priceCategories: MealPriceCategory[];
   complexes: MealComplex[];
+  groups: Group[];
+  children: Child[];
+  ordersDate: string;
+  ordersKind: GroupKind | '';
+  ordersGroupId: string;
+  ordersKey: string | null;
+  orders: AdminMealOrder[];
+  summary: MealSummary | null;
+  ordersFailed: boolean;
+  loadOrders: (patch?: Partial<{ date: string; kind: GroupKind | ''; groupId: string }>) => Promise<void>;
+  cancelOrder: (id: string, reason?: string) => Promise<void>;
+  createOrders: (childId: string, days: OrderDay[]) => Promise<void>;
   deadline: string;
   loadFailed: boolean;
   isSaving: boolean;
@@ -74,18 +93,54 @@ export const useMealsStore = create<MealsState>((set, get) => {
     dishes: [],
     priceCategories: [],
     complexes: [],
+    groups: [],
+    children: [],
+    ordersDate: localToday(),
+    ordersKind: '',
+    ordersGroupId: '',
+    ordersKey: null,
+    orders: [],
+    summary: null,
+    ordersFailed: false,
+    loadOrders: async (patch = {}) => {
+      const state = get();
+      const date = patch.date ?? state.ordersDate;
+      const kind = patch.kind ?? state.ordersKind;
+      const groupId = patch.groupId ?? state.ordersGroupId;
+      const key = `${date}/${kind}/${groupId}`;
+      set({ ordersDate: date, ordersKind: kind, ordersGroupId: groupId, ordersKey: key, orders: [], summary: null, ordersFailed: false });
+      try {
+        const { data } = await mealsApi.getOrders(date, kind || undefined, groupId || undefined);
+        if (get().ordersKey === key) set({ orders: data.orders, summary: data.summary });
+      } catch (error) {
+        if (get().ordersKey === key) set({ ordersFailed: true });
+        throw error;
+      }
+    },
+    cancelOrder: (id, reason) =>
+      saving(async () => {
+        await mealsApi.cancelOrder(id, reason);
+        await get().loadOrders();
+      }),
+    createOrders: (childId, days) =>
+      saving(async () => {
+        await mealsApi.createOrders(childId, days);
+        await get().loadOrders();
+      }),
     deadline: '10:00',
     loadFailed: false,
     isSaving: false,
     load: async () => {
       set({ loadFailed: false });
       try {
-        const [courses, dishes, categories, complexes, settings] = await Promise.all([
+        const [courses, dishes, categories, complexes, settings, groups, children] = await Promise.all([
           mealsApi.getCourses(),
           mealsApi.getDishes(),
           mealsApi.getPriceCategories(),
           mealsApi.getComplexes(),
           mealsApi.getSettings(),
+          groupsApi.getList(),
+          childrenApi.getList(),
         ]);
         set({
           courses: courses.data,
@@ -93,6 +148,8 @@ export const useMealsStore = create<MealsState>((set, get) => {
           priceCategories: categories.data,
           complexes: complexes.data,
           deadline: settings.data.mealOrderDeadline,
+          groups: groups.data,
+          children: children.data,
         });
       } catch (error) {
         set({ loadFailed: true });

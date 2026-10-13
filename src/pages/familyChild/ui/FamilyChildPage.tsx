@@ -6,6 +6,7 @@ import { useFamilyChildStore } from '../model/familyChildStore'
 import { ChildCardTab } from './ChildCardTab'
 import { ScheduleTab } from './ScheduleTab'
 import { AttendanceTab } from './AttendanceTab'
+import { MealsTab } from './MealsTab'
 import { ChildFinanceTab } from './ChildFinanceTab'
 
 export const FamilyChildPage = () => {
@@ -51,12 +52,14 @@ export const FamilyChildPage = () => {
         <Tab label="Картка" />
         <Tab label="Розклад" />
         <Tab label="Відвідування" />
+        <Tab label="Харчування" />
         <Tab label="Фінанси" />
       </Tabs>
       {tab === 0 && <ChildCardTab card={card} />}
       {tab === 1 && <ScheduleTab childId={card.id} />}
       {tab === 2 && <AttendanceTab childId={card.id} visits={card.visits} />}
-      {tab === 3 && <ChildFinanceTab finance={finance} />}
+      {tab === 3 && <MealsTab childId={card.id} />}
+      {tab === 4 && <ChildFinanceTab finance={finance} />}
     </Box>
   )
 }

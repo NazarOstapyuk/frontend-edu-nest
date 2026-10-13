@@ -56,11 +56,11 @@ export const useChildAttendanceStore = create<ChildAttendanceState>((set, get) =
     const key = `${childId}/${month}`;
     set({ month, registerKey: key, register: null, lessons: null, loadFailed: false });
     try {
-      const [{ data }, { data: lessons }] = await Promise.all([
+      const [{ data }, lessonsResponse] = await Promise.all([
         parentCabinetApi.getRegister(childId, month),
-        parentCabinetApi.getLessons(childId, month),
+        parentCabinetApi.getLessons(childId, month).catch(() => null),
       ]);
-      if (get().registerKey === key) set({ register: data, lessons });
+      if (get().registerKey === key) set({ register: data, lessons: lessonsResponse?.data ?? null });
     } catch (error) {
       if (get().registerKey === key) set({ loadFailed: true });
       throw error;

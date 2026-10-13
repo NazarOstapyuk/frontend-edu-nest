@@ -10,6 +10,7 @@ import EventAvailableIcon from '@mui/icons-material/EventAvailable'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
 import FactCheckIcon from '@mui/icons-material/FactCheck'
+import PaymentsIcon from '@mui/icons-material/Payments'
 import MarkEmailUnreadIcon from '@mui/icons-material/MarkEmailUnread'
 import ViewWeekIcon from '@mui/icons-material/ViewWeek'
 import RestaurantIcon from '@mui/icons-material/Restaurant'
@@ -33,6 +34,7 @@ export const navItems: NavItem[] = [
   { path: '/register',            label: 'Журнал',            icon: FactCheckIcon,      roles: ['root', 'admin', 'teacher'] },
   { path: '/schedule',           label: 'Розклад',           icon: ViewWeekIcon,       roles: ADMIN },
   { path: '/meals',              label: 'Харчування',        icon: RestaurantIcon,     roles: ADMIN },
+  { path: '/payroll',            label: 'Зарплати',          icon: PaymentsIcon,       roles: ADMIN },
   { path: '/absence-notices',     label: 'Повідомлення',      icon: MarkEmailUnreadIcon, roles: ADMIN, badge: 'pendingNotices' },
   { path: '/users',               label: 'Користувачі',       icon: ManageAccountsIcon, roles: ADMIN },
   { path: '/groups',              label: 'Групи',             icon: GroupsIcon,         roles: ADMIN },

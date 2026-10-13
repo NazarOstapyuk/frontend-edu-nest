@@ -18,6 +18,7 @@ import { CalendarPage } from '../../pages/calendar'
 import { ScheduleSetupPage } from '../../pages/scheduleSetup'
 import { SchedulePage } from '../../pages/schedule'
 import { MealsPage } from '../../pages/meals'
+import { PayrollPage } from '../../pages/payroll'
 import { RegisterPage } from '../../pages/register'
 import { AbsenceNoticesPage } from '../../pages/absenceNotices'
 import { MyLessonsPage } from '../../pages/myLessons'
@@ -87,6 +88,7 @@ export const router = createBrowserRouter([
                   { path: 'absence-reasons', element: <AbsenceReasonsPage /> },
                   { path: 'schedule',  element: <SchedulePage /> },
                   { path: 'meals', element: <MealsPage /> },
+                  { path: 'payroll', element: <PayrollPage /> },
                   { path: 'grades',    element: <EmptyPage title="Оцінки" /> },
                   { path: 'reports',   element: <EmptyPage title="Звіти" /> },
                   { path: 'settings',  element: <EmptyPage title="Налаштування" /> },

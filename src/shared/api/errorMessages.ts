@@ -139,12 +139,55 @@ export const errorMessages: Record<string, string> = {
   'Room not found': 'Кабінет не знайдено',
   'Subject already exists': 'Такий предмет уже існує',
   'Room already exists': 'Такий кабінет уже існує',
+  'Meal course not found': 'Тип страви не знайдено',
+  'Meal course already exists': 'Такий тип страви вже існує',
+  'Meal course is inactive': 'Тип страви вимкнено',
+  'Dish not found': 'Страву не знайдено',
+  'Dish already exists': 'Така страва вже існує',
+  'Dish is inactive': 'Страву вимкнено',
+  'Dish is ordered': 'Цю страву вже замовили, прибрати не можна',
+  'Meal price category not found': 'Цінову категорію не знайдено',
+  'Meal price category already exists': 'Така цінова категорія вже існує',
+  'Meal price category is inactive': 'Цінову категорію вимкнено',
+  'Meal complex not found': 'Комплекс не знайдено',
+  'Meal complex already exists': 'Такий комплекс уже існує',
+  'Price not found': 'Ціну не знайдено',
+  'Price is already in effect': 'Ціна вже діє, видалити не можна',
+  'Invalid deadline': 'Неправильний час дедлайну',
+  'Period is too long': 'Занадто довгий період',
+  'Day is not a working day': 'Неробочий день',
+  'Menu is published': 'Меню опубліковано, спочатку зніміть публікацію',
+  'Menu has orders': 'На меню вже є замовлення',
+  'Menu day not found': 'Меню на цей день не знайдено',
+  'Menu template not found': 'Шаблон не знайдено',
+  'Menu template already exists': 'Такий шаблон уже існує',
+  'Template week out of range': 'Тиждень поза циклом шаблону',
+  'Order already exists': 'Замовлення на цей день уже є',
+  'Order not found': 'Замовлення не знайдено',
+  'Order is cancelled': 'Замовлення вже скасовано',
+  'Order deadline has passed': 'Час для замовлення минув',
+  'Menu is not published': 'Меню ще не опубліковано',
+  'Complex is inactive': 'Комплекс вимкнено',
+  'Complex is not available on this day': 'Цього дня комплекс недоступний',
+  'Complex has no price': 'Для комплексу не задано ціну',
+  'Dish choice is required': 'Оберіть страву',
+  'Invalid dish choice': 'Неправильний вибір страви',
+  'Child has no group': 'Дитина не в групі',
+  'Group has no meal price category': 'Групі не задано цінову категорію харчування',
+  'Duplicate date in order': 'Дата повторюється',
 };
 
 export const translateError = (error: unknown): string => {
   if (typeof error === 'object' && error !== null && 'message' in error) {
     const { message } = error as { message: unknown };
-    if (typeof message === 'string') return errorMessages[message] ?? GENERIC_ERROR;
+    if (typeof message === 'string') {
+      const dated = /^(\d{4})-(\d{2})-(\d{2}): (.+)$/.exec(message);
+      if (dated) {
+        const text = errorMessages[dated[4]];
+        return text ? `${dated[3]}.${dated[2]}.${dated[1]}: ${text}` : GENERIC_ERROR;
+      }
+      return errorMessages[message] ?? GENERIC_ERROR;
+    }
   }
   return GENERIC_ERROR;
 };

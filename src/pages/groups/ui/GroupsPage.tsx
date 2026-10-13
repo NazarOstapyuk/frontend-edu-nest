@@ -24,6 +24,7 @@ export const GroupsPage = () => {
   const groups = useGroupsStore((s) => s.groups)
   const fetchGroups = useGroupsStore((s) => s.fetchGroups)
   const fetchBellSchedules = useGroupsStore((s) => s.fetchBellSchedules)
+  const fetchMealCategories = useGroupsStore((s) => s.fetchMealCategories)
   const setCreateGroupModal = useGroupsStore((s) => s.setCreateGroupModal)
   const setEditGroupModal = useGroupsStore((s) => s.setEditGroupModal)
   const deleteGroup = useGroupsStore((s) => s.deleteGroup)
@@ -33,7 +34,8 @@ export const GroupsPage = () => {
     fetchGroups()
     fetchUsers()
     fetchBellSchedules().catch(() => undefined)
-  }, [fetchGroups, fetchUsers, fetchBellSchedules])
+    fetchMealCategories().catch(() => undefined)
+  }, [fetchGroups, fetchUsers, fetchBellSchedules, fetchMealCategories])
 
   return (
     <Box>

@@ -19,6 +19,7 @@ const schema = yup.object({
   kind: yup.mixed<GroupKind>().oneOf(groupKinds).required("Обов'язкове поле"),
   teacherIds: yup.array().of(yup.string().required()).default([]),
   bellScheduleId: yup.string().default(''),
+  mealPriceCategoryId: yup.string().default(''),
 })
 
 type FormValues = yup.InferType<typeof schema>
@@ -30,12 +31,13 @@ export const CreateGroupModal = () => {
   const setCreateGroupModal = useGroupsStore((s) => s.setCreateGroupModal)
   const users = useUsersStore((s) => s.users)
   const bellSchedules = useGroupsStore((s) => s.bellSchedules)
+  const mealCategories = useGroupsStore((s) => s.mealCategories)
 
   const teachers = users.filter((u) => u.role === 'teacher')
 
   const { control, handleSubmit, reset } = useForm<FormValues>({
     mode: 'all',
-    defaultValues: { name: '', kind: 'kindergarten', teacherIds: [], bellScheduleId: '' },
+    defaultValues: { name: '', kind: 'kindergarten', teacherIds: [], bellScheduleId: '', mealPriceCategoryId: '' },
     resolver: yupResolver(schema),
   })
   const kind = useWatch({ control, name: 'kind' })
@@ -48,6 +50,7 @@ export const CreateGroupModal = () => {
   const onSubmit = async (values: FormValues) => {
     await createGroup({ name: values.name, kind: values.kind, teacherIds: values.teacherIds ?? [],
       bellScheduleId: values.kind === 'school_class' && values.bellScheduleId ? values.bellScheduleId : undefined,
+      mealPriceCategoryId: values.mealPriceCategoryId || undefined,
     })
     handleClose()
   }
@@ -109,6 +112,19 @@ export const CreateGroupModal = () => {
             )}
           />
         )}
+
+        <Controller
+          name="mealPriceCategoryId"
+          control={control}
+          render={({ field }) => (
+            <TextField {...field} select label="Цінова категорія харчування" fullWidth>
+              <MenuItem value="">Не обрано</MenuItem>
+              {mealCategories
+                .filter((c) => c.active || c.id === field.value)
+                .map((c) => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
+            </TextField>
+          )}
+        />
 
         <Box sx={{ display: 'flex', gap: '10px' }}>
           <Button onClick={handleClose} color="inherit" sx={{ width: '100%' }}>

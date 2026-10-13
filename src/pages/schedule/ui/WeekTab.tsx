@@ -16,6 +16,7 @@ type Action =
 export const WeekTab = () => {
   const navigate = useNavigate()
   const classId = useScheduleStore((s) => s.classId)
+  const classKey = useScheduleStore((s) => s.classKey)
   const week = useScheduleStore((s) => s.week)
   const weekData = useScheduleStore((s) => s.weekData)
   const weekFailed = useScheduleStore((s) => s.weekFailed)
@@ -28,7 +29,7 @@ export const WeekTab = () => {
 
   useEffect(() => {
     if (classId) loadWeek().catch(() => undefined)
-  }, [classId, week, loadWeek])
+  }, [classId, classKey, week, loadWeek])
 
   const openLesson = (date: string, slot: ScheduleSlot) =>
     navigate(`/lessons/${classId}/${date}/${slot.period}${slot.subgroupId ? `?subgroupId=${slot.subgroupId}` : ''}`)

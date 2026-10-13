@@ -34,6 +34,7 @@ interface ScheduleState {
   draft: TimetableEntry[];
   newValidFrom: string;
   conflicts: ScheduleConflict[];
+  changeConflicts: ScheduleConflict[];
   week: string;
   weekData: ClassSchedule | null;
   weekKey: string | null;
@@ -46,6 +47,7 @@ interface ScheduleState {
   startNewVersion: (validFrom: string) => void;
   setDraft: (entries: TimetableEntry[]) => void;
   saveVersion: () => Promise<void>;
+  clearChangeConflicts: () => void;
   setWeek: (week: string) => void;
   loadWeek: () => Promise<void>;
   createChange: (dto: LessonChangeDto) => Promise<void>;
@@ -73,6 +75,7 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
   draft: [],
   newValidFrom: localToday(),
   conflicts: [],
+  changeConflicts: [],
   week: weekStart(localToday()),
   weekData: null,
   weekKey: null,
@@ -105,7 +108,7 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
   setClassId: (classId) => set({ classId }),
   selectClass: async (classId) => {
     const key = `${classId}/${Date.now()}`;
-    set({ classId, classKey: key, classFailed: false, versions: [], subgroups: [], versionId: null, draft: [], conflicts: [], weekData: null, weekKey: null });
+    set({ classId, classKey: key, classFailed: false, versions: [], subgroups: [], versionId: null, draft: [], conflicts: [] });
     try {
       const [versions, subgroups] = await Promise.all([timetableApi.getTimetables(classId), timetableApi.getSubgroups(classId)]);
       if (get().classKey !== key) return;
@@ -147,6 +150,7 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
       set({ isSaving: false });
     }
   },
+  clearChangeConflicts: () => set({ changeConflicts: [] }),
   setWeek: (week) => set({ week }),
   loadWeek: async () => {
     const { classId, week } = get();
@@ -164,10 +168,14 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
   createChange: async (dto) => {
     const { classId } = get();
     if (!classId) return;
-    set({ isSaving: true });
+    set({ isSaving: true, changeConflicts: [] });
     try {
       await timetableApi.createChange(classId, dto);
-      await get().loadWeek();
+      await get().loadWeek().catch(() => undefined);
+    } catch (error) {
+      const conflicts = (error as { conflicts?: ScheduleConflict[] } | null)?.conflicts;
+      if (conflicts) set({ changeConflicts: conflicts });
+      throw error;
     } finally {
       set({ isSaving: false });
     }
@@ -176,7 +184,7 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
     set({ isSaving: true });
     try {
       await timetableApi.voidChange(id, reason);
-      await get().loadWeek();
+      await get().loadWeek().catch(() => undefined);
     } finally {
       set({ isSaving: false });
     }

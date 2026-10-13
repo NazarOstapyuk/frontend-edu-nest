@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Alert, Box, Button, Chip, MenuItem, Paper, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from '@mui/material'
 import { useScheduleStore, isEditableVersion } from '../model/scheduleStore'
 import { EntryModal } from './EntryModal'
-import { conflictText, formatDay, localToday, weekParityLabels, weekdayLabels, type TimetableEntry } from '../../../shared/api'
+import { addDaysIso, conflictText, formatDay, localToday, weekParityLabels, weekdayLabels, type TimetableEntry } from '../../../shared/api'
 
 const WEEKDAYS = [1, 2, 3, 4, 5, 6]
 
@@ -25,7 +25,7 @@ export const TimetableTab = () => {
   const setDraft = useScheduleStore((s) => s.setDraft)
   const saveVersion = useScheduleStore((s) => s.saveVersion)
   const [cell, setCell] = useState<{ weekday: number; period: number; index: number | null } | null>(null)
-  const [validFrom, setValidFrom] = useState(localToday())
+  const [validFrom, setValidFrom] = useState(addDaysIso(localToday(), 1))
 
   const cls = classes.find((c) => c.id === classId)
   const periods = useMemo(

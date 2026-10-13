@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Alert, Box, Button, Tab, Tabs } from '@mui/material'
 import { usePayrollStore } from '../model/payrollStore'
+import { SheetTab } from './SheetTab'
 import { TermsTab } from './TermsTab'
 
 export const PayrollPage = () => {
@@ -24,9 +25,11 @@ export const PayrollPage = () => {
         </Alert>
       )}
       <Tabs value={tab} onChange={(_, value: number) => setTab(value)} sx={{ mb: 2 }}>
+        <Tab label="Відомість" />
         <Tab label="Умови" />
       </Tabs>
-      {tab === 0 && <TermsTab />}
+      {tab === 0 && <SheetTab />}
+      {tab === 1 && <TermsTab />}
     </Box>
   )
 }

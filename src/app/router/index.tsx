@@ -22,6 +22,7 @@ import { PayrollPage } from '../../pages/payroll'
 import { RegisterPage } from '../../pages/register'
 import { AbsenceNoticesPage } from '../../pages/absenceNotices'
 import { MyLessonsPage } from '../../pages/myLessons'
+import { MyPayrollPage } from '../../pages/myPayroll'
 import { LessonPage } from '../../pages/lesson'
 import { MyClassesPage } from '../../pages/myClasses'
 import { ProfilePage } from '../../pages/profile'
@@ -82,6 +83,7 @@ export const router = createBrowserRouter([
                   { path: 'classes/:groupId/lessons/:date', element: <MarkLessonPage /> },
                   { path: 'my-classes',                     element: <MyClassesPage /> },
                   { path: 'my-lessons',                     element: <MyLessonsPage /> },
+                  { path: 'my-payroll',                     element: <MyPayrollPage /> },
                   { path: 'lessons/:groupId/:date/:period', element: <LessonPage /> },
                   { path: 'calendar',        element: <CalendarPage /> },
                   { path: 'schedule-setup', element: <ScheduleSetupPage /> },

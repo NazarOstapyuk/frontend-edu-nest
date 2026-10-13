@@ -16,6 +16,7 @@ import ViewWeekIcon from '@mui/icons-material/ViewWeek'
 import RestaurantIcon from '@mui/icons-material/Restaurant'
 import MenuBookIcon from '@mui/icons-material/MenuBook'
 import TuneIcon from '@mui/icons-material/Tune'
+import RequestQuoteIcon from '@mui/icons-material/RequestQuote'
 import type { SvgIconComponent } from '@mui/icons-material'
 import type { SessionRole } from '../../../entities/user'
 
@@ -44,6 +45,7 @@ export const navItems: NavItem[] = [
   { path: '/classes',             label: 'Гуртки',            icon: CastleIcon,         roles: ADMIN },
   { path: '/my-classes',          label: 'Мої заняття',       icon: EventAvailableIcon, roles: ['teacher'] },
   { path: '/my-lessons',         label: 'Мої уроки',         icon: MenuBookIcon,       roles: ['teacher'] },
+  { path: '/my-payroll',         label: 'Моя зарплата',      icon: RequestQuoteIcon,   roles: ['teacher'] },
   { path: '/calendar',            label: 'Календар',          icon: CalendarMonthIcon,  roles: ADMIN },
   { path: '/schedule-setup',     label: 'Довідники розкладу', icon: TuneIcon,          roles: ADMIN },
   { path: '/absence-reasons',     label: 'Причини відсутності', icon: PlaylistAddCheckIcon, roles: ADMIN },

@@ -11,6 +11,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
 import FactCheckIcon from '@mui/icons-material/FactCheck'
 import MarkEmailUnreadIcon from '@mui/icons-material/MarkEmailUnread'
+import TuneIcon from '@mui/icons-material/Tune'
 import type { SvgIconComponent } from '@mui/icons-material'
 import type { SessionRole } from '../../../entities/user'
 
@@ -36,6 +37,7 @@ export const navItems: NavItem[] = [
   { path: '/classes',             label: 'Гуртки',            icon: CastleIcon,         roles: ADMIN },
   { path: '/my-classes',          label: 'Мої заняття',       icon: EventAvailableIcon, roles: ['teacher'] },
   { path: '/calendar',            label: 'Календар',          icon: CalendarMonthIcon,  roles: ADMIN },
+  { path: '/schedule-setup',     label: 'Довідники розкладу', icon: TuneIcon,          roles: ADMIN },
   { path: '/absence-reasons',     label: 'Причини відсутності', icon: PlaylistAddCheckIcon, roles: ADMIN },
 ]
 

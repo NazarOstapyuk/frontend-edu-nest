@@ -23,6 +23,7 @@ import { EditGroupModal } from './EditGroupModal'
 export const GroupsPage = () => {
   const groups = useGroupsStore((s) => s.groups)
   const fetchGroups = useGroupsStore((s) => s.fetchGroups)
+  const fetchBellSchedules = useGroupsStore((s) => s.fetchBellSchedules)
   const setCreateGroupModal = useGroupsStore((s) => s.setCreateGroupModal)
   const setEditGroupModal = useGroupsStore((s) => s.setEditGroupModal)
   const deleteGroup = useGroupsStore((s) => s.deleteGroup)
@@ -31,7 +32,8 @@ export const GroupsPage = () => {
   useEffect(() => {
     fetchGroups()
     fetchUsers()
-  }, [fetchGroups, fetchUsers])
+    fetchBellSchedules().catch(() => undefined)
+  }, [fetchGroups, fetchUsers, fetchBellSchedules])
 
   return (
     <Box>

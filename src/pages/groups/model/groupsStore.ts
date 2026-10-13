@@ -1,8 +1,9 @@
 import { create } from 'zustand';
-import { groupsApi, type CreateGroupDto, type UpdateGroupDto, type Group } from '../../../shared/api';
+import { groupsApi, timetableApi, type BellSchedule, type CreateGroupDto, type UpdateGroupDto, type Group } from '../../../shared/api';
 
 interface GroupsState {
   groups: Group[];
+  bellSchedules: BellSchedule[];
   isLoading: boolean;
   isCreating: boolean;
   isUpdating: boolean;
@@ -12,6 +13,7 @@ interface GroupsState {
   setCreateGroupModal: (value: Partial<{ isOpen: boolean }>) => void;
   setEditGroupModal: (value: Partial<{ isOpen: boolean; group: Group | null }>) => void;
   fetchGroups: () => Promise<void>;
+  fetchBellSchedules: () => Promise<void>;
   createGroup: (dto: CreateGroupDto) => Promise<void>;
   updateGroup: (id: string, dto: UpdateGroupDto) => Promise<void>;
   deleteGroup: (id: string) => Promise<void>;
@@ -19,6 +21,7 @@ interface GroupsState {
 
 export const useGroupsStore = create<GroupsState>((set) => ({
   groups: [],
+  bellSchedules: [],
   isLoading: false,
   isCreating: false,
   isUpdating: false,
@@ -40,6 +43,11 @@ export const useGroupsStore = create<GroupsState>((set) => ({
     } finally {
       set({ isLoading: false });
     }
+  },
+
+  fetchBellSchedules: async () => {
+    const { data } = await timetableApi.getBellSchedules();
+    set({ bellSchedules: data.filter((b) => b.active) });
   },
 
   createGroup: async (dto) => {

@@ -7,6 +7,7 @@ export interface Group {
   name: string;
   kind: GroupKind;
   teachers: User[];
+  bellScheduleId: string | null;
   createdAt: string;
 }
 
@@ -14,12 +15,14 @@ export interface CreateGroupDto {
   name: string;
   kind: GroupKind;
   teacherIds: string[];
+  bellScheduleId?: string | null;
 }
 
 export interface UpdateGroupDto {
   name: string;
   kind: GroupKind;
   teacherIds: string[];
+  bellScheduleId?: string | null;
 }
 
 export const groupsApi = {

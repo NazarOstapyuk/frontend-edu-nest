@@ -52,6 +52,8 @@ Meals: `pages/meals` (tabs «Меню» calendar by kind with publish/copy/apply
 
 Payroll: `pages/payroll` (tabs «Відомість»: month list of teachers with a detail dialog for worked days, one-off adjustments, payments, approve and reopen; «Умови»: salary terms versions with per-lesson rates and monthly allowances), `pages/myPayroll` (teacher «Моя зарплата», read-only), shared read-only detail `widgets/payrollDetail`. API in `shared/api/payroll.ts`. Amounts, proration and corrections come from the backend; never compute them on the frontend (list totals after a mutation are re-summed in kopecks for display only).
 
+Backups: `pages/backups` (state of database copies, «Зробити копію зараз», files and recent runs; root/admin), dashboard banner `pages/dashboard/ui/BackupBanner.tsx` when copies are not configured or stale. API in `shared/api/backups.ts`. There is no restore in the UI: restore is a backend command (`npm run backup:restore`, see the backend `docs/backups.md`).
+
 Imports go top-down: `app → pages → widgets → entities → shared`. From outside a module, import through its `index.ts`.
 
 Legacy: `pages/children` and `pages/groups` import `pages/users/model/usersStore` and `pages/groups/model/groupsStore` directly. Don't add new cross-page store imports. Data needed by several pages (lists of users, groups, etc.) goes to `entities/<entity>/model/`.

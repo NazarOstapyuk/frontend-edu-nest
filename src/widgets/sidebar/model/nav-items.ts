@@ -1,3 +1,4 @@
+import BackupIcon from '@mui/icons-material/Backup'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import PeopleIcon from '@mui/icons-material/People'
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts'
@@ -52,5 +53,6 @@ export const navItems: NavItem[] = [
 ]
 
 export const bottomNavItems: NavItem[] = [
+  { path: '/backups', label: 'Резервні копії', icon: BackupIcon, roles: ADMIN },
   { path: '/settings', label: 'Налаштування', icon: SettingsIcon, roles: ADMIN },
 ]

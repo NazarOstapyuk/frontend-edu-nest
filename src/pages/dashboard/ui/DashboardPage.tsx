@@ -5,6 +5,7 @@ import ClassIcon from '@mui/icons-material/Class'
 import AssignmentIcon from '@mui/icons-material/Assignment'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import BarChartIcon from '@mui/icons-material/BarChart'
+import { BackupBanner } from './BackupBanner'
 
 const stats = [
   { label: 'Учнів',       value: '245',  icon: PeopleIcon,       color: '#1565c0', bg: '#e3f2fd' },
@@ -18,6 +19,7 @@ const stats = [
 export const DashboardPage = () => {
   return (
     <Box>
+      <BackupBanner />
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
         Загальна статистика школи
       </Typography>

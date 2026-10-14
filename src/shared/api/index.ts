@@ -261,3 +261,12 @@ export type {
   PayrollAdjustmentDto,
   PayrollPaymentDto,
 } from './payroll';
+export {
+  backupsApi,
+  backupKindLabels,
+  backupRunStatusLabels,
+  formatBytes,
+  formatTakenAt,
+  formatDateTime,
+} from './backups';
+export type { BackupKind, BackupRunStatus, BackupRun, BackupFile, BackupStatus } from './backups';

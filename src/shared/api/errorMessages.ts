@@ -195,6 +195,8 @@ export const errorMessages: Record<string, string> = {
   'Payment date is in the future': 'Дата виплати ще не настала',
   'User has salary terms': 'У педагога є умови оплати, змінити роль не можна',
   'Invalid year': 'Неправильний рік',
+  'Backups are not configured': 'Резервні копії не налаштовані',
+  'Backup is already running': 'Копія вже створюється',
 };
 
 export const translateError = (error: unknown): string => {

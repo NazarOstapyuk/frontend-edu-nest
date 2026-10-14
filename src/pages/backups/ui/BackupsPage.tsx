@@ -15,6 +15,7 @@ import {
   Typography,
 } from '@mui/material'
 import {
+  backupErrorLabel,
   backupKindLabels,
   backupRunStatusLabels,
   formatBytes,
@@ -64,7 +65,7 @@ export const BackupsPage = () => {
               </Typography>
               {status.lastFailure && (
                 <Typography color="error.main" variant="body2">
-                  Остання помилка ({formatDateTime(status.lastFailure.startedAt)}): {status.lastFailure.error}
+                  Остання помилка ({formatDateTime(status.lastFailure.startedAt)}): {backupErrorLabel(status.lastFailure.error ?? '')}
                 </Typography>
               )}
               {status.stale && <Alert severity="warning">Остання резервна копія невдала або застаріла.</Alert>}
@@ -153,7 +154,7 @@ export const BackupsPage = () => {
                     />
                   </TableCell>
                   <TableCell>{run.createdBy ? `${run.createdBy.lastName} ${run.createdBy.firstName}` : 'Автоматично'}</TableCell>
-                  <TableCell sx={{ maxWidth: 360, wordBreak: 'break-word' }}>{run.error ?? ''}</TableCell>
+                  <TableCell sx={{ maxWidth: 360, wordBreak: 'break-word' }}>{run.error ? backupErrorLabel(run.error) : ''}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { backupsApi, type BackupRun, type BackupStatus } from '../../../shared/api';
+import { backupErrorLabel, backupsApi, type BackupRun, type BackupStatus } from '../../../shared/api';
 import { useNotifyStore } from '../../../shared/model/notifyStore';
 
 interface BackupsState {
@@ -31,7 +31,7 @@ export const useBackupsStore = create<BackupsState>((set, get) => ({
     try {
       const { data } = await backupsApi.create();
       if (data.status === 'succeeded') useNotifyStore.getState().push('Копію створено', 'success');
-      else useNotifyStore.getState().push(`Копію не створено: ${data.error ?? 'помилка'}`);
+      else useNotifyStore.getState().push(`Копію не створено: ${data.error ? backupErrorLabel(data.error) : 'помилка'}`);
       await get().load();
     } finally {
       set({ isCreating: false });

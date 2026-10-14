@@ -45,6 +45,13 @@ export interface BackupStatus {
   files: BackupFile[];
 }
 
+export const backupErrorLabel = (error: string) =>
+  (({
+    'Timed out': 'Перевищено час очікування',
+    'Empty dump': 'Порожня копія',
+    Interrupted: 'Перервано (бекенд перезапустився)',
+  }) as Record<string, string>)[error] ?? error;
+
 export const formatBytes = (bytes: number) =>
   bytes >= 1024 * 1024
     ? `${(bytes / 1024 / 1024).toFixed(1)} МБ`

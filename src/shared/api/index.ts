@@ -265,6 +265,7 @@ export {
   backupsApi,
   backupKindLabels,
   backupRunStatusLabels,
+  backupErrorLabel,
   formatBytes,
   formatTakenAt,
   formatDateTime,

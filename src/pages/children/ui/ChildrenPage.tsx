@@ -26,6 +26,7 @@ import { genderLabels } from '../../../shared/api'
 import { useCan } from '../../../entities/user'
 import { CreateChildModal } from './CreateChildModal'
 import { EditChildModal } from './EditChildModal'
+import { HistoryButton } from '../../../widgets/auditHistory'
 
 export const ChildrenPage = () => {
   const children = useChildrenStore((s) => s.children)
@@ -124,6 +125,11 @@ export const ChildrenPage = () => {
                     </Box>
                   </TableCell>
                   <TableCell align="right">
+                    <HistoryButton
+                      entityType="children"
+                      entityId={child.id}
+                      title={`${child.lastName} ${child.firstName}`}
+                    />
                     {canViewFinance && (
                       <Tooltip title="Фінанси">
                         <IconButton size="small" onClick={() => navigate(`/finance/${child.id}`)}>

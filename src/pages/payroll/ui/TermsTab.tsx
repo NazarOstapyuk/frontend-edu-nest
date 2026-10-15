@@ -37,6 +37,7 @@ import { usePayrollStore } from '../model/payrollStore'
 import { useCan } from '../../../entities/user'
 import { TermsDialog } from './TermsDialog'
 import { CloseTermsDialog } from './CloseTermsDialog'
+import { HistoryButton } from '../../../widgets/auditHistory'
 
 type EditState = { terms: SalaryTerms | null } | null
 
@@ -157,6 +158,7 @@ export const TermsTab = () => {
                         ))}
                   </TableCell>
                   <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
+                    <HistoryButton entityType="salary-terms" entityId={item.id} title={`Умови з ${item.validFrom}`} />
                     {canEdit && !item.started && (
                       <>
                         <Tooltip title="Редагувати">

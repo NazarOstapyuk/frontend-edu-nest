@@ -26,6 +26,7 @@ import {
 } from '../../../shared/api'
 import { CreateTariffModal } from './CreateTariffModal'
 import { TariffModal } from './TariffModal'
+import { HistoryButton } from '../../../widgets/auditHistory'
 
 export const TariffsPage = () => {
   const tariffs = useTariffsStore((s) => s.tariffs)
@@ -118,12 +119,13 @@ export const TariffsPage = () => {
               <TableCell>Режим</TableCell>
               <TableCell align="right">Поточна ціна</TableCell>
               <TableCell>Стан</TableCell>
+              <TableCell />
             </TableRow>
           </TableHead>
           <TableBody>
             {tariffs.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                <TableCell colSpan={7} align="center" sx={{ py: 6, color: 'text.secondary' }}>
                   Тарифів ще немає. Натисніть «Створити тариф».
                 </TableCell>
               </TableRow>
@@ -150,6 +152,9 @@ export const TariffsPage = () => {
                       color={t.isActive ? 'success' : 'default'}
                       variant="outlined"
                     />
+                  </TableCell>
+                  <TableCell align="right">
+                    <HistoryButton entityType="tariffs" entityId={t.id} title={t.name} />
                   </TableCell>
                 </TableRow>
               ))

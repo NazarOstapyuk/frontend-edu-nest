@@ -23,6 +23,7 @@ import { useUsersStore } from '../model/usersStore'
 import { CreateUserModal } from './CreateUserModal.tsx'
 import { EditUserModal } from './EditUserModal.tsx'
 import { AccessDialog } from './AccessDialog.tsx'
+import { HistoryButton } from '../../../widgets/auditHistory'
 
 const roleColors: Record<string, 'primary' | 'secondary' | 'default'> = {
   admin: 'default',
@@ -116,6 +117,11 @@ export const UsersPage = () => {
                   <TableCell sx={{ fontFamily: 'monospace' }}>{user.login}</TableCell>
                   <TableCell sx={{ color: 'text.secondary' }}>{user.createdAt}</TableCell>
                   <TableCell align="right">
+                    <HistoryButton
+                      entityType="users"
+                      entityId={user.id}
+                      title={`${user.lastName} ${user.firstName}`}
+                    />
                     {canEditUsers && user.role !== 'parent' && (
                       <Tooltip title="Доступ">
                         <IconButton size="small" onClick={() => setAccessUser(user)}>

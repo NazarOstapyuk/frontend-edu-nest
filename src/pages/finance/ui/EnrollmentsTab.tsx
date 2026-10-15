@@ -32,6 +32,7 @@ import {
 import { CreateEnrollmentModal } from './CreateEnrollmentModal'
 import { EndEnrollmentModal } from './EndEnrollmentModal'
 import { AdjustmentModal } from './AdjustmentModal'
+import { HistoryButton } from '../../../widgets/auditHistory'
 
 const formatDate = (value: string) => new Date(value).toLocaleDateString('uk-UA', { timeZone: 'UTC' })
 
@@ -98,6 +99,7 @@ const EnrollmentRow = ({ enrollment }: { enrollment: Enrollment }) => {
           </Box>
         </TableCell>
         <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
+          <HistoryButton entityType="enrollments" entityId={enrollment.id} title={enrollment.tariff.name} />
           {canEdit && (
             <Button size="small" disabled={isSaving} onClick={() => billNow(enrollment.id)}>
               Нарахувати

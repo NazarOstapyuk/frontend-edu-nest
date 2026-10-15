@@ -17,6 +17,7 @@ import { AllocateModal } from './AllocateModal'
 import { EnrollmentsTab } from './EnrollmentsTab'
 import { AdaptationTab } from './AdaptationTab'
 import { PackagesTab } from './PackagesTab'
+import { HistoryButton } from '../../../widgets/auditHistory'
 
 export const ChildFinancePage = () => {
   const { childId } = useParams<{ childId: string }>()
@@ -69,6 +70,11 @@ export const ChildFinancePage = () => {
                   .join(', ')}
           </Typography>
         </Box>
+        <HistoryButton
+          entityType="children"
+          entityId={finance.child.id}
+          title={`${finance.child.lastName} ${finance.child.firstName}`}
+        />
         <Box sx={{ ml: 'auto', textAlign: 'right' }}>
           <Typography sx={{ fontWeight: 700, color: totalDue > 0 ? 'error.main' : 'success.main' }}>
             {totalDue >= 0

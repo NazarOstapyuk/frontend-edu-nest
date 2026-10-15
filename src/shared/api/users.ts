@@ -1,4 +1,5 @@
 import type { User, UserRole } from '../../entities/user';
+import type { UpdateAccessDto } from './access';
 import { axiosInstance } from './axiosInstance';
 
 export interface CreateUserDto {
@@ -32,6 +33,9 @@ export const usersApi = {
 
   update: (id: string, dto: UpdateUserDto) =>
     axiosInstance.patch<User>(`/users/${id}`, dto),
+
+  setAccess: (id: string, dto: UpdateAccessDto) =>
+    axiosInstance.patch<User>(`/users/${id}/access`, dto),
 
   delete: (id: string) =>
     axiosInstance.delete(`/users/${id}`),

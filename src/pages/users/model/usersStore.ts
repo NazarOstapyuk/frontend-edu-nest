@@ -16,6 +16,7 @@ interface UsersState {
   createUser: (dto: CreateUserDto) => Promise<void>;
   updateUser: (id: string, dto: UpdateUserDto) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
+  replaceUser: (user: User) => void;
 }
 
 export const useUsersStore = create<UsersState>((set) => ({
@@ -58,6 +59,9 @@ export const useUsersStore = create<UsersState>((set) => ({
       set({ isUpdating: false });
     }
   },
+
+  replaceUser: (user) =>
+    set((state) => ({ users: state.users.map((u) => (u.id === user.id ? user : u)) })),
 
   deleteUser: async (id) => {
     set({ isDeleting: true });

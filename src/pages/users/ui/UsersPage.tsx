@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Box,
   Button,
@@ -17,12 +17,15 @@ import {
 import AddIcon from '@mui/icons-material/Add'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
-import { roleLabels } from '../../../entities/user'
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
+import { roleLabels, useCan, type User } from '../../../entities/user'
 import { useUsersStore } from '../model/usersStore'
 import { CreateUserModal } from './CreateUserModal.tsx'
 import { EditUserModal } from './EditUserModal.tsx'
+import { AccessDialog } from './AccessDialog.tsx'
 
-const roleColors: Record<string, 'primary' | 'secondary'> = {
+const roleColors: Record<string, 'primary' | 'secondary' | 'default'> = {
+  admin: 'default',
   teacher: 'primary',
   parent:  'secondary',
 }
@@ -33,6 +36,9 @@ export const UsersPage = () => {
   const setCreateUserModal = useUsersStore((s) => s.setCreateUserModal)
   const setEditUserModal = useUsersStore((s) => s.setEditUserModal)
   const deleteUser = useUsersStore((s) => s.deleteUser)
+  const replaceUser = useUsersStore((s) => s.replaceUser)
+  const canEditUsers = useCan('users', 'edit')
+  const [accessUser, setAccessUser] = useState<User | null>(null)
 
   useEffect(() => {
     fetchUsers()
@@ -108,6 +114,13 @@ export const UsersPage = () => {
                   <TableCell sx={{ fontFamily: 'monospace' }}>{user.login}</TableCell>
                   <TableCell sx={{ color: 'text.secondary' }}>{user.createdAt}</TableCell>
                   <TableCell align="right">
+                    {canEditUsers && user.role !== 'parent' && (
+                      <Tooltip title="Доступ">
+                        <IconButton size="small" onClick={() => setAccessUser(user)}>
+                          <AdminPanelSettingsIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
                     <Tooltip title="Редагувати">
                       <IconButton size="small" onClick={() => setEditUserModal({ isOpen: true, user })}>
                         <EditOutlinedIcon fontSize="small" />
@@ -128,6 +141,13 @@ export const UsersPage = () => {
 
       <CreateUserModal />
       <EditUserModal />
+      {accessUser && (
+        <AccessDialog
+          user={accessUser}
+          onClose={() => setAccessUser(null)}
+          onSaved={replaceUser}
+        />
+      )}
     </Box>
   )
 }

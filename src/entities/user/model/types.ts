@@ -1,4 +1,6 @@
-export type UserRole = 'teacher' | 'parent'
+import type { AccessScope, PermissionItem, PermissionMap } from '../../../shared/api'
+
+export type UserRole = 'admin' | 'teacher' | 'parent'
 
 export type SessionRole = 'root' | 'admin' | 'teacher' | 'parent'
 
@@ -13,6 +15,8 @@ export interface User {
   phone?: string | null
   email?: string | null
   mustChangePassword?: boolean
+  accessScope?: AccessScope
+  permissions?: PermissionItem[]
 }
 
 export interface SessionProfile {
@@ -25,6 +29,8 @@ export interface SessionProfile {
   phone: string | null
   email: string | null
   mustChangePassword: boolean
+  accessScope: AccessScope
+  permissions: PermissionMap
 }
 
 export const homePath = (profile: SessionProfile) => {
@@ -33,6 +39,7 @@ export const homePath = (profile: SessionProfile) => {
 }
 
 export const roleLabels: Record<UserRole, string> = {
+  admin: 'Адміністратор',
   teacher: 'Педагог',
   parent:  'Батьки',
 }

@@ -197,6 +197,14 @@ export const errorMessages: Record<string, string> = {
   'Invalid year': 'Неправильний рік',
   'Backups are not configured': 'Резервні копії не налаштовані',
   'Backup is already running': 'Копія вже створюється',
+  'Insufficient permissions': 'Недостатньо прав',
+  'Outside access scope': 'Поза межами вашого доступу',
+  'Cannot change own access': 'Не можна змінювати власний доступ',
+  'Cannot grant more than you have': 'Не можна надати більше прав, ніж маєте самі',
+  'Root access cannot be changed': 'Доступ головного адміністратора не змінюється',
+  'Access applies to staff only': 'Доступ налаштовується лише для персоналу',
+  'Duplicate permission': 'Розділ повторюється',
+  'Cannot manage this user': 'Немає прав керувати цим користувачем',
 };
 
 export const translateError = (error: unknown): string => {

@@ -3,6 +3,23 @@ export { authApi } from './auth';
 export type { ContactsDto } from './auth';
 export { usersApi } from './users';
 export type { CreateUserDto, UpdateUserDto } from './users';
+export {
+  ALL_AREAS,
+  areaLabels,
+  levelLabels,
+  scopeLabels,
+  accessTemplates,
+  levelSatisfies,
+} from './access';
+export type {
+  PermissionArea,
+  PermissionLevel,
+  AccessScope,
+  PermissionMap,
+  PermissionItem,
+  UpdateAccessDto,
+  AccessTemplate,
+} from './access';
 export { groupsApi } from './groups';
 export type { Group, CreateGroupDto, UpdateGroupDto } from './groups';
 export { childrenApi } from './children';

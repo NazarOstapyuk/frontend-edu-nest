@@ -56,6 +56,8 @@ Backups: `pages/backups` (state of database copies, «Зробити копію 
 
 Access control: staff permissions come from `GET /auth/me` (`permissions`: area → `view`/`edit`, `accessScope`). Use `useCan(area, level)` / `canAccess(profile, area, level)` from `entities/user` to show navigation items (`NavItem.area`) and hide change buttons on read-only pages; the backend still enforces everything (403 `Insufficient permissions`, 404/403 for records outside the kindergarten/school scope). Access is edited in `pages/users/ui/AccessDialog.tsx` (templates pre-fill the form; options above the current user's own rights are disabled).
 
+Audit log: `pages/audit` (tabs «Дії» with event details and field changes, «Входи»), `widgets/auditHistory` (changes table and the per-object history dialog). API in `shared/api/audit.ts`; `actionLabel(route)` maps routes to Ukrainian labels. Visible with permission area `audit`.
+
 Imports go top-down: `app → pages → widgets → entities → shared`. From outside a module, import through its `index.ts`.
 
 Legacy: `pages/children` and `pages/groups` import `pages/users/model/usersStore` and `pages/groups/model/groupsStore` directly. Don't add new cross-page store imports. Data needed by several pages (lists of users, groups, etc.) goes to `entities/<entity>/model/`.

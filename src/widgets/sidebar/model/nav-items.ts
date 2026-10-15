@@ -1,3 +1,4 @@
+import HistoryIcon from '@mui/icons-material/History'
 import BackupIcon from '@mui/icons-material/Backup'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import PeopleIcon from '@mui/icons-material/People'
@@ -53,6 +54,7 @@ export const navItems: NavItem[] = [
 ]
 
 export const bottomNavItems: NavItem[] = [
+  { path: '/audit', label: 'Історія змін', icon: HistoryIcon, area: 'audit' },
   { path: '/backups', label: 'Резервні копії', icon: BackupIcon, area: 'backups' },
   { path: '/settings', label: 'Налаштування', icon: SettingsIcon, area: 'settings' },
 ]

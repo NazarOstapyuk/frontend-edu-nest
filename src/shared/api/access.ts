@@ -9,7 +9,8 @@ export type PermissionArea =
   | 'meals'
   | 'payroll'
   | 'backups'
-  | 'settings';
+  | 'settings'
+  | 'audit';
 export type PermissionLevel = 'view' | 'edit';
 export type AccessScope = 'all' | 'kindergarten' | 'school_class';
 export type PermissionMap = Partial<Record<PermissionArea, PermissionLevel>>;
@@ -36,6 +37,7 @@ export const areaLabels: Record<PermissionArea, string> = {
   payroll: 'Зарплати',
   backups: 'Резервні копії',
   settings: 'Налаштування',
+  audit: 'Історія змін',
 };
 
 export const ALL_AREAS = Object.keys(areaLabels) as PermissionArea[];

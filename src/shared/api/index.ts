@@ -288,4 +288,23 @@ export {
   formatDateTime,
 } from './backups';
 export type { BackupKind, BackupRunStatus, BackupRun, BackupFile, BackupStatus } from './backups';
+export {
+  auditApi,
+  authTypeLabels,
+  authReasonLabels,
+  entityTypeLabels,
+  actionLabel,
+} from './audit';
+export type {
+  PersonLogin,
+  FieldChange,
+  AuditChange,
+  AuditEvent,
+  AuditEventDetail,
+  AuthEventType,
+  AuthEvent,
+  Paged,
+  AuditEventsQuery,
+  AuthEventsQuery,
+} from './audit';
 export { softList } from './softList';

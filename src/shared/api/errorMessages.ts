@@ -197,6 +197,7 @@ export const errorMessages: Record<string, string> = {
   'Invalid year': 'Неправильний рік',
   'Backups are not configured': 'Резервні копії не налаштовані',
   'Backup is already running': 'Копія вже створюється',
+  'Audit event not found': 'Запис журналу не знайдено',
   'Insufficient permissions': 'Недостатньо прав',
   'Outside access scope': 'Поза межами вашого доступу',
   'Cannot change own access': 'Не можна змінювати власний доступ',

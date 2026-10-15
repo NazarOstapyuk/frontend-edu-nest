@@ -25,6 +25,7 @@ import {
   scopeLabels,
   usersApi,
   type AccessScope,
+  type AccessTemplate,
   type PermissionArea,
   type PermissionLevel,
   type PermissionMap,
@@ -45,7 +46,8 @@ const toMap = (user: User): PermissionMap =>
 export const AccessDialog = ({ user, onClose, onSaved }: Props) => {
   const profile = useAuthStore((s) => s.profile)
   const [scope, setScope] = useState<AccessScope>(user.accessScope ?? 'all')
-  const [permissions, setPermissions] = useState<PermissionMap>(toMap(user))
+  const [original] = useState<PermissionMap>(() => toMap(user))
+  const [permissions, setPermissions] = useState<PermissionMap>(original)
   const [saving, setSaving] = useState(false)
   const isRoot = profile?.role === 'root'
   const readOnly = !profile || profile.id === user.id || (user.role as SessionRole) === 'root'
@@ -53,12 +55,30 @@ export const AccessDialog = ({ user, onClose, onSaved }: Props) => {
     isRoot || levelSatisfies(profile?.permissions?.[area], level)
   const scopeAllowed = (value: AccessScope) =>
     isRoot || profile?.accessScope === 'all' || profile?.accessScope === value
+  const locked = (area: PermissionArea) => {
+    const have = original[area]
+    return !isRoot && have !== undefined && !levelSatisfies(profile?.permissions?.[area], have)
+  }
+  const templateAllowed = (template: AccessTemplate) =>
+    isRoot ||
+    (scopeAllowed(template.accessScope) &&
+      ALL_AREAS.every((area) => {
+        const level = template.permissions[area]
+        return locked(area) || level === undefined || allowed(level, area)
+      }))
 
   const applyTemplate = (name: string) => {
     const template = accessTemplates.find((t) => t.name === name)
     if (!template) return
     setScope(template.accessScope)
-    setPermissions(template.permissions)
+    setPermissions(
+      Object.fromEntries(
+        ALL_AREAS.flatMap((area) => {
+          const level = locked(area) ? original[area] : template.permissions[area]
+          return level ? [[area, level]] : []
+        }),
+      ),
+    )
   }
 
   const setLevel = (area: PermissionArea, value: PermissionLevel | 'none') => {
@@ -108,7 +128,7 @@ export const AccessDialog = ({ user, onClose, onSaved }: Props) => {
             onChange={(event) => applyTemplate(event.target.value)}
           >
             {accessTemplates.map((template) => (
-              <MenuItem key={template.name} value={template.name}>
+              <MenuItem key={template.name} value={template.name} disabled={!templateAllowed(template)}>
                 {template.name}
               </MenuItem>
             ))}
@@ -141,13 +161,13 @@ export const AccessDialog = ({ user, onClose, onSaved }: Props) => {
                         if (value) setLevel(area, value)
                       }}
                     >
-                      <ToggleButton value="none" disabled={!allowed('view', area) && !!permissions[area]}>
+                      <ToggleButton value="none" disabled={locked(area) && !!permissions[area]}>
                         Немає
                       </ToggleButton>
-                      <ToggleButton value="view" disabled={!allowed('view', area)}>
+                      <ToggleButton value="view" disabled={!allowed('view', area) || (locked(area) && permissions[area] !== 'view')}>
                         {levelLabels.view}
                       </ToggleButton>
-                      <ToggleButton value="edit" disabled={!allowed('edit', area)}>
+                      <ToggleButton value="edit" disabled={!allowed('edit', area) || (locked(area) && permissions[area] !== 'edit')}>
                         {levelLabels.edit}
                       </ToggleButton>
                     </ToggleButtonGroup>

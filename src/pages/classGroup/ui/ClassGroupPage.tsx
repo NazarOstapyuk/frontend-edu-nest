@@ -18,16 +18,15 @@ import AddIcon from '@mui/icons-material/Add'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import EventAvailableIcon from '@mui/icons-material/EventAvailable'
 import { useClassGroupStore } from '../model/classGroupStore'
-import { useAuthStore, useCan, type SessionRole } from '../../../entities/user'
+import { canAccess, useAuthStore, useCan } from '../../../entities/user'
 import { attendanceStatusLabels, classFormatLabels, formatDay, localToday, missedRuleLabels } from '../../../shared/api'
 import { AddMemberModal } from './AddMemberModal'
 
 export const ClassGroupPage = () => {
   const { groupId } = useParams<{ groupId: string }>()
   const navigate = useNavigate()
-  const role = useAuthStore((s) => s.profile?.role) as SessionRole | undefined
-  const isAdmin = role === 'root' || role === 'admin'
   const canManage = useCan('classes', 'edit')
+  const canViewClasses = useAuthStore((s) => canAccess(s.profile, 'classes', 'view'))
   const group = useClassGroupStore((s) => s.group)
   const storeGroupId = useClassGroupStore((s) => s.groupId)
   const fetchGroup = useClassGroupStore((s) => s.fetchGroup)
@@ -37,8 +36,8 @@ export const ClassGroupPage = () => {
   const [lessonDate, setLessonDate] = useState(localToday())
 
   useEffect(() => {
-    if (groupId) fetchGroup(groupId, isAdmin).catch(() => undefined)
-  }, [groupId, isAdmin, fetchGroup])
+    if (groupId) fetchGroup(groupId, canManage).catch(() => undefined)
+  }, [groupId, canManage, fetchGroup])
 
   if (!group || storeGroupId !== groupId) {
     return <Typography color="text.secondary">Завантаження…</Typography>
@@ -47,7 +46,7 @@ export const ClassGroupPage = () => {
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2, mb: 3 }}>
-        <IconButton onClick={() => navigate(isAdmin ? '/classes' : '/my-classes')}>
+        <IconButton onClick={() => navigate(canViewClasses ? '/classes' : '/my-classes')}>
           <ArrowBackIcon />
         </IconButton>
         <Box sx={{ mr: 'auto' }}>
@@ -77,7 +76,7 @@ export const ClassGroupPage = () => {
       <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', p: 2 }}>
           <Typography sx={{ fontWeight: 700, mr: 'auto' }}>Склад ({group.activeMembers})</Typography>
-          {isAdmin && canManage && (
+          {canManage && (
             <Button size="small" startIcon={<AddIcon />} onClick={() => setAddMemberOpen(true)}>
               Додати дитину
             </Button>
@@ -104,7 +103,7 @@ export const ClassGroupPage = () => {
                   <TableCell>{formatDay(m.startDate)}</TableCell>
                   <TableCell>{m.endDate ? formatDay(m.endDate) : '—'}</TableCell>
                   <TableCell align="right">
-                    {isAdmin && canManage && !m.endDate && (
+                    {canManage && !m.endDate && (
                       <Button
                         size="small"
                         color="error"
@@ -167,7 +166,7 @@ export const ClassGroupPage = () => {
         </Table>
       </Paper>
 
-      {isAdmin && canManage && <AddMemberModal />}
+      {canManage && <AddMemberModal />}
     </Box>
   )
 }

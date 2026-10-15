@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import {
   groupsApi,
   localToday,
+  softList,
   timetableApi,
   usersApi,
   weekStart,
@@ -85,18 +86,18 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
     set({ metaFailed: false });
     try {
       const [groups, subjects, rooms, users, bells] = await Promise.all([
-        groupsApi.getList(),
+        softList(groupsApi.getList()),
         timetableApi.getSubjects(),
         timetableApi.getRooms(),
-        usersApi.getList(),
+        softList(usersApi.getList()),
         timetableApi.getBellSchedules(),
       ]);
-      const classes = groups.data.filter((g) => g.kind === 'school_class');
+      const classes = groups.filter((g) => g.kind === 'school_class');
       set((state) => ({
         classes,
         subjects: subjects.data,
         rooms: rooms.data,
-        teachers: users.data.filter((u) => u.role === 'teacher'),
+        teachers: users.filter((u) => u.role === 'teacher'),
         bellSchedules: bells.data,
         classId: classes.some((c) => c.id === state.classId) ? state.classId : (classes[0]?.id ?? null),
       }));

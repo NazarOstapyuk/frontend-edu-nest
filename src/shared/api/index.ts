@@ -288,3 +288,4 @@ export {
   formatDateTime,
 } from './backups';
 export type { BackupKind, BackupRunStatus, BackupRun, BackupFile, BackupStatus } from './backups';
+export { softList } from './softList';

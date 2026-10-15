@@ -3,6 +3,7 @@ import {
   directionsApi,
   localToday,
   payrollApi,
+  softList,
   timetableApi,
   toKopecks,
   usersApi,
@@ -92,17 +93,17 @@ export const usePayrollStore = create<PayrollState>((set, get) => ({
     set({ refsFailed: false });
     try {
       const [users, subjects, directions] = await Promise.all([
-        usersApi.getList(),
-        timetableApi.getSubjects(),
-        directionsApi.getList(),
+        softList(usersApi.getList()),
+        softList(timetableApi.getSubjects()),
+        softList(directionsApi.getList()),
       ]);
       set({
-        teachers: users.data
+        teachers: users
           .filter((user) => user.role === 'teacher')
           .map((user) => ({ id: user.id, name: `${user.lastName} ${user.firstName}` }))
           .sort((a, b) => a.name.localeCompare(b.name, 'uk')),
-        subjects: subjects.data,
-        classGroups: directions.data.flatMap((direction) =>
+        subjects,
+        classGroups: directions.flatMap((direction) =>
           direction.groups.map((group) => ({
             id: group.id,
             name: `${direction.name}: ${group.name}`,

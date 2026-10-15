@@ -3,6 +3,7 @@ import {
   classGroupsApi,
   directionsApi,
   packagesApi,
+  softList,
   tariffsApi,
   usersApi,
   type ClassGroupDto,
@@ -60,7 +61,7 @@ export const useClassesStore = create<ClassesState>((set, get) => {
     fetchAll: async () => {
       set({ isLoading: true });
       try {
-        const [{ data: tariffs }, { data: users }] = await Promise.all([tariffsApi.getList(), usersApi.getList()]);
+        const [tariffs, users] = await Promise.all([softList(tariffsApi.getList()), softList(usersApi.getList())]);
         set({ tariffs, teachers: users.filter((u) => u.role === 'teacher') });
         await refreshDirections();
       } finally {

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { childrenApi, classGroupsApi, type Child, type ClassGroupDetail } from '../../../shared/api';
+import { childrenApi, classGroupsApi, softList, type Child, type ClassGroupDetail } from '../../../shared/api';
 
 interface ClassGroupState {
   groupId: string | null;
@@ -40,7 +40,7 @@ export const useClassGroupStore = create<ClassGroupState>((set, get) => {
       try {
         const [{ data: group }, children] = await Promise.all([
           classGroupsApi.get(groupId),
-          withChildren ? childrenApi.getList().then((r) => r.data) : Promise.resolve([] as Child[]),
+          withChildren ? softList(childrenApi.getList()) : Promise.resolve([] as Child[]),
         ]);
         if (get().groupId === groupId) set({ group, children });
       } finally {

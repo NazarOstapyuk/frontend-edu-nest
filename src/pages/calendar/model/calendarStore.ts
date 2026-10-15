@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import {
   registerApi,
+  softList,
   type CalendarEntry,
   type CreateCalendarDayDto,
   type RegisterGroup,
@@ -41,11 +42,11 @@ export const useCalendarStore = create<CalendarState>((set, get) => ({
     }
   },
   loadMeta: async () => {
-    const [{ data: groups }, { data: settings }] = await Promise.all([
-      registerApi.getGroups(),
-      registerApi.getSettings(),
+    const [groups, settings] = await Promise.all([
+      softList(registerApi.getGroups()),
+      registerApi.getSettings().then((r) => r.data).catch(() => null),
     ]);
-    set({ groups, editDays: settings.editDays });
+    set((state) => ({ groups, editDays: settings ? settings.editDays : state.editDays }));
   },
   createEntry: async (dto) => {
     set({ isSaving: true });

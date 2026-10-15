@@ -5,6 +5,7 @@ import {
   groupsApi,
   localToday,
   mealsApi,
+  softList,
   weekStart,
   type AdminMealOrder,
   type Child,
@@ -139,8 +140,8 @@ export const useMealsStore = create<MealsState>((set, get) => {
           mealsApi.getPriceCategories(),
           mealsApi.getComplexes(),
           mealsApi.getSettings(),
-          groupsApi.getList(),
-          childrenApi.getList(),
+          softList(groupsApi.getList()),
+          softList(childrenApi.getList()),
         ]);
         set({
           courses: courses.data,
@@ -148,8 +149,8 @@ export const useMealsStore = create<MealsState>((set, get) => {
           priceCategories: categories.data,
           complexes: complexes.data,
           deadline: settings.data.mealOrderDeadline,
-          groups: groups.data,
-          children: children.data,
+          groups,
+          children,
         });
       } catch (error) {
         set({ loadFailed: true });

@@ -1,14 +1,14 @@
 import { useEffect } from 'react'
 import { Alert, Button } from '@mui/material'
 import { Link as RouterLink } from 'react-router-dom'
-import { useAuthStore } from '../../../entities/user'
+import { canAccess, useAuthStore } from '../../../entities/user'
 import { useBackupStatusStore } from '../model/backupStatusStore'
 
 export const BackupBanner = () => {
-  const role = useAuthStore((s) => s.profile?.role)
+  const profile = useAuthStore((s) => s.profile)
   const status = useBackupStatusStore((s) => s.status)
   const load = useBackupStatusStore((s) => s.load)
-  const isStaff = role === 'root' || role === 'admin'
+  const isStaff = canAccess(profile, 'backups', 'view')
 
   useEffect(() => {
     if (isStaff) load().catch(() => undefined)

@@ -19,7 +19,7 @@ import {
 } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useMarkLessonStore } from '../model/markLessonStore'
-import { useAuthStore, type SessionRole } from '../../../entities/user'
+import { useCan } from '../../../entities/user'
 import { ReasonDialog } from '../../../shared/ui/ReasonDialog'
 import {
   attendanceStatusLabels,
@@ -33,8 +33,7 @@ import {
 export const MarkLessonPage = () => {
   const { groupId, date } = useParams<{ groupId: string; date: string }>()
   const navigate = useNavigate()
-  const role = useAuthStore((s) => s.profile?.role) as SessionRole | undefined
-  const isAdmin = role === 'root' || role === 'admin'
+  const isAdmin = useCan('classes', 'edit')
   const roster = useMarkLessonStore((s) => s.roster)
   const storeKey = useMarkLessonStore((s) => s.key)
   const draft = useMarkLessonStore((s) => s.draft)

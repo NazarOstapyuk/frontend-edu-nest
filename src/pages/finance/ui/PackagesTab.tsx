@@ -44,7 +44,7 @@ const PackageRow = ({ pkg }: { pkg: ChildPackage }) => {
   const setExtendTarget = usePackagesStore((s) => s.setExtendTarget)
   const setReconcileTarget = usePackagesStore((s) => s.setReconcileTarget)
   const setVoidTarget = usePackagesStore((s) => s.setVoidTarget)
-  const canEdit = useCan('finance', 'edit')
+  const canEdit = useCan('classes', 'edit')
   const voided = pkg.state === 'voided'
 
   return (
@@ -143,7 +143,7 @@ export const PackagesTab = ({ childId }: PackagesTabProps) => {
   const setVoidTarget = usePackagesStore((s) => s.setVoidTarget)
   const voidPackage = usePackagesStore((s) => s.voidPackage)
   const isSaving = usePackagesStore((s) => s.isSaving)
-  const canEdit = useCan('finance', 'edit')
+  const canEdit = useCan('classes', 'edit')
 
   useEffect(() => {
     fetchPackages(childId).catch(() => undefined)

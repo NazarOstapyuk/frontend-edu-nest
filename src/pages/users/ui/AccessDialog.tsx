@@ -50,11 +50,19 @@ export const AccessDialog = ({ user, onClose, onSaved }: Props) => {
   const [permissions, setPermissions] = useState<PermissionMap>(original)
   const [saving, setSaving] = useState(false)
   const isRoot = profile?.role === 'root'
-  const readOnly = !profile || profile.id === user.id || (user.role as SessionRole) === 'root'
   const allowed = (level: PermissionLevel, area: PermissionArea) =>
     isRoot || levelSatisfies(profile?.permissions?.[area], level)
   const scopeAllowed = (value: AccessScope) =>
     isRoot || profile?.accessScope === 'all' || profile?.accessScope === value
+  const covers =
+    isRoot ||
+    ((profile?.accessScope === 'all' || profile?.accessScope === (user.accessScope ?? 'all')) &&
+      ALL_AREAS.every((area) => {
+        const have = original[area]
+        return have === undefined || levelSatisfies(profile?.permissions?.[area], have)
+      }))
+  const readOnly =
+    !profile || profile.id === user.id || (user.role as SessionRole) === 'root' || !covers
   const locked = (area: PermissionArea) => {
     const have = original[area]
     return !isRoot && have !== undefined && !levelSatisfies(profile?.permissions?.[area], have)

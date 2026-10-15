@@ -37,7 +37,7 @@ export const AdaptationTab = ({ childId }: AdaptationTabProps) => {
   const setVoidTarget = useAdaptationStore((s) => s.setVoidTarget)
   const voidVisit = useAdaptationStore((s) => s.voidVisit)
   const isSaving = useAdaptationStore((s) => s.isSaving)
-  const canEdit = useCan('finance', 'edit')
+  const canEdit = useCan('tariffs', 'edit')
 
   useEffect(() => {
     fetchVisits(childId)

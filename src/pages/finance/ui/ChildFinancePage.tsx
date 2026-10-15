@@ -27,7 +27,9 @@ export const ChildFinancePage = () => {
   const setCreateChargeModal = useChildFinanceStore((s) => s.setCreateChargeModal)
   const setCreatePaymentModal = useChildFinanceStore((s) => s.setCreatePaymentModal)
   const canEdit = useCan('finance', 'edit')
-  const [tab, setTab] = useState(0)
+  const canTariffs = useCan('tariffs', 'view')
+  const canClasses = useCan('classes', 'view')
+  const [selected, setSelected] = useState('charges')
 
   useEffect(() => {
     if (childId) fetchFinance(childId)
@@ -38,6 +40,15 @@ export const ChildFinancePage = () => {
   }
 
   const totalDue = Number(finance.totals.totalDue)
+  const tabs = [
+    { key: 'charges', label: `Нарахування (${finance.charges.length})` },
+    { key: 'payments', label: `Оплати (${finance.payments.length})` },
+    ...(canTariffs ? [{ key: 'enrollments', label: 'Абонементи' }] : []),
+    ...(canClasses ? [{ key: 'packages', label: 'Пакети' }] : []),
+    ...(canTariffs ? [{ key: 'adaptation', label: 'Адаптація' }] : []),
+    { key: 'history', label: 'Історія' },
+  ]
+  const tab = tabs.some((t) => t.key === selected) ? selected : tabs[0].key
 
   return (
     <Box>
@@ -84,21 +95,18 @@ export const ChildFinancePage = () => {
 
       <CategoryTiles categories={finance.categories} />
 
-      <Tabs value={tab} onChange={(_, value: number) => setTab(value)} sx={{ mb: 2 }}>
-        <Tab label={`Нарахування (${finance.charges.length})`} />
-        <Tab label={`Оплати (${finance.payments.length})`} />
-        <Tab label="Абонементи" />
-        <Tab label="Пакети" />
-        <Tab label="Адаптація" />
-        <Tab label="Історія" />
+      <Tabs value={tab} onChange={(_, value: string) => setSelected(value)} sx={{ mb: 2 }}>
+        {tabs.map((t) => (
+          <Tab key={t.key} value={t.key} label={t.label} />
+        ))}
       </Tabs>
 
-      {tab === 0 && <ChargesTable charges={finance.charges} />}
-      {tab === 1 && <PaymentsTable payments={finance.payments} />}
-      {tab === 2 && <EnrollmentsTab childId={finance.child.id} />}
-      {tab === 3 && <PackagesTab childId={finance.child.id} />}
-      {tab === 4 && <AdaptationTab childId={finance.child.id} />}
-      {tab === 5 && <HistoryTable events={history} />}
+      {tab === 'charges' && <ChargesTable charges={finance.charges} />}
+      {tab === 'payments' && <PaymentsTable payments={finance.payments} />}
+      {tab === 'enrollments' && <EnrollmentsTab childId={finance.child.id} />}
+      {tab === 'packages' && <PackagesTab childId={finance.child.id} />}
+      {tab === 'adaptation' && <AdaptationTab childId={finance.child.id} />}
+      {tab === 'history' && <HistoryTable events={history} />}
       <CreateChargeModal />
       <VoidModal />
       <CreatePaymentModal />

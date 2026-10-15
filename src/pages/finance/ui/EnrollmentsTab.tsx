@@ -49,7 +49,7 @@ const EnrollmentRow = ({ enrollment }: { enrollment: Enrollment }) => {
   const setReasonTarget = useEnrollmentsStore((s) => s.setReasonTarget)
   const billNow = useEnrollmentsStore((s) => s.billNow)
   const isSaving = useEnrollmentsStore((s) => s.isSaving)
-  const canEdit = useCan('finance', 'edit')
+  const canEdit = useCan('tariffs', 'edit')
   const next = enrollment.nextPeriod
 
   return (
@@ -192,7 +192,7 @@ export const EnrollmentsTab = ({ childId }: EnrollmentsTabProps) => {
   const setReasonTarget = useEnrollmentsStore((s) => s.setReasonTarget)
   const submitReason = useEnrollmentsStore((s) => s.submitReason)
   const isSaving = useEnrollmentsStore((s) => s.isSaving)
-  const canEdit = useCan('finance', 'edit')
+  const canEdit = useCan('tariffs', 'edit')
 
   useEffect(() => {
     fetchEnrollments(childId)

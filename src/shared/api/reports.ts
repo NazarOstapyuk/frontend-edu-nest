@@ -46,19 +46,20 @@ export type ReportFilter = 'kind' | 'group' | 'child' | 'teacher';
 export interface ReportDefinition {
   key: ReportKey;
   label: string;
+  fileName: string;
   areas: PermissionArea[];
   period: boolean;
   filters: ReportFilter[];
 }
 
 export const reportDefinitions: ReportDefinition[] = [
-  { key: 'payments', label: 'Оплати', areas: ['finance'], period: true, filters: ['kind', 'group', 'child'] },
-  { key: 'charges', label: 'Нарахування', areas: ['finance'], period: true, filters: ['kind', 'group', 'child'] },
-  { key: 'debts', label: 'Борги', areas: ['finance'], period: false, filters: ['kind', 'group', 'child'] },
-  { key: 'attendance', label: 'Відвідування', areas: ['register'], period: true, filters: ['kind', 'group', 'child'] },
-  { key: 'lessons', label: 'Уроки', areas: ['timetable', 'classes'], period: true, filters: ['kind', 'group', 'teacher'] },
-  { key: 'meals', label: 'Харчування', areas: ['meals'], period: true, filters: ['kind', 'group'] },
-  { key: 'payroll', label: 'Зарплати', areas: ['payroll'], period: true, filters: ['teacher'] },
+  { key: 'payments', fileName: 'оплати', label: 'Оплати', areas: ['finance'], period: true, filters: ['kind', 'group', 'child'] },
+  { key: 'charges', fileName: 'нарахування', label: 'Нарахування', areas: ['finance'], period: true, filters: ['kind', 'group', 'child'] },
+  { key: 'debts', fileName: 'борги', label: 'Борги', areas: ['finance'], period: false, filters: ['kind', 'group', 'child'] },
+  { key: 'attendance', fileName: 'відвідування', label: 'Відвідування', areas: ['register'], period: true, filters: ['kind', 'group', 'child'] },
+  { key: 'lessons', fileName: 'уроки', label: 'Уроки', areas: ['timetable', 'classes'], period: true, filters: ['kind', 'group', 'teacher'] },
+  { key: 'meals', fileName: 'харчування', label: 'Харчування', areas: ['meals'], period: true, filters: ['kind', 'group'] },
+  { key: 'payroll', fileName: 'зарплати', label: 'Зарплати', areas: ['payroll'], period: true, filters: ['teacher'] },
 ];
 
 const isoDay = (value: string) => {

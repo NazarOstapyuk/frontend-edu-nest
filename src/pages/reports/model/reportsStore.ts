@@ -74,7 +74,7 @@ export const useReportsStore = create<ReportsState>((set, get) => ({
     const params = definition?.period ? query : { ...query, from: undefined, to: undefined };
     set({ downloading: true });
     try {
-      await reportsApi.download(selected, params, report?.fileName ?? selected);
+      await reportsApi.download(selected, params, report?.fileName ?? definition?.fileName ?? selected);
     } catch {
       return;
     } finally {

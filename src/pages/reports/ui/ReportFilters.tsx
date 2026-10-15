@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Autocomplete, Button, MenuItem, Stack, TextField } from '@mui/material'
-import { useAuthStore, type User } from '../../../entities/user'
+import { useAuthStore, useCan, type User } from '../../../entities/user'
 import {
   childrenApi,
   groupsApi,
@@ -80,22 +80,35 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
   const [children, setChildren] = useState<Child[]>([])
   const [teachers, setTeachers] = useState<User[]>([])
 
-  const has = (filter: ReportFilter) => definition.filters.includes(filter)
+  const canListGroups = useCan('children', 'view')
+  const canListChildren = useCan('children', 'view')
+  const canListUsers = useCan('users', 'view')
+
+  const available: Record<ReportFilter, boolean> = {
+    kind: true,
+    group: canListGroups,
+    child: canListChildren,
+    teacher: canListUsers,
+  }
+  const has = (filter: ReportFilter) => definition.filters.includes(filter) && available[filter]
+  const showGroup = has('group')
+  const showChild = has('child')
+  const showTeacher = has('teacher')
   const canPickKind = profile?.role === 'root' || profile?.accessScope === 'all'
 
   useEffect(() => {
     let stale = false
-    if (definition.filters.includes('group')) {
+    if (showGroup) {
       softList(groupsApi.getList()).then((list) => {
         if (!stale) setGroups(list)
       })
     }
-    if (definition.filters.includes('child')) {
+    if (showChild) {
       softList(childrenApi.getList()).then((list) => {
         if (!stale) setChildren(list)
       })
     }
-    if (definition.filters.includes('teacher')) {
+    if (showTeacher) {
       softList(usersApi.getList()).then((list) => {
         if (!stale) setTeachers(list.filter((u) => u.role === 'teacher'))
       })
@@ -103,7 +116,7 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
     return () => {
       stale = true
     }
-  }, [definition])
+  }, [showGroup, showChild, showTeacher])
 
   const update = (partial: Partial<ReportQuery>) => setQuery(partial)
   const visibleGroups = groups.filter((g) => !query.kind || g.kind === query.kind)

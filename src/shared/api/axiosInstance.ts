@@ -23,6 +23,14 @@ export const setSessionHandlers = (next: SessionHandlers) => {
   handlers = next;
 };
 
+const readBlobError = async (blob: Blob): Promise<unknown> => {
+  try {
+    return JSON.parse(await blob.text());
+  } catch {
+    return {};
+  }
+};
+
 let refreshing: Promise<unknown> | null = null;
 
 type RetryConfig = InternalAxiosRequestConfig & { _retried?: boolean };
@@ -31,6 +39,9 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const status = error.response?.status;
+    if (error.response?.data instanceof Blob) {
+      error.response.data = await readBlobError(error.response.data);
+    }
     const data = (error.response?.data ?? error) as { message?: unknown };
     const original = error.config as RetryConfig | undefined;
 

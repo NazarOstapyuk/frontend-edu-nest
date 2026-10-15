@@ -50,13 +50,15 @@ export const UsersPage = () => {
         <Typography variant="body2" color="text.secondary">
           Всього користувачів: {users.length}
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setCreateUserModal({ isOpen: true })}
-        >
-          Створити користувача
-        </Button>
+        {canEditUsers && (
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setCreateUserModal({ isOpen: true })}
+          >
+            Створити користувача
+          </Button>
+        )}
       </Box>
 
       <TableContainer
@@ -121,16 +123,20 @@ export const UsersPage = () => {
                         </IconButton>
                       </Tooltip>
                     )}
-                    <Tooltip title="Редагувати">
-                      <IconButton size="small" onClick={() => setEditUserModal({ isOpen: true, user })}>
-                        <EditOutlinedIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Видалити">
-                      <IconButton size="small" color="error" onClick={() => deleteUser(user.id)}>
-                        <DeleteOutlineIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                    {canEditUsers && (
+                      <Tooltip title="Редагувати">
+                        <IconButton size="small" onClick={() => setEditUserModal({ isOpen: true, user })}>
+                          <EditOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    {canEditUsers && (
+                      <Tooltip title="Видалити">
+                        <IconButton size="small" color="error" onClick={() => deleteUser(user.id)}>
+                          <DeleteOutlineIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
                   </TableCell>
                 </TableRow>
               ))

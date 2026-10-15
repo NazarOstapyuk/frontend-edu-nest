@@ -23,6 +23,7 @@ import { useChildrenStore } from '../model/childrenStore'
 import { useUsersStore } from '../../users/model/usersStore'
 import { useGroupsStore } from '../../groups/model/groupsStore'
 import { genderLabels } from '../../../shared/api'
+import { useCan } from '../../../entities/user'
 import { CreateChildModal } from './CreateChildModal'
 import { EditChildModal } from './EditChildModal'
 
@@ -35,6 +36,8 @@ export const ChildrenPage = () => {
   const navigate = useNavigate()
   const fetchUsers = useUsersStore((s) => s.fetchUsers)
   const fetchGroups = useGroupsStore((s) => s.fetchGroups)
+  const canEdit = useCan('children', 'edit')
+  const canViewFinance = useCan('finance', 'view')
 
   useEffect(() => {
     fetchChildren()
@@ -48,13 +51,15 @@ export const ChildrenPage = () => {
         <Typography variant="body2" color="text.secondary">
           Всього учнів: {children.length}
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setCreateChildModal({ isOpen: true })}
-        >
-          Створити учня
-        </Button>
+        {canEdit && (
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setCreateChildModal({ isOpen: true })}
+          >
+            Створити учня
+          </Button>
+        )}
       </Box>
 
       <TableContainer
@@ -119,24 +124,30 @@ export const ChildrenPage = () => {
                     </Box>
                   </TableCell>
                   <TableCell align="right">
-                    <Tooltip title="Фінанси">
-                      <IconButton size="small" onClick={() => navigate(`/finance/${child.id}`)}>
-                        <AccountBalanceWalletOutlinedIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Редагувати">
-                      <IconButton
-                        size="small"
-                        onClick={() => setEditChildModal({ isOpen: true, child })}
-                      >
-                        <EditOutlinedIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Видалити">
-                      <IconButton size="small" color="error" onClick={() => deleteChild(child.id)}>
-                        <DeleteOutlineIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                    {canViewFinance && (
+                      <Tooltip title="Фінанси">
+                        <IconButton size="small" onClick={() => navigate(`/finance/${child.id}`)}>
+                          <AccountBalanceWalletOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    {canEdit && (
+                      <Tooltip title="Редагувати">
+                        <IconButton
+                          size="small"
+                          onClick={() => setEditChildModal({ isOpen: true, child })}
+                        >
+                          <EditOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    {canEdit && (
+                      <Tooltip title="Видалити">
+                        <IconButton size="small" color="error" onClick={() => deleteChild(child.id)}>
+                          <DeleteOutlineIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
                   </TableCell>
                 </TableRow>
               ))

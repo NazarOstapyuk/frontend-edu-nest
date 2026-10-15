@@ -3,6 +3,7 @@ import { Box, Button, IconButton, Paper, Switch, Table, TableBody, TableCell, Ta
 import AddIcon from '@mui/icons-material/Add'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { useAbsenceReasonsStore } from '../model/absenceReasonsStore'
+import { useCan } from '../../../entities/user'
 import { AbsenceReasonModal } from './AbsenceReasonModal'
 
 export const AbsenceReasonsPage = () => {
@@ -10,6 +11,7 @@ export const AbsenceReasonsPage = () => {
   const fetchReasons = useAbsenceReasonsStore((s) => s.fetchReasons)
   const updateReason = useAbsenceReasonsStore((s) => s.updateReason)
   const setModal = useAbsenceReasonsStore((s) => s.setModal)
+  const canEdit = useCan('register', 'edit')
 
   useEffect(() => {
     fetchReasons().catch(() => undefined)
@@ -19,9 +21,11 @@ export const AbsenceReasonsPage = () => {
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
         <Typography variant="body2" color="text.secondary">Всього причин: {reasons.length}</Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setModal({ isOpen: true, reason: null })}>
-          Додати причину
-        </Button>
+        {canEdit && (
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setModal({ isOpen: true, reason: null })}>
+            Додати причину
+          </Button>
+        )}
       </Box>
       <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflowX: 'auto' }}>
         <Table>
@@ -50,13 +54,16 @@ export const AbsenceReasonsPage = () => {
                   <TableCell>
                     <Switch
                       checked={reason.active}
+                      disabled={!canEdit}
                       onChange={(e) => updateReason(reason.id, { active: e.target.checked }).catch(() => undefined)}
                     />
                   </TableCell>
                   <TableCell align="right">
-                    <IconButton size="small" onClick={() => setModal({ isOpen: true, reason })}>
-                      <EditOutlinedIcon fontSize="small" />
-                    </IconButton>
+                    {canEdit && (
+                      <IconButton size="small" onClick={() => setModal({ isOpen: true, reason })}>
+                        <EditOutlinedIcon fontSize="small" />
+                      </IconButton>
+                    )}
                   </TableCell>
                 </TableRow>
               ))

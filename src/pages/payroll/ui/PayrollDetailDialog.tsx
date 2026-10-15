@@ -13,6 +13,7 @@ import {
 import { monthLabel, payrollApi, payrollStatusLabels } from '../../../shared/api'
 import { PayrollDetailView } from '../../../widgets/payrollDetail'
 import { usePayrollStore } from '../model/payrollStore'
+import { useCan } from '../../../entities/user'
 import { AdjustmentDialog } from './AdjustmentDialog'
 import { PaymentDialog } from './PaymentDialog'
 import { ReasonDialog } from './ReasonDialog'
@@ -27,6 +28,7 @@ type Modal =
   | null
 
 export const PayrollDetailDialog = () => {
+  const canEdit = useCan('payroll', 'edit')
   const detailTeacherId = usePayrollStore((s) => s.detailTeacherId)
   const detail = usePayrollStore((s) => s.detail)
   const detailFailed = usePayrollStore((s) => s.detailFailed)
@@ -79,34 +81,34 @@ export const PayrollDetailDialog = () => {
                 </Typography>
               )}
             </Stack>
-            {draft && (
+            {canEdit && draft && (
               <WorkedDaysForm key={`${detail.days.workedDays}-${String(detail.days.override)}`} detail={detail} />
             )}
             <PayrollDetailView
               detail={detail}
-              onVoidAdjustment={draft ? (id) => setModal({ kind: 'voidAdjustment', id }) : undefined}
-              onVoidPayment={(id) => setModal({ kind: 'voidPayment', id })}
+              onVoidAdjustment={canEdit && draft ? (id) => setModal({ kind: 'voidAdjustment', id }) : undefined}
+              onVoidPayment={canEdit ? (id) => setModal({ kind: 'voidPayment', id }) : undefined}
             />
           </Stack>
         )}
       </DialogContent>
       <DialogActions sx={{ flexWrap: 'wrap', gap: 1 }}>
-        {detail && draft && (
+        {canEdit && detail && draft && (
           <Button disabled={isSaving} onClick={() => setModal({ kind: 'adjustment' })}>
             Доплата / утримання
           </Button>
         )}
-        {detail && (
+        {canEdit && detail && (
           <Button disabled={isSaving} onClick={() => setModal({ kind: 'payment' })}>
             Виплата
           </Button>
         )}
-        {detail && draft && (
+        {canEdit && detail && draft && (
           <Button variant="contained" disabled={isSaving} onClick={approve}>
             Затвердити
           </Button>
         )}
-        {detail && !draft && (
+        {canEdit && detail && !draft && (
           <Button color="warning" disabled={isSaving} onClick={() => setModal({ kind: 'reopen' })}>
             Відкрити повторно
           </Button>

@@ -19,6 +19,7 @@ import AddIcon from '@mui/icons-material/Add'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { useEnrollmentsStore } from '../model/enrollmentsStore'
+import { useCan } from '../../../entities/user'
 import { ReasonDialog } from '../../../shared/ui/ReasonDialog'
 import {
   adjustmentTypeLabels,
@@ -48,6 +49,7 @@ const EnrollmentRow = ({ enrollment }: { enrollment: Enrollment }) => {
   const setReasonTarget = useEnrollmentsStore((s) => s.setReasonTarget)
   const billNow = useEnrollmentsStore((s) => s.billNow)
   const isSaving = useEnrollmentsStore((s) => s.isSaving)
+  const canEdit = useCan('finance', 'edit')
   const next = enrollment.nextPeriod
 
   return (
@@ -96,13 +98,17 @@ const EnrollmentRow = ({ enrollment }: { enrollment: Enrollment }) => {
           </Box>
         </TableCell>
         <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
-          <Button size="small" disabled={isSaving} onClick={() => billNow(enrollment.id)}>
-            Нарахувати
-          </Button>
-          <Button size="small" onClick={() => setAdjustmentModal({ isOpen: true, enrollment })}>
-            Умова
-          </Button>
-          {!enrollment.endDate && (
+          {canEdit && (
+            <Button size="small" disabled={isSaving} onClick={() => billNow(enrollment.id)}>
+              Нарахувати
+            </Button>
+          )}
+          {canEdit && (
+            <Button size="small" onClick={() => setAdjustmentModal({ isOpen: true, enrollment })}>
+              Умова
+            </Button>
+          )}
+          {canEdit && !enrollment.endDate && (
             <Button size="small" color="error" onClick={() => setEndEnrollmentModal({ isOpen: true, enrollment })}>
               Завершити
             </Button>
@@ -144,19 +150,21 @@ const EnrollmentRow = ({ enrollment }: { enrollment: Enrollment }) => {
                                   : '—'}
                         </TableCell>
                         <TableCell align="right">
-                          <Button
-                            size="small"
-                            color={p.needsRecalculation ? 'warning' : 'inherit'}
-                            onClick={() =>
-                              setReasonTarget({
-                                kind: 'recalculate',
-                                id: p.id,
-                                title: `Перерахувати період ${formatDate(p.periodStart)} – ${formatDate(p.periodEnd)}`,
-                              })
-                            }
-                          >
-                            Перерахувати
-                          </Button>
+                          {canEdit && (
+                            <Button
+                              size="small"
+                              color={p.needsRecalculation ? 'warning' : 'inherit'}
+                              onClick={() =>
+                                setReasonTarget({
+                                  kind: 'recalculate',
+                                  id: p.id,
+                                  title: `Перерахувати період ${formatDate(p.periodStart)} – ${formatDate(p.periodEnd)}`,
+                                })
+                              }
+                            >
+                              Перерахувати
+                            </Button>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -184,6 +192,7 @@ export const EnrollmentsTab = ({ childId }: EnrollmentsTabProps) => {
   const setReasonTarget = useEnrollmentsStore((s) => s.setReasonTarget)
   const submitReason = useEnrollmentsStore((s) => s.submitReason)
   const isSaving = useEnrollmentsStore((s) => s.isSaving)
+  const canEdit = useCan('finance', 'edit')
 
   useEffect(() => {
     fetchEnrollments(childId)
@@ -194,9 +203,11 @@ export const EnrollmentsTab = ({ childId }: EnrollmentsTabProps) => {
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateEnrollmentModal({ isOpen: true })}>
-          Записати на тариф
-        </Button>
+        {canEdit && (
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateEnrollmentModal({ isOpen: true })}>
+            Записати на тариф
+          </Button>
+        )}
       </Box>
       <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
         <Table>

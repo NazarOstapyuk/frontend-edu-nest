@@ -17,6 +17,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useTariffsStore } from '../model/tariffsStore'
+import { useCan } from '../../../entities/user'
 import {
   billingModeLabels,
   financeCategoryLabels,
@@ -47,6 +48,7 @@ export const TariffModal = () => {
   const addPrice = useTariffsStore((s) => s.addPrice)
   const updateTariff = useTariffsStore((s) => s.updateTariff)
   const isSaving = useTariffsStore((s) => s.isSaving)
+  const canEdit = useCan('tariffs', 'edit')
   const tariff = tariffs.find((t) => t.id === tariffId) ?? null
 
   const { control, handleSubmit, reset } = useForm<PriceValues>({
@@ -84,7 +86,7 @@ export const TariffModal = () => {
             control={
               <Switch
                 checked={tariff.isActive}
-                disabled={isSaving}
+                disabled={isSaving || !canEdit}
                 onChange={(e) => updateTariff(tariff.id, { isActive: e.target.checked })}
               />
             }
@@ -106,38 +108,44 @@ export const TariffModal = () => {
               ))}
             </TableBody>
           </Table>
-          <Typography sx={{ fontWeight: 600 }}>Нова ціна</Typography>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Controller
-              name="price"
-              control={control}
-              render={({ field, fieldState: { error } }) => (
-                <TextField {...field} label="Ціна, грн" fullWidth error={!!error} helperText={error?.message} />
-              )}
-            />
-            <Controller
-              name="effectiveFrom"
-              control={control}
-              render={({ field, fieldState: { error } }) => (
-                <TextField
-                  {...field}
-                  label="Діє з"
-                  type="date"
-                  fullWidth
-                  slotProps={{ inputLabel: { shrink: true } }}
-                  error={!!error}
-                  helperText={error?.message}
+          {canEdit && (
+            <>
+              <Typography sx={{ fontWeight: 600 }}>Нова ціна</Typography>
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <Controller
+                  name="price"
+                  control={control}
+                  render={({ field, fieldState: { error } }) => (
+                    <TextField {...field} label="Ціна, грн" fullWidth error={!!error} helperText={error?.message} />
+                  )}
                 />
-              )}
-            />
-          </Box>
+                <Controller
+                  name="effectiveFrom"
+                  control={control}
+                  render={({ field, fieldState: { error } }) => (
+                    <TextField
+                      {...field}
+                      label="Діє з"
+                      type="date"
+                      fullWidth
+                      slotProps={{ inputLabel: { shrink: true } }}
+                      error={!!error}
+                      helperText={error?.message}
+                    />
+                  )}
+                />
+              </Box>
+            </>
+          )}
           <Box sx={{ display: 'flex', gap: '10px' }}>
             <Button onClick={handleClose} color="inherit" sx={{ width: '100%' }}>
               Закрити
             </Button>
-            <Button onClick={handleSubmit(onAddPrice)} variant="contained" disabled={isSaving} sx={{ width: '100%' }}>
-              Додати ціну
-            </Button>
+            {canEdit && (
+              <Button onClick={handleSubmit(onAddPrice)} variant="contained" disabled={isSaving} sx={{ width: '100%' }}>
+                Додати ціну
+              </Button>
+            )}
           </Box>
         </Box>
       )}

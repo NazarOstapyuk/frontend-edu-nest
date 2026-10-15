@@ -6,11 +6,13 @@ import AddIcon from '@mui/icons-material/Add'
 import { useMealsStore } from '../model/mealsStore'
 import { CancelOrderDialog } from './CancelOrderDialog'
 import { AdminOrderDialog } from './AdminOrderDialog'
+import { useCan } from '../../../entities/user'
 import { groupKindLabels, groupKinds, type AdminMealOrder, type GroupKind } from '../../../shared/api'
 
 const roleLabel = (role: string) => (role === 'parent' ? 'батьки' : 'адміністратор')
 
 export const OrdersTab = () => {
+  const canEdit = useCan('meals', 'edit')
   const date = useMealsStore((s) => s.ordersDate)
   const kind = useMealsStore((s) => s.ordersKind)
   const groupId = useMealsStore((s) => s.ordersGroupId)
@@ -41,7 +43,7 @@ export const OrdersTab = () => {
           {groups.filter((g) => !kind || g.kind === kind).map((g) => <MenuItem key={g.id} value={g.id}>{g.name}</MenuItem>)}
         </TextField>
         <Box sx={{ flex: 1 }} />
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreating(true)}>Замовлення</Button>
+        {canEdit && <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreating(true)}>Замовлення</Button>}
       </Box>
 
       {failed && key === `${date}/${kind}/${groupId}` ? (
@@ -100,7 +102,7 @@ export const OrdersTab = () => {
                       )}
                     </TableCell>
                     <TableCell align="right">
-                      {!o.cancelledAt && <Button size="small" color="error" onClick={() => setCancelling(o)}>Скасувати</Button>}
+                      {canEdit && !o.cancelledAt && <Button size="small" color="error" onClick={() => setCancelling(o)}>Скасувати</Button>}
                     </TableCell>
                   </TableRow>
                 ))}

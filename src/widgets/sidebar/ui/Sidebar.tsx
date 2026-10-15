@@ -14,7 +14,7 @@ import {
 import SchoolIcon from '@mui/icons-material/School'
 import { navItems, bottomNavItems } from '../model/nav-items'
 import type { NavItem } from '../model/nav-items'
-import { useAuthStore } from '../../../entities/user'
+import { canAccess, useAuthStore } from '../../../entities/user'
 import type { SessionRole } from '../../../entities/user'
 import { usePendingNoticesStore } from '../../../shared/model/pendingNoticesStore'
 
@@ -54,12 +54,17 @@ const NavButton = ({ item }: { item: NavItem }) => {
 }
 
 export const Sidebar = () => {
-  const role = useAuthStore((s) => s.profile?.role) as SessionRole | undefined
+  const profile = useAuthStore((s) => s.profile)
+  const role = profile?.role as SessionRole | undefined
+  const canSeeRegister = canAccess(profile, 'register', 'view')
   const refreshPending = usePendingNoticesStore((s) => s.refresh)
   useEffect(() => {
-    if (role === 'root' || role === 'admin') refreshPending().catch(() => undefined)
-  }, [role, refreshPending])
-  const visible = (item: NavItem) => !item.roles || (role !== undefined && item.roles.includes(role))
+    if (canSeeRegister) refreshPending().catch(() => undefined)
+  }, [canSeeRegister, refreshPending])
+  const visible = (item: NavItem) =>
+    (!item.roles && !item.area) ||
+    (role !== undefined && !!item.roles?.includes(role)) ||
+    (!!item.area && canAccess(profile, item.area, 'view'))
 
   return (
     <Drawer

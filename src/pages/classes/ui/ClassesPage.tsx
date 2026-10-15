@@ -17,6 +17,7 @@ import {
 import AddIcon from '@mui/icons-material/Add'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { useClassesStore } from '../model/classesStore'
+import { useCan } from '../../../entities/user'
 import { classFormatLabels, missedRuleLabels } from '../../../shared/api'
 import { DirectionModal } from './DirectionModal'
 import { GroupModal } from './GroupModal'
@@ -32,6 +33,7 @@ export const ClassesPage = () => {
   const setReconciliationOpen = useClassesStore((s) => s.setReconciliationOpen)
   const migrateLegacy = useClassesStore((s) => s.migrateLegacy)
   const navigate = useNavigate()
+  const canEdit = useCan('classes', 'edit')
 
   useEffect(() => {
     fetchAll().catch(() => undefined)
@@ -43,17 +45,21 @@ export const ClassesPage = () => {
         <Typography variant="body2" color="text.secondary" sx={{ mr: 'auto' }}>
           Напрямів: {directions.length}
         </Typography>
-        {reconciliation.length > 0 && (
+        {canEdit && reconciliation.length > 0 && (
           <Button color="warning" variant="outlined" onClick={() => setReconciliationOpen(true)}>
             Потребує звірки: {reconciliation.length}
           </Button>
         )}
-        <Button variant="outlined" disabled={isSaving} onClick={() => migrateLegacy().catch(() => undefined)}>
-          Перенести старі абонементи
-        </Button>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setDirectionModal({ isOpen: true, direction: null })}>
-          Створити напрям
-        </Button>
+        {canEdit && (
+          <Button variant="outlined" disabled={isSaving} onClick={() => migrateLegacy().catch(() => undefined)}>
+            Перенести старі абонементи
+          </Button>
+        )}
+        {canEdit && (
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setDirectionModal({ isOpen: true, direction: null })}>
+            Створити напрям
+          </Button>
+        )}
       </Box>
 
       {directions.length === 0 && (
@@ -66,19 +72,23 @@ export const ClassesPage = () => {
             <Typography sx={{ fontWeight: 700 }}>{direction.name}</Typography>
             <Chip size="small" variant="outlined" label={missedRuleLabels[direction.missedRule]} />
             {!direction.isActive && <Chip size="small" label="Неактивний" />}
-            <Tooltip title="Редагувати напрям">
-              <IconButton size="small" onClick={() => setDirectionModal({ isOpen: true, direction })}>
-                <EditOutlinedIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-            <Button
-              size="small"
-              startIcon={<AddIcon />}
-              sx={{ ml: 'auto' }}
-              onClick={() => setGroupModal({ isOpen: true, directionId: direction.id, group: null })}
-            >
-              Створити групу
-            </Button>
+            {canEdit && (
+              <Tooltip title="Редагувати напрям">
+                <IconButton size="small" onClick={() => setDirectionModal({ isOpen: true, direction })}>
+                  <EditOutlinedIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
+            {canEdit && (
+              <Button
+                size="small"
+                startIcon={<AddIcon />}
+                sx={{ ml: 'auto' }}
+                onClick={() => setGroupModal({ isOpen: true, directionId: direction.id, group: null })}
+              >
+                Створити групу
+              </Button>
+            )}
           </Box>
           <Table size="small">
             <TableHead>
@@ -110,17 +120,19 @@ export const ClassesPage = () => {
                       {[group.singleTariff?.name, group.packageTariff?.name].filter(Boolean).join(' · ') || '—'}
                     </TableCell>
                     <TableCell align="right">
-                      <Tooltip title="Редагувати групу">
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setGroupModal({ isOpen: true, directionId: direction.id, group })
-                          }}
-                        >
-                          <EditOutlinedIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                      {canEdit && (
+                        <Tooltip title="Редагувати групу">
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setGroupModal({ isOpen: true, directionId: direction.id, group })
+                            }}
+                          >
+                            <EditOutlinedIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))

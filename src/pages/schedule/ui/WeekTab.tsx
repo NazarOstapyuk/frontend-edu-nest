@@ -5,6 +5,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { useScheduleStore } from '../model/scheduleStore'
 import { ChangeDialog } from './ChangeDialog'
+import { useCan } from '../../../entities/user'
 import { ReasonDialog } from '../../../shared/ui/ReasonDialog'
 import { addDaysIso, formatDay, weekdayLabels, type ScheduleSlot } from '../../../shared/api'
 
@@ -15,6 +16,7 @@ type Action =
 
 export const WeekTab = () => {
   const navigate = useNavigate()
+  const canEdit = useCan('timetable', 'edit')
   const classId = useScheduleStore((s) => s.classId)
   const classKey = useScheduleStore((s) => s.classKey)
   const week = useScheduleStore((s) => s.week)
@@ -61,13 +63,13 @@ export const WeekTab = () => {
                   {s.source === 'extra' && <Chip size="small" color="info" label="Додатковий" sx={{ mr: 0.5 }} />}
                   {s.lessonId && <Chip size="small" color="success" variant="outlined" label="Проведено" />}
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
-                    {!s.cancelled && <Button size="small" onClick={() => setAction({ kind: 'replace', date: d.date, slot: s })}>Заміна</Button>}
-                    {!s.cancelled && s.source === 'timetable' && <Button size="small" color="error" onClick={() => setAction({ kind: 'cancel', date: d.date, slot: s })}>Скасувати</Button>}
-                    {s.changeId && <Button size="small" onClick={() => setAction({ kind: 'void', date: d.date, slot: s })}>Відмінити зміну</Button>}
+                    {canEdit && !s.cancelled && <Button size="small" onClick={() => setAction({ kind: 'replace', date: d.date, slot: s })}>Заміна</Button>}
+                    {canEdit && !s.cancelled && s.source === 'timetable' && <Button size="small" color="error" onClick={() => setAction({ kind: 'cancel', date: d.date, slot: s })}>Скасувати</Button>}
+                    {canEdit && s.changeId && <Button size="small" onClick={() => setAction({ kind: 'void', date: d.date, slot: s })}>Відмінити зміну</Button>}
                   </Box>
                 </Box>
               ))}
-              {d.working && <Button size="small" sx={{ mt: 1 }} onClick={() => setAction({ kind: 'extra', date: d.date })}>Додатковий урок</Button>}
+              {canEdit && d.working && <Button size="small" sx={{ mt: 1 }} onClick={() => setAction({ kind: 'extra', date: d.date })}>Додатковий урок</Button>}
             </Paper>
           ))}
         </Box>

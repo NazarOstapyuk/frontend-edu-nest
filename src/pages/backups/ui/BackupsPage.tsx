@@ -23,8 +23,10 @@ import {
   formatTakenAt,
 } from '../../../shared/api'
 import { useBackupsStore } from '../model/backupsStore'
+import { useCan } from '../../../entities/user'
 
 export const BackupsPage = () => {
+  const canEdit = useCan('backups', 'edit')
   const status = useBackupsStore((s) => s.status)
   const runs = useBackupsStore((s) => s.runs)
   const failed = useBackupsStore((s) => s.failed)
@@ -71,16 +73,18 @@ export const BackupsPage = () => {
               {status.stale && <Alert severity="warning">Остання резервна копія невдала або застаріла.</Alert>}
             </>
           )}
-          <Box>
-            <Button
-              variant="contained"
-              disabled={!status.configured || status.running || isCreating}
-              onClick={() => create().catch(() => undefined)}
-              startIcon={isCreating ? <CircularProgress size={16} color="inherit" /> : undefined}
-            >
-              {isCreating ? 'Створюється…' : 'Зробити копію зараз'}
-            </Button>
-          </Box>
+          {canEdit && (
+            <Box>
+              <Button
+                variant="contained"
+                disabled={!status.configured || status.running || isCreating}
+                onClick={() => create().catch(() => undefined)}
+                startIcon={isCreating ? <CircularProgress size={16} color="inherit" /> : undefined}
+              >
+                {isCreating ? 'Створюється…' : 'Зробити копію зараз'}
+              </Button>
+            </Box>
+          )}
         </Stack>
       </Paper>
 

@@ -18,6 +18,7 @@ import AddIcon from '@mui/icons-material/Add'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { usePackagesStore } from '../model/packagesStore'
+import { useCan } from '../../../entities/user'
 import { ReasonDialog } from '../../../shared/ui/ReasonDialog'
 import {
   attendanceStatusLabels,
@@ -43,6 +44,7 @@ const PackageRow = ({ pkg }: { pkg: ChildPackage }) => {
   const setExtendTarget = usePackagesStore((s) => s.setExtendTarget)
   const setReconcileTarget = usePackagesStore((s) => s.setReconcileTarget)
   const setVoidTarget = usePackagesStore((s) => s.setVoidTarget)
+  const canEdit = useCan('finance', 'edit')
   const voided = pkg.state === 'voided'
 
   return (
@@ -63,17 +65,17 @@ const PackageRow = ({ pkg }: { pkg: ChildPackage }) => {
           <Chip size="small" variant="outlined" color={stateColors[pkg.state]} label={packageStateLabels[pkg.state]} />
         </TableCell>
         <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
-          {pkg.needsReconciliation && !voided && (
+          {canEdit && pkg.needsReconciliation && !voided && (
             <Button size="small" color="error" onClick={() => setReconcileTarget(pkg)}>
               Звірити
             </Button>
           )}
-          {!voided && pkg.expiresAt !== null && (
+          {canEdit && !voided && pkg.expiresAt !== null && (
             <Button size="small" onClick={() => setExtendTarget(pkg)}>
               Продовжити
             </Button>
           )}
-          {!voided && pkg.used === 0 && !pkg.needsReconciliation && (
+          {canEdit && !voided && pkg.used === 0 && !pkg.needsReconciliation && (
             <Button size="small" color="error" onClick={() => setVoidTarget(pkg)}>
               Сторнувати
             </Button>
@@ -141,6 +143,7 @@ export const PackagesTab = ({ childId }: PackagesTabProps) => {
   const setVoidTarget = usePackagesStore((s) => s.setVoidTarget)
   const voidPackage = usePackagesStore((s) => s.voidPackage)
   const isSaving = usePackagesStore((s) => s.isSaving)
+  const canEdit = useCan('finance', 'edit')
 
   useEffect(() => {
     fetchPackages(childId).catch(() => undefined)
@@ -151,9 +154,11 @@ export const PackagesTab = ({ childId }: PackagesTabProps) => {
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setBuyOpen(true)}>
-          Купити пакет
-        </Button>
+        {canEdit && (
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setBuyOpen(true)}>
+            Купити пакет
+          </Button>
+        )}
       </Box>
       <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
         <Table>

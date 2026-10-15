@@ -10,6 +10,7 @@ import { SortedNameDialog } from './SortedNameDialog'
 import { DishDialog } from './DishDialog'
 import { ComplexDialog } from './ComplexDialog'
 import { PriceDialog } from './PriceDialog'
+import { useCan } from '../../../entities/user'
 import { formatDay, localToday, type Dish, type MealComplex, type MealCourse } from '../../../shared/api'
 
 type NamedTarget = { kind: 'course' | 'category'; item: MealCourse | null } | null
@@ -18,6 +19,8 @@ const cardSx = { border: '1px solid', borderColor: 'divider', borderRadius: 2, o
 const headSx = { '& th': { fontWeight: 700, bgcolor: 'grey.50' } }
 
 export const DirectoriesTab = () => {
+  const canEdit = useCan('meals', 'edit')
+  const canEditSettings = useCan('settings', 'edit')
   const courses = useMealsStore((s) => s.courses)
   const dishes = useMealsStore((s) => s.dishes)
   const categories = useMealsStore((s) => s.priceCategories)
@@ -46,7 +49,7 @@ export const DirectoriesTab = () => {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
         <Typography sx={{ fontWeight: 700 }}>{title}</Typography>
-        <Button startIcon={<AddIcon />} onClick={() => setNamed({ kind, item: null })}>Додати</Button>
+        {canEdit && <Button startIcon={<AddIcon />} onClick={() => setNamed({ kind, item: null })}>Додати</Button>}
       </Box>
       <Paper elevation={0} sx={cardSx}>
         <Table size="small">
@@ -61,13 +64,14 @@ export const DirectoriesTab = () => {
                 <TableCell>
                   <Switch
                     checked={item.active}
+                    disabled={!canEdit}
                     onChange={(e) =>
                       (kind === 'course' ? saveCourse : savePriceCategory)(item.id, { active: e.target.checked }).catch(() => undefined)
                     }
                   />
                 </TableCell>
                 <TableCell align="right">
-                  <IconButton size="small" onClick={() => setNamed({ kind, item })}><EditOutlinedIcon fontSize="small" /></IconButton>
+                  {canEdit && <IconButton size="small" onClick={() => setNamed({ kind, item })}><EditOutlinedIcon fontSize="small" /></IconButton>}
                 </TableCell>
               </TableRow>
             ))}
@@ -80,21 +84,25 @@ export const DirectoriesTab = () => {
   return (
     <Box>
       <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 3, flexWrap: 'wrap' }}>
-        <TextField
-          size="small"
-          type="time"
-          label="Дедлайн замовлення"
-          value={deadlineDraft ?? deadline}
-          onChange={(e) => setDeadlineDraft(e.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }}
-        />
-        <Button
-          variant="outlined"
-          disabled={isSaving || deadlineDraft === null || deadlineDraft === deadline || !deadlineDraft}
-          onClick={() => deadlineDraft && saveDeadline(deadlineDraft).then(() => setDeadlineDraft(null)).catch(() => undefined)}
-        >
-          Зберегти дедлайн
-        </Button>
+        {canEditSettings && (
+          <TextField
+            size="small"
+            type="time"
+            label="Дедлайн замовлення"
+            value={deadlineDraft ?? deadline}
+            onChange={(e) => setDeadlineDraft(e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
+        )}
+        {canEditSettings && (
+          <Button
+            variant="outlined"
+            disabled={isSaving || deadlineDraft === null || deadlineDraft === deadline || !deadlineDraft}
+            onClick={() => deadlineDraft && saveDeadline(deadlineDraft).then(() => setDeadlineDraft(null)).catch(() => undefined)}
+          >
+            Зберегти дедлайн
+          </Button>
+        )}
         <Typography variant="body2" color="text.secondary">Батьки замовляють і скасовують до цього часу в день харчування.</Typography>
       </Box>
 
@@ -103,7 +111,7 @@ export const DirectoriesTab = () => {
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
         <Typography sx={{ fontWeight: 700 }}>Страви</Typography>
-        <Button startIcon={<AddIcon />} onClick={() => setDish('new')}>Додати</Button>
+        {canEdit && <Button startIcon={<AddIcon />} onClick={() => setDish('new')}>Додати</Button>}
       </Box>
       <Paper elevation={0} sx={cardSx}>
         <Table size="small">
@@ -116,8 +124,8 @@ export const DirectoriesTab = () => {
                 <TableCell>{d.course.name}</TableCell>
                 <TableCell>{d.name}</TableCell>
                 <TableCell sx={{ color: 'text.secondary' }}>{d.description ?? ''}</TableCell>
-                <TableCell><Switch checked={d.active} onChange={(e) => saveDish(d.id, { active: e.target.checked }).catch(() => undefined)} /></TableCell>
-                <TableCell align="right"><IconButton size="small" onClick={() => setDish(d)}><EditOutlinedIcon fontSize="small" /></IconButton></TableCell>
+                <TableCell><Switch checked={d.active} disabled={!canEdit} onChange={(e) => saveDish(d.id, { active: e.target.checked }).catch(() => undefined)} /></TableCell>
+                <TableCell align="right">{canEdit && <IconButton size="small" onClick={() => setDish(d)}><EditOutlinedIcon fontSize="small" /></IconButton>}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -126,7 +134,7 @@ export const DirectoriesTab = () => {
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
         <Typography sx={{ fontWeight: 700 }}>Комплекси і ціни</Typography>
-        <Button startIcon={<AddIcon />} onClick={() => setComplex('new')}>Додати</Button>
+        {canEdit && <Button startIcon={<AddIcon />} onClick={() => setComplex('new')}>Додати</Button>}
       </Box>
       {complexes.length === 0 && <Typography color="text.secondary" sx={{ mb: 2 }}>Комплексів ще немає.</Typography>}
       {complexes.map((c) => (
@@ -135,9 +143,9 @@ export const DirectoriesTab = () => {
             <Typography sx={{ fontWeight: 700 }}>{c.name}</Typography>
             {c.courses.map((course) => <Chip key={course.id} size="small" label={course.name} />)}
             <Box sx={{ flex: 1 }} />
-            <Switch checked={c.active} onChange={(e) => saveComplex(c.id, { active: e.target.checked }).catch(() => undefined)} />
-            <IconButton size="small" onClick={() => setComplex(c)}><EditOutlinedIcon fontSize="small" /></IconButton>
-            <Button size="small" onClick={() => setPriceFor(c)}>Додати ціну</Button>
+            <Switch checked={c.active} disabled={!canEdit} onChange={(e) => saveComplex(c.id, { active: e.target.checked }).catch(() => undefined)} />
+            {canEdit && <IconButton size="small" onClick={() => setComplex(c)}><EditOutlinedIcon fontSize="small" /></IconButton>}
+            {canEdit && <Button size="small" onClick={() => setPriceFor(c)}>Додати ціну</Button>}
           </Box>
           {c.description && <Typography variant="body2" color="text.secondary">{c.description}</Typography>}
           <Table size="small" sx={{ mt: 1 }}>
@@ -151,7 +159,7 @@ export const DirectoriesTab = () => {
                   <TableCell>{p.price} грн</TableCell>
                   <TableCell>{formatDay(p.validFrom)}</TableCell>
                   <TableCell align="right">
-                    {p.validFrom > today && (
+                    {canEdit && p.validFrom > today && (
                       <IconButton size="small" disabled={isSaving} onClick={() => deletePrice(c.id, p.id).catch(() => undefined)}>
                         <DeleteOutlineIcon fontSize="small" />
                       </IconButton>

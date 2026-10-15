@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Box, Button, Paper, Tab, Table, TableBody, TableCell, TableHead, TableRow, Tabs, Typography } from '@mui/material'
 import { useAbsenceNoticesStore } from '../model/absenceNoticesStore'
+import { useCan } from '../../../entities/user'
 import { ReasonDialog } from '../../../shared/ui/ReasonDialog'
 import { formatDay, type AdminNotice, type NoticeStatus } from '../../../shared/api'
 
@@ -12,6 +13,7 @@ const tabs: { status: NoticeStatus; label: string }[] = [
 ]
 
 export const AbsenceNoticesPage = () => {
+  const canEdit = useCan('register', 'edit')
   const status = useAbsenceNoticesStore((s) => s.status)
   const notices = useAbsenceNoticesStore((s) => s.notices)
   const isLoading = useAbsenceNoticesStore((s) => s.isLoading)
@@ -72,13 +74,13 @@ export const AbsenceNoticesPage = () => {
                   </TableCell>
                   <TableCell>{n.createdBy.lastName} {n.createdBy.firstName}</TableCell>
                   <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
-                    {n.status === 'pending' && (
+                    {canEdit && n.status === 'pending' && (
                       <>
                         <Button size="small" disabled={isSaving} onClick={() => approve(n.id).catch(() => undefined)}>Підтвердити</Button>
                         <Button size="small" color="error" disabled={isSaving} onClick={() => setDialog({ notice: n, action: 'reject' })}>Відхилити</Button>
                       </>
                     )}
-                    {n.status === 'approved' && (
+                    {canEdit && n.status === 'approved' && (
                       <Button size="small" color="error" disabled={isSaving} onClick={() => setDialog({ notice: n, action: 'cancel' })}>Скасувати</Button>
                     )}
                   </TableCell>

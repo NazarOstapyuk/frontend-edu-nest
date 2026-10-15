@@ -17,6 +17,7 @@ import {
 import AddIcon from '@mui/icons-material/Add'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import { useTariffsStore } from '../model/tariffsStore'
+import { useCan } from '../../../entities/user'
 import {
   billingModeLabels,
   financeCategoryLabels,
@@ -37,6 +38,8 @@ export const TariffsPage = () => {
   const runBilling = useTariffsStore((s) => s.runBilling)
   const setCreateTariffModal = useTariffsStore((s) => s.setCreateTariffModal)
   const setTariffModal = useTariffsStore((s) => s.setTariffModal)
+  const canEdit = useCan('tariffs', 'edit')
+  const canEditSettings = useCan('settings', 'edit')
   const [leadInput, setLeadInput] = useState<string | null>(null)
 
   useEffect(() => {
@@ -53,30 +56,38 @@ export const TariffsPage = () => {
         <Typography variant="body2" color="text.secondary" sx={{ mr: 'auto' }}>
           Всього тарифів: {tariffs.length}
         </Typography>
-        <TextField
-          size="small"
-          label="Нараховувати за N днів"
-          value={leadValue}
-          onChange={(e) => setLeadInput(e.target.value)}
-          error={leadInput !== null && !leadValid}
-          sx={{ width: 200 }}
-        />
-        <Button
-          variant="outlined"
-          disabled={isSaving || leadDays === null || leadInput === null || !leadValid || parsedLead === leadDays}
-          onClick={async () => {
-            await setLeadDays(parsedLead)
-            setLeadInput(null)
-          }}
-        >
-          Зберегти
-        </Button>
-        <Button variant="outlined" startIcon={<PlayArrowIcon />} disabled={isSaving} onClick={() => runBilling()}>
-          Нарахувати зараз
-        </Button>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateTariffModal({ isOpen: true })}>
-          Створити тариф
-        </Button>
+        {canEditSettings && (
+          <TextField
+            size="small"
+            label="Нараховувати за N днів"
+            value={leadValue}
+            onChange={(e) => setLeadInput(e.target.value)}
+            error={leadInput !== null && !leadValid}
+            sx={{ width: 200 }}
+          />
+        )}
+        {canEditSettings && (
+          <Button
+            variant="outlined"
+            disabled={isSaving || leadDays === null || leadInput === null || !leadValid || parsedLead === leadDays}
+            onClick={async () => {
+              await setLeadDays(parsedLead)
+              setLeadInput(null)
+            }}
+          >
+            Зберегти
+          </Button>
+        )}
+        {canEdit && (
+          <Button variant="outlined" startIcon={<PlayArrowIcon />} disabled={isSaving} onClick={() => runBilling()}>
+            Нарахувати зараз
+          </Button>
+        )}
+        {canEdit && (
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateTariffModal({ isOpen: true })}>
+            Створити тариф
+          </Button>
+        )}
       </Box>
 
       {lastRun && (

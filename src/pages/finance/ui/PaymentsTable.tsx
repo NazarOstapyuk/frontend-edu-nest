@@ -18,6 +18,7 @@ import CallSplitIcon from '@mui/icons-material/CallSplit'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { useChildFinanceStore } from '../model/childFinanceStore'
+import { useCan } from '../../../entities/user'
 import {
   financeCategoryLabels,
   formatMoney,
@@ -32,6 +33,7 @@ const PaymentRow = ({ payment }: { payment: FinancePayment }) => {
   const [open, setOpen] = useState(false)
   const setVoidModal = useChildFinanceStore((s) => s.setVoidModal)
   const setAllocateModal = useChildFinanceStore((s) => s.setAllocateModal)
+  const canEdit = useCan('finance', 'edit')
   const voided = Boolean(payment.voidedAt)
 
   return (
@@ -60,7 +62,7 @@ const PaymentRow = ({ payment }: { payment: FinancePayment }) => {
           {payment.createdBy ? `${payment.createdBy.lastName} ${payment.createdBy.firstName}` : '—'}
         </TableCell>
         <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
-          {!voided && Number(payment.free) > 0 && (
+          {canEdit && !voided && Number(payment.free) > 0 && (
             <Tooltip title="Розподілити">
               <IconButton
                 size="small"
@@ -71,7 +73,7 @@ const PaymentRow = ({ payment }: { payment: FinancePayment }) => {
               </IconButton>
             </Tooltip>
           )}
-          {!voided && (
+          {canEdit && !voided && (
             <Tooltip title="Сторнувати">
               <IconButton
                 size="small"
@@ -129,7 +131,7 @@ const PaymentRow = ({ payment }: { payment: FinancePayment }) => {
                         <TableCell>{formatDate(a.createdAt)}</TableCell>
                         <TableCell>{`${a.createdBy.lastName} ${a.createdBy.firstName}`}</TableCell>
                         <TableCell align="right">
-                          {!a.voidedAt && !voided && (
+                          {canEdit && !a.voidedAt && !voided && (
                             <Tooltip title="Зняти розподіл">
                               <IconButton
                                 size="small"

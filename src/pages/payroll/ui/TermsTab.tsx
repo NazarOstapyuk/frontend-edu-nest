@@ -34,6 +34,7 @@ import {
   type SalaryTerms,
 } from '../../../shared/api'
 import { usePayrollStore } from '../model/payrollStore'
+import { useCan } from '../../../entities/user'
 import { TermsDialog } from './TermsDialog'
 import { CloseTermsDialog } from './CloseTermsDialog'
 
@@ -45,6 +46,7 @@ const rateLabel = (rate: SalaryRate) => {
 }
 
 export const TermsTab = () => {
+  const canEdit = useCan('payroll', 'edit')
   const teachers = usePayrollStore((s) => s.teachers)
   const termsTeacherId = usePayrollStore((s) => s.termsTeacherId)
   const terms = usePayrollStore((s) => s.terms)
@@ -82,13 +84,15 @@ export const TermsTab = () => {
             </MenuItem>
           ))}
         </TextField>
-        <Button
-          variant="contained"
-          disabled={!termsTeacherId || isSaving}
-          onClick={() => setEditing({ terms: null })}
-        >
-          Нова версія умов
-        </Button>
+        {canEdit && (
+          <Button
+            variant="contained"
+            disabled={!termsTeacherId || isSaving}
+            onClick={() => setEditing({ terms: null })}
+          >
+            Нова версія умов
+          </Button>
+        )}
       </Stack>
 
       {!termsTeacherId ? (
@@ -153,7 +157,7 @@ export const TermsTab = () => {
                         ))}
                   </TableCell>
                   <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
-                    {!item.started && (
+                    {canEdit && !item.started && (
                       <>
                         <Tooltip title="Редагувати">
                           <IconButton size="small" disabled={isSaving} onClick={() => setEditing({ terms: item })}>
@@ -167,7 +171,7 @@ export const TermsTab = () => {
                         </Tooltip>
                       </>
                     )}
-                    {item.validTo === null && (
+                    {canEdit && item.validTo === null && (
                       <Tooltip title="Закрити умови">
                         <IconButton size="small" disabled={isSaving} onClick={() => setClosing(item)}>
                           <EventBusyIcon fontSize="small" />

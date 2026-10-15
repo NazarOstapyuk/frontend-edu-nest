@@ -13,6 +13,7 @@ import {
 } from '@mui/material'
 import BlockIcon from '@mui/icons-material/Block'
 import { useChildFinanceStore } from '../model/childFinanceStore'
+import { useCan } from '../../../entities/user'
 import {
   chargeStateLabels,
   financeCategoryLabels,
@@ -42,6 +43,7 @@ interface ChargesTableProps {
 
 export const ChargesTable = ({ charges }: ChargesTableProps) => {
   const setVoidModal = useChildFinanceStore((s) => s.setVoidModal)
+  const canEdit = useCan('finance', 'edit')
 
   return (
     <TableContainer
@@ -105,7 +107,7 @@ export const ChargesTable = ({ charges }: ChargesTableProps) => {
                     )}
                   </TableCell>
                   <TableCell align="right">
-                    {!voided && (
+                    {canEdit && !voided && (
                       <Tooltip title="Сторнувати">
                         <IconButton
                           size="small"

@@ -17,6 +17,7 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { useGroupsStore } from '../model/groupsStore'
 import { useUsersStore } from '../../users/model/usersStore'
 import { groupKindLabels } from '../../../shared/api'
+import { useCan } from '../../../entities/user'
 import { CreateGroupModal } from './CreateGroupModal'
 import { EditGroupModal } from './EditGroupModal'
 
@@ -29,6 +30,7 @@ export const GroupsPage = () => {
   const setEditGroupModal = useGroupsStore((s) => s.setEditGroupModal)
   const deleteGroup = useGroupsStore((s) => s.deleteGroup)
   const fetchUsers = useUsersStore((s) => s.fetchUsers)
+  const canEdit = useCan('children', 'edit')
 
   useEffect(() => {
     fetchGroups()
@@ -43,13 +45,15 @@ export const GroupsPage = () => {
         <Typography variant="body2" color="text.secondary">
           Всього груп: {groups.length}
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setCreateGroupModal({ isOpen: true })}
-        >
-          Створити групу
-        </Button>
+        {canEdit && (
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setCreateGroupModal({ isOpen: true })}
+          >
+            Створити групу
+          </Button>
+        )}
       </Box>
 
       {groups.length === 0 ? (
@@ -86,21 +90,23 @@ export const GroupsPage = () => {
                     )}
                   </Box>
                 </CardContent>
-                <CardActions sx={{ justifyContent: 'flex-end', pt: 0 }}>
-                  <Tooltip title="Редагувати">
-                    <IconButton
-                      size="small"
-                      onClick={() => setEditGroupModal({ isOpen: true, group })}
-                    >
-                      <EditOutlinedIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Видалити">
-                    <IconButton size="small" color="error" onClick={() => deleteGroup(group.id)}>
-                      <DeleteOutlineIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                </CardActions>
+                {canEdit && (
+                  <CardActions sx={{ justifyContent: 'flex-end', pt: 0 }}>
+                    <Tooltip title="Редагувати">
+                      <IconButton
+                        size="small"
+                        onClick={() => setEditGroupModal({ isOpen: true, group })}
+                      >
+                        <EditOutlinedIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Видалити">
+                      <IconButton size="small" color="error" onClick={() => deleteGroup(group.id)}>
+                        <DeleteOutlineIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </CardActions>
+                )}
               </Card>
             </Grid>
           ))}

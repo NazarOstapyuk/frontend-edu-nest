@@ -16,6 +16,7 @@ import {
 import AddIcon from '@mui/icons-material/Add'
 import BlockIcon from '@mui/icons-material/Block'
 import { useAdaptationStore } from '../model/adaptationStore'
+import { useCan } from '../../../entities/user'
 import { ReasonDialog } from '../../../shared/ui/ReasonDialog'
 import { chargeStateLabels, formatMoney } from '../../../shared/api'
 import { CreateAdaptationVisitModal } from './CreateAdaptationVisitModal'
@@ -36,6 +37,7 @@ export const AdaptationTab = ({ childId }: AdaptationTabProps) => {
   const setVoidTarget = useAdaptationStore((s) => s.setVoidTarget)
   const voidVisit = useAdaptationStore((s) => s.voidVisit)
   const isSaving = useAdaptationStore((s) => s.isSaving)
+  const canEdit = useCan('finance', 'edit')
 
   useEffect(() => {
     fetchVisits(childId)
@@ -46,9 +48,11 @@ export const AdaptationTab = ({ childId }: AdaptationTabProps) => {
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateVisitModal({ isOpen: true })}>
-          Додати відвідування
-        </Button>
+        {canEdit && (
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateVisitModal({ isOpen: true })}>
+            Додати відвідування
+          </Button>
+        )}
       </Box>
       <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
         <Table>
@@ -90,7 +94,7 @@ export const AdaptationTab = ({ childId }: AdaptationTabProps) => {
                     )}
                   </TableCell>
                   <TableCell align="right">
-                    {!v.voidedAt && (
+                    {canEdit && !v.voidedAt && (
                       <Tooltip title="Сторнувати">
                         <IconButton size="small" color="error" onClick={() => setVoidTarget(v)}>
                           <BlockIcon fontSize="small" />

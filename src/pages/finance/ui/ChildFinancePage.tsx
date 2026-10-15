@@ -5,6 +5,7 @@ import AddIcon from '@mui/icons-material/Add'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useChildFinanceStore } from '../model/childFinanceStore'
 import { formatMoney } from '../../../shared/api'
+import { useCan } from '../../../entities/user'
 import { CategoryTiles } from './CategoryTiles'
 import { ChargesTable } from './ChargesTable'
 import { PaymentsTable } from './PaymentsTable'
@@ -25,6 +26,7 @@ export const ChildFinancePage = () => {
   const fetchFinance = useChildFinanceStore((s) => s.fetchFinance)
   const setCreateChargeModal = useChildFinanceStore((s) => s.setCreateChargeModal)
   const setCreatePaymentModal = useChildFinanceStore((s) => s.setCreatePaymentModal)
+  const canEdit = useCan('finance', 'edit')
   const [tab, setTab] = useState(0)
 
   useEffect(() => {
@@ -68,12 +70,16 @@ export const ChildFinancePage = () => {
             </Typography>
           )}
         </Box>
-        <Button variant="outlined" startIcon={<AddIcon />} onClick={() => setCreateChargeModal({ isOpen: true })}>
-          Додати нарахування
-        </Button>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreatePaymentModal({ isOpen: true })}>
-          Внести оплату
-        </Button>
+        {canEdit && (
+          <Button variant="outlined" startIcon={<AddIcon />} onClick={() => setCreateChargeModal({ isOpen: true })}>
+            Додати нарахування
+          </Button>
+        )}
+        {canEdit && (
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreatePaymentModal({ isOpen: true })}>
+            Внести оплату
+          </Button>
+        )}
       </Box>
 
       <CategoryTiles categories={finance.categories} />

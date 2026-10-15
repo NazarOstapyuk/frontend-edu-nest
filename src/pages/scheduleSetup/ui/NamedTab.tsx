@@ -4,6 +4,7 @@ import AddIcon from '@mui/icons-material/Add'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { useScheduleSetupStore, type NamedKind } from '../model/scheduleSetupStore'
 import { NameDialog } from './NameDialog'
+import { useCan } from '../../../entities/user'
 import type { NamedItem } from '../../../shared/api'
 
 const titles: Record<NamedKind, { add: string; edit: string; empty: string }> = {
@@ -17,13 +18,14 @@ export const NamedTab = ({ kind }: { kind: NamedKind }) => {
   const isSaving = useScheduleSetupStore((s) => s.isSaving)
   const createNamed = useScheduleSetupStore((s) => s.createNamed)
   const updateNamed = useScheduleSetupStore((s) => s.updateNamed)
+  const canEdit = useCan('timetable', 'edit')
   const [editing, setEditing] = useState<NamedItem | 'new' | null>(null)
   const items = kind === 'subject' ? subjects : rooms
 
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setEditing('new')}>{titles[kind].add}</Button>
+        {canEdit && <Button variant="contained" startIcon={<AddIcon />} onClick={() => setEditing('new')}>{titles[kind].add}</Button>}
       </Box>
       <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflowX: 'auto' }}>
         <Table>
@@ -42,10 +44,10 @@ export const NamedTab = ({ kind }: { kind: NamedKind }) => {
                 <TableRow key={item.id} sx={{ opacity: item.active ? 1 : 0.5 }}>
                   <TableCell>{item.name}</TableCell>
                   <TableCell>
-                    <Switch checked={item.active} onChange={(e) => updateNamed(kind, item.id, { active: e.target.checked }).catch(() => undefined)} />
+                    <Switch checked={item.active} disabled={!canEdit} onChange={(e) => updateNamed(kind, item.id, { active: e.target.checked }).catch(() => undefined)} />
                   </TableCell>
                   <TableCell align="right">
-                    <IconButton size="small" onClick={() => setEditing(item)}><EditOutlinedIcon fontSize="small" /></IconButton>
+                    {canEdit && <IconButton size="small" onClick={() => setEditing(item)}><EditOutlinedIcon fontSize="small" /></IconButton>}
                   </TableCell>
                 </TableRow>
               ))

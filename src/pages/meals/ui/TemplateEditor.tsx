@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { Box, Button, Dialog, DialogTitle, Paper, Typography } from '@mui/material'
 import { useMealsStore } from '../model/mealsStore'
 import { DishPicker } from './DishPicker'
+import { useCan } from '../../../entities/user'
 import { isoWeekdayLabels, type MenuTemplate } from '../../../shared/api'
 
 type Item = { week: number; weekday: number; dishId: string }
 
 export const TemplateEditor = ({ template }: { template: MenuTemplate }) => {
+  const canEdit = useCan('meals', 'edit')
   const dishes = useMealsStore((s) => s.dishes)
   const isSaving = useMealsStore((s) => s.isSaving)
   const saveTemplateItems = useMealsStore((s) => s.saveTemplateItems)
@@ -41,8 +43,8 @@ export const TemplateEditor = ({ template }: { template: MenuTemplate }) => {
               <Paper
                 key={label}
                 elevation={0}
-                onClick={() => openCell(week, i + 1)}
-                sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: 1, minHeight: 80, cursor: 'pointer' }}
+                onClick={() => canEdit && openCell(week, i + 1)}
+                sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: 1, minHeight: 80, cursor: canEdit ? 'pointer' : 'default' }}
               >
                 <Typography variant="caption" sx={{ fontWeight: 700 }}>{label}</Typography>
                 {at(week, i + 1).map((item) => (
@@ -53,11 +55,13 @@ export const TemplateEditor = ({ template }: { template: MenuTemplate }) => {
           </Box>
         </Box>
       ))}
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-        <Button variant="contained" disabled={!dirty || isSaving} onClick={() => saveTemplateItems(template.id, items).catch(() => undefined)}>
-          Зберегти шаблон
-        </Button>
-      </Box>
+      {canEdit && (
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+          <Button variant="contained" disabled={!dirty || isSaving} onClick={() => saveTemplateItems(template.id, items).catch(() => undefined)}>
+            Зберегти шаблон
+          </Button>
+        </Box>
+      )}
       <Dialog open={cell !== null} onClose={() => setCell(null)} fullWidth maxWidth="sm">
         <DialogTitle sx={{ fontWeight: 700 }}>
           Тиждень {cell?.week}, {cell ? isoWeekdayLabels[cell.weekday - 1] : ''}

@@ -5,6 +5,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import { useCalendarStore } from '../model/calendarStore'
+import { useCan } from '../../../entities/user'
 import { CalendarDayModal } from './CalendarDayModal'
 import { ReasonDialog } from '../../../shared/ui/ReasonDialog'
 import { calendarDayTypeLabels, calendarScopeLabels, formatDay, type CalendarEntry } from '../../../shared/api'
@@ -13,6 +14,8 @@ const period = (e: CalendarEntry) =>
   e.startDate === e.endDate ? formatDay(e.startDate) : `${formatDay(e.startDate)} – ${formatDay(e.endDate)}`
 
 export const CalendarPage = () => {
+  const canEdit = useCan('register', 'edit')
+  const canEditSettings = useCan('settings', 'edit')
   const year = useCalendarStore((s) => s.year)
   const entries = useCalendarStore((s) => s.entries)
   const editDays = useCalendarStore((s) => s.editDays)
@@ -36,29 +39,33 @@ export const CalendarPage = () => {
 
   return (
     <Box>
-      <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: 2, mb: 3, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
-        <Typography sx={{ mr: 'auto' }}>Скільки днів назад вчитель може виправляти журнал</Typography>
-        <TextField
-          size="small"
-          type="number"
-          value={daysInput}
-          onChange={(e) => setDraft(e.target.value)}
-          error={daysInput !== '' && !daysValid}
-          helperText={daysInput !== '' && !daysValid ? 'Від 0 до 30' : undefined}
-          sx={{ width: 120 }}
-        />
-        <Button variant="outlined" disabled={!daysValid || isSaving || daysValue === editDays} onClick={() => saveEditDays(daysValue).then(() => setDraft(null)).catch(() => undefined)}>
-          Зберегти
-        </Button>
-      </Paper>
+      {canEditSettings && (
+        <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: 2, mb: 3, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Typography sx={{ mr: 'auto' }}>Скільки днів назад вчитель може виправляти журнал</Typography>
+          <TextField
+            size="small"
+            type="number"
+            value={daysInput}
+            onChange={(e) => setDraft(e.target.value)}
+            error={daysInput !== '' && !daysValid}
+            helperText={daysInput !== '' && !daysValid ? 'Від 0 до 30' : undefined}
+            sx={{ width: 120 }}
+          />
+          <Button variant="outlined" disabled={!daysValid || isSaving || daysValue === editDays} onClick={() => saveEditDays(daysValue).then(() => setDraft(null)).catch(() => undefined)}>
+            Зберегти
+          </Button>
+        </Paper>
+      )}
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
         <IconButton onClick={() => setYear(year - 1).catch(() => undefined)}><ChevronLeftIcon /></IconButton>
         <Typography variant="h6" sx={{ fontWeight: 700 }}>{year}</Typography>
         <IconButton onClick={() => setYear(year + 1).catch(() => undefined)}><ChevronRightIcon /></IconButton>
-        <Button variant="contained" startIcon={<AddIcon />} sx={{ ml: 'auto' }} onClick={() => setModalOpen(true)}>
-          Додати
-        </Button>
+        {canEdit && (
+          <Button variant="contained" startIcon={<AddIcon />} sx={{ ml: 'auto' }} onClick={() => setModalOpen(true)}>
+            Додати
+          </Button>
+        )}
       </Box>
 
       <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflowX: 'auto' }}>
@@ -87,9 +94,11 @@ export const CalendarPage = () => {
                   <TableCell>{e.scope === 'group' ? e.group?.name : calendarScopeLabels[e.scope]}</TableCell>
                   <TableCell>{e.title}</TableCell>
                   <TableCell align="right">
-                    <IconButton size="small" color="error" onClick={() => setVoiding(e)}>
-                      <DeleteOutlineIcon fontSize="small" />
-                    </IconButton>
+                    {canEdit && (
+                      <IconButton size="small" color="error" onClick={() => setVoiding(e)}>
+                        <DeleteOutlineIcon fontSize="small" />
+                      </IconButton>
+                    )}
                   </TableCell>
                 </TableRow>
               ))

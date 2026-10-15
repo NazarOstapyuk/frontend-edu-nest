@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Alert, Box, Button, Chip, MenuItem, Paper, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from '@mui/material'
 import { useScheduleStore, isEditableVersion } from '../model/scheduleStore'
 import { EntryModal } from './EntryModal'
+import { useCan } from '../../../entities/user'
 import { addDaysIso, conflictText, formatDay, localToday, weekParityLabels, weekdayLabels, type TimetableEntry } from '../../../shared/api'
 
 const WEEKDAYS = [1, 2, 3, 4, 5, 6]
@@ -32,7 +33,8 @@ export const TimetableTab = () => {
     () => bellSchedules.find((b) => b.id === cls?.bellScheduleId)?.periods ?? [],
     [bellSchedules, cls?.bellScheduleId],
   )
-  const editable = isEditableVersion(versionId, versions)
+  const canEdit = useCan('timetable', 'edit')
+  const editable = canEdit && isEditableVersion(versionId, versions)
   const name = (list: { id: string; name: string }[], id: string | null) => (id ? (list.find((x) => x.id === id)?.name ?? '') : '')
   const teacherName = (id: string) => {
     const t = teachers.find((x) => x.id === id)
@@ -53,13 +55,13 @@ export const TimetableTab = () => {
           ))}
           {versionId === 'new' && <MenuItem value="new">Нова з {formatDay(newValidFrom)}</MenuItem>}
         </TextField>
-        <TextField size="small" type="date" label="Нова версія з" value={validFrom} onChange={(e) => setValidFrom(e.target.value)} slotProps={{ inputLabel: { shrink: true } }} />
-        <Button variant="outlined" disabled={!validFrom} onClick={() => startNewVersion(validFrom)}>Нова версія</Button>
+        {canEdit && <TextField size="small" type="date" label="Нова версія з" value={validFrom} onChange={(e) => setValidFrom(e.target.value)} slotProps={{ inputLabel: { shrink: true } }} />}
+        {canEdit && <Button variant="outlined" disabled={!validFrom} onClick={() => startNewVersion(validFrom)}>Нова версія</Button>}
         {editable && (
           <Button variant="contained" disabled={isSaving} onClick={() => saveVersion().catch(() => undefined)} sx={{ ml: 'auto' }}>Зберегти</Button>
         )}
       </Box>
-      {!editable && versionId && <Alert severity="info" sx={{ mb: 2 }}>Ця версія вже діє. Щоб змінити розклад, створіть нову версію з потрібної дати.</Alert>}
+      {canEdit && !editable && versionId && <Alert severity="info" sx={{ mb: 2 }}>Ця версія вже діє. Щоб змінити розклад, створіть нову версію з потрібної дати.</Alert>}
       {versions.length === 0 && versionId === null && <Typography color="text.secondary" sx={{ mb: 2 }}>Розкладу ще немає. Створіть першу версію.</Typography>}
       {conflicts.length > 0 && (
         <Alert severity="error" sx={{ mb: 2 }}>

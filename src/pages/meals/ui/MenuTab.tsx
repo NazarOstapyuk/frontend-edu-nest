@@ -6,11 +6,13 @@ import { useMealsStore } from '../model/mealsStore'
 import { MenuDayDialog } from './MenuDayDialog'
 import { CopyMenuDialog } from './CopyMenuDialog'
 import { ApplyTemplateDialog } from './ApplyTemplateDialog'
+import { useCan } from '../../../entities/user'
 import {
   addDaysIso, formatDay, groupKindLabels, groupKinds, isoWeekdayLabels, menuStatusLabels, type GroupKind, type MenuDayView,
 } from '../../../shared/api'
 
 export const MenuTab = () => {
+  const canEdit = useCan('meals', 'edit')
   const kind = useMealsStore((s) => s.menuKind)
   const start = useMealsStore((s) => s.menuStart)
   const weeks = useMealsStore((s) => s.menuWeeks)
@@ -47,10 +49,10 @@ export const MenuTab = () => {
           <ToggleButton value={4}>4 тижні</ToggleButton>
         </ToggleButtonGroup>
         <Box sx={{ flex: 1 }} />
-        <Button onClick={() => setDialog('apply')}>Застосувати шаблон</Button>
-        <Button onClick={() => setDialog('copy')}>Копіювати</Button>
-        <Button disabled={isSaving} onClick={() => unpublishPeriod().catch(() => undefined)}>Зняти публікацію</Button>
-        <Button variant="contained" disabled={isSaving} onClick={() => publishPeriod().catch(() => undefined)}>Опублікувати період</Button>
+        {canEdit && <Button onClick={() => setDialog('apply')}>Застосувати шаблон</Button>}
+        {canEdit && <Button onClick={() => setDialog('copy')}>Копіювати</Button>}
+        {canEdit && <Button disabled={isSaving} onClick={() => unpublishPeriod().catch(() => undefined)}>Зняти публікацію</Button>}
+        {canEdit && <Button variant="contained" disabled={isSaving} onClick={() => publishPeriod().catch(() => undefined)}>Опублікувати період</Button>}
       </Box>
 
       {failed && key === `${kind}/${start}/${weeks}` ? (
@@ -64,11 +66,11 @@ export const MenuTab = () => {
               <Paper
                 key={day.date}
                 elevation={0}
-                onClick={() => day.working && setEditing(day)}
+                onClick={() => canEdit && day.working && setEditing(day)}
                 sx={{
                   border: '1px solid', borderColor: 'divider', borderRadius: 2, p: 1, minHeight: 120,
                   bgcolor: day.working ? 'background.paper' : 'grey.50',
-                  cursor: day.working ? 'pointer' : 'default',
+                  cursor: canEdit && day.working ? 'pointer' : 'default',
                 }}
               >
                 <Typography variant="body2" sx={{ fontWeight: 700 }}>{isoWeekdayLabels[i]} {formatDay(day.date)}</Typography>

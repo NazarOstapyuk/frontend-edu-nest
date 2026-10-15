@@ -20,39 +20,39 @@ import TuneIcon from '@mui/icons-material/Tune'
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote'
 import type { SvgIconComponent } from '@mui/icons-material'
 import type { SessionRole } from '../../../entities/user'
+import type { PermissionArea } from '../../../shared/api'
 
 export interface NavItem {
   label: string
   icon: SvgIconComponent
   path: string
   roles?: SessionRole[]
+  area?: PermissionArea
   badge?: 'pendingNotices'
 }
 
-const ADMIN: SessionRole[] = ['root', 'admin']
-
 export const navItems: NavItem[] = [
   { path: '/',                    label: 'Дашборд',           icon: DashboardIcon },
-  { path: '/register',            label: 'Журнал',            icon: FactCheckIcon,      roles: ['root', 'admin', 'teacher'] },
-  { path: '/schedule',           label: 'Розклад',           icon: ViewWeekIcon,       roles: ADMIN },
-  { path: '/meals',              label: 'Харчування',        icon: RestaurantIcon,     roles: ADMIN },
-  { path: '/payroll',            label: 'Зарплати',          icon: PaymentsIcon,       roles: ADMIN },
-  { path: '/absence-notices',     label: 'Повідомлення',      icon: MarkEmailUnreadIcon, roles: ADMIN, badge: 'pendingNotices' },
-  { path: '/users',               label: 'Користувачі',       icon: ManageAccountsIcon, roles: ADMIN },
-  { path: '/groups',              label: 'Групи',             icon: GroupsIcon,         roles: ADMIN },
-  { path: '/students',            label: 'Учні',              icon: PeopleIcon,         roles: ADMIN },
-  { path: '/finance',             label: 'Фінанси',           icon: AccountBalanceWalletIcon, roles: ADMIN },
-  { path: '/tariffs',             label: 'Тарифи',            icon: PriceChangeIcon,    roles: ADMIN },
-  { path: '/classes',             label: 'Гуртки',            icon: CastleIcon,         roles: ADMIN },
+  { path: '/register',            label: 'Журнал',            icon: FactCheckIcon,      roles: ['teacher'], area: 'register' },
+  { path: '/schedule',           label: 'Розклад',           icon: ViewWeekIcon,       area: 'timetable' },
+  { path: '/meals',              label: 'Харчування',        icon: RestaurantIcon,     area: 'meals' },
+  { path: '/payroll',            label: 'Зарплати',          icon: PaymentsIcon,       area: 'payroll' },
+  { path: '/absence-notices',     label: 'Повідомлення',      icon: MarkEmailUnreadIcon, area: 'register', badge: 'pendingNotices' },
+  { path: '/users',               label: 'Користувачі',       icon: ManageAccountsIcon, area: 'users' },
+  { path: '/groups',              label: 'Групи',             icon: GroupsIcon,         area: 'children' },
+  { path: '/students',            label: 'Учні',              icon: PeopleIcon,         area: 'children' },
+  { path: '/finance',             label: 'Фінанси',           icon: AccountBalanceWalletIcon, area: 'finance' },
+  { path: '/tariffs',             label: 'Тарифи',            icon: PriceChangeIcon,    area: 'tariffs' },
+  { path: '/classes',             label: 'Гуртки',            icon: CastleIcon,         area: 'classes' },
   { path: '/my-classes',          label: 'Мої заняття',       icon: EventAvailableIcon, roles: ['teacher'] },
   { path: '/my-lessons',         label: 'Мої уроки',         icon: MenuBookIcon,       roles: ['teacher'] },
   { path: '/my-payroll',         label: 'Моя зарплата',      icon: RequestQuoteIcon,   roles: ['teacher'] },
-  { path: '/calendar',            label: 'Календар',          icon: CalendarMonthIcon,  roles: ADMIN },
-  { path: '/schedule-setup',     label: 'Довідники розкладу', icon: TuneIcon,          roles: ADMIN },
-  { path: '/absence-reasons',     label: 'Причини відсутності', icon: PlaylistAddCheckIcon, roles: ADMIN },
+  { path: '/calendar',            label: 'Календар',          icon: CalendarMonthIcon,  area: 'register' },
+  { path: '/schedule-setup',     label: 'Довідники розкладу', icon: TuneIcon,          area: 'timetable' },
+  { path: '/absence-reasons',     label: 'Причини відсутності', icon: PlaylistAddCheckIcon, area: 'register' },
 ]
 
 export const bottomNavItems: NavItem[] = [
-  { path: '/backups', label: 'Резервні копії', icon: BackupIcon, roles: ADMIN },
-  { path: '/settings', label: 'Налаштування', icon: SettingsIcon, roles: ADMIN },
+  { path: '/backups', label: 'Резервні копії', icon: BackupIcon, area: 'backups' },
+  { path: '/settings', label: 'Налаштування', icon: SettingsIcon, area: 'settings' },
 ]

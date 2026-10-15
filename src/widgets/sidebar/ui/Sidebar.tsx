@@ -62,9 +62,10 @@ export const Sidebar = () => {
     if (canSeeRegister) refreshPending().catch(() => undefined)
   }, [canSeeRegister, refreshPending])
   const visible = (item: NavItem) =>
-    (!item.roles && !item.area) ||
+    (!item.roles && !item.area && !item.areas) ||
     (role !== undefined && !!item.roles?.includes(role)) ||
-    (!!item.area && canAccess(profile, item.area, 'view'))
+    (!!item.area && canAccess(profile, item.area, 'view')) ||
+    !!item.areas?.some((a) => canAccess(profile, a, 'view'))
 
   return (
     <Drawer

@@ -98,6 +98,7 @@ export const errorMessages: Record<string, string> = {
   'Absence reason already exists': 'Така причина вже існує',
   'Child is not in this group': 'Дитина не належить до цієї групи',
   'Invalid period': 'Неправильний період',
+  'Period too long': 'Період задовгий (максимум 366 днів)',
   'Group is required for group scope': 'Групу вказують лише для запису «Одна група»',
   'Notice overlaps an existing notice': 'На ці дні вже є повідомлення',
   'Notice period is too long': 'Період не може перевищувати 60 днів',

@@ -21,6 +21,7 @@ import { MealsPage } from '../../pages/meals'
 import { PayrollPage } from '../../pages/payroll'
 import { BackupsPage } from '../../pages/backups'
 import { AuditPage } from '../../pages/audit'
+import { ReportsPage } from '../../pages/reports'
 import { RegisterPage } from '../../pages/register'
 import { AbsenceNoticesPage } from '../../pages/absenceNotices'
 import { MyLessonsPage } from '../../pages/myLessons'
@@ -96,7 +97,7 @@ export const router = createBrowserRouter([
                   { path: 'backups', element: <BackupsPage /> },
                   { path: 'audit', element: <AuditPage /> },
                   { path: 'grades',    element: <EmptyPage title="Оцінки" /> },
-                  { path: 'reports',   element: <EmptyPage title="Звіти" /> },
+                  { path: 'reports',   element: <ReportsPage /> },
                   { path: 'settings',  element: <EmptyPage title="Налаштування" /> },
                   { path: '*',         element: <Navigate to="/" replace /> },
                 ],

@@ -308,4 +308,17 @@ export type {
   AuditEventsQuery,
   AuthEventsQuery,
 } from './audit';
+export { reportsApi, reportDefinitions, formatCell } from './reports';
+export type {
+  ReportKey,
+  ColumnType,
+  ReportColumn,
+  Cell,
+  ReportRow,
+  ReportSheet,
+  Report,
+  ReportQuery,
+  ReportFilter,
+  ReportDefinition,
+} from './reports';
 export { softList } from './softList';

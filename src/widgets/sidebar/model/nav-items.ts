@@ -19,6 +19,7 @@ import RestaurantIcon from '@mui/icons-material/Restaurant'
 import MenuBookIcon from '@mui/icons-material/MenuBook'
 import TuneIcon from '@mui/icons-material/Tune'
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote'
+import AssessmentIcon from '@mui/icons-material/Assessment'
 import type { SvgIconComponent } from '@mui/icons-material'
 import type { SessionRole } from '../../../entities/user'
 import type { PermissionArea } from '../../../shared/api'
@@ -29,6 +30,7 @@ export interface NavItem {
   path: string
   roles?: SessionRole[]
   area?: PermissionArea
+  areas?: PermissionArea[]
   badge?: 'pendingNotices'
 }
 
@@ -48,6 +50,7 @@ export const navItems: NavItem[] = [
   { path: '/my-classes',          label: 'Мої заняття',       icon: EventAvailableIcon, roles: ['teacher'] },
   { path: '/my-lessons',         label: 'Мої уроки',         icon: MenuBookIcon,       roles: ['teacher'] },
   { path: '/my-payroll',         label: 'Моя зарплата',      icon: RequestQuoteIcon,   roles: ['teacher'] },
+  { path: '/reports',           label: 'Звіти',             icon: AssessmentIcon,     areas: ['finance', 'register', 'timetable', 'classes', 'meals', 'payroll'] },
   { path: '/calendar',            label: 'Календар',          icon: CalendarMonthIcon,  area: 'register' },
   { path: '/schedule-setup',     label: 'Довідники розкладу', icon: TuneIcon,          area: 'timetable' },
   { path: '/absence-reasons',     label: 'Причини відсутності', icon: PlaylistAddCheckIcon, area: 'register' },

@@ -58,6 +58,8 @@ Access control: staff permissions come from `GET /auth/me` (`permissions`: area 
 
 Audit log: `pages/audit` (tabs «Дії» with event details and field changes, «Входи»), `widgets/auditHistory` (changes table and the per-object history dialog). API in `shared/api/audit.ts`; `actionLabel(route)` maps routes to Ukrainian labels. Visible with permission area `audit`.
 
+Reports: `pages/reports` (one page with a tab per report: payments, charges, debts, attendance, lessons, meals, payroll; period presets, kind/group/child/teacher filters, table with totals, extra sheets as tabs, «Завантажити Excel»). API in `shared/api/reports.ts`; `reportDefinitions` lists the reports with their permission areas and filters (the menu item is shown to anyone with one of those areas). Cells arrive typed (money = 2-decimal string, date = `YYYY-MM-DD`, percent = fraction); `formatCell` only formats them, never recompute totals. The Excel file name is built on the client because `Content-Disposition` is not exposed cross-origin.
+
 Imports go top-down: `app → pages → widgets → entities → shared`. From outside a module, import through its `index.ts`.
 
 Legacy: `pages/children` and `pages/groups` import `pages/users/model/usersStore` and `pages/groups/model/groupsStore` directly. Don't add new cross-page store imports. Data needed by several pages (lists of users, groups, etc.) goes to `entities/<entity>/model/`.

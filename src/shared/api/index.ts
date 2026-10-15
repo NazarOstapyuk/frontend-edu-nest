@@ -292,6 +292,7 @@ export {
   auditApi,
   authTypeLabels,
   authReasonLabels,
+  changeActionLabels,
   entityTypeLabels,
   actionLabel,
 } from './audit';

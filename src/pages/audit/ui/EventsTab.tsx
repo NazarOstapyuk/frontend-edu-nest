@@ -1,6 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Alert,
+  Autocomplete,
   Button,
   Chip,
   FormControlLabel,
@@ -17,7 +18,8 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { actionLabel, entityTypeLabels } from '../../../shared/api'
+import { actionLabel, entityTypeLabels, softList, usersApi } from '../../../shared/api'
+import type { User } from '../../../entities/user'
 import { useAuditStore } from '../model/auditStore'
 
 const PAGE_SIZE = 50
@@ -29,6 +31,17 @@ export const EventsTab = () => {
   const loadEvents = useAuditStore((s) => s.loadEvents)
   const setQuery = useAuditStore((s) => s.setEventsQuery)
   const openEvent = useAuditStore((s) => s.openEvent)
+  const [staff, setStaff] = useState<User[]>([])
+
+  useEffect(() => {
+    let stale = false
+    softList(usersApi.getList()).then((users) => {
+      if (!stale) setStaff(users.filter((u) => u.role !== 'parent'))
+    })
+    return () => {
+      stale = true
+    }
+  }, [])
 
   useEffect(() => {
     loadEvents().catch(() => undefined)
@@ -73,6 +86,15 @@ export const EventsTab = () => {
             </MenuItem>
           ))}
         </TextField>
+        <Autocomplete
+          size="small"
+          sx={{ minWidth: 240 }}
+          options={staff}
+          getOptionLabel={(u) => `${u.lastName} ${u.firstName}`}
+          value={staff.find((u) => u.id === query.actorId) ?? null}
+          onChange={(_, user) => update({ actorId: user?.id })}
+          renderInput={(params) => <TextField {...params} label="Користувач" />}
+        />
         <FormControlLabel
           label="Лише помилки"
           control={

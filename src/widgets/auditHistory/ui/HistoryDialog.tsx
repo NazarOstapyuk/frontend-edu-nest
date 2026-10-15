@@ -10,17 +10,10 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { auditApi, formatDateTime, type AuditChange } from '../../../shared/api'
+import { auditApi, changeActionLabels, formatDateTime, type AuditChange } from '../../../shared/api'
 import { ChangesTable } from './ChangesTable'
 
 const PAGE_SIZE = 50
-
-const changeActionLabels: Record<AuditChange['action'], string> = {
-  create: 'Створено',
-  update: 'Змінено',
-  delete: 'Видалено',
-  void: 'Анульовано',
-}
 
 interface Loaded {
   key: string

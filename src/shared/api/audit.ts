@@ -43,6 +43,13 @@ export interface AuditEventDetail extends AuditEvent {
   changes: AuditChange[];
 }
 
+export const changeActionLabels: Record<AuditChange['action'], string> = {
+  create: 'Створено',
+  update: 'Змінено',
+  delete: 'Видалено',
+  void: 'Анульовано',
+};
+
 export type AuthEventType =
   | 'login_success'
   | 'login_failed'

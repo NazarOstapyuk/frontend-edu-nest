@@ -1,14 +1,7 @@
-import { Alert, Box, Dialog, DialogContent, DialogTitle, Stack, Typography } from '@mui/material'
-import { actionLabel, entityTypeLabels } from '../../../shared/api'
+import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from '@mui/material'
+import { actionLabel, changeActionLabels, entityTypeLabels } from '../../../shared/api'
 import { ChangesTable } from '../../../widgets/auditHistory'
 import { useAuditStore } from '../model/auditStore'
-
-const changeActionLabels = {
-  create: 'створено',
-  update: 'змінено',
-  delete: 'видалено',
-  void: 'анульовано',
-}
 
 export const EventDialog = () => {
   const selectedId = useAuditStore((s) => s.selectedId)
@@ -63,6 +56,9 @@ export const EventDialog = () => {
           </Stack>
         )}
       </DialogContent>
+      <DialogActions>
+        <Button onClick={closeEvent}>Закрити</Button>
+      </DialogActions>
     </Dialog>
   )
 }

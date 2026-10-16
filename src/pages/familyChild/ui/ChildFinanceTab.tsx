@@ -1,6 +1,7 @@
-import { Fragment, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import {
   Box,
+  Button,
   Chip,
   Collapse,
   IconButton,
@@ -19,10 +20,13 @@ import {
   financeCategoryLabels,
   formatDay,
   formatMoney,
+  onlinePaymentsApi,
   paymentMethodLabels,
   type CabinetFinance,
   type CabinetPayment,
+  type FinanceCategory,
 } from '../../../shared/api'
+import { PayDialog } from './PayDialog'
 
 const stateColor = { paid: 'success', partial: 'warning', unpaid: 'error' } as const
 
@@ -63,7 +67,17 @@ const PaymentRow = ({ payment }: { payment: CabinetPayment }) => {
   )
 }
 
-export const ChildFinanceTab = ({ finance }: { finance: CabinetFinance }) => {
+export const ChildFinanceTab = ({ childId, finance }: { childId: string; finance: CabinetFinance }) => {
+  const [enabled, setEnabled] = useState(false)
+  const [payCategory, setPayCategory] = useState<{ category: FinanceCategory; due: string } | null>(null)
+
+  useEffect(() => {
+    onlinePaymentsApi
+      .config()
+      .then(({ data }) => setEnabled(data.enabled))
+      .catch(() => setEnabled(false))
+  }, [])
+
   const active = finance.summary.filter((s) => Number(s.due) > 0 || Number(s.prepayment) > 0)
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -74,6 +88,11 @@ export const ChildFinanceTab = ({ finance }: { finance: CabinetFinance }) => {
             <Typography color={Number(s.due) > 0 ? 'error.main' : 'text.primary'}>До оплати: {formatMoney(s.due)} грн</Typography>
             {Number(s.overdue) > 0 && <Typography variant="body2" color="error.main">Прострочено: {formatMoney(s.overdue)} грн</Typography>}
             {Number(s.prepayment) > 0 && <Typography variant="body2" color="text.secondary">Передоплата: {formatMoney(s.prepayment)} грн</Typography>}
+            {enabled && (
+              <Button variant="contained" size="small" sx={{ mt: 1 }} onClick={() => setPayCategory({ category: s.category, due: s.due })}>
+                Оплатити
+              </Button>
+            )}
           </Paper>
         ))}
         {Number(finance.unallocated) > 0 && (
@@ -143,6 +162,9 @@ export const ChildFinanceTab = ({ finance }: { finance: CabinetFinance }) => {
           </TableBody>
         </Table>
       </Paper>
+      {payCategory && (
+        <PayDialog childId={childId} category={payCategory.category} due={payCategory.due} onClose={() => setPayCategory(null)} />
+      )}
     </Box>
   )
 }

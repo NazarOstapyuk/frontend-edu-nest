@@ -1,7 +1,7 @@
 import { axiosInstance } from './axiosInstance';
 
 export type FinanceCategory = 'tuition' | 'adaptation' | 'extra_classes' | 'meals';
-export type PaymentMethod = 'cash' | 'bank_transfer' | 'online';
+export type PaymentMethod = 'cash' | 'bank_transfer' | 'card' | 'online';
 export type ManualPaymentMethod = Exclude<PaymentMethod, 'online'>;
 export type ChargeState = 'unpaid' | 'partial' | 'paid';
 export type FinanceEventType =
@@ -24,6 +24,7 @@ export const financeCategories = Object.keys(financeCategoryLabels) as FinanceCa
 export const paymentMethodLabels: Record<PaymentMethod, string> = {
   cash: 'Готівка',
   bank_transfer: 'Банківський переказ',
+  card: 'Картка',
   online: 'Онлайн',
 };
 

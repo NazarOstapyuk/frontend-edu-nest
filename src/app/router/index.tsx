@@ -34,11 +34,20 @@ import { FamilyPage } from '../../pages/family'
 import { FamilyChildPage } from '../../pages/familyChild'
 import { EmptyPage } from '../../shared/ui/EmptyPage'
 import { LoginPage } from '../../pages/login'
+import { PayLinkPage, TestBankPage } from '../../pages/pay'
 
 export const router = createBrowserRouter([
   {
     path: '/login',
     element: <LoginPage />,
+  },
+  {
+    path: '/pay/test/:invoiceId',
+    element: <TestBankPage />,
+  },
+  {
+    path: '/pay/:token',
+    element: <PayLinkPage />,
   },
   {
     path: '/',

@@ -321,4 +321,6 @@ export type {
   ReportFilter,
   ReportDefinition,
 } from './reports';
+export { onlinePaymentsApi, payAmountError, invoiceStatusLabels, linkStateLabels, requestSourceLabels } from './onlinePayments';
+export type { InvoiceStatus, LinkState, RequestSource, PaymentRequestView, PublicLink, PayCategoryDto, CreateLinkDto } from './onlinePayments';
 export { softList } from './softList';

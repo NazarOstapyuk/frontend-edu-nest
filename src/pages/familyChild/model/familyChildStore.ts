@@ -8,6 +8,7 @@ interface FamilyChildState {
   isLoading: boolean;
   error: 'notFound' | 'failed' | null;
   fetchChild: (childId: string) => Promise<void>;
+  reloadFinance: (childId: string) => Promise<void>;
 }
 
 export const useFamilyChildStore = create<FamilyChildState>((set, get) => ({
@@ -16,6 +17,10 @@ export const useFamilyChildStore = create<FamilyChildState>((set, get) => ({
   finance: null,
   isLoading: false,
   error: null,
+  reloadFinance: async (childId) => {
+    const { data: finance } = await parentCabinetApi.getFinance(childId);
+    if (get().childId === childId) set({ finance });
+  },
   fetchChild: async (childId) => {
     set({ childId, card: null, finance: null, isLoading: true, error: null });
     try {

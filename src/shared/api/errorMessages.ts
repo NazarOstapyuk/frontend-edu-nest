@@ -206,6 +206,13 @@ export const errorMessages: Record<string, string> = {
   'Root access cannot be changed': 'Доступ головного адміністратора не змінюється',
   'Access applies to staff only': 'Доступ налаштовується лише для персоналу',
   'Duplicate permission': 'Розділ повторюється',
+  'Online payments are disabled': 'Онлайн-оплата вимкнена',
+  'Payment link not found': 'Посилання не знайдено',
+  'Payment link expired': 'Посилання прострочене',
+  'Payment request is not open': 'Запит на оплату вже закритий',
+  'Payment request not found': 'Запит на оплату не знайдено',
+  'Payment provider error': 'Помилка платіжної системи. Спробуйте пізніше',
+  'Invoice not found': 'Оплату не знайдено',
   'Cannot manage this user': 'Немає прав керувати цим користувачем',
 };
 

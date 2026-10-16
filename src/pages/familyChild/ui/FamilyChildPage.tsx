@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Box, Button, IconButton, Tab, Tabs, Typography } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useFamilyChildStore } from '../model/familyChildStore'
@@ -8,6 +8,7 @@ import { ScheduleTab } from './ScheduleTab'
 import { AttendanceTab } from './AttendanceTab'
 import { MealsTab } from './MealsTab'
 import { ChildFinanceTab } from './ChildFinanceTab'
+import { PaymentReturnBanner } from './PaymentReturnBanner'
 
 export const FamilyChildPage = () => {
   const { childId } = useParams<{ childId: string }>()
@@ -17,7 +18,10 @@ export const FamilyChildPage = () => {
   const storeChildId = useFamilyChildStore((s) => s.childId)
   const error = useFamilyChildStore((s) => s.error)
   const fetchChild = useFamilyChildStore((s) => s.fetchChild)
-  const [tab, setTab] = useState(0)
+  const reloadFinance = useFamilyChildStore((s) => s.reloadFinance)
+  const [searchParams] = useSearchParams()
+  const [returnInvoice] = useState(() => searchParams.get('invoice'))
+  const [tab, setTab] = useState(returnInvoice ? 4 : 0)
 
   useEffect(() => {
     if (childId) fetchChild(childId).catch(() => undefined)
@@ -48,6 +52,9 @@ export const FamilyChildPage = () => {
           {[card.lastName, card.firstName, card.middleName].filter(Boolean).join(' ')}
         </Typography>
       </Box>
+      {returnInvoice && (
+        <PaymentReturnBanner invoiceId={returnInvoice} onSuccess={() => reloadFinance(card.id).catch(() => undefined)} />
+      )}
       <Tabs value={tab} onChange={(_, v: number) => setTab(v)} variant="scrollable" sx={{ mb: 2 }}>
         <Tab label="Картка" />
         <Tab label="Розклад" />
@@ -59,7 +66,7 @@ export const FamilyChildPage = () => {
       {tab === 1 && <ScheduleTab childId={card.id} />}
       {tab === 2 && <AttendanceTab childId={card.id} visits={card.visits} />}
       {tab === 3 && <MealsTab childId={card.id} />}
-      {tab === 4 && <ChildFinanceTab finance={finance} />}
+      {tab === 4 && <ChildFinanceTab childId={card.id} finance={finance} />}
     </Box>
   )
 }

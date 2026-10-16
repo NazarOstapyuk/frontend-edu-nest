@@ -19,7 +19,7 @@ import {
   type SuggestionLine,
 } from '../../../shared/api'
 
-const manualMethods: ManualPaymentMethod[] = ['cash', 'bank_transfer']
+const manualMethods: ManualPaymentMethod[] = ['cash', 'bank_transfer', 'card']
 
 const schema = yup.object({
   amount: amountSchema,

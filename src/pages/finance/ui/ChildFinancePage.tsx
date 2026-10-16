@@ -17,6 +17,8 @@ import { AllocateModal } from './AllocateModal'
 import { EnrollmentsTab } from './EnrollmentsTab'
 import { AdaptationTab } from './AdaptationTab'
 import { PackagesTab } from './PackagesTab'
+import { OnlinePaymentsTab } from './OnlinePaymentsTab'
+import { PaymentLinkModal } from './PaymentLinkModal'
 import { HistoryButton } from '../../../widgets/auditHistory'
 
 export const ChildFinancePage = () => {
@@ -31,6 +33,8 @@ export const ChildFinancePage = () => {
   const canTariffs = useCan('tariffs', 'view')
   const canClasses = useCan('classes', 'view')
   const [selected, setSelected] = useState('charges')
+  const [linkOpen, setLinkOpen] = useState(false)
+  const [onlineVersion, setOnlineVersion] = useState(0)
 
   useEffect(() => {
     if (childId) fetchFinance(childId)
@@ -47,6 +51,7 @@ export const ChildFinancePage = () => {
     ...(canTariffs ? [{ key: 'enrollments', label: 'Абонементи' }] : []),
     ...(canClasses ? [{ key: 'packages', label: 'Пакети' }] : []),
     ...(canTariffs ? [{ key: 'adaptation', label: 'Адаптація' }] : []),
+    { key: 'online', label: 'Онлайн-оплати' },
     { key: 'history', label: 'Історія' },
   ]
   const tab = tabs.some((t) => t.key === selected) ? selected : tabs[0].key
@@ -93,6 +98,11 @@ export const ChildFinancePage = () => {
           </Button>
         )}
         {canEdit && (
+          <Button variant="outlined" onClick={() => setLinkOpen(true)}>
+            Посилання на оплату
+          </Button>
+        )}
+        {canEdit && (
           <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreatePaymentModal({ isOpen: true })}>
             Внести оплату
           </Button>
@@ -112,7 +122,16 @@ export const ChildFinancePage = () => {
       {tab === 'enrollments' && <EnrollmentsTab childId={finance.child.id} />}
       {tab === 'packages' && <PackagesTab childId={finance.child.id} />}
       {tab === 'adaptation' && <AdaptationTab childId={finance.child.id} />}
+      {tab === 'online' && <OnlinePaymentsTab key={onlineVersion} childId={finance.child.id} />}
       {tab === 'history' && <HistoryTable events={history} />}
+      {linkOpen && (
+        <PaymentLinkModal
+          childId={finance.child.id}
+          categories={finance.categories}
+          onClose={() => setLinkOpen(false)}
+          onCreated={() => setOnlineVersion((v) => v + 1)}
+        />
+      )}
       <CreateChargeModal />
       <VoidModal />
       <CreatePaymentModal />

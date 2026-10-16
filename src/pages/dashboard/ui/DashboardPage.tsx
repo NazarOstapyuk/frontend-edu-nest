@@ -10,6 +10,7 @@ import RequestQuoteIcon from '@mui/icons-material/RequestQuote'
 import BackupIcon from '@mui/icons-material/Backup'
 import { dashboardApi, formatMoney } from '../../../shared/api'
 import type { DashboardPaymentMethod, TodayDashboard } from '../../../shared/api'
+import { useCan } from '../../../entities/user'
 import { DashboardCard } from './DashboardCard'
 
 const methodLabels: Record<DashboardPaymentMethod, string> = {
@@ -45,6 +46,7 @@ const Calm = ({ children }: { children: string }) => (
 const hasCards = (data: TodayDashboard) => Object.keys(data).some((key) => key !== 'date')
 
 export const DashboardPage = () => {
+  const canViewMeals = useCan('meals', 'view')
   const [data, setData] = useState<TodayDashboard | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isFailed, setIsFailed] = useState(false)
@@ -131,7 +133,7 @@ export const DashboardPage = () => {
             <DashboardCard to="/finance" title="Прострочені борги" icon={MoneyOffIcon} alert={debts.children > 0}>
               {debts.children > 0 ? (
                 <>
-                  <Value>{`${formatMoney(debts.amount)} грн`}</Value>
+                  <Value>{formatMoney(debts.amount)}</Value>
                   <Detail>{`Дітей: ${debts.children}`}</Detail>
                 </>
               ) : (
@@ -142,7 +144,7 @@ export const DashboardPage = () => {
         )}
         {meals && (
           <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <DashboardCard to="/meals" title="Обіди сьогодні" icon={RestaurantIcon} alert={false}>
+            <DashboardCard to={canViewMeals ? '/meals' : '/register'} title="Обіди сьогодні" icon={RestaurantIcon} alert={false}>
               <Value>{String(meals.count)}</Value>
               {meals.groups.map((group) => (
                 <Detail key={group.name}>{`${group.name}: ${group.count}`}</Detail>
@@ -153,9 +155,9 @@ export const DashboardPage = () => {
         {payments && (
           <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <DashboardCard to="/reports" title="Оплати сьогодні" icon={PaymentsIcon} alert={false}>
-              <Value>{`${formatMoney(payments.total)} грн`}</Value>
+              <Value>{formatMoney(payments.total)}</Value>
               {methodOrder.map((method) => (
-                <Detail key={method}>{`${methodLabels[method]}: ${formatMoney(payments.byMethod[method])} грн`}</Detail>
+                <Detail key={method}>{`${methodLabels[method]}: ${formatMoney(payments.byMethod[method])}`}</Detail>
               ))}
             </DashboardCard>
           </Grid>

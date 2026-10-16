@@ -8,11 +8,10 @@ interface DashboardCardProps {
   title: string
   icon: SvgIconComponent
   alert: boolean
-  value?: string
   children?: ReactNode
 }
 
-export const DashboardCard = ({ to, title, icon: Icon, alert, value, children }: DashboardCardProps) => {
+export const DashboardCard = ({ to, title, icon: Icon, alert, children }: DashboardCardProps) => {
   const tone = alert ? { color: '#e65100', bg: '#fff3e0' } : { color: '#2e7d32', bg: '#e8f5e9' }
   return (
     <Paper
@@ -53,11 +52,6 @@ export const DashboardCard = ({ to, title, icon: Icon, alert, value, children }:
         <Typography variant="body2" color="text.secondary">
           {title}
         </Typography>
-        {value && (
-          <Typography variant="h5" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
-            {value}
-          </Typography>
-        )}
         {children}
       </Box>
     </Paper>

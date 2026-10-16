@@ -57,7 +57,7 @@ const PaymentRow = ({ payment }: { payment: CabinetPayment }) => {
             <Box sx={{ py: 1 }}>
               {payment.allocations.length === 0 && <Typography variant="body2" color="text.secondary">Ще не розподілено</Typography>}
               {payment.allocations.map((a) => (
-                <Typography key={a.chargeId} variant="body2">{a.description}: {formatMoney(a.amount)} грн</Typography>
+                <Typography key={a.chargeId} variant="body2">{a.description}: {formatMoney(a.amount)}</Typography>
               ))}
             </Box>
           </Collapse>
@@ -87,9 +87,9 @@ export const ChildFinanceTab = ({ childId, finance }: { childId: string; finance
         {active.map((s) => (
           <Paper key={s.category} elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: 2 }}>
             <Typography sx={{ fontWeight: 700 }}>{financeCategoryLabels[s.category]}</Typography>
-            <Typography color={Number(s.due) > 0 ? 'error.main' : 'text.primary'}>До оплати: {formatMoney(s.due)} грн</Typography>
-            {Number(s.overdue) > 0 && <Typography variant="body2" color="error.main">Прострочено: {formatMoney(s.overdue)} грн</Typography>}
-            {Number(s.prepayment) > 0 && <Typography variant="body2" color="text.secondary">Передоплата: {formatMoney(s.prepayment)} грн</Typography>}
+            <Typography color={Number(s.due) > 0 ? 'error.main' : 'text.primary'}>До оплати: {formatMoney(s.due)}</Typography>
+            {Number(s.overdue) > 0 && <Typography variant="body2" color="error.main">Прострочено: {formatMoney(s.overdue)}</Typography>}
+            {Number(s.prepayment) > 0 && <Typography variant="body2" color="text.secondary">Передоплата: {formatMoney(s.prepayment)}</Typography>}
             {enabled && (
               <Button variant="contained" size="small" sx={{ mt: 1 }} onClick={() => setPayCategory({ category: s.category, due: s.due })}>
                 Оплатити
@@ -100,7 +100,7 @@ export const ChildFinanceTab = ({ childId, finance }: { childId: string; finance
         {Number(finance.unallocated) > 0 && (
           <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: 2 }}>
             <Typography sx={{ fontWeight: 700 }}>Аванс без призначення</Typography>
-            <Typography>{formatMoney(finance.unallocated)} грн</Typography>
+            <Typography>{formatMoney(finance.unallocated)}</Typography>
           </Paper>
         )}
       </Box>

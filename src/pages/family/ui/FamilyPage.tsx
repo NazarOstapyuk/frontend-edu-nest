@@ -38,15 +38,15 @@ export const FamilyPage = () => {
         <Box>
           <Typography variant="body2" color="text.secondary">До оплати</Typography>
           <Typography variant="h5" sx={{ fontWeight: 700, color: due > 0 ? 'error.main' : 'success.main' }}>
-            {formatMoney(family.totals.due)} грн
+            {formatMoney(family.totals.due)}
           </Typography>
           {overdue > 0 && (
-            <Typography variant="body2" color="error.main">з них прострочено {formatMoney(family.totals.overdue)} грн</Typography>
+            <Typography variant="body2" color="error.main">з них прострочено {formatMoney(family.totals.overdue)}</Typography>
           )}
         </Box>
         <Box>
           <Typography variant="body2" color="text.secondary">Передоплата</Typography>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>{formatMoney(family.totals.prepayment)} грн</Typography>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>{formatMoney(family.totals.prepayment)}</Typography>
         </Box>
       </Paper>
 
@@ -61,13 +61,13 @@ export const FamilyPage = () => {
               <Typography sx={{ fontWeight: 700 }}>{fullName(child)}</Typography>
               <Typography variant="body2" color="text.secondary">{child.group?.name ?? 'Без групи'}</Typography>
               <Typography sx={{ mt: 1, fontWeight: 600, color: Number(child.due) > 0 ? 'error.main' : 'success.main' }}>
-                До оплати: {formatMoney(child.due)} грн
+                До оплати: {formatMoney(child.due)}
               </Typography>
               {Number(child.overdue) > 0 && (
-                <Typography variant="body2" color="error.main">Прострочено: {formatMoney(child.overdue)} грн</Typography>
+                <Typography variant="body2" color="error.main">Прострочено: {formatMoney(child.overdue)}</Typography>
               )}
               {Number(child.prepayment) > 0 && (
-                <Typography variant="body2" color="text.secondary">Передоплата: {formatMoney(child.prepayment)} грн</Typography>
+                <Typography variant="body2" color="text.secondary">Передоплата: {formatMoney(child.prepayment)}</Typography>
               )}
             </CardContent>
             <CardActions>

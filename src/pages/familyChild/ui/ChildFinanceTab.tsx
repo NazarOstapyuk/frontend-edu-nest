@@ -78,7 +78,9 @@ export const ChildFinanceTab = ({ childId, finance }: { childId: string; finance
       .catch(() => setEnabled(false))
   }, [])
 
-  const active = finance.summary.filter((s) => Number(s.due) > 0 || Number(s.prepayment) > 0)
+  const active = enabled
+    ? finance.summary
+    : finance.summary.filter((s) => Number(s.due) > 0 || Number(s.prepayment) > 0)
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: 'repeat(auto-fill, minmax(220px, 1fr))' } }}>

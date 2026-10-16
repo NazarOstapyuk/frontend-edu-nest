@@ -207,6 +207,7 @@ export const errorMessages: Record<string, string> = {
   'Access applies to staff only': 'Доступ налаштовується лише для персоналу',
   'Duplicate permission': 'Розділ повторюється',
   'Online payments are disabled': 'Онлайн-оплата вимкнена',
+  'Amount is out of range': 'Сума має бути від 1.00 до 1 000 000.00 грн',
   'Payment link not found': 'Посилання не знайдено',
   'Payment link expired': 'Посилання прострочене',
   'Payment request is not open': 'Запит на оплату вже закритий',

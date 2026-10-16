@@ -4,7 +4,7 @@ import { Box, Button, IconButton, Tab, Tabs, Typography } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useChildFinanceStore } from '../model/childFinanceStore'
-import { formatMoney } from '../../../shared/api'
+import { formatMoney, onlinePaymentsApi } from '../../../shared/api'
 import { useCan } from '../../../entities/user'
 import { CategoryTiles } from './CategoryTiles'
 import { ChargesTable } from './ChargesTable'
@@ -35,6 +35,14 @@ export const ChildFinancePage = () => {
   const [selected, setSelected] = useState('charges')
   const [linkOpen, setLinkOpen] = useState(false)
   const [onlineVersion, setOnlineVersion] = useState(0)
+  const [onlineEnabled, setOnlineEnabled] = useState(false)
+
+  useEffect(() => {
+    onlinePaymentsApi
+      .config()
+      .then(({ data }) => setOnlineEnabled(data.enabled))
+      .catch(() => setOnlineEnabled(false))
+  }, [])
 
   useEffect(() => {
     if (childId) fetchFinance(childId)
@@ -97,7 +105,7 @@ export const ChildFinancePage = () => {
             Додати нарахування
           </Button>
         )}
-        {canEdit && (
+        {canEdit && onlineEnabled && (
           <Button variant="outlined" onClick={() => setLinkOpen(true)}>
             Посилання на оплату
           </Button>

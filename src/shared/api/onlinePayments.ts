@@ -70,9 +70,9 @@ export const onlinePaymentsApi = {
   payCategory: (childId: string, dto: PayCategoryDto) =>
     axiosInstance.post<{ pageUrl: string }>(`/me/children/${childId}/online-payments`, dto),
 
-  invoiceStatus: (invoiceId: string) =>
+  invoiceStatus: (id: string) =>
     axiosInstance.get<{ status: InvoiceStatus; amount: string; category: FinanceCategory; paidAt: string | null }>(
-      `/me/online-payments/${invoiceId}`,
+      `/me/online-payments/${id}`,
     ),
 
   createLink: (childId: string, dto: CreateLinkDto) =>
@@ -97,5 +97,6 @@ export const payAmountError = (value: string): string | null => {
   const normalized = value.trim().replace(',', '.');
   if (!PAY_AMOUNT_PATTERN.test(normalized)) return 'Вкажіть суму, наприклад 1500.00';
   if (Number(normalized) < 1) return 'Мінімальна сума 1.00';
+  if (Number(normalized) > 1000000) return 'Максимальна сума 1 000 000.00';
   return null;
 };

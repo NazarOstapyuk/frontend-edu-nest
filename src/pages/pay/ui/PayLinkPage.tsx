@@ -37,6 +37,8 @@ export const PayLinkPage = () => {
   const { token } = useParams<{ token: string }>()
   const [link, setLink] = useState<PublicLink | null>(null)
   const [invalid, setInvalid] = useState(false)
+  const [loadFailed, setLoadFailed] = useState(false)
+  const [enabled, setEnabled] = useState(true)
   const [processing, setProcessing] = useState(() => (token ? readFlag(token) : false))
   const [isSending, setIsSending] = useState(false)
 
@@ -45,12 +47,26 @@ export const PayLinkPage = () => {
     try {
       const { data } = await onlinePaymentsApi.publicLink(token)
       setLink(data)
+      setLoadFailed(false)
       return data
-    } catch {
-      setInvalid(true)
+    } catch (error) {
+      if ((error as { statusCode?: unknown } | null)?.statusCode === 404) setInvalid(true)
+      else setLoadFailed(true)
       return null
     }
   }, [token])
+
+  useEffect(() => {
+    onlinePaymentsApi
+      .config()
+      .then(({ data }) => setEnabled(data.enabled))
+      .catch(() => setEnabled(false))
+  }, [])
+
+  const retry = () => {
+    setLoadFailed(false)
+    load()
+  }
 
   useEffect(() => {
     if (!token) return
@@ -90,6 +106,13 @@ export const PayLinkPage = () => {
   let body
   if (invalid) {
     body = <Typography>Посилання недійсне</Typography>
+  } else if (loadFailed && !link) {
+    body = (
+      <>
+        <Typography>Не вдалося завантажити дані.</Typography>
+        <Button variant="outlined" onClick={retry}>Спробувати ще</Button>
+      </>
+    )
   } else if (!link) {
     body = <Typography color="text.secondary">Завантаження…</Typography>
   } else if (link.status !== 'open') {
@@ -107,7 +130,11 @@ export const PayLinkPage = () => {
         <Typography>Оплата за: {financeCategoryLabels[link.category]}</Typography>
         <Typography>Дитина: {link.payer}</Typography>
         <Typography variant="h5" sx={{ fontWeight: 700 }}>{formatMoney(link.amount)}</Typography>
-        <Button variant="contained" size="large" onClick={pay} disabled={isSending}>Оплатити</Button>
+        {enabled ? (
+          <Button variant="contained" size="large" onClick={pay} disabled={isSending}>Оплатити</Button>
+        ) : (
+          <Typography color="text.secondary">Онлайн-оплата тимчасово недоступна</Typography>
+        )}
       </>
     )
   }

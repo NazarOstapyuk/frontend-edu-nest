@@ -1,10 +1,21 @@
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { Box, Button, Paper, Typography } from '@mui/material'
 import { onlinePaymentsApi } from '../../../shared/api'
 
+const sameOriginUrl = (value: string | null): string | null => {
+  if (!value) return null
+  try {
+    const url = new URL(value, window.location.origin)
+    return url.origin === window.location.origin ? url.href : null
+  } catch {
+    return null
+  }
+}
+
 export const TestBankPage = () => {
   const { invoiceId } = useParams<{ invoiceId: string }>()
+  const [searchParams] = useSearchParams()
   const [isSending, setIsSending] = useState(false)
   const [done, setDone] = useState(false)
 
@@ -13,6 +24,11 @@ export const TestBankPage = () => {
     setIsSending(true)
     try {
       await onlinePaymentsApi.testResult(invoiceId, result)
+      const target = sameOriginUrl(searchParams.get('return'))
+      if (target) {
+        window.location.assign(target)
+        return
+      }
       setDone(true)
     } catch {
       setIsSending(false)

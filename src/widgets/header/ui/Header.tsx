@@ -5,7 +5,7 @@ import { useAuthStore } from '../../../entities/user'
 import { SIDEBAR_WIDTH } from '../../sidebar/ui/Sidebar'
 
 const pageTitles: Record<string, string> = {
-  '/':          'Дашборд',
+  '/':          'Сьогодні',
   '/register':  'Журнал',
   '/users':     'Користувачі',
   '/groups':    'Групи',

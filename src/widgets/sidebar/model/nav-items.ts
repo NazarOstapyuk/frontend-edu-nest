@@ -35,7 +35,7 @@ export interface NavItem {
 }
 
 export const navItems: NavItem[] = [
-  { path: '/',                    label: 'Дашборд',           icon: DashboardIcon },
+  { path: '/',                    label: 'Сьогодні',           icon: DashboardIcon },
   { path: '/register',            label: 'Журнал',            icon: FactCheckIcon,      roles: ['teacher'], area: 'register' },
   { path: '/schedule',           label: 'Розклад',           icon: ViewWeekIcon,       area: 'timetable' },
   { path: '/meals',              label: 'Харчування',        icon: RestaurantIcon,     area: 'meals' },

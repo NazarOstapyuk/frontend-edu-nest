@@ -1,71 +1,195 @@
-import { Grid, Paper, Typography, Box } from '@mui/material'
-import PeopleIcon from '@mui/icons-material/People'
-import SchoolIcon from '@mui/icons-material/School'
-import ClassIcon from '@mui/icons-material/Class'
-import AssignmentIcon from '@mui/icons-material/Assignment'
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
-import BarChartIcon from '@mui/icons-material/BarChart'
-import { BackupBanner } from './BackupBanner'
+import { useCallback, useEffect, useState } from 'react'
+import { Alert, Box, Button, Grid, Skeleton, Typography } from '@mui/material'
+import FactCheckIcon from '@mui/icons-material/FactCheck'
+import MarkEmailUnreadIcon from '@mui/icons-material/MarkEmailUnread'
+import MoneyOffIcon from '@mui/icons-material/MoneyOff'
+import RestaurantIcon from '@mui/icons-material/Restaurant'
+import PaymentsIcon from '@mui/icons-material/Payments'
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty'
+import RequestQuoteIcon from '@mui/icons-material/RequestQuote'
+import BackupIcon from '@mui/icons-material/Backup'
+import { dashboardApi, formatMoney } from '../../../shared/api'
+import type { DashboardPaymentMethod, TodayDashboard } from '../../../shared/api'
+import { DashboardCard } from './DashboardCard'
 
-const stats = [
-  { label: 'Учнів',       value: '245',  icon: PeopleIcon,       color: '#1565c0', bg: '#e3f2fd' },
-  { label: 'Вчителів',    value: '32',   icon: SchoolIcon,       color: '#2e7d32', bg: '#e8f5e9' },
-  { label: 'Класів',      value: '18',   icon: ClassIcon,        color: '#e65100', bg: '#fff3e0' },
-  { label: 'Предметів',   value: '24',   icon: AssignmentIcon,   color: '#6a1b9a', bg: '#f3e5f5' },
-  { label: 'Подій',       value: '5',    icon: CalendarMonthIcon,color: '#00695c', bg: '#e0f2f1' },
-  { label: 'Середній бал',value: '4.2',  icon: BarChartIcon,     color: '#c62828', bg: '#ffebee' },
-]
+const methodLabels: Record<DashboardPaymentMethod, string> = {
+  cash: 'Готівка',
+  bank_transfer: 'Переказ',
+  card: 'Картка',
+  online: 'Онлайн',
+}
+
+const methodOrder: DashboardPaymentMethod[] = ['cash', 'bank_transfer', 'card', 'online']
+
+const namesLine = (names: string[], more: number) =>
+  names.join(', ') + (more > 0 ? ` і ще ${more}` : '')
+
+const Detail = ({ children }: { children: string }) => (
+  <Typography variant="body2" color="text.secondary">
+    {children}
+  </Typography>
+)
+
+const Value = ({ children }: { children: string }) => (
+  <Typography variant="h5" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+    {children}
+  </Typography>
+)
+
+const Calm = ({ children }: { children: string }) => (
+  <Typography variant="body1" sx={{ fontWeight: 600 }}>
+    {children}
+  </Typography>
+)
+
+const hasCards = (data: TodayDashboard) => Object.keys(data).some((key) => key !== 'date')
 
 export const DashboardPage = () => {
-  return (
-    <Box>
-      <BackupBanner />
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Загальна статистика школи
-      </Typography>
+  const [data, setData] = useState<TodayDashboard | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isFailed, setIsFailed] = useState(false)
 
+  const load = useCallback(() => {
+    dashboardApi
+      .today()
+      .then((result) => {
+        setData(result)
+        setIsFailed(false)
+      })
+      .catch(() => setIsFailed(true))
+      .finally(() => setIsLoading(false))
+  }, [])
+
+  useEffect(() => {
+    load()
+  }, [load])
+
+  const retry = () => {
+    setIsLoading(true)
+    load()
+  }
+
+  if (isLoading) {
+    return (
       <Grid container spacing={2.5}>
-        {stats.map(({ label, value, icon: Icon, color, bg }) => (
-          <Grid key={label} size={{ xs: 12, sm: 6, md: 4 }}>
-            <Paper
-              elevation={0}
-              sx={{
-                p: 2.5,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 2,
-                border: '1px solid',
-                borderColor: 'divider',
-                borderRadius: 2,
-                transition: 'box-shadow .2s',
-                '&:hover': { boxShadow: 3 },
-              }}
-            >
-              <Box
-                sx={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 2,
-                  bgcolor: bg,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                }}
-              >
-                <Icon sx={{ color, fontSize: 24 }} />
-              </Box>
-              <Box>
-                <Typography variant="h5" sx={{ fontWeight: 700, lineHeight: 1 }}>
-                  {value}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
-                  {label}
-                </Typography>
-              </Box>
-            </Paper>
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <Grid key={i} size={{ xs: 12, sm: 6, md: 4 }}>
+            <Skeleton variant="rounded" height={96} />
           </Grid>
         ))}
+      </Grid>
+    )
+  }
+
+  if (isFailed || !data) {
+    return (
+      <Alert
+        severity="error"
+        action={
+          <Button color="inherit" size="small" onClick={retry}>
+            Спробувати ще
+          </Button>
+        }
+      >
+        Не вдалося завантажити дані.
+      </Alert>
+    )
+  }
+
+  if (!hasCards(data)) {
+    return <Typography color="text.secondary">Для вас поки немає карток</Typography>
+  }
+
+  const { register, notices, debts, meals, payments, onlinePending, payroll, backups } = data
+
+  return (
+    <Box>
+      <Grid container spacing={2.5}>
+        {register && (
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <DashboardCard to="/register" title="Журнал не відмічено" icon={FactCheckIcon} alert={register.count > 0}>
+              {register.count > 0 ? (
+                <>
+                  <Value>{String(register.count)}</Value>
+                  <Detail>{namesLine(register.names, register.more)}</Detail>
+                </>
+              ) : (
+                <Calm>Усі групи відмічено</Calm>
+              )}
+            </DashboardCard>
+          </Grid>
+        )}
+        {notices && (
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <DashboardCard to="/absence-notices" title="Заяви на відсутність" icon={MarkEmailUnreadIcon} alert={notices.count > 0}>
+              {notices.count > 0 ? <Value>{String(notices.count)}</Value> : <Calm>Нових заяв немає</Calm>}
+            </DashboardCard>
+          </Grid>
+        )}
+        {debts && (
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <DashboardCard to="/finance" title="Прострочені борги" icon={MoneyOffIcon} alert={debts.children > 0}>
+              {debts.children > 0 ? (
+                <>
+                  <Value>{`${formatMoney(debts.amount)} грн`}</Value>
+                  <Detail>{`Дітей: ${debts.children}`}</Detail>
+                </>
+              ) : (
+                <Calm>Прострочених боргів немає</Calm>
+              )}
+            </DashboardCard>
+          </Grid>
+        )}
+        {meals && (
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <DashboardCard to="/meals" title="Обіди сьогодні" icon={RestaurantIcon} alert={false}>
+              <Value>{String(meals.count)}</Value>
+              {meals.groups.map((group) => (
+                <Detail key={group.name}>{`${group.name}: ${group.count}`}</Detail>
+              ))}
+            </DashboardCard>
+          </Grid>
+        )}
+        {payments && (
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <DashboardCard to="/reports" title="Оплати сьогодні" icon={PaymentsIcon} alert={false}>
+              <Value>{`${formatMoney(payments.total)} грн`}</Value>
+              {methodOrder.map((method) => (
+                <Detail key={method}>{`${methodLabels[method]}: ${formatMoney(payments.byMethod[method])} грн`}</Detail>
+              ))}
+            </DashboardCard>
+          </Grid>
+        )}
+        {onlinePending && (
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <DashboardCard to="/finance" title="Онлайн-оплати очікують" icon={HourglassEmptyIcon} alert>
+              <Value>{String(onlinePending.count)}</Value>
+            </DashboardCard>
+          </Grid>
+        )}
+        {payroll && (
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <DashboardCard to="/payroll" title={`Зарплати за ${payroll.month}`} icon={RequestQuoteIcon} alert={payroll.count > 0}>
+              {payroll.count > 0 ? (
+                <>
+                  <Value>{String(payroll.count)}</Value>
+                  <Detail>{namesLine(payroll.names, payroll.more)}</Detail>
+                </>
+              ) : (
+                <Calm>Усі відомості затверджені</Calm>
+              )}
+            </DashboardCard>
+          </Grid>
+        )}
+        {backups && (
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <DashboardCard to="/backups" title="Резервні копії" icon={BackupIcon} alert>
+              <Calm>
+                {backups.configured ? 'Остання резервна копія невдала або застаріла' : 'Резервні копії не налаштовані'}
+              </Calm>
+            </DashboardCard>
+          </Grid>
+        )}
       </Grid>
     </Box>
   )

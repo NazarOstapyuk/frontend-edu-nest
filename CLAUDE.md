@@ -52,7 +52,9 @@ Meals: `pages/meals` (tabs «Меню» calendar by kind with publish/copy/apply
 
 Payroll: `pages/payroll` (tabs «Відомість»: month list of teachers with a detail dialog for worked days, one-off adjustments, payments, approve and reopen; «Умови»: salary terms versions with per-lesson rates and monthly allowances), `pages/myPayroll` (teacher «Моя зарплата», read-only), shared read-only detail `widgets/payrollDetail`. API in `shared/api/payroll.ts`. Amounts, proration and corrections come from the backend; never compute them on the frontend (list totals after a mutation are re-summed in kopecks for display only).
 
-Backups: `pages/backups` (state of database copies, «Зробити копію зараз», files and recent runs; root/admin), dashboard banner `pages/dashboard/ui/BackupBanner.tsx` when copies are not configured or stale. API in `shared/api/backups.ts`. There is no restore in the UI: restore is a backend command (`npm run backup:restore`, see the backend `docs/backups.md`).
+Backups: `pages/backups` (state of database copies, «Зробити копію зараз», files and recent runs; root/admin); the «Сьогодні» card shows when copies are not configured or stale. API in `shared/api/backups.ts`. There is no restore in the UI: restore is a backend command (`npm run backup:restore`, see the backend `docs/backups.md`).
+
+Today page: `pages/dashboard` (menu item «Сьогодні», `GET /dashboard/today`): `DashboardCard` tiles linking to the relevant pages. The backend decides which keys the user gets; the page only renders the ones present. API in `shared/api/dashboard.ts`.
 
 Access control: staff permissions come from `GET /auth/me` (`permissions`: area → `view`/`edit`, `accessScope`). Use `useCan(area, level)` / `canAccess(profile, area, level)` from `entities/user` to show navigation items (`NavItem.area`) and hide change buttons on read-only pages; the backend still enforces everything (403 `Insufficient permissions`, 404/403 for records outside the kindergarten/school scope). Access is edited in `pages/users/ui/AccessDialog.tsx` (templates pre-fill the form; options above the current user's own rights are disabled).
 

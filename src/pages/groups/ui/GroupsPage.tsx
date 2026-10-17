@@ -69,7 +69,7 @@ export const GroupsPage = () => {
                 sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, height: '100%' }}
               >
                 <CardContent>
-                  <Typography variant="h6" fontWeight={700} gutterBottom>
+                  <Typography variant="h6" sx={{ fontWeight: 700 }} gutterBottom>
                     {group.name}
                   </Typography>
                   <Chip size="small" label={groupKindLabels[group.kind]} sx={{ mb: 1 }} />

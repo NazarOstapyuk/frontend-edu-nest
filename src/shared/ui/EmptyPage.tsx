@@ -18,7 +18,7 @@ export const EmptyPage = ({ title }: EmptyPageProps) => (
     }}
   >
     <ConstructionIcon sx={{ fontSize: 48, opacity: 0.4 }} />
-    <Typography variant="h6" fontWeight={600}>
+    <Typography variant="h6" sx={{ fontWeight: 600 }}>
       {title}
     </Typography>
     <Typography variant="body2">Сторінка в розробці</Typography>

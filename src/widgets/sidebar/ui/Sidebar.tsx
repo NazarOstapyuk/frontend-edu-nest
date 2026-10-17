@@ -45,7 +45,7 @@ const NavButton = ({ item }: { item: NavItem }) => {
         </ListItemIcon>
         <ListItemText
           primary={item.label}
-          slotProps={{ primary: { fontSize: 14, fontWeight: isActive ? 600 : 400 } }}
+          slotProps={{ primary: { sx: { fontSize: 14, fontWeight: isActive ? 600 : 400 } } }}
         />
       </ListItemButton>
     )}

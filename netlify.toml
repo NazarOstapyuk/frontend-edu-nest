@@ -8,8 +8,8 @@
 
 [[redirects]]
   from = "/api/*"
-  to = "https://edunest-backend.onrender.com/:splat"
-  status = 200
+  to = "https://edunest-backend-1x53.onrender.com/:splat"
+    status = 200
   force = true
 
 [[redirects]]

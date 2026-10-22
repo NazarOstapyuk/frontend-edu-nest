@@ -1,11 +1,13 @@
 import type { User } from '../../entities/user';
 import { axiosInstance } from './axiosInstance';
 import type { GroupKind } from './register';
+import type { InstitutionType } from './institutions';
 
 export interface Group {
   id: string;
   name: string;
   kind: GroupKind;
+  institution: { id: string; name: string; type: InstitutionType };
   teachers: User[];
   bellScheduleId: string | null;
   mealPriceCategoryId: string | null;
@@ -14,7 +16,7 @@ export interface Group {
 
 export interface CreateGroupDto {
   name: string;
-  kind: GroupKind;
+  institutionId: string;
   teacherIds: string[];
   bellScheduleId?: string | null;
   mealPriceCategoryId?: string | null;
@@ -22,7 +24,7 @@ export interface CreateGroupDto {
 
 export interface UpdateGroupDto {
   name: string;
-  kind: GroupKind;
+  institutionId?: string;
   teacherIds: string[];
   bellScheduleId?: string | null;
   mealPriceCategoryId?: string | null;

@@ -103,7 +103,7 @@ export const ChildrenPage = () => {
                   </TableCell>
                   <TableCell>
                     {child.group ? (
-                      <Chip label={child.group.name} size="small" variant="outlined" />
+                      <Chip label={child.group.institution ? `${child.group.name} · ${child.group.institution.name}` : child.group.name} size="small" variant="outlined" />
                     ) : (
                       <Typography variant="body2" color="text.secondary">—</Typography>
                     )}

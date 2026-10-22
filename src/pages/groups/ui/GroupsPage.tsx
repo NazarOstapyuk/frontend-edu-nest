@@ -72,7 +72,10 @@ export const GroupsPage = () => {
                   <Typography variant="h6" sx={{ fontWeight: 700 }} gutterBottom>
                     {group.name}
                   </Typography>
-                  <Chip size="small" label={groupKindLabels[group.kind]} sx={{ mb: 1 }} />
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
+                    <Chip size="small" label={groupKindLabels[group.kind]} />
+                    <Chip size="small" variant="outlined" label={group.institution.name} />
+                  </Box>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                     {group.teachers.length === 0 ? (
                       <Typography variant="body2" color="text.secondary">

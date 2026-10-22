@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useForm, useWatch, Controller } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import {
@@ -13,11 +13,11 @@ import {
 } from '@mui/material'
 import { useGroupsStore } from '../model/groupsStore'
 import { useUsersStore } from '../../users/model/usersStore'
-import { groupKinds, groupKindLabels, type GroupKind } from '../../../shared/api'
+import { useInstitutionStore } from '../../../shared/model/institutionStore'
 
 const schema = yup.object({
   name: yup.string().min(2, 'Мінімум 2 символи').required("Обов'язкове поле"),
-  kind: yup.mixed<GroupKind>().oneOf(groupKinds).required("Обов'язкове поле"),
+  institutionId: yup.string().required("Обов'язкове поле"),
   teacherIds: yup.array().of(yup.string().required()).default([]),
   bellScheduleId: yup.string().default(''),
   mealPriceCategoryId: yup.string().default(''),
@@ -34,20 +34,31 @@ export const EditGroupModal = () => {
   const bellSchedules = useGroupsStore((s) => s.bellSchedules)
   const mealCategories = useGroupsStore((s) => s.mealCategories)
 
+  const institutions = useInstitutionStore((s) => s.institutions)
+  const loadInstitutions = useInstitutionStore((s) => s.load)
+
+  useEffect(() => {
+    if (isOpen && institutions.length === 0) loadInstitutions().catch(() => undefined)
+  }, [isOpen, institutions.length, loadInstitutions])
+
   const teachers = users.filter((u) => u.role === 'teacher')
+
+  const options = institutions.filter(
+    (i) => i.type === group?.institution.type && (i.isActive || i.id === group?.institution.id),
+  )
 
   const { control, handleSubmit, reset } = useForm<FormValues>({
     mode: 'all',
-    defaultValues: { name: '', kind: 'kindergarten', teacherIds: [], bellScheduleId: '', mealPriceCategoryId: '' },
+    defaultValues: { name: '', institutionId: '', teacherIds: [], bellScheduleId: '', mealPriceCategoryId: '' },
     resolver: yupResolver(schema),
   })
-  const kind = useWatch({ control, name: 'kind' })
+  const kind = group?.kind
 
   useEffect(() => {
     if (group) {
       reset({
         name: group.name,
-        kind: group.kind,
+        institutionId: group.institution.id,
         teacherIds: group.teachers.map((t) => t.id),
         bellScheduleId: group.bellScheduleId ?? '',
         mealPriceCategoryId: group.mealPriceCategoryId ?? '',
@@ -62,8 +73,8 @@ export const EditGroupModal = () => {
 
   const onSubmit = async (values: FormValues) => {
     if (!group) return
-    await updateGroup(group.id, { name: values.name, kind: values.kind, teacherIds: values.teacherIds ?? [],
-      bellScheduleId: values.kind === 'school_class' && values.bellScheduleId ? values.bellScheduleId : null,
+    await updateGroup(group.id, { name: values.name, institutionId: values.institutionId, teacherIds: values.teacherIds ?? [],
+      bellScheduleId: kind === 'school_class' && values.bellScheduleId ? values.bellScheduleId : null,
       mealPriceCategoryId: values.mealPriceCategoryId || null,
     })
     handleClose()
@@ -88,12 +99,12 @@ export const EditGroupModal = () => {
         />
 
         <Controller
-          name="kind"
+          name="institutionId"
           control={control}
           render={({ field, fieldState: { error } }) => (
-            <TextField {...field} select label="Тип" fullWidth error={!!error} helperText={error?.message}>
-              {groupKinds.map((kind) => (
-                <MenuItem key={kind} value={kind}>{groupKindLabels[kind]}</MenuItem>
+            <TextField {...field} select label="Заклад" fullWidth error={!!error} helperText={error?.message}>
+              {options.map((i) => (
+                <MenuItem key={i.id} value={i.id}>{i.name}</MenuItem>
               ))}
             </TextField>
           )}

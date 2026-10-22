@@ -1,8 +1,10 @@
+import { useEffect } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, MenuItem, TextField } from '@mui/material'
 import { useCalendarStore } from '../model/calendarStore'
+import { useInstitutionStore } from '../../../shared/model/institutionStore'
 import {
   calendarDayTypeLabels,
   calendarScopeLabels,
@@ -27,12 +29,16 @@ const schema = yup.object({
     .string()
     .default('')
     .when('scope', { is: 'group', then: (s) => s.required('Оберіть групу') }),
+  institutionId: yup
+    .string()
+    .default('')
+    .when('scope', { is: 'institution', then: (s) => s.required('Оберіть заклад') }),
   title: yup.string().trim().required("Обов'язкове поле").max(200, 'Максимум 200 символів'),
 })
 
 type FormValues = yup.InferType<typeof schema>
 
-const empty: FormValues = { startDate: '', endDate: '', type: 'non_working', scope: 'all', groupId: '', title: '' }
+const empty: FormValues = { startDate: '', endDate: '', type: 'non_working', scope: 'all', groupId: '', institutionId: '', title: '' }
 
 export const CalendarDayModal = () => {
   const isOpen = useCalendarStore((s) => s.isModalOpen)
@@ -41,12 +47,23 @@ export const CalendarDayModal = () => {
   const groups = useCalendarStore((s) => s.groups)
   const isSaving = useCalendarStore((s) => s.isSaving)
 
+  const institutions = useInstitutionStore((s) => s.institutions)
+  const selectedInstitutionId = useInstitutionStore((s) => s.selectedId)
+  const loadInstitutions = useInstitutionStore((s) => s.load)
+
   const { control, handleSubmit, reset } = useForm<FormValues>({
     mode: 'all',
     defaultValues: empty,
     resolver: yupResolver(schema),
   })
   const scope = useWatch({ control, name: 'scope' })
+
+  useEffect(() => {
+    if (!isOpen) return
+    reset({ ...empty, institutionId: selectedInstitutionId ?? '' })
+    if (institutions.length === 0) void loadInstitutions().catch(() => undefined)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen])
 
   const handleClose = () => {
     reset(empty)
@@ -60,6 +77,7 @@ export const CalendarDayModal = () => {
       type: values.type,
       scope: values.scope,
       groupId: values.scope === 'group' ? values.groupId : undefined,
+      institutionId: values.scope === 'institution' ? values.institutionId : undefined,
       title: values.title.trim(),
     })
     handleClose()
@@ -108,6 +126,17 @@ export const CalendarDayModal = () => {
             render={({ field, fieldState: { error } }) => (
               <TextField {...field} select label="Група" error={!!error} helperText={error?.message}>
                 {groups.map((g) => <MenuItem key={g.id} value={g.id}>{g.name}</MenuItem>)}
+              </TextField>
+            )}
+          />
+        )}
+        {scope === 'institution' && (
+          <Controller
+            name="institutionId"
+            control={control}
+            render={({ field, fieldState: { error } }) => (
+              <TextField {...field} select label="Заклад" error={!!error} helperText={error?.message}>
+                {institutions.map((i) => <MenuItem key={i.id} value={i.id}>{i.name}</MenuItem>)}
               </TextField>
             )}
           />

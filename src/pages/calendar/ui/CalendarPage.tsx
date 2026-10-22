@@ -91,7 +91,7 @@ export const CalendarPage = () => {
                 <TableRow key={e.id}>
                   <TableCell>{period(e)}</TableCell>
                   <TableCell>{calendarDayTypeLabels[e.type]}</TableCell>
-                  <TableCell>{e.scope === 'group' ? e.group?.name : calendarScopeLabels[e.scope]}</TableCell>
+                  <TableCell>{e.scope === 'group' ? e.group?.name : e.scope === 'institution' ? e.institution?.name : calendarScopeLabels[e.scope]}</TableCell>
                   <TableCell>{e.title}</TableCell>
                   <TableCell align="right">
                     {canEdit && (

@@ -31,12 +31,13 @@ export const calendarDayTypeLabels: Record<CalendarDayType, string> = {
   working: 'Робочий',
 };
 
-export type CalendarScope = 'all' | 'kindergarten' | 'school_class' | 'group';
+export type CalendarScope = 'all' | 'kindergarten' | 'school_class' | 'group' | 'institution';
 export const calendarScopeLabels: Record<CalendarScope, string> = {
   all: 'Усі',
   kindergarten: 'Садок',
   school_class: 'Школа',
   group: 'Одна група',
+  institution: 'Заклад',
 };
 
 export type NoticeStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
@@ -75,6 +76,8 @@ export interface CalendarEntry {
   scope: CalendarScope;
   groupId: string | null;
   group: { id: string; name: string } | null;
+  institutionId: string | null;
+  institution: { id: string; name: string } | null;
   title: string;
   createdAt: string;
 }
@@ -85,6 +88,7 @@ export interface CreateCalendarDayDto {
   type: CalendarDayType;
   scope: CalendarScope;
   groupId?: string;
+  institutionId?: string;
   title: string;
 }
 

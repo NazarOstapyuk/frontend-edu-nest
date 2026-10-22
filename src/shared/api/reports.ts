@@ -60,7 +60,7 @@ export const reportDefinitions: ReportDefinition[] = [
   { key: 'attendance', fileName: 'відвідування', label: 'Відвідування', areas: ['register'], period: true, filters: ['institution', 'kind', 'group', 'child'] },
   { key: 'lessons', fileName: 'уроки', label: 'Уроки', areas: ['timetable', 'classes'], period: true, filters: ['institution', 'kind', 'group', 'teacher'] },
   { key: 'meals', fileName: 'харчування', label: 'Харчування', areas: ['meals'], period: true, filters: ['institution', 'kind', 'group'] },
-  { key: 'payroll', fileName: 'зарплати', label: 'Зарплати', areas: ['payroll'], period: true, filters: ['institution', 'teacher'] },
+  { key: 'payroll', fileName: 'зарплати', label: 'Зарплати', areas: ['payroll'], period: true, filters: ['teacher'] },
 ];
 
 const isoDay = (value: string) => {

@@ -124,8 +124,8 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
   }, [showGroup, showChild, showTeacher])
 
   useEffect(() => {
-    setQuery({ institutionId: selectedInstitutionId ?? undefined })
-  }, [selectedInstitutionId, setQuery])
+    if (showInstitution) setQuery({ institutionId: selectedInstitutionId ?? undefined })
+  }, [showInstitution, selectedInstitutionId, setQuery])
 
   const update = (partial: Partial<ReportQuery>) => setQuery(partial)
   const visibleGroups = groups.filter((g) => !query.kind || g.kind === query.kind)
@@ -171,6 +171,7 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
             sx={{ minWidth: 180 }}
             value={query.institutionId ?? ''}
             onChange={(e) => update({ institutionId: e.target.value || undefined })}
+            helperText={definition.key === 'lessons' ? 'Не впливає на уроки гуртків' : undefined}
             slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}
           >
             <MenuItem value="">Усі заклади</MenuItem>

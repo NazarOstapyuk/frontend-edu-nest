@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useInstitutionStore } from '../../../shared/model/institutionStore';
 import {
   addDaysIso,
   childrenApi,
@@ -278,4 +279,8 @@ export const useMealsStore = create<MealsState>((set, get) => {
       return result;
     },
   };
+});
+
+useInstitutionStore.subscribe((state, prev) => {
+  if (state.selectedId !== prev.selectedId) useMealsStore.setState({ ordersGroupId: '', ordersKey: null });
 });

@@ -1,5 +1,5 @@
 import { Checkbox, ListItemText, MenuItem, TextField } from '@mui/material'
-import { useInstitutionStore } from '../../../shared/model/institutionStore'
+import { useEffectiveInstitutions } from '../../../shared/model/institutionStore'
 
 export const InstitutionMultiSelect = ({ label, value, onChange, currentId, lockCurrent }: {
   label: string
@@ -8,7 +8,7 @@ export const InstitutionMultiSelect = ({ label, value, onChange, currentId, lock
   currentId: string
   lockCurrent?: boolean
 }) => {
-  const institutions = useInstitutionStore((s) => s.institutions)
+  const institutions = useEffectiveInstitutions()
   const options = institutions.filter((i) => i.isActive || i.id === currentId)
   const names = (ids: string[]) => ids.map((id) => institutions.find((i) => i.id === id)?.name ?? id).join(', ')
 

@@ -4,7 +4,8 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, MenuItem, TextField } from '@mui/material'
 import { useCalendarStore } from '../model/calendarStore'
-import { useInstitutionStore } from '../../../shared/model/institutionStore'
+import { useEffectiveInstitutions, useInstitutionStore } from '../../../shared/model/institutionStore'
+import { useCanManageShared } from '../../../entities/user'
 import {
   calendarDayTypeLabels,
   calendarScopeLabels,
@@ -47,7 +48,10 @@ export const CalendarDayModal = () => {
   const groups = useCalendarStore((s) => s.groups)
   const isSaving = useCalendarStore((s) => s.isSaving)
 
-  const institutions = useInstitutionStore((s) => s.institutions)
+  const allInstitutions = useInstitutionStore((s) => s.institutions)
+  const institutions = useEffectiveInstitutions()
+  const canShare = useCanManageShared()
+  const allowedScopes = canShare ? scopes : scopes.filter((s) => s === 'group' || s === 'institution')
   const selectedInstitutionId = useInstitutionStore((s) => s.selectedId)
   const loadInstitutions = useInstitutionStore((s) => s.load)
 
@@ -60,8 +64,12 @@ export const CalendarDayModal = () => {
 
   useEffect(() => {
     if (!isOpen) return
-    reset({ ...empty, institutionId: selectedInstitutionId ?? '' })
-    if (institutions.length === 0) void loadInstitutions().catch(() => undefined)
+    reset({
+      ...empty,
+      scope: canShare ? 'all' : 'institution',
+      institutionId: selectedInstitutionId ?? (canShare ? '' : (institutions[0]?.id ?? '')),
+    })
+    if (allInstitutions.length === 0) void loadInstitutions().catch(() => undefined)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen])
 
@@ -115,7 +123,7 @@ export const CalendarDayModal = () => {
           control={control}
           render={({ field }) => (
             <TextField {...field} select label="Для кого">
-              {scopes.map((s) => <MenuItem key={s} value={s}>{calendarScopeLabels[s]}</MenuItem>)}
+              {allowedScopes.map((s) => <MenuItem key={s} value={s}>{calendarScopeLabels[s]}</MenuItem>)}
             </TextField>
           )}
         />

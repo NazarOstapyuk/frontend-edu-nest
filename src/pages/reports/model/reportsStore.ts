@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { getSelectedInstitutionId } from '../../../shared/model/institutionStore';
+
+import { getSelectedInstitutionId, useInstitutionStore } from '../../../shared/model/institutionStore';
 import {
   reportDefinitions,
   reportsApi,
@@ -84,3 +85,9 @@ export const useReportsStore = create<ReportsState>((set, get) => ({
     }
   },
 }));
+
+useInstitutionStore.subscribe((state, prev) => {
+  if (state.selectedId !== prev.selectedId) {
+    useReportsStore.setState({ query: { ...useReportsStore.getState().query, groupId: undefined, childId: undefined, teacherId: undefined } });
+  }
+});

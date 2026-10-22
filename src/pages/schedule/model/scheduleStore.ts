@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useInstitutionStore } from '../../../shared/model/institutionStore';
 import {
   groupsApi,
   localToday,
@@ -194,3 +195,7 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
 
 export const isEditableVersion = (versionId: string | 'new' | null, versions: TimetableVersion[]) =>
   versionId === 'new' || (versions.find((v) => v.id === versionId)?.validFrom ?? '') > localToday();
+
+useInstitutionStore.subscribe((state, prev) => {
+  if (state.selectedId !== prev.selectedId) useScheduleStore.setState({ classId: null });
+});

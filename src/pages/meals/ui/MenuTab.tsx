@@ -7,7 +7,7 @@ import { MenuDayDialog } from './MenuDayDialog'
 import { CopyMenuDialog } from './CopyMenuDialog'
 import { ApplyTemplateDialog } from './ApplyTemplateDialog'
 import { MenuPeriodDialog } from './MenuPeriodDialog'
-import { useInstitutionStore } from '../../../shared/model/institutionStore'
+import { useEffectiveInstitutions, useInstitutionStore } from '../../../shared/model/institutionStore'
 import { useCan } from '../../../entities/user'
 import {
   addDaysIso, formatDay, isoWeekdayLabels, menuStatusLabels, type MenuDayView,
@@ -16,7 +16,9 @@ import {
 export const MenuTab = () => {
   const canEdit = useCan('meals', 'edit')
   const institutionId = useMealsStore((s) => s.menuInstitutionId)
-  const institutions = useInstitutionStore((s) => s.institutions)
+  const allInstitutions = useInstitutionStore((s) => s.institutions)
+  const institutions = useEffectiveInstitutions()
+  const isLoadingInstitutions = useInstitutionStore((s) => s.isLoading)
   const selectedId = useInstitutionStore((s) => s.selectedId)
   const loadInstitutions = useInstitutionStore((s) => s.load)
   const start = useMealsStore((s) => s.menuStart)
@@ -31,8 +33,8 @@ export const MenuTab = () => {
   const ready = key === `${institutionId}/${start}/${weeks}` && days.length > 0
 
   useEffect(() => {
-    if (institutions.length === 0) loadInstitutions().catch(() => undefined)
-  }, [institutions.length, loadInstitutions])
+    if (allInstitutions.length === 0) loadInstitutions().catch(() => undefined)
+  }, [allInstitutions.length, loadInstitutions])
 
   useEffect(() => {
     loadMenu({ institutionId: initialId }).catch(() => undefined)
@@ -64,6 +66,8 @@ export const MenuTab = () => {
 
       {failed && key === `${institutionId}/${start}/${weeks}` ? (
         <Alert severity="error" action={<Button onClick={() => loadMenu().catch(() => undefined)}>Спробувати ще</Button>}>Не вдалося завантажити дані.</Alert>
+      ) : institutions.length === 0 && !isLoadingInstitutions ? (
+        <Typography color="text.secondary">Немає доступних закладів.</Typography>
       ) : !ready ? (
         <Typography color="text.secondary">Завантаження…</Typography>
       ) : (

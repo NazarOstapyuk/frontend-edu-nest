@@ -14,3 +14,6 @@ export const canAccess = (
 
 export const useCan = (area: PermissionArea, level: PermissionLevel): boolean =>
   useAuthStore((s) => canAccess(s.profile, area, level))
+
+export const useCanManageShared = (): boolean =>
+  useAuthStore((s) => s.profile?.role === 'root' || s.profile?.accessScope === 'all')

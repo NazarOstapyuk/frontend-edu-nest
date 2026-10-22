@@ -12,7 +12,7 @@ import {
   type ReportFilter,
   type ReportQuery,
 } from '../../../shared/api'
-import { useInstitutionStore } from '../../../shared/model/institutionStore'
+import { useEffectiveInstitutions, useInstitutionStore } from '../../../shared/model/institutionStore'
 import { useReportsStore } from '../model/reportsStore'
 
 const dayString = (date: Date) => date.toISOString().slice(0, 10)
@@ -77,7 +77,7 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
   const setQuery = useReportsStore((s) => s.setQuery)
   const load = useReportsStore((s) => s.load)
   const download = useReportsStore((s) => s.download)
-  const institutions = useInstitutionStore((s) => s.institutions)
+  const institutions = useEffectiveInstitutions()
   const selectedInstitutionId = useInstitutionStore((s) => s.selectedId)
   const [groups, setGroups] = useState<Group[]>([])
   const [children, setChildren] = useState<Child[]>([])

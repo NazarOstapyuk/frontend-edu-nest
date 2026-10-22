@@ -13,7 +13,7 @@ import {
 } from '@mui/material'
 import { useGroupsStore } from '../model/groupsStore'
 import { useUsersStore } from '../../users/model/usersStore'
-import { useInstitutionStore } from '../../../shared/model/institutionStore'
+import { useEffectiveInstitutions, useInstitutionStore } from '../../../shared/model/institutionStore'
 
 const schema = yup.object({
   name: yup.string().min(2, 'Мінімум 2 символи').required("Обов'язкове поле"),
@@ -34,12 +34,13 @@ export const EditGroupModal = () => {
   const bellSchedules = useGroupsStore((s) => s.bellSchedules)
   const mealCategories = useGroupsStore((s) => s.mealCategories)
 
-  const institutions = useInstitutionStore((s) => s.institutions)
+  const allInstitutions = useInstitutionStore((s) => s.institutions)
+  const institutions = useEffectiveInstitutions()
   const loadInstitutions = useInstitutionStore((s) => s.load)
 
   useEffect(() => {
-    if (isOpen && institutions.length === 0) loadInstitutions().catch(() => undefined)
-  }, [isOpen, institutions.length, loadInstitutions])
+    if (isOpen && allInstitutions.length === 0) loadInstitutions().catch(() => undefined)
+  }, [isOpen, allInstitutions.length, loadInstitutions])
 
   const teachers = users.filter((u) => u.role === 'teacher')
 

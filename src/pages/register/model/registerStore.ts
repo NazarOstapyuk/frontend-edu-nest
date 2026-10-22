@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useInstitutionStore } from '../../../shared/model/institutionStore';
 import {
   localToday,
   registerApi,
@@ -165,3 +166,7 @@ export const useRegisterStore = create<RegisterState>((set, get) => ({
     }
   },
 }));
+
+useInstitutionStore.subscribe((state, prev) => {
+  if (state.selectedId !== prev.selectedId) useRegisterStore.setState({ groupId: null });
+});

@@ -4,7 +4,8 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, MenuItem, TextField } from '@mui/material'
 import { useTariffsStore } from '../model/tariffsStore'
-import { useInstitutionStore } from '../../../shared/model/institutionStore'
+import { useEffectiveInstitutions, useInstitutionStore } from '../../../shared/model/institutionStore'
+import { useCanManageShared } from '../../../entities/user'
 import {
   billingModeLabels,
   billingModes,
@@ -67,11 +68,17 @@ export const CreateTariffModal = () => {
   const createTariff = useTariffsStore((s) => s.createTariff)
   const isSaving = useTariffsStore((s) => s.isSaving)
 
-  const institutions = useInstitutionStore((s) => s.institutions)
+  const allInstitutions = useInstitutionStore((s) => s.institutions)
+  const institutions = useEffectiveInstitutions()
+  const canShare = useCanManageShared()
   const selectedId = useInstitutionStore((s) => s.selectedId)
   const loadInstitutions = useInstitutionStore((s) => s.load)
   const activeInstitutions = institutions.filter((i) => i.isActive)
-  const defaultInstitutionId = activeInstitutions.some((i) => i.id === selectedId) ? (selectedId ?? '') : ''
+  const defaultInstitutionId = activeInstitutions.some((i) => i.id === selectedId)
+    ? (selectedId ?? '')
+    : canShare
+      ? ''
+      : (activeInstitutions[0]?.id ?? '')
 
   const { control, handleSubmit, reset, watch } = useForm<FormValues>({
     mode: 'all',
@@ -82,7 +89,7 @@ export const CreateTariffModal = () => {
 
   useEffect(() => {
     if (!isOpen) return
-    if (institutions.length === 0) loadInstitutions().catch(() => undefined)
+    if (allInstitutions.length === 0) loadInstitutions().catch(() => undefined)
     reset({ ...defaults, institutionId: defaultInstitutionId })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen])
@@ -123,7 +130,7 @@ export const CreateTariffModal = () => {
           control={control}
           render={({ field, fieldState: { error } }) => (
             <TextField {...field} select label="Заклад" fullWidth error={!!error} helperText={error?.message}>
-              <MenuItem value="">Спільний для всіх закладів</MenuItem>
+              {canShare && <MenuItem value="">Спільний для всіх закладів</MenuItem>}
               {activeInstitutions.map((i) => (
                 <MenuItem key={i.id} value={i.id}>{i.name}</MenuItem>
               ))}

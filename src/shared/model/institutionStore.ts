@@ -1,4 +1,6 @@
+import { useMemo } from 'react';
 import { create } from 'zustand';
+import { usePendingNoticesStore } from './pendingNoticesStore';
 import { institutionsApi, type Institution } from '../api/institutions';
 
 const STORAGE_KEY = 'edunest.institutionId';
@@ -15,6 +17,7 @@ interface InstitutionState {
   isLoading: boolean;
   load: () => Promise<void>;
   select: (id: string | null) => void;
+  clear: () => void;
   reconcile: (profile: InstitutionProfile) => void;
 }
 
@@ -59,6 +62,15 @@ export const useInstitutionStore = create<InstitutionState>((set, get) => ({
   select: (id) => {
     writeStored(id);
     set({ selectedId: id });
+    void usePendingNoticesStore
+      .getState()
+      .refresh()
+      .catch(() => undefined);
+  },
+
+  clear: () => {
+    writeStored(null);
+    set({ selectedId: null, institutions: [] });
   },
 
   reconcile: (profile) => {
@@ -77,5 +89,14 @@ export const useInstitutionStore = create<InstitutionState>((set, get) => ({
       .catch(() => undefined);
   },
 }));
+
+export const effectiveInstitutions = (institutions: Institution[], selectedId: string | null) =>
+  selectedId ? institutions.filter((i) => i.id === selectedId) : institutions;
+
+export const useEffectiveInstitutions = () => {
+  const institutions = useInstitutionStore((s) => s.institutions);
+  const selectedId = useInstitutionStore((s) => s.selectedId);
+  return useMemo(() => effectiveInstitutions(institutions, selectedId), [institutions, selectedId]);
+};
 
 export const getSelectedInstitutionId = () => useInstitutionStore.getState().selectedId;

@@ -10,7 +10,7 @@ export const errorMessages: Record<string, string> = {
   'Tariff is in use': 'Тариф використовується',
   'Child has an active enrollment': 'У дитини є активний запис на тариф',
   'Child has meal orders': 'У дитини є замовлення харчування',
-  'Institution is required for institution scope': 'Для обраних закладів потрібен заклад',
+  'Institution is required for institution scope': 'Оберіть заклад',
   'Invalid credentials': 'Невірний логін або пароль',
   'Password change required': 'Спочатку змініть пароль',
   'Invalid current password': 'Невірний поточний пароль',

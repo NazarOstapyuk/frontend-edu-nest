@@ -51,6 +51,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
     } finally {
       set({ profile: null });
+      useInstitutionStore.getState().clear();
     }
   },
 
@@ -71,6 +72,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     await authApi.changePassword(currentPassword, newPassword);
     const { data } = await authApi.me();
     set({ profile: data });
+    useInstitutionStore.getState().reconcile(data);
     return data;
   },
 

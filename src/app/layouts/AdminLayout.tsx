@@ -3,8 +3,11 @@ import { Box, Toolbar } from '@mui/material'
 import { Sidebar, SIDEBAR_WIDTH } from '../../widgets/sidebar'
 import { Header } from '../../widgets/header'
 import { Notifier } from '../../shared/ui/Notifier'
+import { useInstitutionStore } from '../../shared/model/institutionStore'
 
-export const AdminLayout = () => (
+export const AdminLayout = () => {
+  const institutionId = useInstitutionStore((s) => s.selectedId)
+  return (
   <Box sx={{ display: 'flex', minHeight: '100vh' }}>
     <Sidebar />
 
@@ -22,10 +25,11 @@ export const AdminLayout = () => (
       <Toolbar />
 
       <Box sx={{ flex: 1, p: 3 }}>
-        <Outlet />
+        <Outlet key={institutionId ?? 'all'} />
       </Box>
     </Box>
 
     <Notifier />
   </Box>
-)
+  )
+}

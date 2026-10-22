@@ -29,7 +29,8 @@ export interface SessionProfile {
   phone: string | null
   email: string | null
   mustChangePassword: boolean
-  accessScope: AccessScope
+  accessScope: AccessScope | 'institutions'
+  institutionIds: string[]
   permissions: PermissionMap
 }
 

@@ -323,6 +323,8 @@ export type {
 } from './reports';
 export { onlinePaymentsApi, payAmountError, invoiceStatusLabels, linkStateLabels, requestSourceLabels } from './onlinePayments';
 export type { InvoiceStatus, LinkState, RequestSource, PaymentRequestView, PublicLink, PayCategoryDto, CreateLinkDto } from './onlinePayments';
+export { institutionsApi, institutionTypeLabels } from './institutions';
+export type { Institution, InstitutionType, CreateInstitutionDto, UpdateInstitutionDto } from './institutions';
 export { softList } from './softList';
 export { dashboardApi } from './dashboard';
 export type { TodayDashboard, DashboardPaymentMethod } from './dashboard';

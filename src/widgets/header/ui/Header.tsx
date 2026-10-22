@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { AppBar, Avatar, Box, Menu, MenuItem, Toolbar, Typography } from '@mui/material'
 import { useAuthStore } from '../../../entities/user'
 import { SIDEBAR_WIDTH } from '../../sidebar/ui/Sidebar'
+import { InstitutionSwitcher } from './InstitutionSwitcher'
 
 const pageTitles: Record<string, string> = {
   '/':          'Сьогодні',
@@ -64,6 +65,8 @@ export const Header = () => {
         <Typography variant="h6" sx={{ flex: 1, fontWeight: 600, color: 'text.primary' }}>
           {pageTitles[pathname] ?? 'EduNest'}
         </Typography>
+
+        {profile && profile.role !== 'parent' && <InstitutionSwitcher />}
 
         {profile && (
           <Box

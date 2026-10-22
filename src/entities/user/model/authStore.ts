@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { authApi, setSessionHandlers, type ContactsDto } from '../../../shared/api';
 import { useNotifyStore } from '../../../shared/model/notifyStore';
+import { useInstitutionStore } from '../../../shared/model/institutionStore';
 import type { SessionProfile } from './types';
 
 interface LoginCredentials {
@@ -32,6 +33,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await authApi.login(credentials);
       const { data } = await authApi.me();
       set({ profile: data, isInitialized: true });
+      useInstitutionStore.getState().reconcile(data);
       return data;
     } finally {
       set({ isLoading: false });
@@ -57,6 +59,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const { data } = await authApi.me();
       set({ profile: data });
+      useInstitutionStore.getState().reconcile(data);
     } catch {
       set({ profile: null });
     } finally {

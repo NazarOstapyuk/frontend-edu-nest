@@ -1,6 +1,7 @@
 ﻿import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { useNotifyStore } from '../model/notifyStore';
 import { translateError } from './errorMessages';
+import { getSelectedInstitutionId } from '../model/institutionStore';
 
 export const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -8,6 +9,12 @@ export const axiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+});
+
+axiosInstance.interceptors.request.use((config) => {
+  const institutionId = getSelectedInstitutionId();
+  if (institutionId) config.headers.set('X-Institution-Id', institutionId);
+  return config;
 });
 
 const NO_REFRESH = ['/auth/login', '/auth/refresh', '/auth/logout'];

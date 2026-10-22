@@ -1,6 +1,16 @@
 export const GENERIC_ERROR = 'Сталася помилка. Спробуйте ще раз.';
 
 export const errorMessages: Record<string, string> = {
+  'Institution not found': 'Заклад не знайдено',
+  'Institution name already taken': 'Заклад з такою назвою вже існує',
+  'Institution is inactive': 'Заклад неактивний',
+  'Institution type cannot change': 'Тип закладу змінити не можна',
+  'Group is required': 'Оберіть групу',
+  'Tariff belongs to another institution': 'Тариф належить іншому закладу',
+  'Tariff is in use': 'Тариф використовується',
+  'Child has an active enrollment': 'У дитини є активний запис на тариф',
+  'Child has meal orders': 'У дитини є замовлення харчування',
+  'Institution is required for institution scope': 'Для обраних закладів потрібен заклад',
   'Invalid credentials': 'Невірний логін або пароль',
   'Password change required': 'Спочатку змініть пароль',
   'Invalid current password': 'Невірний поточний пароль',

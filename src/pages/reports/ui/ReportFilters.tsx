@@ -12,6 +12,7 @@ import {
   type ReportFilter,
   type ReportQuery,
 } from '../../../shared/api'
+import { useInstitutionStore } from '../../../shared/model/institutionStore'
 import { useReportsStore } from '../model/reportsStore'
 
 const dayString = (date: Date) => date.toISOString().slice(0, 10)
@@ -76,6 +77,8 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
   const setQuery = useReportsStore((s) => s.setQuery)
   const load = useReportsStore((s) => s.load)
   const download = useReportsStore((s) => s.download)
+  const institutions = useInstitutionStore((s) => s.institutions)
+  const selectedInstitutionId = useInstitutionStore((s) => s.selectedId)
   const [groups, setGroups] = useState<Group[]>([])
   const [children, setChildren] = useState<Child[]>([])
   const [teachers, setTeachers] = useState<User[]>([])
@@ -85,12 +88,14 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
   const canListUsers = useCan('users', 'view')
 
   const available: Record<ReportFilter, boolean> = {
+    institution: true,
     kind: true,
     group: canListGroups,
     child: canListChildren,
     teacher: canListUsers,
   }
   const has = (filter: ReportFilter) => definition.filters.includes(filter) && available[filter]
+  const showInstitution = has('institution')
   const showGroup = has('group')
   const showChild = has('child')
   const showTeacher = has('teacher')
@@ -117,6 +122,10 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
       stale = true
     }
   }, [showGroup, showChild, showTeacher])
+
+  useEffect(() => {
+    setQuery({ institutionId: selectedInstitutionId ?? undefined })
+  }, [selectedInstitutionId, setQuery])
 
   const update = (partial: Partial<ReportQuery>) => setQuery(partial)
   const visibleGroups = groups.filter((g) => !query.kind || g.kind === query.kind)
@@ -153,6 +162,24 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
               slotProps={{ inputLabel: { shrink: true }, htmlInput: { min: query.from } }}
             />
           </>
+        )}
+        {showInstitution && (
+          <TextField
+            select
+            label="Заклад"
+            size="small"
+            sx={{ minWidth: 180 }}
+            value={query.institutionId ?? ''}
+            onChange={(e) => update({ institutionId: e.target.value || undefined })}
+            slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}
+          >
+            <MenuItem value="">Усі заклади</MenuItem>
+            {institutions.map((i) => (
+              <MenuItem key={i.id} value={i.id}>
+                {i.name}
+              </MenuItem>
+            ))}
+          </TextField>
         )}
         {has('kind') && canPickKind && (
           <TextField

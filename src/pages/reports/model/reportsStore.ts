@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { getSelectedInstitutionId } from '../../../shared/model/institutionStore';
 import {
   reportDefinitions,
   reportsApi,
@@ -35,7 +36,7 @@ let requestId = 0;
 
 export const useReportsStore = create<ReportsState>((set, get) => ({
   selected: null,
-  query: currentMonth(),
+  query: { ...currentMonth(), institutionId: getSelectedInstitutionId() ?? undefined },
   report: null,
   loading: false,
   failed: false,
@@ -45,6 +46,7 @@ export const useReportsStore = create<ReportsState>((set, get) => ({
     const definition = reportDefinitions.find((d) => d.key === key);
     const { query } = get();
     const next: ReportQuery = { from: query.from, to: query.to };
+    if (definition?.filters.includes('institution')) next.institutionId = query.institutionId;
     if (definition?.filters.includes('kind')) next.kind = query.kind;
     if (definition?.filters.includes('group')) next.groupId = query.groupId;
     if (definition?.filters.includes('child')) next.childId = query.childId;

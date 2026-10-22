@@ -60,6 +60,9 @@ export const FamilyPage = () => {
             <CardContent>
               <Typography sx={{ fontWeight: 700 }}>{fullName(child)}</Typography>
               <Typography variant="body2" color="text.secondary">{child.group?.name ?? 'Без групи'}</Typography>
+              {child.institution && (
+                <Typography variant="body2" color="text.secondary">{child.institution.name}</Typography>
+              )}
               <Typography sx={{ mt: 1, fontWeight: 600, color: Number(child.due) > 0 ? 'error.main' : 'success.main' }}>
                 До оплати: {formatMoney(child.due)}
               </Typography>

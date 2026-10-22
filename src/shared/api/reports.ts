@@ -39,9 +39,10 @@ export interface ReportQuery {
   groupId?: string;
   childId?: string;
   teacherId?: string;
+  institutionId?: string;
 }
 
-export type ReportFilter = 'kind' | 'group' | 'child' | 'teacher';
+export type ReportFilter = 'institution' | 'kind' | 'group' | 'child' | 'teacher';
 
 export interface ReportDefinition {
   key: ReportKey;
@@ -53,13 +54,13 @@ export interface ReportDefinition {
 }
 
 export const reportDefinitions: ReportDefinition[] = [
-  { key: 'payments', fileName: 'оплати', label: 'Оплати', areas: ['finance'], period: true, filters: ['kind', 'group', 'child'] },
-  { key: 'charges', fileName: 'нарахування', label: 'Нарахування', areas: ['finance'], period: true, filters: ['kind', 'group', 'child'] },
-  { key: 'debts', fileName: 'борги', label: 'Борги', areas: ['finance'], period: false, filters: ['kind', 'group', 'child'] },
-  { key: 'attendance', fileName: 'відвідування', label: 'Відвідування', areas: ['register'], period: true, filters: ['kind', 'group', 'child'] },
-  { key: 'lessons', fileName: 'уроки', label: 'Уроки', areas: ['timetable', 'classes'], period: true, filters: ['kind', 'group', 'teacher'] },
-  { key: 'meals', fileName: 'харчування', label: 'Харчування', areas: ['meals'], period: true, filters: ['kind', 'group'] },
-  { key: 'payroll', fileName: 'зарплати', label: 'Зарплати', areas: ['payroll'], period: true, filters: ['teacher'] },
+  { key: 'payments', fileName: 'оплати', label: 'Оплати', areas: ['finance'], period: true, filters: ['institution', 'kind', 'group', 'child'] },
+  { key: 'charges', fileName: 'нарахування', label: 'Нарахування', areas: ['finance'], period: true, filters: ['institution', 'kind', 'group', 'child'] },
+  { key: 'debts', fileName: 'борги', label: 'Борги', areas: ['finance'], period: false, filters: ['institution', 'kind', 'group', 'child'] },
+  { key: 'attendance', fileName: 'відвідування', label: 'Відвідування', areas: ['register'], period: true, filters: ['institution', 'kind', 'group', 'child'] },
+  { key: 'lessons', fileName: 'уроки', label: 'Уроки', areas: ['timetable', 'classes'], period: true, filters: ['institution', 'kind', 'group', 'teacher'] },
+  { key: 'meals', fileName: 'харчування', label: 'Харчування', areas: ['meals'], period: true, filters: ['institution', 'kind', 'group'] },
+  { key: 'payroll', fileName: 'зарплати', label: 'Зарплати', areas: ['payroll'], period: true, filters: ['institution', 'teacher'] },
 ];
 
 const isoDay = (value: string) => {

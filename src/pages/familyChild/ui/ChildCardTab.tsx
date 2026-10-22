@@ -8,6 +8,7 @@ export const ChildCardTab = ({ card }: { card: ChildCard }) => (
     <Paper elevation={0} sx={section}>
       <Typography sx={{ fontWeight: 700, mb: 1 }}>Дитина</Typography>
       <Typography>Дата народження: {formatDay(card.birthDate)}</Typography>
+      {card.institution && <Typography>Заклад: {card.institution.name}</Typography>}
       <Typography>Група: {card.group?.name ?? '—'}</Typography>
     </Paper>
     <Paper elevation={0} sx={section}>

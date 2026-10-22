@@ -10,6 +10,7 @@ export interface FamilyChild {
   lastName: string;
   middleName: string | null;
   group: { id: string; name: string } | null;
+  institution: { id: string; name: string } | null;
   due: string;
   overdue: string;
   prepayment: string;
@@ -41,6 +42,7 @@ export interface ChildCard {
   middleName: string | null;
   birthDate: string;
   group: { id: string; name: string } | null;
+  institution: { id: string; name: string } | null;
   parents: ParentContact[];
   enrollments: { id: string; tariffName: string; startDate: string; endDate: string | null; pauses: { startDate: string; endDate: string | null }[] }[];
   packages: { id: string; directionName: string; sessionsTotal: number; used: number; remaining: number; expiresAt: string | null; state: PackageState }[];

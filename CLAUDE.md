@@ -37,8 +37,11 @@ src/
   widgets/             # header, sidebar (sidebar/model/nav-items.ts is the menu)
   shared/api/          # axiosInstance + API modules, all re-exported from index.ts
   shared/ui/           # EmptyPage, RHFTextField
+  shared/model/        # institutionStore (selected institution), notifyStore, pendingNoticesStore
 docs/superpowers/      # specs/ and plans/
 ```
+
+Institutions: `pages/institutions` (Заклади: name, type, active; create/edit modals; menu «Заклади», area `settings`; edit only for root or `settings: edit` with scope `all`). Staff switcher `widgets/header/ui/InstitutionSwitcher.tsx` («Усі заклади» or one institution; one institution = plain text; hidden for parents) sets `shared/model/institutionStore` (choice in localStorage `edunest.institutionId`, sent by the axios request interceptor as `X-Institution-Id`; «Усі заклади» sends nothing). After `fetchMe`, `reconcile` drops a stored institution not in `profile.institutionIds` (unless root or scope `all`) or not in `GET /institutions`. `AdminLayout` renders `<Outlet key={selectedId ?? 'all'} />` so pages remount on change. Menus (`MenuTab`, `InstitutionMultiSelect`), the reports «Заклад» filter (all but payroll) and `AccessDialog` (scope «Усі заклади» / «Вибрані заклади») take lists from the backend; parent views show `institution.name` from the API, never the store. API in `shared/api/institutions.ts`.
 
 Classes and packages: `pages/classes` (Гуртки: directions, class groups, packages), `pages/classGroup` (group page + mark lesson), `pages/myClasses` (teacher view), `shared/model` (notify store). Nav items in `widgets/sidebar/model/nav-items.ts` declare `roles`; items without `roles` are visible to everyone.
 

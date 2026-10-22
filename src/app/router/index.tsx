@@ -19,6 +19,7 @@ import { ScheduleSetupPage } from '../../pages/scheduleSetup'
 import { SchedulePage } from '../../pages/schedule'
 import { MealsPage } from '../../pages/meals'
 import { PayrollPage } from '../../pages/payroll'
+import { InstitutionsPage } from '../../pages/institutions'
 import { BackupsPage } from '../../pages/backups'
 import { AuditPage } from '../../pages/audit'
 import { ReportsPage } from '../../pages/reports'
@@ -103,6 +104,7 @@ export const router = createBrowserRouter([
                   { path: 'schedule',  element: <SchedulePage /> },
                   { path: 'meals', element: <MealsPage /> },
                   { path: 'payroll', element: <PayrollPage /> },
+                  { path: 'institutions', element: <InstitutionsPage /> },
                   { path: 'backups', element: <BackupsPage /> },
                   { path: 'audit', element: <AuditPage /> },
                   { path: 'grades',    element: <EmptyPage title="Оцінки" /> },

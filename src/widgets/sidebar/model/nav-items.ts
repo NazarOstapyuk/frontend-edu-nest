@@ -3,6 +3,7 @@ import BackupIcon from '@mui/icons-material/Backup'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import PeopleIcon from '@mui/icons-material/People'
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts'
+import ApartmentIcon from '@mui/icons-material/Apartment'
 import SettingsIcon from '@mui/icons-material/Settings'
 import GroupsIcon from '@mui/icons-material/Groups'
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet'
@@ -59,5 +60,6 @@ export const navItems: NavItem[] = [
 export const bottomNavItems: NavItem[] = [
   { path: '/audit', label: 'Історія змін', icon: HistoryIcon, area: 'audit' },
   { path: '/backups', label: 'Резервні копії', icon: BackupIcon, area: 'backups' },
+  { path: '/institutions', label: 'Заклади', icon: ApartmentIcon, area: 'settings' },
   { path: '/settings', label: 'Налаштування', icon: SettingsIcon, area: 'settings' },
 ]

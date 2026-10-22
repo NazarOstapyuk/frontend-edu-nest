@@ -7,6 +7,7 @@ import {
   Dialog,
   DialogTitle,
   FormControlLabel,
+  MenuItem,
   Switch,
   Table,
   TableBody,
@@ -16,7 +17,9 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import { useEffect } from 'react'
 import { useTariffsStore } from '../model/tariffsStore'
+import { useInstitutionStore } from '../../../shared/model/institutionStore'
 import { useCan } from '../../../entities/user'
 import {
   billingModeLabels,
@@ -50,6 +53,13 @@ export const TariffModal = () => {
   const isSaving = useTariffsStore((s) => s.isSaving)
   const canEdit = useCan('tariffs', 'edit')
   const tariff = tariffs.find((t) => t.id === tariffId) ?? null
+  const institutions = useInstitutionStore((s) => s.institutions)
+  const loadInstitutions = useInstitutionStore((s) => s.load)
+  const institutionOptions = institutions.filter((i) => i.isActive || i.id === tariff?.institutionId)
+
+  useEffect(() => {
+    if (isOpen && institutions.length === 0) loadInstitutions().catch(() => undefined)
+  }, [isOpen, institutions.length, loadInstitutions])
 
   const { control, handleSubmit, reset } = useForm<PriceValues>({
     mode: 'all',
@@ -82,6 +92,19 @@ export const TariffModal = () => {
               Термін дії: {tariff.validityDays ? `${tariff.validityDays} дн.` : 'без терміну'}
             </Typography>
           )}
+          <TextField
+            select
+            label="Заклад"
+            fullWidth
+            value={tariff.institutionId ?? ''}
+            disabled={isSaving || !canEdit}
+            onChange={(e) => updateTariff(tariff.id, { institutionId: e.target.value || null })}
+          >
+            <MenuItem value="">Спільний для всіх закладів</MenuItem>
+            {institutionOptions.map((i) => (
+              <MenuItem key={i.id} value={i.id}>{i.name}</MenuItem>
+            ))}
+          </TextField>
           <FormControlLabel
             control={
               <Switch

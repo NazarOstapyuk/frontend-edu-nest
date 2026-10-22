@@ -29,6 +29,7 @@ export interface TariffPrice {
 export interface Tariff {
   id: string;
   name: string;
+  institutionId: string | null;
   category: FinanceCategory;
   unit: TariffUnit;
   packageSize: number | null;
@@ -41,6 +42,7 @@ export interface Tariff {
 
 export interface CreateTariffDto {
   name: string;
+  institutionId: string | null;
   category: FinanceCategory;
   unit: TariffUnit;
   packageSize?: number;
@@ -52,6 +54,7 @@ export interface CreateTariffDto {
 
 export interface UpdateTariffDto {
   name?: string;
+  institutionId?: string | null;
   validityDays?: number | null;
   billingMode?: BillingMode;
   isActive?: boolean;

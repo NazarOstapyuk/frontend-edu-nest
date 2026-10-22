@@ -1,8 +1,10 @@
+import { useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, MenuItem, TextField } from '@mui/material'
 import { useTariffsStore } from '../model/tariffsStore'
+import { useInstitutionStore } from '../../../shared/model/institutionStore'
 import {
   billingModeLabels,
   billingModes,
@@ -20,6 +22,7 @@ import {
 const amountPattern = /^\d{1,8}([.,]\d{1,2})?$/
 
 const schema = yup.object({
+  institutionId: yup.string().default(''),
   name: yup.string().trim().required("Обов'язкове поле").min(2, 'Мінімум 2 символи').max(100, 'Максимум 100 символів'),
   category: yup.mixed<FinanceCategory>().oneOf(financeCategories).required("Обов'язкове поле"),
   unit: yup.mixed<TariffUnit>().oneOf(tariffUnits).required("Обов'язкове поле"),
@@ -47,6 +50,7 @@ const schema = yup.object({
 type FormValues = yup.InferType<typeof schema>
 
 const defaults: FormValues = {
+  institutionId: '',
   name: '',
   category: 'tuition',
   unit: 'month',
@@ -63,12 +67,25 @@ export const CreateTariffModal = () => {
   const createTariff = useTariffsStore((s) => s.createTariff)
   const isSaving = useTariffsStore((s) => s.isSaving)
 
+  const institutions = useInstitutionStore((s) => s.institutions)
+  const selectedId = useInstitutionStore((s) => s.selectedId)
+  const loadInstitutions = useInstitutionStore((s) => s.load)
+  const activeInstitutions = institutions.filter((i) => i.isActive)
+  const defaultInstitutionId = activeInstitutions.some((i) => i.id === selectedId) ? (selectedId ?? '') : ''
+
   const { control, handleSubmit, reset, watch } = useForm<FormValues>({
     mode: 'all',
     defaultValues: defaults,
     resolver: yupResolver(schema),
   })
   const unit = watch('unit')
+
+  useEffect(() => {
+    if (!isOpen) return
+    if (institutions.length === 0) loadInstitutions().catch(() => undefined)
+    reset({ ...defaults, institutionId: defaultInstitutionId })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen])
 
   const handleClose = () => {
     reset(defaults)
@@ -78,6 +95,7 @@ export const CreateTariffModal = () => {
   const onSubmit = async (values: FormValues) => {
     await createTariff({
       name: values.name.trim(),
+      institutionId: values.institutionId || null,
       category: values.category,
       unit: values.unit,
       packageSize: values.unit === 'package' ? Number(values.packageSize) : undefined,
@@ -98,6 +116,18 @@ export const CreateTariffModal = () => {
           control={control}
           render={({ field, fieldState: { error } }) => (
             <TextField {...field} label="Назва" fullWidth error={!!error} helperText={error?.message} />
+          )}
+        />
+        <Controller
+          name="institutionId"
+          control={control}
+          render={({ field, fieldState: { error } }) => (
+            <TextField {...field} select label="Заклад" fullWidth error={!!error} helperText={error?.message}>
+              <MenuItem value="">Спільний для всіх закладів</MenuItem>
+              {activeInstitutions.map((i) => (
+                <MenuItem key={i.id} value={i.id}>{i.name}</MenuItem>
+              ))}
+            </TextField>
           )}
         />
         <Controller

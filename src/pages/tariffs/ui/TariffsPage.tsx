@@ -17,6 +17,7 @@ import {
 import AddIcon from '@mui/icons-material/Add'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import { useTariffsStore } from '../model/tariffsStore'
+import { useInstitutionStore } from '../../../shared/model/institutionStore'
 import { useCan } from '../../../entities/user'
 import {
   billingModeLabels,
@@ -41,6 +42,7 @@ export const TariffsPage = () => {
   const setTariffModal = useTariffsStore((s) => s.setTariffModal)
   const canEdit = useCan('tariffs', 'edit')
   const canEditSettings = useCan('settings', 'edit')
+  const institutions = useInstitutionStore((s) => s.institutions)
   const [leadInput, setLeadInput] = useState<string | null>(null)
 
   useEffect(() => {
@@ -114,6 +116,7 @@ export const TariffsPage = () => {
           <TableHead>
             <TableRow sx={{ '& th': { fontWeight: 700, bgcolor: 'grey.50' } }}>
               <TableCell>Назва</TableCell>
+              <TableCell>Заклад</TableCell>
               <TableCell>Категорія</TableCell>
               <TableCell>Одиниця</TableCell>
               <TableCell>Режим</TableCell>
@@ -125,7 +128,7 @@ export const TariffsPage = () => {
           <TableBody>
             {tariffs.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                <TableCell colSpan={8} align="center" sx={{ py: 6, color: 'text.secondary' }}>
                   Тарифів ще немає. Натисніть «Створити тариф».
                 </TableCell>
               </TableRow>
@@ -138,6 +141,9 @@ export const TariffsPage = () => {
                   sx={{ cursor: 'pointer', '&:last-child td': { borderBottom: 0 } }}
                 >
                   <TableCell sx={{ fontWeight: 500 }}>{t.name}</TableCell>
+                  <TableCell>
+                    {t.institutionId ? (institutions.find((i) => i.id === t.institutionId)?.name ?? '—') : 'Спільний'}
+                  </TableCell>
                   <TableCell>{financeCategoryLabels[t.category]}</TableCell>
                   <TableCell>
                     {tariffUnitLabels[t.unit]}

@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { Box, Button, Checkbox, Dialog, DialogTitle, FormControlLabel, MenuItem, TextField, Typography } from '@mui/material'
 import { useMealsStore } from '../model/mealsStore'
+import { InstitutionMultiSelect } from './InstitutionMultiSelect'
 import { useNotifyStore } from '../../../shared/model/notifyStore'
 import { addDaysIso } from '../../../shared/api'
 
 export const ApplyTemplateDialog = ({ onClose }: { onClose: () => void }) => {
   const templates = useMealsStore((s) => s.templates)
+  const current = useMealsStore((s) => s.menuInstitutionId)
   const menuStart = useMealsStore((s) => s.menuStart)
   const menuWeeks = useMealsStore((s) => s.menuWeeks)
   const isSaving = useMealsStore((s) => s.isSaving)
@@ -17,11 +19,12 @@ export const ApplyTemplateDialog = ({ onClose }: { onClose: () => void }) => {
   const [to, setTo] = useState(addDaysIso(menuStart, menuWeeks * 7 - 1))
   const [startWeek, setStartWeek] = useState(1)
   const [overwrite, setOverwrite] = useState(false)
+  const [institutionIds, setInstitutionIds] = useState<string[]>([current])
   const template = active.find((t) => t.id === templateId)
-  const invalid = !template || !from || !to || to < from || startWeek > template.weeks
+  const invalid = institutionIds.length === 0 || !template || !from || !to || to < from || startWeek > template.weeks
 
   const submit = () =>
-    applyTemplate(templateId, { from, to, startWeek, overwrite })
+    applyTemplate(templateId, { institutionIds, from, to, startWeek, overwrite })
       .then((r) => {
         push(`Створено: ${r.created}, перезаписано: ${r.overwritten}, пропущено: ${r.skipped}`, 'success')
         onClose()
@@ -46,6 +49,7 @@ export const ApplyTemplateDialog = ({ onClose }: { onClose: () => void }) => {
             <TextField select label="Почати з тижня циклу" value={startWeek} onChange={(e) => setStartWeek(Number(e.target.value))}>
               {Array.from({ length: template?.weeks ?? 1 }, (_, i) => i + 1).map((w) => <MenuItem key={w} value={w}>{w}</MenuItem>)}
             </TextField>
+            <InstitutionMultiSelect label="Для закладів" value={institutionIds} onChange={setInstitutionIds} currentId={current} />
             <FormControlLabel control={<Checkbox checked={overwrite} onChange={(e) => setOverwrite(e.target.checked)} />} label="Перезаписати чернетки" />
             <Typography variant="body2" color="text.secondary">Створюються чернетки. Опубліковані дні й неробочі дні пропускаються.</Typography>
           </>

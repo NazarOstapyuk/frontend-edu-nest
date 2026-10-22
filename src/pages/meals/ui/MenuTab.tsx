@@ -6,38 +6,45 @@ import { useMealsStore } from '../model/mealsStore'
 import { MenuDayDialog } from './MenuDayDialog'
 import { CopyMenuDialog } from './CopyMenuDialog'
 import { ApplyTemplateDialog } from './ApplyTemplateDialog'
+import { MenuPeriodDialog } from './MenuPeriodDialog'
+import { useInstitutionStore } from '../../../shared/model/institutionStore'
 import { useCan } from '../../../entities/user'
 import {
-  addDaysIso, formatDay, groupKindLabels, groupKinds, isoWeekdayLabels, menuStatusLabels, type GroupKind, type MenuDayView,
+  addDaysIso, formatDay, isoWeekdayLabels, menuStatusLabels, type MenuDayView,
 } from '../../../shared/api'
 
 export const MenuTab = () => {
   const canEdit = useCan('meals', 'edit')
-  const kind = useMealsStore((s) => s.menuKind)
+  const institutionId = useMealsStore((s) => s.menuInstitutionId)
+  const institutions = useInstitutionStore((s) => s.institutions)
+  const selectedId = useInstitutionStore((s) => s.selectedId)
+  const loadInstitutions = useInstitutionStore((s) => s.load)
   const start = useMealsStore((s) => s.menuStart)
   const weeks = useMealsStore((s) => s.menuWeeks)
   const key = useMealsStore((s) => s.menuKey)
   const days = useMealsStore((s) => s.menuDays)
   const failed = useMealsStore((s) => s.menuFailed)
-  const isSaving = useMealsStore((s) => s.isSaving)
   const loadMenu = useMealsStore((s) => s.loadMenu)
-  const publishPeriod = useMealsStore((s) => s.publishPeriod)
-  const unpublishPeriod = useMealsStore((s) => s.unpublishPeriod)
   const [editing, setEditing] = useState<MenuDayView | null>(null)
-  const [dialog, setDialog] = useState<'copy' | 'apply' | null>(null)
-  const ready = key === `${kind}/${start}/${weeks}` && days.length > 0
+  const [dialog, setDialog] = useState<'copy' | 'apply' | 'publish' | 'unpublish' | null>(null)
+  const initialId = selectedId ?? institutions.find((i) => i.isActive)?.id ?? ''
+  const ready = key === `${institutionId}/${start}/${weeks}` && days.length > 0
 
   useEffect(() => {
-    loadMenu().catch(() => undefined)
-  }, [loadMenu])
+    if (institutions.length === 0) loadInstitutions().catch(() => undefined)
+  }, [institutions.length, loadInstitutions])
+
+  useEffect(() => {
+    loadMenu({ institutionId: initialId }).catch(() => undefined)
+  }, [loadMenu, initialId])
 
   const rows = Array.from({ length: weeks }, (_, w) => days.slice(w * 7, w * 7 + 7))
 
   return (
     <Box>
       <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap', mb: 2 }}>
-        <TextField select size="small" label="Для" value={kind} onChange={(e) => loadMenu({ kind: e.target.value as GroupKind }).catch(() => undefined)} sx={{ minWidth: 160 }}>
-          {groupKinds.map((k) => <MenuItem key={k} value={k}>{groupKindLabels[k]}</MenuItem>)}
+        <TextField select size="small" label="Заклад" value={institutionId} onChange={(e) => loadMenu({ institutionId: e.target.value }).catch(() => undefined)} sx={{ minWidth: 200 }}>
+          {institutions.map((i) => <MenuItem key={i.id} value={i.id}>{i.name}</MenuItem>)}
         </TextField>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <IconButton onClick={() => loadMenu({ start: addDaysIso(start, -7 * weeks) }).catch(() => undefined)}><ChevronLeftIcon /></IconButton>
@@ -51,11 +58,11 @@ export const MenuTab = () => {
         <Box sx={{ flex: 1 }} />
         {canEdit && <Button onClick={() => setDialog('apply')}>Застосувати шаблон</Button>}
         {canEdit && <Button onClick={() => setDialog('copy')}>Копіювати</Button>}
-        {canEdit && <Button disabled={isSaving} onClick={() => unpublishPeriod().catch(() => undefined)}>Зняти публікацію</Button>}
-        {canEdit && <Button variant="contained" disabled={isSaving} onClick={() => publishPeriod().catch(() => undefined)}>Опублікувати період</Button>}
+        {canEdit && <Button disabled={!institutionId} onClick={() => setDialog('unpublish')}>Зняти публікацію</Button>}
+        {canEdit && <Button variant="contained" disabled={!institutionId} onClick={() => setDialog('publish')}>Опублікувати період</Button>}
       </Box>
 
-      {failed && key === `${kind}/${start}/${weeks}` ? (
+      {failed && key === `${institutionId}/${start}/${weeks}` ? (
         <Alert severity="error" action={<Button onClick={() => loadMenu().catch(() => undefined)}>Спробувати ще</Button>}>Не вдалося завантажити дані.</Alert>
       ) : !ready ? (
         <Typography color="text.secondary">Завантаження…</Typography>
@@ -105,6 +112,7 @@ export const MenuTab = () => {
       {editing && <MenuDayDialog key={editing.date} day={editing} onClose={() => setEditing(null)} />}
       {dialog === 'copy' && <CopyMenuDialog onClose={() => setDialog(null)} />}
       {dialog === 'apply' && <ApplyTemplateDialog onClose={() => setDialog(null)} />}
+      {(dialog === 'publish' || dialog === 'unpublish') && <MenuPeriodDialog mode={dialog} onClose={() => setDialog(null)} />}
     </Box>
   )
 }

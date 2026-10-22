@@ -86,6 +86,7 @@ export interface MenuDish {
 }
 
 export interface MenuDayView {
+  institutionId: string;
   date: string;
   working: boolean;
   title: string | null;
@@ -96,6 +97,21 @@ export interface MenuDayView {
     activeOrders: number;
     dishes: MenuDish[];
   };
+}
+
+export interface MenuPeriodDto {
+  institutionIds: string[];
+  from: string;
+  to: string;
+}
+
+export interface CopyMenuDto {
+  sourceInstitutionId: string;
+  institutionIds: string[];
+  fromStart: string;
+  fromEnd: string;
+  toStart: string;
+  overwrite: boolean;
 }
 
 export interface FillResult {
@@ -208,17 +224,14 @@ export const mealsApi = {
   getSettings: () => axiosInstance.get<{ mealOrderDeadline: string }>('/meals/settings'),
   updateSettings: (mealOrderDeadline: string) =>
     axiosInstance.patch<{ mealOrderDeadline: string }>('/meals/settings', { mealOrderDeadline }),
-  getMenuDays: (kind: GroupKind, from: string, to: string) =>
-    axiosInstance.get<MenuDayView[]>('/menu-days', { params: { kind, from, to } }),
-  saveMenuDay: (date: string, kind: GroupKind, dishIds: string[]) =>
-    axiosInstance.put<MenuDayView>(`/menu-days/${date}/${kind}`, { dishIds }),
-  deleteMenuDay: (date: string, kind: GroupKind) => axiosInstance.delete(`/menu-days/${date}/${kind}`),
-  publish: (kind: GroupKind, from: string, to: string) =>
-    axiosInstance.post<{ count: number }>('/menu-days/publish', { kind, from, to }),
-  unpublish: (kind: GroupKind, from: string, to: string) =>
-    axiosInstance.post<{ count: number }>('/menu-days/unpublish', { kind, from, to }),
-  copy: (dto: { kind: GroupKind; fromStart: string; fromEnd: string; toStart: string; overwrite: boolean }) =>
-    axiosInstance.post<FillResult>('/menu-days/copy', dto),
+  getMenuDays: (institutionId: string, from: string, to: string) =>
+    axiosInstance.get<MenuDayView[]>('/menu-days', { params: { institutionId, from, to } }),
+  saveMenuDay: (date: string, institutionIds: string[], dishIds: string[]) =>
+    axiosInstance.put<MenuDayView[]>(`/menu-days/${date}`, { institutionIds, dishIds }),
+  deleteMenuDay: (date: string, institutionId: string) => axiosInstance.delete(`/menu-days/${date}/${institutionId}`),
+  publish: (dto: MenuPeriodDto) => axiosInstance.post<{ count: number }>('/menu-days/publish', dto),
+  unpublish: (dto: MenuPeriodDto) => axiosInstance.post<{ count: number }>('/menu-days/unpublish', dto),
+  copy: (dto: CopyMenuDto) => axiosInstance.post<FillResult>('/menu-days/copy', dto),
   getTemplates: () => axiosInstance.get<MenuTemplate[]>('/menu-templates'),
   createTemplate: (dto: { name: string; weeks: number }) => axiosInstance.post<MenuTemplate>('/menu-templates', dto),
   updateTemplate: (id: string, dto: { name?: string; weeks?: number; active?: boolean }) =>
@@ -227,7 +240,7 @@ export const mealsApi = {
     axiosInstance.put<MenuTemplate>(`/menu-templates/${id}/items`, { items }),
   applyTemplate: (
     id: string,
-    dto: { kind: GroupKind; from: string; to: string; startWeek: number; overwrite: boolean },
+    dto: { institutionIds: string[]; from: string; to: string; startWeek: number; overwrite: boolean },
   ) => axiosInstance.post<FillResult>(`/menu-templates/${id}/apply`, dto),
   getOrders: (date: string, kind?: GroupKind, groupId?: string) =>
     axiosInstance.get<{ orders: AdminMealOrder[]; summary: MealSummary }>('/meal-orders', {

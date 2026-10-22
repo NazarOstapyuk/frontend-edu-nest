@@ -54,7 +54,7 @@ interface MealsState {
   addPrice: (complexId: string, dto: ComplexPriceDto) => Promise<void>;
   deletePrice: (complexId: string, priceId: string) => Promise<void>;
   saveDeadline: (value: string) => Promise<void>;
-  menuKind: GroupKind;
+  menuInstitutionId: string;
   menuStart: string;
   menuWeeks: 1 | 4;
   menuKey: string | null;
@@ -62,16 +62,16 @@ interface MealsState {
   menuFailed: boolean;
   templates: MenuTemplate[];
   templatesFailed: boolean;
-  loadMenu: (patch?: Partial<{ kind: GroupKind; start: string; weeks: 1 | 4 }>) => Promise<void>;
-  saveMenuDay: (date: string, dishIds: string[]) => Promise<void>;
+  loadMenu: (patch?: Partial<{ institutionId: string; start: string; weeks: 1 | 4 }>) => Promise<void>;
+  saveMenuDay: (date: string, institutionIds: string[], dishIds: string[]) => Promise<void>;
   deleteMenuDay: (date: string) => Promise<void>;
-  publishPeriod: () => Promise<void>;
-  unpublishPeriod: () => Promise<void>;
-  copyMenu: (dto: { fromStart: string; fromEnd: string; toStart: string; overwrite: boolean }) => Promise<FillResult>;
+  publishPeriod: (institutionIds: string[]) => Promise<void>;
+  unpublishPeriod: (institutionIds: string[]) => Promise<void>;
+  copyMenu: (dto: { institutionIds: string[]; fromStart: string; fromEnd: string; toStart: string; overwrite: boolean }) => Promise<FillResult>;
   loadTemplates: () => Promise<void>;
   saveTemplate: (id: string | null, dto: { name?: string; weeks?: number; active?: boolean }) => Promise<void>;
   saveTemplateItems: (id: string, items: { week: number; weekday: number; dishId: string }[]) => Promise<void>;
-  applyTemplate: (id: string, dto: { from: string; to: string; startWeek: number; overwrite: boolean }) => Promise<FillResult>;
+  applyTemplate: (id: string, dto: { institutionIds: string[]; from: string; to: string; startWeek: number; overwrite: boolean }) => Promise<FillResult>;
 }
 
 const replace = <T extends { id: string }>(list: T[], item: T) =>
@@ -192,7 +192,7 @@ export const useMealsStore = create<MealsState>((set, get) => {
         const { data } = await mealsApi.updateSettings(value);
         set({ deadline: data.mealOrderDeadline });
       }),
-    menuKind: 'kindergarten',
+    menuInstitutionId: '',
     menuStart: weekStart(localToday()),
     menuWeeks: 1,
     menuKey: null,
@@ -202,45 +202,47 @@ export const useMealsStore = create<MealsState>((set, get) => {
     templatesFailed: false,
     loadMenu: async (patch = {}) => {
       const state = get();
-      const kind = patch.kind ?? state.menuKind;
+      const institutionId = patch.institutionId ?? state.menuInstitutionId;
       const start = patch.start ?? state.menuStart;
       const weeks = patch.weeks ?? state.menuWeeks;
-      const key = `${kind}/${start}/${weeks}`;
-      set({ menuKind: kind, menuStart: start, menuWeeks: weeks, menuKey: key, menuDays: [], menuFailed: false });
+      const key = `${institutionId}/${start}/${weeks}`;
+      set({ menuInstitutionId: institutionId, menuStart: start, menuWeeks: weeks, menuKey: key, menuDays: [], menuFailed: false });
+      if (!institutionId) return;
       try {
-        const { data } = await mealsApi.getMenuDays(kind, start, addDaysIso(start, weeks * 7 - 1));
+        const { data } = await mealsApi.getMenuDays(institutionId, start, addDaysIso(start, weeks * 7 - 1));
         if (get().menuKey === key) set({ menuDays: data });
       } catch (error) {
         if (get().menuKey === key) set({ menuFailed: true });
         throw error;
       }
     },
-    saveMenuDay: (date, dishIds) =>
+    saveMenuDay: (date, institutionIds, dishIds) =>
       saving(async () => {
-        const { data } = await mealsApi.saveMenuDay(date, get().menuKind, dishIds);
-        set((s) => ({ menuDays: s.menuDays.map((d) => (d.date === data.date ? data : d)) }));
+        const { data } = await mealsApi.saveMenuDay(date, institutionIds, dishIds);
+        const view = data.find((v) => v.institutionId === get().menuInstitutionId);
+        if (view) set((s) => ({ menuDays: s.menuDays.map((d) => (d.date === view.date ? view : d)) }));
       }),
     deleteMenuDay: (date) =>
       saving(async () => {
-        await mealsApi.deleteMenuDay(date, get().menuKind);
+        await mealsApi.deleteMenuDay(date, get().menuInstitutionId);
         set((s) => ({ menuDays: s.menuDays.map((d) => (d.date === date ? { ...d, menu: null } : d)) }));
       }),
-    publishPeriod: () =>
+    publishPeriod: (institutionIds) =>
       saving(async () => {
-        const { menuKind, menuStart, menuWeeks } = get();
-        await mealsApi.publish(menuKind, menuStart, addDaysIso(menuStart, menuWeeks * 7 - 1));
+        const { menuStart, menuWeeks } = get();
+        await mealsApi.publish({ institutionIds, from: menuStart, to: addDaysIso(menuStart, menuWeeks * 7 - 1) });
         await get().loadMenu();
       }),
-    unpublishPeriod: () =>
+    unpublishPeriod: (institutionIds) =>
       saving(async () => {
-        const { menuKind, menuStart, menuWeeks } = get();
-        await mealsApi.unpublish(menuKind, menuStart, addDaysIso(menuStart, menuWeeks * 7 - 1));
+        const { menuStart, menuWeeks } = get();
+        await mealsApi.unpublish({ institutionIds, from: menuStart, to: addDaysIso(menuStart, menuWeeks * 7 - 1) });
         await get().loadMenu();
       }),
     copyMenu: async (dto) => {
       let result: FillResult = { created: 0, overwritten: 0, skipped: 0 };
       await saving(async () => {
-        result = (await mealsApi.copy({ ...dto, kind: get().menuKind })).data;
+        result = (await mealsApi.copy({ ...dto, sourceInstitutionId: get().menuInstitutionId })).data;
         await get().loadMenu();
       });
       return result;
@@ -270,7 +272,7 @@ export const useMealsStore = create<MealsState>((set, get) => {
     applyTemplate: async (id, dto) => {
       let result: FillResult = { created: 0, overwritten: 0, skipped: 0 };
       await saving(async () => {
-        result = (await mealsApi.applyTemplate(id, { ...dto, kind: get().menuKind })).data;
+        result = (await mealsApi.applyTemplate(id, dto)).data;
         await get().loadMenu();
       });
       return result;

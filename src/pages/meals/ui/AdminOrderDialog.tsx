@@ -14,13 +14,13 @@ export const AdminOrderDialog = ({ onClose }: { onClose: () => void }) => {
   const [menu, setMenu] = useState<{ key: string; day: MenuDayView | null; failed: boolean } | null>(null)
   const [complexId, setComplexId] = useState('')
   const [picks, setPicks] = useState<Record<string, string>>({})
-  const kind = child?.group?.kind
-  const menuKey = kind && date ? `${kind}/${date}` : null
+  const institutionId = child?.group?.institution.id
+  const menuKey = institutionId && date ? `${institutionId}/${date}` : null
 
-  const fetchMenu = (k: string, groupKind: NonNullable<typeof kind>, day: string) => {
+  const fetchMenu = (k: string, id: string, day: string) => {
     setMenu({ key: k, day: null, failed: false })
     mealsApi
-      .getMenuDays(groupKind, day, day)
+      .getMenuDays(id, day, day)
       .then(({ data }) => setMenu((m) => (m?.key === k ? { key: k, day: data[0] ?? null, failed: false } : m)))
       .catch(() => setMenu((m) => (m?.key === k ? { key: k, day: null, failed: true } : m)))
   }
@@ -30,8 +30,8 @@ export const AdminOrderDialog = ({ onClose }: { onClose: () => void }) => {
     setDate(nextDate)
     setComplexId('')
     setPicks({})
-    const groupKind = nextChild?.group?.kind
-    if (groupKind && nextDate) fetchMenu(`${groupKind}/${nextDate}`, groupKind, nextDate)
+    const id = nextChild?.group?.institution.id
+    if (id && nextDate) fetchMenu(`${id}/${nextDate}`, id, nextDate)
     else setMenu(null)
   }
 

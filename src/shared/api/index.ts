@@ -230,6 +230,8 @@ export type {
   MenuDish,
   MenuDayView,
   FillResult,
+  MenuPeriodDto,
+  CopyMenuDto,
   MenuTemplateItem,
   MenuTemplate,
   OrderItem,

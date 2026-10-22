@@ -21,7 +21,7 @@ export type {
   AccessTemplate,
 } from './access';
 export { groupsApi } from './groups';
-export type { Group, CreateGroupDto, UpdateGroupDto } from './groups';
+export type { Group, GroupChild, CreateGroupDto, UpdateGroupDto } from './groups';
 export { childrenApi } from './children';
 export type { Child, CreateChildDto, UpdateChildDto, Gender } from './children';
 export { genderLabels } from './children';

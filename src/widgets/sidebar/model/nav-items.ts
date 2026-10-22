@@ -60,6 +60,6 @@ export const navItems: NavItem[] = [
 export const bottomNavItems: NavItem[] = [
   { path: '/audit', label: 'Історія змін', icon: HistoryIcon, area: 'audit' },
   { path: '/backups', label: 'Резервні копії', icon: BackupIcon, area: 'backups' },
-  { path: '/institutions', label: 'Заклади', icon: ApartmentIcon, area: 'settings' },
+  { path: '/institutions', label: 'Заклади', icon: ApartmentIcon, areas: ['settings', 'children'] },
   { path: '/settings', label: 'Налаштування', icon: SettingsIcon, area: 'settings' },
 ]

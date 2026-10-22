@@ -3,6 +3,13 @@ import { axiosInstance } from './axiosInstance';
 import type { GroupKind } from './register';
 import type { InstitutionType } from './institutions';
 
+export interface GroupChild {
+  id: string;
+  firstName: string;
+  lastName: string;
+  middleName: string | null;
+}
+
 export interface Group {
   id: string;
   name: string;
@@ -11,6 +18,7 @@ export interface Group {
   teachers: User[];
   bellScheduleId: string | null;
   mealPriceCategoryId: string | null;
+  children?: GroupChild[];
   createdAt: string;
 }
 

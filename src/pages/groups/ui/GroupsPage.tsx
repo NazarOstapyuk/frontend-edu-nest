@@ -18,8 +18,7 @@ import { useGroupsStore } from '../model/groupsStore'
 import { useUsersStore } from '../../users/model/usersStore'
 import { groupKindLabels } from '../../../shared/api'
 import { useCan } from '../../../entities/user'
-import { CreateGroupModal } from './CreateGroupModal'
-import { EditGroupModal } from './EditGroupModal'
+import { CreateGroupModal, EditGroupModal } from '../../../widgets/groupForms'
 
 export const GroupsPage = () => {
   const groups = useGroupsStore((s) => s.groups)
@@ -29,6 +28,15 @@ export const GroupsPage = () => {
   const setCreateGroupModal = useGroupsStore((s) => s.setCreateGroupModal)
   const setEditGroupModal = useGroupsStore((s) => s.setEditGroupModal)
   const deleteGroup = useGroupsStore((s) => s.deleteGroup)
+  const createGroupModal = useGroupsStore((s) => s.createGroupModal)
+  const editGroupModal = useGroupsStore((s) => s.editGroupModal)
+  const createGroup = useGroupsStore((s) => s.createGroup)
+  const updateGroup = useGroupsStore((s) => s.updateGroup)
+  const isCreating = useGroupsStore((s) => s.isCreating)
+  const isUpdating = useGroupsStore((s) => s.isUpdating)
+  const bellSchedules = useGroupsStore((s) => s.bellSchedules)
+  const mealCategories = useGroupsStore((s) => s.mealCategories)
+  const users = useUsersStore((s) => s.users)
   const fetchUsers = useUsersStore((s) => s.fetchUsers)
   const canEdit = useCan('children', 'edit')
 
@@ -116,8 +124,25 @@ export const GroupsPage = () => {
         </Grid>
       )}
 
-      <CreateGroupModal />
-      <EditGroupModal />
+      <CreateGroupModal
+        isOpen={createGroupModal.isOpen}
+        isSubmitting={isCreating}
+        users={users}
+        bellSchedules={bellSchedules}
+        mealCategories={mealCategories}
+        onSubmit={createGroup}
+        onClose={() => setCreateGroupModal({ isOpen: false })}
+      />
+      <EditGroupModal
+        isOpen={editGroupModal.isOpen}
+        group={editGroupModal.group}
+        isSubmitting={isUpdating}
+        users={users}
+        bellSchedules={bellSchedules}
+        mealCategories={mealCategories}
+        onSubmit={updateGroup}
+        onClose={() => setEditGroupModal({ isOpen: false, group: null })}
+      />
     </Box>
   )
 }

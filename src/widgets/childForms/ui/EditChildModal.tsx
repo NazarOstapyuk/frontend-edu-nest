@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
@@ -10,10 +11,8 @@ import {
   MenuItem,
   TextField,
 } from '@mui/material'
-import { useChildrenStore } from '../model/childrenStore'
-import { useUsersStore } from '../../users/model/usersStore'
-import { useGroupsStore } from '../../groups/model/groupsStore'
-import { genderLabels, type Gender } from '../../../shared/api'
+import type { User } from '../../../entities/user'
+import { genderLabels, type Child, type Gender, type Group, type UpdateChildDto } from '../../../shared/api'
 
 const schema = yup.object({
   firstName: yup.string().min(2, 'Мінімум 2 символи').required("Обов'язкове поле"),
@@ -27,13 +26,25 @@ const schema = yup.object({
 
 type FormValues = yup.InferType<typeof schema>
 
-export const CreateChildModal = () => {
-  const createChild = useChildrenStore((s) => s.createChild)
-  const isCreating = useChildrenStore((s) => s.isCreating)
-  const { isOpen } = useChildrenStore((s) => s.createChildModal)
-  const setCreateChildModal = useChildrenStore((s) => s.setCreateChildModal)
-  const users = useUsersStore((s) => s.users)
-  const groups = useGroupsStore((s) => s.groups)
+interface EditChildModalProps {
+  isOpen: boolean
+  child: Child | null
+  isSubmitting: boolean
+  users: User[]
+  groups: Group[]
+  onSubmit: (id: string, dto: UpdateChildDto) => Promise<unknown>
+  onClose: () => void
+}
+
+export const EditChildModal = ({
+  isOpen,
+  child,
+  isSubmitting,
+  users,
+  groups,
+  onSubmit: submit,
+  onClose,
+}: EditChildModalProps) => {
 
   const parents = users.filter((u) => u.role === 'parent')
 
@@ -43,16 +54,31 @@ export const CreateChildModal = () => {
     resolver: yupResolver(schema),
   })
 
+  useEffect(() => {
+    if (child) {
+      reset({
+        firstName: child.firstName,
+        lastName: child.lastName,
+        middleName: child.middleName ?? '',
+        birthDate: child.birthDate,
+        gender: child.gender,
+        groupId: child.group?.id ?? '',
+        parentIds: child.parents.map((p) => p.id),
+      })
+    }
+  }, [child, reset])
+
   const handleClose = () => {
     reset()
-    setCreateChildModal({ isOpen: false })
+    onClose()
   }
 
   const onSubmit = async (values: FormValues) => {
-    await createChild({
+    if (!child) return
+    await submit(child.id, {
       firstName: values.firstName,
       lastName: values.lastName,
-      middleName: values.middleName.trim() || undefined,
+      middleName: values.middleName.trim() || null,
       birthDate: values.birthDate,
       gender: values.gender as Gender,
       groupId: values.groupId,
@@ -63,7 +89,7 @@ export const CreateChildModal = () => {
 
   return (
     <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ fontWeight: 700 }}>Новий учень</DialogTitle>
+      <DialogTitle sx={{ fontWeight: 700 }}>Редагувати учня</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         <Controller
           name="lastName"
@@ -185,7 +211,7 @@ export const CreateChildModal = () => {
           <Button
             onClick={handleSubmit(onSubmit)}
             variant="contained"
-            disabled={isCreating}
+            disabled={isSubmitting}
             sx={{ width: '100%' }}
           >
             Зберегти

@@ -11,10 +11,8 @@ import {
   MenuItem,
   TextField,
 } from '@mui/material'
-import { useChildrenStore } from '../model/childrenStore'
-import { useUsersStore } from '../../users/model/usersStore'
-import { useGroupsStore } from '../../groups/model/groupsStore'
-import { genderLabels, type Gender } from '../../../shared/api'
+import type { User } from '../../../entities/user'
+import { genderLabels, type CreateChildDto, type Gender, type Group } from '../../../shared/api'
 
 const schema = yup.object({
   firstName: yup.string().min(2, 'Мінімум 2 символи').required("Обов'язкове поле"),
@@ -28,47 +26,47 @@ const schema = yup.object({
 
 type FormValues = yup.InferType<typeof schema>
 
-export const EditChildModal = () => {
-  const updateChild = useChildrenStore((s) => s.updateChild)
-  const isUpdating = useChildrenStore((s) => s.isUpdating)
-  const { isOpen, child } = useChildrenStore((s) => s.editChildModal)
-  const setEditChildModal = useChildrenStore((s) => s.setEditChildModal)
-  const users = useUsersStore((s) => s.users)
-  const groups = useGroupsStore((s) => s.groups)
+interface CreateChildModalProps {
+  isOpen: boolean
+  isSubmitting: boolean
+  users: User[]
+  groups: Group[]
+  presetGroupId?: string | null
+  onSubmit: (dto: CreateChildDto) => Promise<unknown>
+  onClose: () => void
+}
 
+export const CreateChildModal = ({
+  isOpen,
+  isSubmitting,
+  users,
+  groups,
+  presetGroupId,
+  onSubmit: submit,
+  onClose,
+}: CreateChildModalProps) => {
   const parents = users.filter((u) => u.role === 'parent')
 
-  const { control, handleSubmit, reset } = useForm<FormValues>({
+  const { control, handleSubmit, reset, setValue } = useForm<FormValues>({
     mode: 'all',
     defaultValues: { firstName: '', lastName: '', middleName: '', birthDate: '', gender: 'male', groupId: '', parentIds: [] },
     resolver: yupResolver(schema),
   })
 
   useEffect(() => {
-    if (child) {
-      reset({
-        firstName: child.firstName,
-        lastName: child.lastName,
-        middleName: child.middleName ?? '',
-        birthDate: child.birthDate,
-        gender: child.gender,
-        groupId: child.group?.id ?? '',
-        parentIds: child.parents.map((p) => p.id),
-      })
-    }
-  }, [child, reset])
+    if (isOpen && presetGroupId) setValue('groupId', presetGroupId)
+  }, [isOpen, presetGroupId, setValue])
 
   const handleClose = () => {
     reset()
-    setEditChildModal({ isOpen: false, child: null })
+    onClose()
   }
 
   const onSubmit = async (values: FormValues) => {
-    if (!child) return
-    await updateChild(child.id, {
+    await submit({
       firstName: values.firstName,
       lastName: values.lastName,
-      middleName: values.middleName.trim() || null,
+      middleName: values.middleName.trim() || undefined,
       birthDate: values.birthDate,
       gender: values.gender as Gender,
       groupId: values.groupId,
@@ -79,7 +77,7 @@ export const EditChildModal = () => {
 
   return (
     <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ fontWeight: 700 }}>Редагувати учня</DialogTitle>
+      <DialogTitle sx={{ fontWeight: 700 }}>Новий учень</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         <Controller
           name="lastName"
@@ -201,7 +199,7 @@ export const EditChildModal = () => {
           <Button
             onClick={handleSubmit(onSubmit)}
             variant="contained"
-            disabled={isUpdating}
+            disabled={isSubmitting}
             sx={{ width: '100%' }}
           >
             Зберегти

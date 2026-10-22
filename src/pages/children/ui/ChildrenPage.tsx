@@ -24,8 +24,7 @@ import { useUsersStore } from '../../users/model/usersStore'
 import { useGroupsStore } from '../../groups/model/groupsStore'
 import { genderLabels } from '../../../shared/api'
 import { useCan } from '../../../entities/user'
-import { CreateChildModal } from './CreateChildModal'
-import { EditChildModal } from './EditChildModal'
+import { CreateChildModal, EditChildModal } from '../../../widgets/childForms'
 import { HistoryButton } from '../../../widgets/auditHistory'
 
 export const ChildrenPage = () => {
@@ -34,8 +33,16 @@ export const ChildrenPage = () => {
   const setCreateChildModal = useChildrenStore((s) => s.setCreateChildModal)
   const setEditChildModal = useChildrenStore((s) => s.setEditChildModal)
   const deleteChild = useChildrenStore((s) => s.deleteChild)
+  const createChildModal = useChildrenStore((s) => s.createChildModal)
+  const editChildModal = useChildrenStore((s) => s.editChildModal)
+  const createChild = useChildrenStore((s) => s.createChild)
+  const updateChild = useChildrenStore((s) => s.updateChild)
+  const isCreating = useChildrenStore((s) => s.isCreating)
+  const isUpdating = useChildrenStore((s) => s.isUpdating)
   const navigate = useNavigate()
+  const users = useUsersStore((s) => s.users)
   const fetchUsers = useUsersStore((s) => s.fetchUsers)
+  const groups = useGroupsStore((s) => s.groups)
   const fetchGroups = useGroupsStore((s) => s.fetchGroups)
   const canEdit = useCan('children', 'edit')
   const canViewFinance = useCan('finance', 'view')
@@ -162,8 +169,23 @@ export const ChildrenPage = () => {
         </Table>
       </TableContainer>
 
-      <CreateChildModal />
-      <EditChildModal />
+      <CreateChildModal
+        isOpen={createChildModal.isOpen}
+        isSubmitting={isCreating}
+        users={users}
+        groups={groups}
+        onSubmit={createChild}
+        onClose={() => setCreateChildModal({ isOpen: false })}
+      />
+      <EditChildModal
+        isOpen={editChildModal.isOpen}
+        child={editChildModal.child}
+        isSubmitting={isUpdating}
+        users={users}
+        groups={groups}
+        onSubmit={updateChild}
+        onClose={() => setEditChildModal({ isOpen: false, child: null })}
+      />
     </Box>
   )
 }

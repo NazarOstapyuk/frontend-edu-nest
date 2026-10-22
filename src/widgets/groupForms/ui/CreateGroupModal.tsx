@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm, useWatch, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import {
@@ -11,8 +11,8 @@ import {
   MenuItem,
   TextField,
 } from '@mui/material'
-import { useGroupsStore } from '../model/groupsStore'
-import { useUsersStore } from '../../users/model/usersStore'
+import type { BellSchedule, CreateGroupDto, MealPriceCategory } from '../../../shared/api'
+import type { User } from '../../../entities/user'
 import { useEffectiveInstitutions, useInstitutionStore } from '../../../shared/model/institutionStore'
 
 const schema = yup.object({
@@ -25,17 +25,32 @@ const schema = yup.object({
 
 type FormValues = yup.InferType<typeof schema>
 
-export const EditGroupModal = () => {
-  const updateGroup = useGroupsStore((s) => s.updateGroup)
-  const isUpdating = useGroupsStore((s) => s.isUpdating)
-  const { isOpen, group } = useGroupsStore((s) => s.editGroupModal)
-  const setEditGroupModal = useGroupsStore((s) => s.setEditGroupModal)
-  const users = useUsersStore((s) => s.users)
-  const bellSchedules = useGroupsStore((s) => s.bellSchedules)
-  const mealCategories = useGroupsStore((s) => s.mealCategories)
+interface CreateGroupModalProps {
+  isOpen: boolean
+  isSubmitting: boolean
+  users: User[]
+  bellSchedules: BellSchedule[]
+  mealCategories: MealPriceCategory[]
+  lockedInstitutionId?: string | null
+  title?: string
+  onSubmit: (dto: CreateGroupDto) => Promise<unknown>
+  onClose: () => void
+}
 
+export const CreateGroupModal = ({
+  isOpen,
+  isSubmitting,
+  users,
+  bellSchedules,
+  mealCategories,
+  lockedInstitutionId,
+  title = 'Нова група',
+  onSubmit: submit,
+  onClose,
+}: CreateGroupModalProps) => {
   const allInstitutions = useInstitutionStore((s) => s.institutions)
   const institutions = useEffectiveInstitutions()
+  const selectedId = useInstitutionStore((s) => s.selectedId)
   const loadInstitutions = useInstitutionStore((s) => s.load)
 
   useEffect(() => {
@@ -44,46 +59,43 @@ export const EditGroupModal = () => {
 
   const teachers = users.filter((u) => u.role === 'teacher')
 
-  const options = institutions.filter(
-    (i) => i.type === group?.institution.type && (i.isActive || i.id === group?.institution.id),
-  )
+  const options = lockedInstitutionId
+    ? allInstitutions.filter((i) => i.id === lockedInstitutionId)
+    : institutions.filter((i) => i.isActive)
 
-  const { control, handleSubmit, reset } = useForm<FormValues>({
+  const { control, handleSubmit, reset, setValue } = useForm<FormValues>({
     mode: 'all',
     defaultValues: { name: '', institutionId: '', teacherIds: [], bellScheduleId: '', mealPriceCategoryId: '' },
     resolver: yupResolver(schema),
   })
-  const kind = group?.kind
+  const institutionId = useWatch({ control, name: 'institutionId' })
+  const kind = allInstitutions.find((i) => i.id === institutionId)?.type
 
   useEffect(() => {
-    if (group) {
-      reset({
-        name: group.name,
-        institutionId: group.institution.id,
-        teacherIds: group.teachers.map((t) => t.id),
-        bellScheduleId: group.bellScheduleId ?? '',
-        mealPriceCategoryId: group.mealPriceCategoryId ?? '',
-      })
+    if (!isOpen) return
+    if (lockedInstitutionId) {
+      setValue('institutionId', lockedInstitutionId)
+    } else if (selectedId && institutions.some((i) => i.id === selectedId && i.isActive)) {
+      setValue('institutionId', selectedId)
     }
-  }, [group, reset])
+  }, [isOpen, lockedInstitutionId, selectedId, institutions, setValue])
 
   const handleClose = () => {
     reset()
-    setEditGroupModal({ isOpen: false, group: null })
+    onClose()
   }
 
   const onSubmit = async (values: FormValues) => {
-    if (!group) return
-    await updateGroup(group.id, { name: values.name, institutionId: values.institutionId, teacherIds: values.teacherIds ?? [],
-      bellScheduleId: kind === 'school_class' && values.bellScheduleId ? values.bellScheduleId : null,
-      mealPriceCategoryId: values.mealPriceCategoryId || null,
+    await submit({ name: values.name, institutionId: values.institutionId, teacherIds: values.teacherIds ?? [],
+      bellScheduleId: kind === 'school_class' && values.bellScheduleId ? values.bellScheduleId : undefined,
+      mealPriceCategoryId: values.mealPriceCategoryId || undefined,
     })
     handleClose()
   }
 
   return (
     <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ fontWeight: 700 }}>Редагувати групу</DialogTitle>
+      <DialogTitle sx={{ fontWeight: 700 }}>{title}</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         <Controller
           name="name"
@@ -103,7 +115,15 @@ export const EditGroupModal = () => {
           name="institutionId"
           control={control}
           render={({ field, fieldState: { error } }) => (
-            <TextField {...field} select label="Заклад" fullWidth error={!!error} helperText={error?.message}>
+            <TextField
+              {...field}
+              select
+              label="Заклад"
+              fullWidth
+              disabled={!!lockedInstitutionId}
+              error={!!error}
+              helperText={error?.message}
+            >
               {options.map((i) => (
                 <MenuItem key={i.id} value={i.id}>{i.name}</MenuItem>
               ))}
@@ -159,7 +179,7 @@ export const EditGroupModal = () => {
           <Button
             onClick={handleSubmit(onSubmit)}
             variant="contained"
-            disabled={isUpdating}
+            disabled={isSubmitting}
             sx={{ width: '100%' }}
           >
             Зберегти

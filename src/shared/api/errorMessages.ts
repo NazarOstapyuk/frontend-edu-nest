@@ -5,6 +5,7 @@ export const errorMessages: Record<string, string> = {
   'Institution name already taken': 'Заклад з такою назвою вже існує',
   'Institution is inactive': 'Заклад неактивний',
   'Institution type cannot change': 'Тип закладу змінити не можна',
+  'Institution is in use': 'Заклад використовується, його не можна видалити. Деактивуйте його',
   'Group is required': 'Оберіть групу',
   'Tariff belongs to another institution': 'Тариф належить іншому закладу',
   'Tariff is in use': 'Тариф використовується',

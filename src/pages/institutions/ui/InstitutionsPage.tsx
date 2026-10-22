@@ -16,6 +16,7 @@ import {
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import { useInstitutionsStore } from '../model/institutionsStore'
 import { institutionTypeLabels } from '../../../shared/api'
 import { useAuthStore, useCan } from '../../../entities/user'
@@ -27,6 +28,8 @@ export const InstitutionsPage = () => {
   const fetchInstitutions = useInstitutionsStore((s) => s.fetchInstitutions)
   const setCreateInstitutionModal = useInstitutionsStore((s) => s.setCreateInstitutionModal)
   const setEditInstitutionModal = useInstitutionsStore((s) => s.setEditInstitutionModal)
+  const deleteInstitution = useInstitutionsStore((s) => s.deleteInstitution)
+  const isDeleting = useInstitutionsStore((s) => s.isDeleting)
   const canEditSettings = useCan('settings', 'edit')
   const isFullScope = useAuthStore((s) => s.profile?.role === 'root' || s.profile?.accessScope === 'all')
   const canEdit = canEditSettings && isFullScope
@@ -99,6 +102,16 @@ export const InstitutionsPage = () => {
                           onClick={() => setEditInstitutionModal({ isOpen: true, institution })}
                         >
                           <EditOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Видалити (лише якщо заклад не використовується)">
+                        <IconButton
+                          size="small"
+                          color="error"
+                          disabled={isDeleting}
+                          onClick={() => deleteInstitution(institution.id).catch(() => undefined)}
+                        >
+                          <DeleteOutlineIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                     </TableCell>

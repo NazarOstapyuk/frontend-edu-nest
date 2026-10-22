@@ -12,6 +12,7 @@ interface InstitutionsState {
   isLoading: boolean;
   isCreating: boolean;
   isUpdating: boolean;
+  isDeleting: boolean;
   createInstitutionModal: { isOpen: boolean };
   editInstitutionModal: { isOpen: boolean; institution: Institution | null };
   setCreateInstitutionModal: (value: Partial<{ isOpen: boolean }>) => void;
@@ -19,6 +20,7 @@ interface InstitutionsState {
   fetchInstitutions: () => Promise<void>;
   createInstitution: (dto: CreateInstitutionDto) => Promise<void>;
   updateInstitution: (id: string, dto: UpdateInstitutionDto) => Promise<void>;
+  deleteInstitution: (id: string) => Promise<void>;
 }
 
 const syncShared = (institutions: Institution[]) => useInstitutionStore.setState({ institutions });
@@ -28,6 +30,7 @@ export const useInstitutionsStore = create<InstitutionsState>((set, get) => ({
   isLoading: false,
   isCreating: false,
   isUpdating: false,
+  isDeleting: false,
   createInstitutionModal: { isOpen: false },
   editInstitutionModal: { isOpen: false, institution: null },
 
@@ -69,6 +72,19 @@ export const useInstitutionsStore = create<InstitutionsState>((set, get) => ({
       syncShared(next);
     } finally {
       set({ isUpdating: false });
+    }
+  },
+
+  deleteInstitution: async (id) => {
+    set({ isDeleting: true });
+    try {
+      await institutionsApi.delete(id);
+      const next = get().institutions.filter((i) => i.id !== id);
+      set({ institutions: next });
+      syncShared(next);
+      if (useInstitutionStore.getState().selectedId === id) useInstitutionStore.getState().select(null);
+    } finally {
+      set({ isDeleting: false });
     }
   },
 }));

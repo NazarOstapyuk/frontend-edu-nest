@@ -29,4 +29,5 @@ export const institutionsApi = {
   getList: () => axiosInstance.get<Institution[]>('/institutions'),
   create: (dto: CreateInstitutionDto) => axiosInstance.post<Institution>('/institutions', dto),
   update: (id: string, dto: UpdateInstitutionDto) => axiosInstance.patch<Institution>(`/institutions/${id}`, dto),
+  delete: (id: string) => axiosInstance.delete<{ message: string }>(`/institutions/${id}`),
 };

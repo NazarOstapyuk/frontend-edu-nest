@@ -12,7 +12,7 @@ export type PermissionArea =
   | 'settings'
   | 'audit';
 export type PermissionLevel = 'view' | 'edit';
-export type AccessScope = 'all' | 'kindergarten' | 'school_class';
+export type AccessScope = 'all' | 'institutions';
 export type PermissionMap = Partial<Record<PermissionArea, PermissionLevel>>;
 
 export interface PermissionItem {
@@ -22,6 +22,7 @@ export interface PermissionItem {
 
 export interface UpdateAccessDto {
   accessScope: AccessScope;
+  institutionIds?: string[];
   permissions: PermissionItem[];
 }
 
@@ -48,9 +49,8 @@ export const levelLabels: Record<PermissionLevel, string> = {
 };
 
 export const scopeLabels: Record<AccessScope, string> = {
-  all: 'Усе',
-  kindergarten: 'Садочок',
-  school_class: 'Школа',
+  all: 'Усі заклади',
+  institutions: 'Вибрані заклади',
 };
 
 const RANK: Record<PermissionLevel, number> = { view: 1, edit: 2 };
@@ -61,6 +61,7 @@ export const levelSatisfies = (have: PermissionLevel | undefined, need: Permissi
 export interface AccessTemplate {
   name: string;
   accessScope: AccessScope;
+  institutionIds: string[];
   permissions: PermissionMap;
 }
 
@@ -68,21 +69,24 @@ const all = (level: PermissionLevel): PermissionMap =>
   Object.fromEntries(ALL_AREAS.map((area) => [area, level]));
 
 export const accessTemplates: AccessTemplate[] = [
-  { name: 'Адміністратор', accessScope: 'all', permissions: all('edit') },
+  { name: 'Адміністратор', accessScope: 'all', institutionIds: [], permissions: all('edit') },
   {
     name: 'Бухгалтер',
     accessScope: 'all',
+    institutionIds: [],
     permissions: { finance: 'edit', tariffs: 'edit', payroll: 'edit', children: 'view' },
   },
   {
     name: 'Завуч школи',
-    accessScope: 'school_class',
+    accessScope: 'institutions',
+    institutionIds: [],
     permissions: { register: 'edit', timetable: 'edit', children: 'edit' },
   },
   {
     name: 'Керівник садочка',
-    accessScope: 'kindergarten',
+    accessScope: 'institutions',
+    institutionIds: [],
     permissions: { register: 'edit', children: 'edit', meals: 'edit', finance: 'view' },
   },
-  { name: 'Відповідальний за харчування', accessScope: 'all', permissions: { meals: 'edit' } },
+  { name: 'Відповідальний за харчування', accessScope: 'all', institutionIds: [], permissions: { meals: 'edit' } },
 ];

@@ -16,6 +16,7 @@ export interface User {
   email?: string | null
   mustChangePassword?: boolean
   accessScope?: AccessScope
+  institutionIds?: string[]
   permissions?: PermissionItem[]
 }
 
@@ -29,7 +30,7 @@ export interface SessionProfile {
   phone: string | null
   email: string | null
   mustChangePassword: boolean
-  accessScope: AccessScope | 'institutions'
+  accessScope: AccessScope
   institutionIds: string[]
   permissions: PermissionMap
 }

@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import * as yup from 'yup'
 import {
+  Autocomplete,
   Button,
   Dialog,
   DialogActions,
@@ -30,6 +32,7 @@ import {
   type PermissionLevel,
   type PermissionMap,
 } from '../../../shared/api'
+import { useInstitutionStore } from '../../../shared/model/institutionStore'
 import { useAuthStore, type SessionRole, type User } from '../../../entities/user'
 
 interface Props {
@@ -40,12 +43,17 @@ interface Props {
 
 const scopes = Object.keys(scopeLabels) as AccessScope[]
 
+const institutionsSchema = yup.array(yup.string().required()).min(1, 'Оберіть хоча б один заклад')
+
 const toMap = (user: User): PermissionMap =>
   Object.fromEntries((user.permissions ?? []).map((p) => [p.area, p.level]))
 
 export const AccessDialog = ({ user, onClose, onSaved }: Props) => {
   const profile = useAuthStore((s) => s.profile)
   const [scope, setScope] = useState<AccessScope>(user.accessScope ?? 'all')
+  const institutions = useInstitutionStore((s) => s.institutions)
+  const [institutionIds, setInstitutionIds] = useState<string[]>(user.institutionIds ?? [])
+  const [institutionsError, setInstitutionsError] = useState<string | null>(null)
   const [original] = useState<PermissionMap>(() => toMap(user))
   const [permissions, setPermissions] = useState<PermissionMap>(original)
   const [saving, setSaving] = useState(false)
@@ -53,10 +61,12 @@ export const AccessDialog = ({ user, onClose, onSaved }: Props) => {
   const allowed = (level: PermissionLevel, area: PermissionArea) =>
     isRoot || levelSatisfies(profile?.permissions?.[area], level)
   const scopeAllowed = (value: AccessScope) =>
-    isRoot || profile?.accessScope === 'all' || profile?.accessScope === value
+    isRoot || profile?.accessScope === 'all' || value === 'institutions'
   const covers =
     isRoot ||
-    ((profile?.accessScope === 'all' || profile?.accessScope === (user.accessScope ?? 'all')) &&
+    ((profile?.accessScope === 'all' ||
+      ((user.accessScope ?? 'all') === 'institutions' &&
+        (user.institutionIds ?? []).every((id) => profile?.institutionIds.includes(id)))) &&
       ALL_AREAS.every((area) => {
         const have = original[area]
         return have === undefined || levelSatisfies(profile?.permissions?.[area], have)
@@ -79,6 +89,8 @@ export const AccessDialog = ({ user, onClose, onSaved }: Props) => {
     const template = accessTemplates.find((t) => t.name === name)
     if (!template) return
     setScope(template.accessScope)
+    setInstitutionIds(template.institutionIds)
+    setInstitutionsError(null)
     setPermissions(
       Object.fromEntries(
         ALL_AREAS.flatMap((area) => {
@@ -98,11 +110,24 @@ export const AccessDialog = ({ user, onClose, onSaved }: Props) => {
     })
   }
 
+  const options = institutions.filter(
+    (institution) => institution.isActive || (user.institutionIds ?? []).includes(institution.id),
+  )
+
   const save = () => {
+    if (scope === 'institutions') {
+      try {
+        institutionsSchema.validateSync(institutionIds)
+      } catch (error) {
+        setInstitutionsError(error instanceof yup.ValidationError ? error.message : 'Оберіть хоча б один заклад')
+        return
+      }
+    }
     setSaving(true)
     usersApi
       .setAccess(user.id, {
         accessScope: scope,
+        ...(scope === 'institutions' ? { institutionIds } : {}),
         permissions: ALL_AREAS.flatMap((area) => {
           const level = permissions[area]
           return level ? [{ area, level }] : []
@@ -154,6 +179,29 @@ export const AccessDialog = ({ user, onClose, onSaved }: Props) => {
               </MenuItem>
             ))}
           </TextField>
+          {scope === 'institutions' && (
+            <Autocomplete
+              multiple
+              disabled={readOnly}
+              options={options}
+              value={options.filter((institution) => institutionIds.includes(institution.id))}
+              getOptionLabel={(institution) => institution.name}
+              isOptionEqualToValue={(a, b) => a.id === b.id}
+              noOptionsText="Немає закладів"
+              onChange={(_, value) => {
+                setInstitutionIds(value.map((institution) => institution.id))
+                setInstitutionsError(null)
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Заклади"
+                  error={!!institutionsError}
+                  helperText={institutionsError}
+                />
+              )}
+            />
+          )}
           <Table size="small">
             <TableBody>
               {ALL_AREAS.map((area) => (

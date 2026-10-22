@@ -18,11 +18,13 @@ import AddIcon from '@mui/icons-material/Add'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
+import { scopeLabels } from '../../../shared/api'
 import { roleLabels, useCan, type User } from '../../../entities/user'
 import { useUsersStore } from '../model/usersStore'
 import { CreateUserModal } from './CreateUserModal.tsx'
 import { EditUserModal } from './EditUserModal.tsx'
 import { AccessDialog } from './AccessDialog.tsx'
+import { useInstitutionStore } from '../../../shared/model/institutionStore'
 import { HistoryButton } from '../../../widgets/auditHistory'
 
 const roleColors: Record<string, 'primary' | 'secondary' | 'default'> = {
@@ -39,6 +41,7 @@ export const UsersPage = () => {
   const deleteUser = useUsersStore((s) => s.deleteUser)
   const replaceUser = useUsersStore((s) => s.replaceUser)
   const canEditUsers = useCan('users', 'edit')
+  const institutions = useInstitutionStore((s) => s.institutions)
   const [accessUser, setAccessUser] = useState<User | null>(null)
 
   useEffect(() => {
@@ -74,6 +77,7 @@ export const UsersPage = () => {
               <TableCell>Ім'я та прізвище</TableCell>
               <TableCell>Роль</TableCell>
               <TableCell>Телефон</TableCell>
+              <TableCell>Заклади</TableCell>
               <TableCell>Логін</TableCell>
               <TableCell>Дата створення</TableCell>
               <TableCell align="right">Дії</TableCell>
@@ -83,7 +87,7 @@ export const UsersPage = () => {
           <TableBody>
             {users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                <TableCell colSpan={8} align="center" sx={{ py: 6, color: 'text.secondary' }}>
                   Користувачів ще немає. Натисніть «Створити користувача».
                 </TableCell>
               </TableRow>
@@ -113,6 +117,16 @@ export const UsersPage = () => {
                     {user.role === 'parent' && !user.phone && (
                       <Chip size="small" color="warning" label="немає телефону" sx={{ ml: 1 }} />
                     )}
+                  </TableCell>
+                  <TableCell>
+                    {user.role === 'parent'
+                      ? '—'
+                      : user.accessScope === 'institutions'
+                        ? (user.institutionIds ?? [])
+                            .map((id) => institutions.find((i) => i.id === id)?.name)
+                            .filter(Boolean)
+                            .join(', ') || '—'
+                        : scopeLabels.all}
                   </TableCell>
                   <TableCell sx={{ fontFamily: 'monospace' }}>{user.login}</TableCell>
                   <TableCell sx={{ color: 'text.secondary' }}>{user.createdAt}</TableCell>

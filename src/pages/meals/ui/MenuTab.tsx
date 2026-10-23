@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react'
 import {
-  Alert, Box, Button, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Paper, Skeleton, TextField, ToggleButton,
-  ToggleButtonGroup, Tooltip, Typography,
+  Alert, Box, Button, IconButton, MenuItem, Paper, Skeleton, TextField, ToggleButton, ToggleButtonGroup, Tooltip, Typography,
 } from '@mui/material'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
 import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined'
 import EventRepeatOutlinedIcon from '@mui/icons-material/EventRepeatOutlined'
 import UnpublishedOutlinedIcon from '@mui/icons-material/UnpublishedOutlined'
@@ -41,7 +39,6 @@ export const MenuTab = () => {
   const loadMenu = useMealsStore((s) => s.loadMenu)
   const [editing, setEditing] = useState<MenuDayView | null>(null)
   const [dialog, setDialog] = useState<'copy' | 'apply' | 'publish' | 'unpublish' | null>(null)
-  const [moreAnchor, setMoreAnchor] = useState<HTMLElement | null>(null)
   const initialId = selectedId ?? institutions.find((i) => i.isActive)?.id ?? ''
   const ready = key === `${institutionId}/${start}/${weeks}` && days.length > 0
   const today = localToday()
@@ -58,10 +55,6 @@ export const MenuTab = () => {
 
   const rows = Array.from({ length: weeks }, (_, w) => days.slice(w * 7, w * 7 + 7))
   const go = (patch: Parameters<typeof loadMenu>[0]) => loadMenu(patch).catch(() => undefined)
-  const openDialog = (value: typeof dialog) => {
-    setMoreAnchor(null)
-    setDialog(value)
-  }
 
   return (
     <Box>
@@ -98,31 +91,27 @@ export const MenuTab = () => {
           <ToggleButton value={4}>4 тижні</ToggleButton>
         </ToggleButtonGroup>
 
-        <Box sx={{ flex: 1 }} />
-
         {canEdit && (
-          <>
-            <Tooltip title="Інші дії">
-              <IconButton onClick={(e) => setMoreAnchor(e.currentTarget)} aria-label="Інші дії"><MoreHorizIcon /></IconButton>
-            </Tooltip>
-            <Menu anchorEl={moreAnchor} open={moreAnchor !== null} onClose={() => setMoreAnchor(null)}>
-              <MenuItem onClick={() => openDialog('apply')}>
-                <ListItemIcon><EventRepeatOutlinedIcon fontSize="small" /></ListItemIcon>
-                <ListItemText>Заповнити з шаблону</ListItemText>
-              </MenuItem>
-              <MenuItem onClick={() => openDialog('copy')}>
-                <ListItemIcon><ContentCopyOutlinedIcon fontSize="small" /></ListItemIcon>
-                <ListItemText>Скопіювати меню</ListItemText>
-              </MenuItem>
-              <MenuItem disabled={!institutionId} onClick={() => openDialog('unpublish')}>
-                <ListItemIcon><UnpublishedOutlinedIcon fontSize="small" /></ListItemIcon>
-                <ListItemText>Зняти публікацію</ListItemText>
-              </MenuItem>
-            </Menu>
+          <Box
+            sx={{
+              display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1, width: '100%',
+              pt: 1.5, mt: 0.5, borderTop: '1px solid', borderColor: 'divider',
+            }}
+          >
+            <Button variant="outlined" startIcon={<EventRepeatOutlinedIcon />} onClick={() => setDialog('apply')}>
+              Заповнити з шаблону
+            </Button>
+            <Button variant="outlined" startIcon={<ContentCopyOutlinedIcon />} onClick={() => setDialog('copy')}>
+              Скопіювати меню
+            </Button>
+            <Box sx={{ flex: 1 }} />
+            <Button color="inherit" startIcon={<UnpublishedOutlinedIcon />} disabled={!institutionId} onClick={() => setDialog('unpublish')}>
+              Зняти публікацію
+            </Button>
             <Button variant="contained" disabled={!institutionId} onClick={() => setDialog('publish')}>
               {weeks === 1 ? 'Опублікувати тиждень' : 'Опублікувати 4 тижні'}
             </Button>
-          </>
+          </Box>
         )}
       </Paper>
 

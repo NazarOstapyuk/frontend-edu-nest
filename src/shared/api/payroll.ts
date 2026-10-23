@@ -4,7 +4,7 @@ import type { PersonRef } from './finance';
 export type PayrollCalendar = 'all' | 'kindergarten' | 'school_class';
 export type PayrollLessonType = 'school_lesson' | 'class_group' | 'individual';
 export type PayrollStatus = 'draft' | 'approved';
-export type PayrollLineType = 'base' | 'allowance' | 'lesson' | 'correction' | 'adjustment';
+export type PayrollLineType = 'base' | 'allowance' | 'lesson' | 'correction' | 'adjustment' | 'extra_hours';
 export type PayrollAdjustmentKind = 'bonus' | 'deduction';
 export type PayrollPaymentMethod = 'cash' | 'card';
 
@@ -57,6 +57,8 @@ export interface SalaryTerms {
   validFrom: string;
   validTo: string | null;
   monthlyRate: string;
+  extraHourRate: string | null;
+  payrollDetailsVisible: boolean;
   calendarKind: PayrollCalendar;
   note: string | null;
   started: boolean;
@@ -79,6 +81,7 @@ export interface SalaryAllowanceDto {
 
 export interface UpdateSalaryTermsDto {
   monthlyRate?: string;
+  extraHourRate?: string | null;
   calendarKind?: PayrollCalendar;
   note?: string;
   rates?: SalaryRateDto[];
@@ -89,6 +92,7 @@ export interface CreateSalaryTermsDto {
   teacherId: string;
   validFrom: string;
   monthlyRate: string;
+  extraHourRate?: string;
   calendarKind: PayrollCalendar;
   note?: string;
   rates: SalaryRateDto[];
@@ -100,6 +104,7 @@ export interface PayrollDays {
   defaultDays: number;
   workedDays: number;
   override: boolean;
+  unpaidAbsenceDays?: number;
 }
 
 export interface PayrollLine {
@@ -137,9 +142,38 @@ export interface PayrollPayment {
   voidReason: string | null;
 }
 
+export interface PayrollExtraHours {
+  id?: string;
+  date: string | null;
+  hours: string;
+  rate?: string | null;
+  ownRate?: string | null;
+  amount: string | null;
+  comment: string | null;
+  createdAt?: string;
+  createdBy?: PersonRef;
+  voidedAt?: string | null;
+  voidReason?: string | null;
+}
+
+export interface TeacherAbsence {
+  id: string;
+  teacherId?: string;
+  startDate: string;
+  endDate: string;
+  paid: boolean;
+  reason: string;
+  workingDays?: number;
+  createdAt: string;
+  createdBy?: PersonRef;
+  voidedAt: string | null;
+  voidReason: string | null;
+}
+
 export interface PayrollWarnings {
   noRate: number;
   lessonsWithoutTerms: number;
+  lessonsOnAbsenceDays?: string[];
 }
 
 export interface PayrollTotals {
@@ -158,6 +192,9 @@ export interface PayrollDetail {
   lines: PayrollLine[];
   adjustments: PayrollAdjustment[];
   payments: PayrollPayment[];
+  extraHours?: PayrollExtraHours[];
+  absences?: TeacherAbsence[];
+  payrollDetailsVisible?: boolean;
   warnings: PayrollWarnings;
   lessons: number;
   totals: PayrollTotals;
@@ -205,6 +242,20 @@ export interface PayrollPaymentDto {
   comment?: string;
 }
 
+export interface ExtraHoursDto {
+  date?: string;
+  hours: string;
+  rate?: string;
+  comment?: string;
+}
+
+export interface AbsenceDto {
+  startDate: string;
+  endDate?: string;
+  paid: boolean;
+  reason: string;
+}
+
 const sheetPath = (teacherId: string, month: string) => `/payroll/${teacherId}/${month}`;
 
 export const payrollApi = {
@@ -225,6 +276,18 @@ export const payrollApi = {
     axiosInstance.post<PayrollDetail>(`${sheetPath(teacherId, month)}/adjustments`, dto),
   voidAdjustment: (id: string, reason: string) =>
     axiosInstance.post<PayrollDetail>(`/payroll-adjustments/${id}/void`, { reason }),
+  addExtraHours: (teacherId: string, month: string, dto: ExtraHoursDto) =>
+    axiosInstance.post<PayrollDetail>(`${sheetPath(teacherId, month)}/extra-hours`, dto),
+  voidExtraHours: (id: string, reason: string) =>
+    axiosInstance.post<PayrollDetail>(`/payroll-extra-hours/${id}/void`, { reason }),
+  addAbsence: (teacherId: string, dto: AbsenceDto) =>
+    axiosInstance.post<TeacherAbsence>(`/teachers/${teacherId}/absences`, dto),
+  getAbsences: (teacherId: string, from?: string, to?: string) =>
+    axiosInstance.get<TeacherAbsence[]>(`/teachers/${teacherId}/absences`, { params: { from, to } }),
+  voidAbsence: (id: string, reason: string) =>
+    axiosInstance.post<TeacherAbsence>(`/teacher-absences/${id}/void`, { reason }),
+  setDetailsVisibility: (teacherId: string, visible: boolean) =>
+    axiosInstance.patch<{ visible: boolean }>(`/payroll/teachers/${teacherId}/details-visibility`, { visible }),
   addPayment: (teacherId: string, month: string, dto: PayrollPaymentDto) =>
     axiosInstance.post<PayrollDetail>(`${sheetPath(teacherId, month)}/payments`, dto),
   voidPayment: (id: string, reason: string) =>

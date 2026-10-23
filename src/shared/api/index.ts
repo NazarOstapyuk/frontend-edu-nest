@@ -270,6 +270,8 @@ export type {
   PayrollLine,
   PayrollAdjustment,
   PayrollPayment,
+  PayrollExtraHours,
+  TeacherAbsence,
   PayrollWarnings,
   PayrollTotals,
   PayrollDetail,
@@ -279,6 +281,8 @@ export type {
   MyPayrollYear,
   PayrollAdjustmentDto,
   PayrollPaymentDto,
+  ExtraHoursDto,
+  AbsenceDto,
 } from './payroll';
 export {
   backupsApi,

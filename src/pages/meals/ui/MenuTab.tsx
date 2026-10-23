@@ -7,6 +7,8 @@ import { MenuDayDialog } from './MenuDayDialog'
 import { CopyMenuDialog } from './CopyMenuDialog'
 import { ApplyTemplateDialog } from './ApplyTemplateDialog'
 import { MenuPeriodDialog } from './MenuPeriodDialog'
+import { DayDishList } from './DayDishList'
+import { groupDishesByCourse } from '../model/dayDishes'
 import { useEffectiveInstitutions, useInstitutionStore } from '../../../shared/model/institutionStore'
 import { useCan } from '../../../entities/user'
 import {
@@ -102,9 +104,7 @@ export const MenuTab = () => {
                       <Chip size="small" color={day.menu.status === 'published' ? 'success' : 'default'} label={menuStatusLabels[day.menu.status]} />
                       {day.menu.activeOrders > 0 && <Chip size="small" label={`Замовлень: ${day.menu.activeOrders}`} />}
                     </Box>
-                    {day.menu.dishes.map((d) => (
-                      <Typography key={d.id} variant="caption" sx={{ display: 'block' }}>{d.course.name}: {d.name}</Typography>
-                    ))}
+                    <DayDishList rows={groupDishesByCourse(day.menu.dishes)} />
                   </>
                 )}
               </Paper>

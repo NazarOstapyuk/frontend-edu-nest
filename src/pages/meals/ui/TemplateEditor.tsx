@@ -3,6 +3,8 @@ import { Box, Button, Dialog, DialogTitle, IconButton, Paper, Typography } from 
 import CloseIcon from '@mui/icons-material/Close'
 import { useMealsStore } from '../model/mealsStore'
 import { DishPicker } from './DishPicker'
+import { DayDishList } from './DayDishList'
+import { groupDishesByCourse } from '../model/dayDishes'
 import { useCan } from '../../../entities/user'
 import { isoWeekdayLabels, type MenuTemplate } from '../../../shared/api'
 
@@ -11,14 +13,23 @@ type Item = { week: number; weekday: number; dishId: string }
 export const TemplateEditor = ({ template }: { template: MenuTemplate }) => {
   const canEdit = useCan('meals', 'edit')
   const dishes = useMealsStore((s) => s.dishes)
+  const courses = useMealsStore((s) => s.courses)
   const isSaving = useMealsStore((s) => s.isSaving)
   const saveTemplateItems = useMealsStore((s) => s.saveTemplateItems)
   const [items, setItems] = useState<Item[]>(template.items.map(({ week, weekday, dishId }) => ({ week, weekday, dishId })))
   const [cell, setCell] = useState<{ week: number; weekday: number } | null>(null)
   const [cellDishes, setCellDishes] = useState<string[]>([])
   const dirty = JSON.stringify(items) !== JSON.stringify(template.items.map(({ week, weekday, dishId }) => ({ week, weekday, dishId })))
-  const nameOf = (id: string) => dishes.find((d) => d.id === id)?.name ?? '—'
+  const dishById = new Map(dishes.map((d) => [d.id, d]))
   const at = (week: number, weekday: number) => items.filter((i) => i.week === week && i.weekday === weekday)
+  const dayRows = (week: number, weekday: number) =>
+    groupDishesByCourse(
+      at(week, weekday).flatMap((i) => {
+        const dish = dishById.get(i.dishId)
+        const course = dish && courses.find((c) => c.id === dish.courseId)
+        return dish && course ? [{ name: dish.name, course }] : []
+      }),
+    )
 
   const openCell = (week: number, weekday: number) => {
     setCell({ week, weekday })
@@ -47,10 +58,12 @@ export const TemplateEditor = ({ template }: { template: MenuTemplate }) => {
                 onClick={() => canEdit && openCell(week, i + 1)}
                 sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: 1, minHeight: 80, cursor: canEdit ? 'pointer' : 'default' }}
               >
-                <Typography variant="caption" sx={{ fontWeight: 700 }}>{label}</Typography>
-                {at(week, i + 1).map((item) => (
-                  <Typography key={item.dishId} variant="caption" sx={{ display: 'block' }}>{nameOf(item.dishId)}</Typography>
-                ))}
+                <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.75 }}>{label}</Typography>
+                {dayRows(week, i + 1).length === 0 ? (
+                  <Typography variant="caption" color="text.disabled">{canEdit ? '+ Додати страви' : '—'}</Typography>
+                ) : (
+                  <DayDishList rows={dayRows(week, i + 1)} />
+                )}
               </Paper>
             ))}
           </Box>

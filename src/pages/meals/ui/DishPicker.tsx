@@ -26,7 +26,6 @@ export const DishPicker = ({ value, onChange }: { value: string[]; onChange: (id
           <Autocomplete
             key={course.id}
             multiple
-            disableCloseOnSelect
             size="small"
             options={options}
             value={selected}

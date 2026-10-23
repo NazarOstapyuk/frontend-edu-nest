@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Box,
   Button,
   Chip,
   IconButton,
+  MenuItem,
   Paper,
   Table,
   TableBody,
@@ -12,6 +13,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Tooltip,
   Typography,
 } from '@mui/material'
@@ -46,6 +48,17 @@ export const ChildrenPage = () => {
   const fetchGroups = useGroupsStore((s) => s.fetchGroups)
   const canEdit = useCan('children', 'edit')
   const canViewFinance = useCan('finance', 'view')
+  const [selectedGroupId, setGroupId] = useState('')
+  const groupId = groups.some((g) => g.id === selectedGroupId) ? selectedGroupId : ''
+
+  const sortedGroups = useMemo(
+    () => [...groups].sort((a, b) => a.name.localeCompare(b.name, 'uk')),
+    [groups],
+  )
+  const visibleChildren = useMemo(
+    () => (groupId ? children.filter((c) => c.group?.id === groupId) : children),
+    [children, groupId],
+  )
 
   useEffect(() => {
     fetchChildren()
@@ -56,9 +69,26 @@ export const ChildrenPage = () => {
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="body2" color="text.secondary">
-          Всього учнів: {children.length}
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <TextField
+            select
+            size="small"
+            label="Група"
+            value={groupId}
+            onChange={(e) => setGroupId(e.target.value)}
+            sx={{ minWidth: 220 }}
+          >
+            <MenuItem value="">Усі групи</MenuItem>
+            {sortedGroups.map((g) => (
+              <MenuItem key={g.id} value={g.id}>
+                {g.institution ? `${g.name} · ${g.institution.name}` : g.name}
+              </MenuItem>
+            ))}
+          </TextField>
+          <Typography variant="body2" color="text.secondary">
+            {groupId ? `Учнів у групі: ${visibleChildren.length} із ${children.length}` : `Всього учнів: ${children.length}`}
+          </Typography>
+        </Box>
         {canEdit && (
           <Button
             variant="contained"
@@ -89,14 +119,14 @@ export const ChildrenPage = () => {
           </TableHead>
 
           <TableBody>
-            {children.length === 0 ? (
+            {visibleChildren.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} align="center" sx={{ py: 6, color: 'text.secondary' }}>
-                  Учнів ще немає. Натисніть «Створити учня».
+                  {groupId ? 'У цій групі учнів немає.' : 'Учнів ще немає. Натисніть «Створити учня».'}
                 </TableCell>
               </TableRow>
             ) : (
-              children.map((child, index) => (
+              visibleChildren.map((child, index) => (
                 <TableRow key={child.id} hover sx={{ '&:last-child td': { borderBottom: 0 } }}>
                   <TableCell sx={{ color: 'text.secondary', width: 40 }}>{index + 1}</TableCell>
                   <TableCell sx={{ fontWeight: 500 }}>

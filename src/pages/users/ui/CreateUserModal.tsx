@@ -1,5 +1,5 @@
 import {useState} from 'react'
-import {useForm, Controller, FormProvider} from 'react-hook-form'
+import {useForm, useWatch, Controller, FormProvider} from 'react-hook-form'
 import {yupResolver} from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import {
@@ -14,7 +14,10 @@ import {
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import {RHFTextField} from "../../../shared/ui/RHFTextField.tsx";
-import type {UserRole} from "../../../entities/user";
+import {useAuthStore, type UserRole} from "../../../entities/user";
+import type {AccessScope} from "../../../shared/api";
+import {defaultScope} from "../model/accessRules.ts";
+import {InstitutionScopeFields} from "./InstitutionScopeFields.tsx";
 import {useUsersStore} from "../model/usersStore.ts";
 import {isValidPhone, normalizePhone} from "../../../shared/lib/phone.ts";
 
@@ -30,10 +33,17 @@ const schema = yup.object({
         then: (s) => s.required('Для батьків потрібен телефон'),
     }).test('phone', 'Формат +380XXXXXXXXX', (value) => !value || isValidPhone(normalizePhone(value))),
     email: yup.string().default('').email('Невірний email').max(200, 'Максимум 200 символів'),
+    accessScope: yup.mixed<AccessScope>().oneOf(['all', 'institutions']).required(),
+    institutionIds: yup.array(yup.string().required()).default([]).when(['role', 'accessScope'], {
+        is: (role: string, scope: AccessScope) => role !== 'parent' && scope === 'institutions',
+        then: (s) => s.min(1, 'Оберіть хоча б один заклад'),
+    }),
 })
 
 export const CreateUserModal = () => {
     const createUser = useUsersStore((s) => s.createUser)
+    const applyScope = useUsersStore((s) => s.applyScope)
+    const profile = useAuthStore((s) => s.profile)
     const isCreating = useUsersStore((s) => s.isCreating)
     const {isOpen} = useUsersStore((s) => s.createUserModal)
     const setCreateUserModal = useUsersStore((s) => s.setCreateUserModal)
@@ -51,9 +61,12 @@ export const CreateUserModal = () => {
             middleName: '',
             phone: '',
             email: '',
+            ...defaultScope(profile),
         },
         resolver: yupResolver(schema),
     });
+
+    const role = useWatch({control: methods.control, name: 'role'})
 
     const handleClose = () => {
         methods.reset()
@@ -61,7 +74,7 @@ export const CreateUserModal = () => {
     }
 
     const onSubmit = async (values: yup.InferType<typeof schema>) => {
-        await createUser({
+        const created = await createUser({
             firstName: values.firstName,
             lastName: values.lastName,
             role: values.role as UserRole,
@@ -72,6 +85,9 @@ export const CreateUserModal = () => {
             email: values.email.trim() || undefined,
         })
         handleClose()
+        if (values.role !== 'parent') {
+            await applyScope(created, values.accessScope, values.institutionIds).catch(() => undefined)
+        }
     }
 
     return (
@@ -129,6 +145,8 @@ export const CreateUserModal = () => {
                                 </TextField>
                             )}
                         />
+
+                        {role !== 'parent' && <InstitutionScopeFields control={methods.control}/>}
 
                         <RHFTextField
                             name="phone"

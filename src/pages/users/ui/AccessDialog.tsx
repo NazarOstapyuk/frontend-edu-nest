@@ -33,7 +33,8 @@ import {
   type PermissionMap,
 } from '../../../shared/api'
 import { useInstitutionStore } from '../../../shared/model/institutionStore'
-import { useAuthStore, type SessionRole, type User } from '../../../entities/user'
+import { useAuthStore, type User } from '../../../entities/user'
+import { canChangeAccess, permissionMap, scopeAllowed as scopeAllowedFor } from '../model/accessRules'
 
 interface Props {
   user: User
@@ -45,34 +46,20 @@ const scopes = Object.keys(scopeLabels) as AccessScope[]
 
 const institutionsSchema = yup.array(yup.string().required()).min(1, 'Оберіть хоча б один заклад')
 
-const toMap = (user: User): PermissionMap =>
-  Object.fromEntries((user.permissions ?? []).map((p) => [p.area, p.level]))
-
 export const AccessDialog = ({ user, onClose, onSaved }: Props) => {
   const profile = useAuthStore((s) => s.profile)
   const [scope, setScope] = useState<AccessScope>(user.accessScope ?? 'all')
   const institutions = useInstitutionStore((s) => s.institutions)
   const [institutionIds, setInstitutionIds] = useState<string[]>(user.institutionIds ?? [])
   const [institutionsError, setInstitutionsError] = useState<string | null>(null)
-  const [original] = useState<PermissionMap>(() => toMap(user))
+  const [original] = useState<PermissionMap>(() => permissionMap(user))
   const [permissions, setPermissions] = useState<PermissionMap>(original)
   const [saving, setSaving] = useState(false)
   const isRoot = profile?.role === 'root'
   const allowed = (level: PermissionLevel, area: PermissionArea) =>
     isRoot || levelSatisfies(profile?.permissions?.[area], level)
-  const scopeAllowed = (value: AccessScope) =>
-    isRoot || profile?.accessScope === 'all' || value === 'institutions'
-  const covers =
-    isRoot ||
-    ((profile?.accessScope === 'all' ||
-      ((user.accessScope ?? 'all') === 'institutions' &&
-        (user.institutionIds ?? []).every((id) => profile?.institutionIds.includes(id)))) &&
-      ALL_AREAS.every((area) => {
-        const have = original[area]
-        return have === undefined || levelSatisfies(profile?.permissions?.[area], have)
-      }))
-  const readOnly =
-    !profile || profile.id === user.id || (user.role as SessionRole) === 'root' || !covers
+  const scopeAllowed = (value: AccessScope) => scopeAllowedFor(profile, value)
+  const readOnly = !canChangeAccess(profile, user)
   const locked = (area: PermissionArea) => {
     const have = original[area]
     return !isRoot && have !== undefined && !levelSatisfies(profile?.permissions?.[area], have)

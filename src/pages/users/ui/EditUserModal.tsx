@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useForm, Controller, FormProvider } from 'react-hook-form'
+import { useForm, useWatch, Controller, FormProvider } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import {
@@ -18,8 +18,10 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import { RHFTextField } from '../../../shared/ui/RHFTextField.tsx'
 import { useUsersStore } from '../model/usersStore.ts'
 import { isValidPhone, normalizePhone } from '../../../shared/lib/phone.ts'
-import type { UpdateUserDto } from '../../../shared/api'
-import type { UserRole } from '../../../entities/user'
+import type { AccessScope, UpdateUserDto } from '../../../shared/api'
+import { useAuthStore, type UserRole } from '../../../entities/user'
+import { canChangeAccess } from '../model/accessRules.ts'
+import { InstitutionScopeFields } from './InstitutionScopeFields.tsx'
 
 const schema = yup.object({
   firstName: yup.string().min(3, 'Мінімум 3 символи').required("Обов'язкове поле"),
@@ -33,10 +35,19 @@ const schema = yup.object({
       then: (s) => s.required('Для батьків потрібен телефон'),
   }).test('phone', 'Формат +380XXXXXXXXX', (value) => !value || isValidPhone(normalizePhone(value))),
   email: yup.string().default('').email('Невірний email').max(200, 'Максимум 200 символів'),
+  accessScope: yup.mixed<AccessScope>().oneOf(['all', 'institutions']).required(),
+  institutionIds: yup.array(yup.string().required()).default([]).when(['role', 'accessScope'], {
+    is: (role: string, scope: AccessScope) => role !== 'parent' && scope === 'institutions',
+    then: (s) => s.min(1, 'Оберіть хоча б один заклад'),
+  }),
 })
+
+type FormValues = yup.InferType<typeof schema>
 
 export const EditUserModal = () => {
   const updateUser = useUsersStore((s) => s.updateUser)
+  const applyScope = useUsersStore((s) => s.applyScope)
+  const profile = useAuthStore((s) => s.profile)
   const isUpdating = useUsersStore((s) => s.isUpdating)
   const { isOpen, user } = useUsersStore((s) => s.editUserModal)
   const setEditUserModal = useUsersStore((s) => s.setEditUserModal)
@@ -54,6 +65,8 @@ export const EditUserModal = () => {
       middleName: '',
       phone: '',
       email: '',
+      accessScope: 'all',
+      institutionIds: [],
     },
     resolver: yupResolver(schema),
   })
@@ -69,6 +82,8 @@ export const EditUserModal = () => {
         middleName: user.middleName ?? '',
         phone: user.phone ?? '',
         email: user.email ?? '',
+        accessScope: user.accessScope ?? 'all',
+        institutionIds: user.institutionIds ?? [],
       })
     }
   }, [user, methods])
@@ -78,7 +93,10 @@ export const EditUserModal = () => {
     setEditUserModal({ isOpen: false, user: null })
   }
 
-  const onSubmit = async (values: yup.InferType<typeof schema>) => {
+  const role = useWatch({ control: methods.control, name: 'role' })
+  const scopeEditable = !!user && role !== 'parent' && canChangeAccess(profile, user)
+
+  const onSubmit = async (values: FormValues) => {
     if (!user) return
     const dto: UpdateUserDto = {
       firstName: values.firstName,
@@ -90,7 +108,8 @@ export const EditUserModal = () => {
       email: values.email.trim() || null,
     }
     if (values.password) dto.password = values.password
-    await updateUser(user.id, dto)
+    const updated = await updateUser(user.id, dto)
+    if (scopeEditable) await applyScope(updated, values.accessScope, values.institutionIds)
     handleClose()
   }
 
@@ -140,6 +159,8 @@ export const EditUserModal = () => {
               </TextField>
             )}
           />
+
+          {scopeEditable && <InstitutionScopeFields control={methods.control} assignedIds={user?.institutionIds ?? []} />}
 
           <RHFTextField
             name="phone"

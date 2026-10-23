@@ -129,7 +129,9 @@ export const UsersPage = () => {
                         : scopeLabels.all}
                   </TableCell>
                   <TableCell sx={{ fontFamily: 'monospace' }}>{user.login}</TableCell>
-                  <TableCell sx={{ color: 'text.secondary' }}>{user.createdAt}</TableCell>
+                  <TableCell sx={{ color: 'text.secondary' }}>
+                    {new Date(user.createdAt).toLocaleDateString('uk-UA', { timeZone: 'Europe/Kyiv' })}
+                  </TableCell>
                   <TableCell align="right">
                     <HistoryButton
                       entityType="users"

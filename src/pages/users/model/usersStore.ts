@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { usersApi, type CreateUserDto, type UpdateUserDto } from '../../../shared/api';
+import { usersApi, type AccessScope, type CreateUserDto, type UpdateUserDto } from '../../../shared/api';
+import { sameScope } from './accessRules';
 import type { User } from '../../../entities/user';
 
 interface UsersState {
@@ -13,8 +14,9 @@ interface UsersState {
   setCreateUserModal: (value: Partial<{ isOpen: boolean }>) => void;
   setEditUserModal: (value: Partial<{ isOpen: boolean; user: User | null }>) => void;
   fetchUsers: () => Promise<void>;
-  createUser: (dto: CreateUserDto) => Promise<void>;
-  updateUser: (id: string, dto: UpdateUserDto) => Promise<void>;
+  createUser: (dto: CreateUserDto) => Promise<User>;
+  updateUser: (id: string, dto: UpdateUserDto) => Promise<User>;
+  applyScope: (user: User, accessScope: AccessScope, institutionIds: string[]) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
   replaceUser: (user: User) => void;
 }
@@ -45,6 +47,7 @@ export const useUsersStore = create<UsersState>((set) => ({
     try {
       const { data } = await usersApi.create(dto);
       set((state) => ({ users: [...state.users, data] }));
+      return data;
     } finally {
       set({ isCreating: false });
     }
@@ -55,6 +58,22 @@ export const useUsersStore = create<UsersState>((set) => ({
     try {
       const { data } = await usersApi.update(id, dto);
       set((state) => ({ users: state.users.map((u) => (u.id === id ? data : u)) }));
+      return data;
+    } finally {
+      set({ isUpdating: false });
+    }
+  },
+
+  applyScope: async (user, accessScope, institutionIds) => {
+    if (sameScope(user, accessScope, institutionIds)) return;
+    set({ isUpdating: true });
+    try {
+      const { data } = await usersApi.setAccess(user.id, {
+        accessScope,
+        ...(accessScope === 'institutions' ? { institutionIds } : {}),
+        permissions: user.permissions ?? [],
+      });
+      set((state) => ({ users: state.users.map((u) => (u.id === data.id ? data : u)) }));
     } finally {
       set({ isUpdating: false });
     }

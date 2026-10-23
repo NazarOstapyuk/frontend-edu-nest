@@ -183,6 +183,7 @@ export const CreateChildModal = ({
           render={({ field }) => (
             <Autocomplete
               multiple
+              disableCloseOnSelect
               options={parents}
               getOptionLabel={(option) => `${option.lastName} ${option.firstName}`}
               value={parents.filter((p) => field.value?.includes(p.id))}

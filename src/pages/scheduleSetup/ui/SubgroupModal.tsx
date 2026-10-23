@@ -45,6 +45,7 @@ export const SubgroupModal = ({ open, subgroup, onClose }: { open: boolean; subg
           render={({ field }) => (
             <Autocomplete
               multiple
+              disableCloseOnSelect
               options={classChildren}
               getOptionLabel={(c) => `${c.lastName} ${c.firstName}`}
               value={classChildren.filter((c) => field.value?.includes(c.id))}

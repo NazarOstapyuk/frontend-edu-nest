@@ -58,6 +58,7 @@ export const CreateSubscriptionModal = () => {
           render={({ field, fieldState: { error } }) => (
             <Autocomplete
               multiple
+              disableCloseOnSelect
               options={children}
               getOptionLabel={(option) => `${option.lastName} ${option.firstName}`}
               value={children.filter((c) => field.value?.includes(c.id))}

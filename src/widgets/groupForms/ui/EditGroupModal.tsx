@@ -132,6 +132,7 @@ export const EditGroupModal = ({
           render={({ field }) => (
             <Autocomplete
               multiple
+              disableCloseOnSelect
               options={teachers}
               getOptionLabel={(option) => `${option.lastName} ${option.firstName}`}
               value={teachers.filter((t) => field.value?.includes(t.id))}

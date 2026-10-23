@@ -65,6 +65,7 @@ export const ComplexDialog = ({ complex, open, onClose }: { complex: MealComplex
             return (
               <Autocomplete
                 multiple
+                disableCloseOnSelect
                 options={courses.filter((c) => c.active || selected.includes(c.id))}
                 getOptionLabel={(c) => c.name}
                 value={courses.filter((c) => selected.includes(c.id))}

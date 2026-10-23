@@ -182,6 +182,7 @@ export const AccessDialog = ({ user, onClose, onSaved }: Props) => {
           {scope === 'institutions' && (
             <Autocomplete
               multiple
+              disableCloseOnSelect
               disabled={readOnly}
               options={options}
               value={options.filter((institution) => institutionIds.includes(institution.id))}

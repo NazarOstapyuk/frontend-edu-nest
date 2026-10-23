@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Alert, Box, Button, Dialog, DialogTitle } from '@mui/material'
+import { Alert, Box, Button, Dialog, DialogTitle, IconButton } from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
 import { useMealsStore } from '../model/mealsStore'
 import { DishPicker } from './DishPicker'
 import { InstitutionMultiSelect } from './InstitutionMultiSelect'
@@ -18,9 +19,16 @@ export const MenuDayDialog = ({ day, onClose }: { day: MenuDayView; onClose: () 
   const remove = () => deleteMenuDay(day.date).then(onClose).catch(() => undefined)
 
   return (
-    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ fontWeight: 700 }}>
+    <Dialog
+      open
+      fullWidth
+      maxWidth="sm"
+    >
+      <DialogTitle sx={{ fontWeight: 700, pr: 7 }}>
         Меню {formatDay(day.date)}{day.menu ? ` · ${menuStatusLabels[day.menu.status]}` : ''}
+        <IconButton aria-label="Закрити" onClick={onClose} sx={{ position: 'absolute', right: 12, top: 12 }}>
+          <CloseIcon />
+        </IconButton>
       </DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: '20px' }}>
         {day.menu && day.menu.activeOrders > 0 && (

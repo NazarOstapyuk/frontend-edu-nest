@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Box, Button, Dialog, DialogTitle, Paper, Typography } from '@mui/material'
+import { Box, Button, Dialog, DialogTitle, IconButton, Paper, Typography } from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
 import { useMealsStore } from '../model/mealsStore'
 import { DishPicker } from './DishPicker'
 import { useCan } from '../../../entities/user'
@@ -62,9 +63,16 @@ export const TemplateEditor = ({ template }: { template: MenuTemplate }) => {
           </Button>
         </Box>
       )}
-      <Dialog open={cell !== null} onClose={() => setCell(null)} fullWidth maxWidth="sm">
-        <DialogTitle sx={{ fontWeight: 700 }}>
+      <Dialog
+        open={cell !== null}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle sx={{ fontWeight: 700, pr: 7 }}>
           Тиждень {cell?.week}, {cell ? isoWeekdayLabels[cell.weekday - 1] : ''}
+          <IconButton aria-label="Закрити" onClick={() => setCell(null)} sx={{ position: 'absolute', right: 12, top: 12 }}>
+            <CloseIcon />
+          </IconButton>
         </DialogTitle>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: '20px' }}>
           <DishPicker value={cellDishes} onChange={setCellDishes} />

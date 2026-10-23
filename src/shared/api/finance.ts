@@ -159,6 +159,7 @@ export interface BalancesFilters {
   category?: FinanceCategory;
   hasDebt?: 'true';
   hasUnallocated?: 'true';
+  groupId?: string;
 }
 
 export interface CreateChargeDto {

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Box,
@@ -16,6 +16,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useFinanceBalancesStore } from '../model/financeBalancesStore'
+import { useGroupsStore } from '../../groups/model/groupsStore'
 import {
   financeCategories,
   financeCategoryLabels,
@@ -29,6 +30,18 @@ export const FinanceBalancesPage = () => {
   const setFilters = useFinanceBalancesStore((s) => s.setFilters)
   const fetchBalances = useFinanceBalancesStore((s) => s.fetchBalances)
   const navigate = useNavigate()
+  const groups = useGroupsStore((s) => s.groups)
+  const fetchGroups = useGroupsStore((s) => s.fetchGroups)
+  const sortedGroups = useMemo(
+    () => [...groups].sort((a, b) => a.name.localeCompare(b.name, 'uk')),
+    [groups],
+  )
+  const groupId = groups.some((g) => g.id === filters.groupId) ? filters.groupId : undefined
+
+  useEffect(() => {
+    if (useFinanceBalancesStore.getState().filters.groupId) setFilters({ groupId: undefined })
+    fetchGroups().catch(() => undefined)
+  }, [fetchGroups, setFilters])
 
   useEffect(() => {
     fetchBalances()
@@ -40,6 +53,21 @@ export const FinanceBalancesPage = () => {
         <Typography variant="body2" color="text.secondary" sx={{ mr: 'auto' }}>
           Всього учнів: {balances.length}
         </Typography>
+        <TextField
+          select
+          size="small"
+          label="Група"
+          value={groupId ?? ''}
+          onChange={(e) => setFilters({ groupId: e.target.value || undefined })}
+          sx={{ minWidth: 220 }}
+        >
+          <MenuItem value="">Усі групи</MenuItem>
+          {sortedGroups.map((g) => (
+            <MenuItem key={g.id} value={g.id}>
+              {g.institution ? `${g.name} · ${g.institution.name}` : g.name}
+            </MenuItem>
+          ))}
+        </TextField>
         <TextField
           select
           size="small"

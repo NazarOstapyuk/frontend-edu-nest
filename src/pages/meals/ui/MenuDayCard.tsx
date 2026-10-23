@@ -5,6 +5,7 @@ import type { MealComplex, MenuDayView } from '../../../shared/api'
 import { groupDishesByCourse } from '../model/dayDishes'
 import { complexAvailability, dayState, longDate, weekdayNames } from '../model/menuDay'
 import { ComplexChips } from './ComplexChips'
+import { DishRows } from './DishRows'
 
 const railColor = {
   off: 'transparent',
@@ -132,27 +133,8 @@ export const MenuDayCard = ({ day, weekdayIndex, isToday, compact, canEdit, comp
           )}
         </Box>
       ) : (
-        <Box sx={{ flex: 1, px: 1.5, pb: 1, display: 'flex', flexDirection: 'column', gap: compact ? 0.25 : 0.9 }}>
-          {rows.map((row) => (
-            <Box key={row.key} sx={{ minWidth: 0 }}>
-              {!compact && (
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', lineHeight: 1.25 }}>
-                  {row.title}
-                </Typography>
-              )}
-              <Typography
-                variant="body2"
-                sx={{
-                  fontSize: compact ? 12 : 13,
-                  lineHeight: 1.35,
-                  ...(compact && { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }),
-                }}
-                title={row.names.join(' або ')}
-              >
-                {row.names.join(' або ')}
-              </Typography>
-            </Box>
-          ))}
+        <Box sx={{ flex: 1, px: 1.5, pb: compact ? 1 : 0.5 }}>
+          <DishRows rows={rows} compact={compact} />
         </Box>
       )}
 

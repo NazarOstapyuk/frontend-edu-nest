@@ -4,6 +4,7 @@ import type { MealComplex } from '../../../shared/api'
 import type { DayDishRow } from '../model/dayDishes'
 import { availabilityFor, weekdayNames } from '../model/menuDay'
 import { ComplexChips } from './ComplexChips'
+import { DishRows } from './DishRows'
 
 interface TemplateDayCardProps {
   weekdayIndex: number
@@ -100,13 +101,8 @@ export const TemplateDayCard = ({ weekdayIndex, rows, courseIds, narrow, canEdit
           <Typography variant="body2">{canEdit ? 'Додати страви' : 'Страв немає'}</Typography>
         </Box>
       ) : (
-        <Box sx={{ flex: 1, px: 1.5, pb: 1, display: 'flex', flexDirection: 'column', gap: 0.9 }}>
-          {rows.map((row) => (
-            <Box key={row.key}>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', lineHeight: 1.25 }}>{row.title}</Typography>
-              <Typography variant="body2" sx={{ fontSize: 13, lineHeight: 1.35 }}>{row.names.join(' або ')}</Typography>
-            </Box>
-          ))}
+        <Box sx={{ flex: 1, px: 1.5, pb: 0.5 }}>
+          <DishRows rows={rows} />
         </Box>
       )}
 

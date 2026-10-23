@@ -8,12 +8,14 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import { useMealsStore } from '../model/mealsStore'
 import { SortedNameDialog } from './SortedNameDialog'
 import { DishDialog } from './DishDialog'
+import { DishTypeBlock } from './DishTypeBlock'
 import { ComplexDialog } from './ComplexDialog'
 import { PriceDialog } from './PriceDialog'
 import { useCan } from '../../../entities/user'
 import { formatDay, localToday, type Dish, type MealComplex, type MealCourse } from '../../../shared/api'
 
 type NamedTarget = { kind: 'course' | 'category'; item: MealCourse | null } | null
+type DishTarget = { dish: Dish | null; courseId: string | null } | null
 
 const cardSx = { border: '1px solid', borderColor: 'divider', borderRadius: 2, overflowX: 'auto', mb: 3 }
 const headSx = { '& th': { fontWeight: 700, bgcolor: 'grey.50' } }
@@ -29,16 +31,23 @@ export const DirectoriesTab = () => {
   const isSaving = useMealsStore((s) => s.isSaving)
   const saveCourse = useMealsStore((s) => s.saveCourse)
   const savePriceCategory = useMealsStore((s) => s.savePriceCategory)
-  const saveDish = useMealsStore((s) => s.saveDish)
   const saveComplex = useMealsStore((s) => s.saveComplex)
   const deletePrice = useMealsStore((s) => s.deletePrice)
   const saveDeadline = useMealsStore((s) => s.saveDeadline)
   const [named, setNamed] = useState<NamedTarget>(null)
-  const [dish, setDish] = useState<Dish | 'new' | null>(null)
+  const [dish, setDish] = useState<DishTarget>(null)
   const [complex, setComplex] = useState<MealComplex | 'new' | null>(null)
   const [priceFor, setPriceFor] = useState<MealComplex | null>(null)
   const [deadlineDraft, setDeadlineDraft] = useState<string | null>(null)
   const today = localToday()
+
+  const dishesByCourse = useMemo(() => {
+    const map = new Map<string, Dish[]>()
+    for (const d of [...dishes].sort((a, b) => a.name.localeCompare(b.name, 'uk'))) {
+      map.set(d.courseId, [...(map.get(d.courseId) ?? []), d])
+    }
+    return map
+  }, [dishes])
 
   const namedInitial = useMemo(
     () => ({ name: named?.item?.name ?? '', sortOrder: named?.item?.sortOrder ?? 0 }),
@@ -111,26 +120,24 @@ export const DirectoriesTab = () => {
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
         <Typography sx={{ fontWeight: 700 }}>Страви</Typography>
-        {canEdit && <Button startIcon={<AddIcon />} onClick={() => setDish('new')}>Додати</Button>}
+        {canEdit && <Button startIcon={<AddIcon />} onClick={() => setDish({ dish: null, courseId: null })}>Додати</Button>}
       </Box>
-      <Paper elevation={0} sx={cardSx}>
-        <Table size="small">
-          <TableHead><TableRow sx={headSx}><TableCell>Тип</TableCell><TableCell>Назва</TableCell><TableCell>Опис</TableCell><TableCell>Активна</TableCell><TableCell /></TableRow></TableHead>
-          <TableBody>
-            {dishes.length === 0 ? (
-              <TableRow><TableCell colSpan={5} sx={{ color: 'text.secondary' }}>Страв ще немає.</TableCell></TableRow>
-            ) : dishes.map((d) => (
-              <TableRow key={d.id} sx={{ opacity: d.active ? 1 : 0.5 }}>
-                <TableCell>{d.course.name}</TableCell>
-                <TableCell>{d.name}</TableCell>
-                <TableCell sx={{ color: 'text.secondary' }}>{d.description ?? ''}</TableCell>
-                <TableCell><Switch checked={d.active} disabled={!canEdit} onChange={(e) => saveDish(d.id, { active: e.target.checked }).catch(() => undefined)} /></TableCell>
-                <TableCell align="right">{canEdit && <IconButton size="small" onClick={() => setDish(d)}><EditOutlinedIcon fontSize="small" /></IconButton>}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Paper>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 3 }}>
+        {courses.length === 0 ? (
+          <Typography color="text.secondary">Спочатку створіть типи страв.</Typography>
+        ) : (
+          courses.map((course) => (
+            <DishTypeBlock
+              key={course.id}
+              course={course}
+              dishes={dishesByCourse.get(course.id) ?? []}
+              canEdit={canEdit}
+              onAdd={(courseId) => setDish({ dish: null, courseId })}
+              onEdit={(d) => setDish({ dish: d, courseId: null })}
+            />
+          ))
+        )}
+      </Box>
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
         <Typography sx={{ fontWeight: 700 }}>Комплекси і ціни</Typography>
@@ -184,7 +191,7 @@ export const DirectoriesTab = () => {
             : saveCourse(named?.item?.id ?? null, values)
         }
       />
-      <DishDialog open={dish !== null} dish={dish && dish !== 'new' ? dish : null} onClose={() => setDish(null)} />
+      <DishDialog open={dish !== null} dish={dish?.dish ?? null} presetCourseId={dish?.courseId} onClose={() => setDish(null)} />
       <ComplexDialog open={complex !== null} complex={complex && complex !== 'new' ? complex : null} onClose={() => setComplex(null)} />
       <PriceDialog complex={priceFor} onClose={() => setPriceFor(null)} />
     </Box>

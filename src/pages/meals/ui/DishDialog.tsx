@@ -14,7 +14,17 @@ const schema = yup.object({
 
 type FormValues = yup.InferType<typeof schema>
 
-export const DishDialog = ({ dish, open, onClose }: { dish: Dish | null; open: boolean; onClose: () => void }) => {
+export const DishDialog = ({
+  dish,
+  presetCourseId,
+  open,
+  onClose,
+}: {
+  dish: Dish | null
+  presetCourseId?: string | null
+  open: boolean
+  onClose: () => void
+}) => {
   const courses = useMealsStore((s) => s.courses)
   const isSaving = useMealsStore((s) => s.isSaving)
   const saveDish = useMealsStore((s) => s.saveDish)
@@ -25,8 +35,13 @@ export const DishDialog = ({ dish, open, onClose }: { dish: Dish | null; open: b
   })
 
   useEffect(() => {
-    if (open) reset({ name: dish?.name ?? '', courseId: dish?.courseId ?? '', description: dish?.description ?? '' })
-  }, [open, dish, reset])
+    if (open)
+      reset({
+        name: dish?.name ?? '',
+        courseId: dish?.courseId ?? presetCourseId ?? '',
+        description: dish?.description ?? '',
+      })
+  }, [open, dish, presetCourseId, reset])
 
   const submit = async (values: FormValues) => {
     const description = values.description.trim()

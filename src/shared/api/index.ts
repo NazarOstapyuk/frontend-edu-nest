@@ -334,3 +334,13 @@ export type { Institution, InstitutionType, CreateInstitutionDto, UpdateInstitut
 export { softList } from './softList';
 export { dashboardApi } from './dashboard';
 export type { TodayDashboard, DashboardPaymentMethod } from './dashboard';
+export { routineApi } from './routine';
+export type {
+  RoutineItem,
+  RoutineDay,
+  RoutineView,
+  RoutineTemplate,
+  RoutineTemplateItem,
+  RoutineTemplateDto,
+  RoutineDayDto,
+} from './routine';

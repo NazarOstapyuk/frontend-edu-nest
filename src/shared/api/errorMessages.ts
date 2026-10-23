@@ -1,6 +1,12 @@
 export const GENERIC_ERROR = 'Сталася помилка. Спробуйте ще раз.';
 
 export const errorMessages: Record<string, string> = {
+  'Routine is for kindergarten groups': 'Розпорядок дня є лише для садкових груп',
+  'Routine version already starts on this date': 'Версія з цієї дати вже існує',
+  'Routine template not found': 'Шаблон розпорядку не знайдено',
+  'Invalid time range': 'Кінець має бути пізніше за початок',
+  'Cannot copy to the same group': 'Не можна копіювати в ту саму групу',
+  'Too many items': 'Забагато пунктів',
   'Institution not found': 'Заклад не знайдено',
   'Institution name already taken': 'Заклад з такою назвою вже існує',
   'Institution is inactive': 'Заклад неактивний',

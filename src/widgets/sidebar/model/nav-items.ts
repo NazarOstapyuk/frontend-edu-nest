@@ -15,6 +15,7 @@ import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
 import FactCheckIcon from '@mui/icons-material/FactCheck'
 import PaymentsIcon from '@mui/icons-material/Payments'
 import MarkEmailUnreadIcon from '@mui/icons-material/MarkEmailUnread'
+import ScheduleIcon from '@mui/icons-material/Schedule'
 import ViewWeekIcon from '@mui/icons-material/ViewWeek'
 import RestaurantIcon from '@mui/icons-material/Restaurant'
 import MenuBookIcon from '@mui/icons-material/MenuBook'
@@ -38,6 +39,7 @@ export interface NavItem {
 export const navItems: NavItem[] = [
   { path: '/',                    label: 'Сьогодні',           icon: DashboardIcon },
   { path: '/register',            label: 'Журнал',            icon: FactCheckIcon,      roles: ['teacher'], area: 'register' },
+  { path: '/routine',            label: 'Розпорядок дня',    icon: ScheduleIcon,       roles: ['teacher'], area: 'timetable' },
   { path: '/schedule',           label: 'Розклад',           icon: ViewWeekIcon,       area: 'timetable' },
   { path: '/meals',              label: 'Харчування',        icon: RestaurantIcon,     area: 'meals' },
   { path: '/payroll',            label: 'Зарплати',          icon: PaymentsIcon,       area: 'payroll' },

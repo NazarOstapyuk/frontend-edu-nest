@@ -22,13 +22,16 @@ export interface ComplexAvailability {
   missing: string[]
 }
 
-export const complexAvailability = (day: MenuDayView, complexes: MealComplex[]): ComplexAvailability[] => {
-  const present = new Set((day.menu?.dishes ?? []).map((d) => d.course.id))
+export const availabilityFor = (courseIds: Iterable<string>, complexes: MealComplex[]): ComplexAvailability[] => {
+  const present = new Set(courseIds)
   return complexes
     .filter((c) => c.active)
     .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, 'uk'))
     .map((c) => ({ id: c.id, name: c.name, missing: c.courses.filter((course) => !present.has(course.id)).map((course) => course.name) }))
 }
+
+export const complexAvailability = (day: MenuDayView, complexes: MealComplex[]): ComplexAvailability[] =>
+  availabilityFor((day.menu?.dishes ?? []).map((d) => d.course.id), complexes)
 
 export interface WeekSummary {
   working: number

@@ -1,11 +1,10 @@
 import { Box, Button, Chip, Paper, Tooltip, Typography } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
-import CheckIcon from '@mui/icons-material/Check'
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutlineOutlined'
 import RestaurantOutlinedIcon from '@mui/icons-material/RestaurantOutlined'
 import type { MealComplex, MenuDayView } from '../../../shared/api'
 import { groupDishesByCourse } from '../model/dayDishes'
 import { complexAvailability, dayState, longDate, weekdayNames } from '../model/menuDay'
+import { ComplexChips } from './ComplexChips'
 
 const railColor = {
   off: 'transparent',
@@ -159,15 +158,7 @@ export const MenuDayCard = ({ day, weekdayIndex, isToday, compact, canEdit, comp
 
       {(availability.length > 0 || (day.menu?.activeOrders ?? 0) > 0) && !compact && (
         <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5, px: 1.5, py: 1, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'grey.50' }}>
-          {availability.map((c) =>
-            c.missing.length === 0 ? (
-              <Chip key={c.id} size="small" variant="outlined" icon={<CheckIcon />} label={c.name} sx={{ bgcolor: 'background.paper' }} />
-            ) : (
-              <Tooltip key={c.id} title={`Не можна замовити: немає ${c.missing.join(', ')}`}>
-                <Chip size="small" variant="outlined" color="warning" icon={<ErrorOutlineIcon />} label={c.name} sx={{ bgcolor: 'background.paper' }} />
-              </Tooltip>
-            ),
-          )}
+          <ComplexChips items={availability} />
           <Box sx={{ flex: 1 }} />
           {(day.menu?.activeOrders ?? 0) > 0 && (
             <Tooltip title="Активні замовлення">

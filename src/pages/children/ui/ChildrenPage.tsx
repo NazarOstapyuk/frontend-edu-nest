@@ -12,6 +12,7 @@ import {
   TableCell,
   TableContainer,
   TableHead,
+  TablePagination,
   TableRow,
   TextField,
   Tooltip,
@@ -59,6 +60,11 @@ export const ChildrenPage = () => {
     () => (groupId ? children.filter((c) => c.group?.id === groupId) : children),
     [children, groupId],
   )
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
+  const lastPage = Math.max(0, Math.ceil(visibleChildren.length / rowsPerPage) - 1)
+  const currentPage = Math.min(page, lastPage)
+  const pagedChildren = visibleChildren.slice(currentPage * rowsPerPage, (currentPage + 1) * rowsPerPage)
 
   useEffect(() => {
     fetchChildren()
@@ -75,7 +81,10 @@ export const ChildrenPage = () => {
             size="small"
             label="Група"
             value={groupId}
-            onChange={(e) => setGroupId(e.target.value)}
+            onChange={(e) => {
+              setGroupId(e.target.value)
+              setPage(0)
+            }}
             sx={{ minWidth: 220 }}
           >
             <MenuItem value="">Усі групи</MenuItem>
@@ -126,9 +135,9 @@ export const ChildrenPage = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              visibleChildren.map((child, index) => (
+              pagedChildren.map((child, index) => (
                 <TableRow key={child.id} hover sx={{ '&:last-child td': { borderBottom: 0 } }}>
-                  <TableCell sx={{ color: 'text.secondary', width: 40 }}>{index + 1}</TableCell>
+                  <TableCell sx={{ color: 'text.secondary', width: 40 }}>{currentPage * rowsPerPage + index + 1}</TableCell>
                   <TableCell sx={{ fontWeight: 500 }}>
                     {[child.lastName, child.firstName, child.middleName].filter(Boolean).join(' ')}
                   </TableCell>
@@ -197,6 +206,23 @@ export const ChildrenPage = () => {
             )}
           </TableBody>
         </Table>
+        {visibleChildren.length > 0 && (
+          <TablePagination
+            component="div"
+            count={visibleChildren.length}
+            page={currentPage}
+            rowsPerPage={rowsPerPage}
+            rowsPerPageOptions={[10, 25, 50, 100]}
+            onPageChange={(_, next) => setPage(next)}
+            onRowsPerPageChange={(e) => {
+              setRowsPerPage(Number(e.target.value))
+              setPage(0)
+            }}
+            labelRowsPerPage="Рядків на сторінці:"
+            labelDisplayedRows={({ from, to, count }) => `${from}–${to} з ${count}`}
+            sx={{ borderTop: '1px solid', borderColor: 'divider' }}
+          />
+        )}
       </TableContainer>
 
       <CreateChildModal

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Box,
@@ -11,6 +11,7 @@ import {
   TableCell,
   TableContainer,
   TableHead,
+  TablePagination,
   TableRow,
   TextField,
   Typography,
@@ -38,6 +39,11 @@ export const FinanceBalancesPage = () => {
     [groups],
   )
   const groupId = groups.some((g) => g.id === filters.groupId) ? filters.groupId : undefined
+  const [paging, setPaging] = useState({ page: 0, filters })
+  const [rowsPerPage, setRowsPerPage] = useState(10)
+  const lastPage = Math.max(0, Math.ceil(balances.length / rowsPerPage) - 1)
+  const currentPage = Math.min(paging.filters === filters ? paging.page : 0, lastPage)
+  const pagedBalances = balances.slice(currentPage * rowsPerPage, (currentPage + 1) * rowsPerPage)
 
   useEffect(() => {
     if (useFinanceBalancesStore.getState().filters.groupId) setFilters({ groupId: undefined })
@@ -130,14 +136,14 @@ export const FinanceBalancesPage = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              balances.map((row, index) => (
+              pagedBalances.map((row, index) => (
                 <TableRow
                   key={row.childId}
                   hover
                   onClick={() => navigate(`/finance/${row.childId}`)}
                   sx={{ cursor: 'pointer', '&:last-child td': { borderBottom: 0 } }}
                 >
-                  <TableCell sx={{ color: 'text.secondary', width: 40 }}>{index + 1}</TableCell>
+                  <TableCell sx={{ color: 'text.secondary', width: 40 }}>{currentPage * rowsPerPage + index + 1}</TableCell>
                   <TableCell sx={{ fontWeight: 500 }}>
                     {row.lastName} {row.firstName}
                   </TableCell>
@@ -161,6 +167,23 @@ export const FinanceBalancesPage = () => {
             )}
           </TableBody>
         </Table>
+        {balances.length > 0 && (
+          <TablePagination
+            component="div"
+            count={balances.length}
+            page={currentPage}
+            rowsPerPage={rowsPerPage}
+            rowsPerPageOptions={[10, 25, 50, 100]}
+            onPageChange={(_, next) => setPaging({ page: next, filters })}
+            onRowsPerPageChange={(e) => {
+              setRowsPerPage(Number(e.target.value))
+              setPaging({ page: 0, filters })
+            }}
+            labelRowsPerPage="Рядків на сторінці:"
+            labelDisplayedRows={({ from, to, count }) => `${from}–${to} з ${count}`}
+            sx={{ borderTop: '1px solid', borderColor: 'divider' }}
+          />
+        )}
       </TableContainer>
     </Box>
   )

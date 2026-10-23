@@ -46,7 +46,7 @@ export const useRoutineStore = create<RoutineState>((set, get) => ({
   loadError: false,
   dayDialog: { isOpen: false, day: null },
   loadMeta: async () => {
-    set({ metaError: false });
+    set({ metaError: false, groupsLoaded: false, days: [] });
     try {
       const { data: groups } = await routineApi.getGroups();
       const current = get().groupId;
@@ -63,8 +63,8 @@ export const useRoutineStore = create<RoutineState>((set, get) => ({
   selectGroup: (groupId) => set({ groupId, days: [] }),
   shiftWeek: (weeks) => set({ weekFrom: addDaysIso(get().weekFrom, weeks * 7), days: [] }),
   load: async () => {
-    const { groupId, weekFrom } = get();
-    if (!groupId) return;
+    const { groupId, weekFrom, groupsLoaded, groups } = get();
+    if (!groupsLoaded || !groupId || !groups.some((g) => g.id === groupId)) return;
     const ticket = ++loadTicket;
     set({ isLoading: true, loadError: false });
     try {

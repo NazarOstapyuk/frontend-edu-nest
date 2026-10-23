@@ -28,8 +28,8 @@ export const RoutinePage = () => {
   }, [loadMeta])
 
   useEffect(() => {
-    if (groupId) load().catch(() => undefined)
-  }, [groupId, weekFrom, load])
+    if (groupsLoaded && groupId) load().catch(() => undefined)
+  }, [groupsLoaded, groupId, weekFrom, load])
 
   if (metaError) {
     return (

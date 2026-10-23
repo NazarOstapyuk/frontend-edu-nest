@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { addDaysIso, localToday, routineApi, weekStart, type RoutineView } from '../../../shared/api';
+import { addDaysIso, kyivNow, routineApi, weekStart, type RoutineView } from '../../../shared/api';
 
 interface ChildRoutineState {
   childId: string | null;
@@ -12,7 +12,7 @@ interface ChildRoutineState {
 
 export const useChildRoutineStore = create<ChildRoutineState>((set, get) => ({
   childId: null,
-  week: weekStart(localToday()),
+  week: weekStart(kyivNow().date),
   key: null,
   data: null,
   loadFailed: false,

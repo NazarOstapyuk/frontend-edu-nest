@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Box, Button, Chip, Stack, Typography } from '@mui/material'
 import { kyivNow, type RoutineDay } from '../../../shared/api'
 
@@ -19,7 +19,12 @@ const minutes = (time: string) => Number(time.slice(0, 2)) * 60 + Number(time.sl
 
 export const RoutineWeek = ({ days, today, onEditDay, onResetDay }: RoutineWeekProps) => {
   const [chosen, setChosen] = useState<string | null>(null)
-  const shown = days.filter((d) => weekdayIndex(d.date) < 5 || d.items.length > 0)
+  const [, setTick] = useState(0)
+  useEffect(() => {
+    const timer = setInterval(() => setTick((n) => n + 1), 60_000)
+    return () => clearInterval(timer)
+  }, [])
+  const shown = onEditDay ? days : days.filter((d) => weekdayIndex(d.date) < 5 || d.items.length > 0)
   const fallback = shown.find((d) => d.date === today) ?? shown.find((d) => weekdayIndex(d.date) === 0) ?? shown[0]
   const selected = shown.find((d) => d.date === chosen) ?? fallback
   const now = kyivNow()

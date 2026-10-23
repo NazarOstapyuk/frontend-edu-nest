@@ -1,24 +1,27 @@
 import { useMemo, useState } from 'react'
 import {
-  Box, Button, Chip, IconButton, Paper, Switch, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography,
+  Box, Button, FormControlLabel, InputAdornment, Paper, Switch, Tab, Tabs, TextField, Typography,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
+import SearchIcon from '@mui/icons-material/Search'
 import { useMealsStore } from '../model/mealsStore'
 import { SortedNameDialog } from './SortedNameDialog'
 import { DishDialog } from './DishDialog'
 import { DishTypeBlock } from './DishTypeBlock'
 import { ComplexDialog } from './ComplexDialog'
+import { ComplexCard } from './ComplexCard'
 import { PriceDialog } from './PriceDialog'
+import { NamedList } from './NamedList'
 import { useCan } from '../../../entities/user'
-import { formatDay, localToday, type Dish, type MealComplex, type MealCourse } from '../../../shared/api'
+import { localToday, type Dish, type MealComplex, type MealCourse } from '../../../shared/api'
 
+type Section = 'dishes' | 'complexes' | 'lists' | 'orders'
 type NamedTarget = { kind: 'course' | 'category'; item: MealCourse | null } | null
 type DishTarget = { dish: Dish | null; courseId: string | null } | null
+type PriceTarget = { complex: MealComplex; categoryId: string | null } | null
 
-const cardSx = { border: '1px solid', borderColor: 'divider', borderRadius: 2, overflowX: 'auto', mb: 3 }
-const headSx = { '& th': { fontWeight: 700, bgcolor: 'grey.50' } }
+const dishWord = (n: number) => (n % 10 === 1 && n % 100 !== 11 ? 'страва' : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? 'страви' : 'страв')
+const groupWord = (n: number) => (n % 10 === 1 && n % 100 !== 11 ? 'група' : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? 'групи' : 'груп')
 
 export const DirectoriesTab = () => {
   const canEdit = useCan('meals', 'edit')
@@ -27,157 +30,202 @@ export const DirectoriesTab = () => {
   const dishes = useMealsStore((s) => s.dishes)
   const categories = useMealsStore((s) => s.priceCategories)
   const complexes = useMealsStore((s) => s.complexes)
+  const groups = useMealsStore((s) => s.groups)
   const deadline = useMealsStore((s) => s.deadline)
   const isSaving = useMealsStore((s) => s.isSaving)
   const saveCourse = useMealsStore((s) => s.saveCourse)
   const savePriceCategory = useMealsStore((s) => s.savePriceCategory)
-  const saveComplex = useMealsStore((s) => s.saveComplex)
-  const deletePrice = useMealsStore((s) => s.deletePrice)
   const saveDeadline = useMealsStore((s) => s.saveDeadline)
+  const [section, setSection] = useState<Section>('dishes')
+  const [query, setQuery] = useState('')
+  const [showInactive, setShowInactive] = useState(true)
   const [named, setNamed] = useState<NamedTarget>(null)
   const [dish, setDish] = useState<DishTarget>(null)
   const [complex, setComplex] = useState<MealComplex | 'new' | null>(null)
-  const [priceFor, setPriceFor] = useState<MealComplex | null>(null)
+  const [priceFor, setPriceFor] = useState<PriceTarget>(null)
   const [deadlineDraft, setDeadlineDraft] = useState<string | null>(null)
   const today = localToday()
+  const needle = query.trim().toLowerCase()
 
   const dishesByCourse = useMemo(() => {
     const map = new Map<string, Dish[]>()
-    for (const d of [...dishes].sort((a, b) => a.name.localeCompare(b.name, 'uk'))) {
-      map.set(d.courseId, [...(map.get(d.courseId) ?? []), d])
-    }
+    const visible = dishes
+      .filter((d) => showInactive || d.active)
+      .filter((d) => !needle || d.name.toLowerCase().includes(needle) || (d.description ?? '').toLowerCase().includes(needle))
+      .sort((a, b) => a.name.localeCompare(b.name, 'uk'))
+    for (const d of visible) map.set(d.courseId, [...(map.get(d.courseId) ?? []), d])
     return map
-  }, [dishes])
+  }, [dishes, showInactive, needle])
+
+  const sortedCourses = useMemo(
+    () => [...courses].sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, 'uk')),
+    [courses],
+  )
+  const visibleCourses = needle ? sortedCourses.filter((c) => (dishesByCourse.get(c.id) ?? []).length > 0) : sortedCourses
+  const sortedComplexes = [...complexes].sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, 'uk'))
 
   const namedInitial = useMemo(
     () => ({ name: named?.item?.name ?? '', sortOrder: named?.item?.sortOrder ?? 0 }),
     [named],
   )
 
-  const namedTable = (kind: 'course' | 'category', title: string, items: MealCourse[]) => (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-        <Typography sx={{ fontWeight: 700 }}>{title}</Typography>
-        {canEdit && <Button startIcon={<AddIcon />} onClick={() => setNamed({ kind, item: null })}>Додати</Button>}
-      </Box>
-      <Paper elevation={0} sx={cardSx}>
-        <Table size="small">
-          <TableHead><TableRow sx={headSx}><TableCell>Назва</TableCell><TableCell>Порядок</TableCell><TableCell>Активний</TableCell><TableCell /></TableRow></TableHead>
-          <TableBody>
-            {items.length === 0 ? (
-              <TableRow><TableCell colSpan={4} sx={{ color: 'text.secondary' }}>Записів ще немає.</TableCell></TableRow>
-            ) : items.map((item) => (
-              <TableRow key={item.id} sx={{ opacity: item.active ? 1 : 0.5 }}>
-                <TableCell>{item.name}</TableCell>
-                <TableCell>{item.sortOrder}</TableCell>
-                <TableCell>
-                  <Switch
-                    checked={item.active}
-                    disabled={!canEdit}
-                    onChange={(e) =>
-                      (kind === 'course' ? saveCourse : savePriceCategory)(item.id, { active: e.target.checked }).catch(() => undefined)
-                    }
-                  />
-                </TableCell>
-                <TableCell align="right">
-                  {canEdit && <IconButton size="small" onClick={() => setNamed({ kind, item })}><EditOutlinedIcon fontSize="small" /></IconButton>}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Paper>
-    </Box>
-  )
+  const courseUsage = (id: string) => {
+    const n = dishes.filter((d) => d.courseId === id).length
+    return n ? `${n} ${dishWord(n)}` : null
+  }
+  const categoryUsage = (id: string) => {
+    const n = groups.filter((g) => g.mealPriceCategoryId === id).length
+    return n ? `${n} ${groupWord(n)}` : 'Не призначена жодній групі'
+  }
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 3, flexWrap: 'wrap' }}>
-        {canEditSettings && (
-          <TextField
-            size="small"
-            type="time"
-            label="Дедлайн замовлення"
-            value={deadlineDraft ?? deadline}
-            onChange={(e) => setDeadlineDraft(e.target.value)}
-            slotProps={{ inputLabel: { shrink: true } }}
-          />
-        )}
-        {canEditSettings && (
-          <Button
-            variant="outlined"
-            disabled={isSaving || deadlineDraft === null || deadlineDraft === deadline || !deadlineDraft}
-            onClick={() => deadlineDraft && saveDeadline(deadlineDraft).then(() => setDeadlineDraft(null)).catch(() => undefined)}
-          >
-            Зберегти дедлайн
-          </Button>
-        )}
-        <Typography variant="body2" color="text.secondary">Батьки замовляють і скасовують до цього часу в день харчування.</Typography>
-      </Box>
+      <Tabs
+        value={section}
+        onChange={(_, v: Section) => setSection(v)}
+        variant="scrollable"
+        sx={{ mb: 2.5, minHeight: 40, borderBottom: '1px solid', borderColor: 'divider', '& .MuiTab-root': { minHeight: 40, textTransform: 'none', fontWeight: 600 } }}
+      >
+        <Tab value="dishes" label={`Страви (${dishes.length})`} />
+        <Tab value="complexes" label="Комплекси і ціни" />
+        <Tab value="lists" label="Типи страв і цінові категорії" />
+        <Tab value="orders" label="Замовлення" />
+      </Tabs>
 
-      {namedTable('course', 'Типи страв', courses)}
-      {namedTable('category', 'Цінові категорії', categories)}
-
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-        <Typography sx={{ fontWeight: 700 }}>Страви</Typography>
-        {canEdit && <Button startIcon={<AddIcon />} onClick={() => setDish({ dish: null, courseId: null })}>Додати</Button>}
-      </Box>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 3 }}>
-        {courses.length === 0 ? (
-          <Typography color="text.secondary">Спочатку створіть типи страв.</Typography>
-        ) : (
-          courses.map((course) => (
-            <DishTypeBlock
-              key={course.id}
-              course={course}
-              dishes={dishesByCourse.get(course.id) ?? []}
-              canEdit={canEdit}
-              onAdd={(courseId) => setDish({ dish: null, courseId })}
-              onEdit={(d) => setDish({ dish: d, courseId: null })}
+      {section === 'dishes' && (
+        <Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1.5, mb: 2 }}>
+            <TextField
+              size="small"
+              placeholder="Пошук страви"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              sx={{ minWidth: { xs: '100%', sm: 320 } }}
+              slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment> } }}
             />
-          ))
-        )}
-      </Box>
-
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-        <Typography sx={{ fontWeight: 700 }}>Комплекси і ціни</Typography>
-        {canEdit && <Button startIcon={<AddIcon />} onClick={() => setComplex('new')}>Додати</Button>}
-      </Box>
-      {complexes.length === 0 && <Typography color="text.secondary" sx={{ mb: 2 }}>Комплексів ще немає.</Typography>}
-      {complexes.map((c) => (
-        <Paper key={c.id} elevation={0} sx={{ ...cardSx, p: 2, opacity: c.active ? 1 : 0.6 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-            <Typography sx={{ fontWeight: 700 }}>{c.name}</Typography>
-            {c.courses.map((course) => <Chip key={course.id} size="small" label={course.name} />)}
+            <FormControlLabel
+              control={<Switch size="small" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} />}
+              label="Показувати вимкнені"
+            />
             <Box sx={{ flex: 1 }} />
-            <Switch checked={c.active} disabled={!canEdit} onChange={(e) => saveComplex(c.id, { active: e.target.checked }).catch(() => undefined)} />
-            {canEdit && <IconButton size="small" onClick={() => setComplex(c)}><EditOutlinedIcon fontSize="small" /></IconButton>}
-            {canEdit && <Button size="small" onClick={() => setPriceFor(c)}>Додати ціну</Button>}
+            {canEdit && (
+              <Button variant="contained" startIcon={<AddIcon />} disabled={courses.length === 0} onClick={() => setDish({ dish: null, courseId: null })}>
+                Додати страву
+              </Button>
+            )}
           </Box>
-          {c.description && <Typography variant="body2" color="text.secondary">{c.description}</Typography>}
-          <Table size="small" sx={{ mt: 1 }}>
-            <TableHead><TableRow sx={headSx}><TableCell>Категорія</TableCell><TableCell>Ціна</TableCell><TableCell>Діє з</TableCell><TableCell /></TableRow></TableHead>
-            <TableBody>
-              {c.prices.length === 0 ? (
-                <TableRow><TableCell colSpan={4} sx={{ color: 'text.secondary' }}>Цін ще немає.</TableCell></TableRow>
-              ) : c.prices.map((p) => (
-                <TableRow key={p.id}>
-                  <TableCell>{p.priceCategoryName}</TableCell>
-                  <TableCell>{p.price} грн</TableCell>
-                  <TableCell>{formatDay(p.validFrom)}</TableCell>
-                  <TableCell align="right">
-                    {canEdit && p.validFrom > today && (
-                      <IconButton size="small" disabled={isSaving} onClick={() => deletePrice(c.id, p.id).catch(() => undefined)}>
-                        <DeleteOutlineIcon fontSize="small" />
-                      </IconButton>
-                    )}
-                  </TableCell>
-                </TableRow>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+            {courses.length === 0 ? (
+              <Paper elevation={0} sx={{ border: '1px dashed', borderColor: 'divider', borderRadius: 1.5, p: 3, textAlign: 'center' }}>
+                <Typography color="text.secondary" sx={{ mb: 1 }}>Спочатку створіть типи страв, наприклад «Перша страва» чи «Гарнір».</Typography>
+                <Button onClick={() => setSection('lists')}>До типів страв</Button>
+              </Paper>
+            ) : visibleCourses.length === 0 ? (
+              <Typography color="text.secondary">Нічого не знайдено за запитом «{query.trim()}».</Typography>
+            ) : (
+              visibleCourses.map((course) => (
+                <DishTypeBlock
+                  key={course.id}
+                  course={course}
+                  dishes={dishesByCourse.get(course.id) ?? []}
+                  canEdit={canEdit}
+                  forceExpanded={Boolean(needle)}
+                  onAdd={(courseId) => setDish({ dish: null, courseId })}
+                  onEdit={(d) => setDish({ dish: d, courseId: null })}
+                />
+              ))
+            )}
+          </Box>
+        </Box>
+      )}
+
+      {section === 'complexes' && (
+        <Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1.5, mb: 2 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ flex: 1, minWidth: 260 }}>
+              Комплекс — це варіант обіду з кількох типів страв за одну ціну. Ціна залежить від цінової категорії групи дитини.
+            </Typography>
+            {canEdit && <Button variant="contained" startIcon={<AddIcon />} onClick={() => setComplex('new')}>Додати комплекс</Button>}
+          </Box>
+          {sortedComplexes.length === 0 ? (
+            <Paper elevation={0} sx={{ border: '1px dashed', borderColor: 'divider', borderRadius: 1.5, p: 3, textAlign: 'center' }}>
+              <Typography color="text.secondary">Комплексів ще немає. Додайте, наприклад, «Повний»: перша страва, гарнір, основна страва і салат.</Typography>
+            </Paper>
+          ) : (
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'repeat(2, minmax(0, 1fr))' }, gap: 2, alignItems: 'start' }}>
+              {sortedComplexes.map((c) => (
+                <ComplexCard
+                  key={c.id}
+                  complex={c}
+                  categories={categories}
+                  today={today}
+                  canEdit={canEdit}
+                  onEdit={() => setComplex(c)}
+                  onAddPrice={(categoryId) => setPriceFor({ complex: c, categoryId })}
+                />
               ))}
-            </TableBody>
-          </Table>
+            </Box>
+          )}
+        </Box>
+      )}
+
+      {section === 'lists' && (
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' }, gap: 2, alignItems: 'start' }}>
+          <NamedList
+            title="Типи страв"
+            hint="Частини обіду. Порядок визначає послідовність у меню."
+            addLabel="Додати"
+            emptyText="Типів страв ще немає."
+            items={courses}
+            usage={courseUsage}
+            canEdit={canEdit}
+            onAdd={() => setNamed({ kind: 'course', item: null })}
+            onEdit={(item) => setNamed({ kind: 'course', item })}
+            onToggle={(item, active) => saveCourse(item.id, { active }).catch(() => undefined)}
+          />
+          <NamedList
+            title="Цінові категорії"
+            hint="Призначаються групам і визначають ціну комплексу."
+            addLabel="Додати"
+            emptyText="Цінових категорій ще немає."
+            items={categories}
+            usage={categoryUsage}
+            canEdit={canEdit}
+            onAdd={() => setNamed({ kind: 'category', item: null })}
+            onEdit={(item) => setNamed({ kind: 'category', item })}
+            onToggle={(item, active) => savePriceCategory(item.id, { active }).catch(() => undefined)}
+          />
+        </Box>
+      )}
+
+      {section === 'orders' && (
+        <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1.5, p: 2.5, maxWidth: 560 }}>
+          <Typography sx={{ fontWeight: 700, mb: 0.5 }}>Дедлайн замовлення</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            До цього часу в день харчування батьки можуть замовити або скасувати обід. Пізніше це може зробити лише адміністратор.
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', flexWrap: 'wrap' }}>
+            <TextField
+              size="small"
+              type="time"
+              label="Час"
+              value={deadlineDraft ?? deadline}
+              disabled={!canEditSettings}
+              onChange={(e) => setDeadlineDraft(e.target.value)}
+              slotProps={{ inputLabel: { shrink: true } }}
+            />
+            {canEditSettings && (
+              <Button
+                variant="contained"
+                disabled={isSaving || deadlineDraft === null || deadlineDraft === deadline || !deadlineDraft}
+                onClick={() => deadlineDraft && saveDeadline(deadlineDraft).then(() => setDeadlineDraft(null)).catch(() => undefined)}
+              >
+                Зберегти
+              </Button>
+            )}
+          </Box>
         </Paper>
-      ))}
+      )}
 
       <SortedNameDialog
         open={named !== null}
@@ -193,7 +241,7 @@ export const DirectoriesTab = () => {
       />
       <DishDialog open={dish !== null} dish={dish?.dish ?? null} presetCourseId={dish?.courseId} onClose={() => setDish(null)} />
       <ComplexDialog open={complex !== null} complex={complex && complex !== 'new' ? complex : null} onClose={() => setComplex(null)} />
-      <PriceDialog complex={priceFor} onClose={() => setPriceFor(null)} />
+      <PriceDialog complex={priceFor?.complex ?? null} presetCategoryId={priceFor?.categoryId} onClose={() => setPriceFor(null)} />
     </Box>
   )
 }

@@ -18,7 +18,15 @@ const schema = yup.object({
 
 type FormValues = yup.InferType<typeof schema>
 
-export const PriceDialog = ({ complex, onClose }: { complex: MealComplex | null; onClose: () => void }) => {
+export const PriceDialog = ({
+  complex,
+  presetCategoryId,
+  onClose,
+}: {
+  complex: MealComplex | null
+  presetCategoryId?: string | null
+  onClose: () => void
+}) => {
   const categories = useMealsStore((s) => s.priceCategories)
   const isSaving = useMealsStore((s) => s.isSaving)
   const addPrice = useMealsStore((s) => s.addPrice)
@@ -29,8 +37,8 @@ export const PriceDialog = ({ complex, onClose }: { complex: MealComplex | null;
   })
 
   useEffect(() => {
-    if (complex) reset({ priceCategoryId: '', price: '', validFrom: localToday() })
-  }, [complex, reset])
+    if (complex) reset({ priceCategoryId: presetCategoryId ?? '', price: '', validFrom: localToday() })
+  }, [complex, presetCategoryId, reset])
 
   const submit = async (values: FormValues) => {
     if (!complex) return

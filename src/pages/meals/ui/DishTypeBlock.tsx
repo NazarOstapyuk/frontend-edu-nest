@@ -28,11 +28,13 @@ interface DishTypeBlockProps {
   canEdit: boolean
   onAdd: (courseId: string) => void
   onEdit: (dish: Dish) => void
+  forceExpanded?: boolean
 }
 
-export const DishTypeBlock = ({ course, dishes, canEdit, onAdd, onEdit }: DishTypeBlockProps) => {
+export const DishTypeBlock = ({ course, dishes, canEdit, onAdd, onEdit, forceExpanded = false }: DishTypeBlockProps) => {
   const saveDish = useMealsStore((s) => s.saveDish)
-  const [expanded, setExpanded] = useState(false)
+  const [open, setExpanded] = useState(false)
+  const expanded = forceExpanded || open
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const lastPage = Math.max(0, Math.ceil(dishes.length / rowsPerPage) - 1)

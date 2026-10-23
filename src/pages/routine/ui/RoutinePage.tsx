@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { Alert, Box, Button, CircularProgress, IconButton, MenuItem, Tab, Tabs, TextField, Typography } from '@mui/material'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import { useCan } from '../../../entities/user'
 import { addDaysIso, formatDay } from '../../../shared/api'
 import { useRoutineStore } from '../model/routineStore'
 import { DayOverrideDialog } from './DayOverrideDialog'
 import { RoutineScheduleTab } from './RoutineScheduleTab'
+import { RoutineTemplateTab } from './RoutineTemplateTab'
 
 export const RoutinePage = () => {
   const groups = useRoutineStore((s) => s.groups)
@@ -18,6 +20,7 @@ export const RoutinePage = () => {
   const shiftWeek = useRoutineStore((s) => s.shiftWeek)
   const load = useRoutineStore((s) => s.load)
   const [tab, setTab] = useState(0)
+  const canEdit = useCan('timetable', 'edit')
   const manyInstitutions = new Set(groups.map((g) => g.institution.id)).size > 1
 
   useEffect(() => {
@@ -64,8 +67,10 @@ export const RoutinePage = () => {
       </Box>
       <Tabs value={tab} onChange={(_, v: number) => setTab(v)} sx={{ mb: 2 }}>
         <Tab label="Розклад" />
+        {canEdit && <Tab label="Шаблон тижня" />}
       </Tabs>
       {tab === 0 && <RoutineScheduleTab />}
+      {tab === 1 && canEdit && <RoutineTemplateTab key={groupId} groupId={groupId!} />}
       <DayOverrideDialog />
     </Box>
   )

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField } from '@mui/material'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField, Typography } from '@mui/material'
 import { kyivNow, routineApi } from '../../../shared/api'
 import { useRoutineStore } from '../model/routineStore'
 
@@ -7,7 +7,7 @@ interface CopyRoutineDialogProps {
   open: boolean
   groupId: string
   onClose: () => void
-  onCopied: () => void
+  onCopied: (id: string) => void
 }
 
 const CopyForm = ({ groupId, onClose, onCopied }: Omit<CopyRoutineDialogProps, 'open'>) => {
@@ -21,8 +21,8 @@ const CopyForm = ({ groupId, onClose, onCopied }: Omit<CopyRoutineDialogProps, '
   const onSubmit = async () => {
     setIsSaving(true)
     try {
-      await routineApi.copy(groupId, sourceId, validFrom)
-      onCopied()
+      const { data } = await routineApi.copy(groupId, sourceId, validFrom)
+      onCopied(data.id)
     } catch {
       return
     } finally {
@@ -34,6 +34,9 @@ const CopyForm = ({ groupId, onClose, onCopied }: Omit<CopyRoutineDialogProps, '
     <>
       <DialogTitle>Скопіювати з іншої групи</DialogTitle>
       <DialogContent>
+        {sources.length === 0 && (
+          <Typography color="text.secondary" sx={{ mt: 1 }}>Немає інших садкових груп</Typography>
+        )}
         <TextField
           select
           fullWidth

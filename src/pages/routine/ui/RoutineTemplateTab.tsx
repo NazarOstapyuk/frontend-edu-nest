@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Alert,
   Box,
@@ -59,6 +59,13 @@ const validate = (items: RoutineTemplateItem[]): string | null => {
   return null
 }
 
+const draftKey = (d: Draft) =>
+  JSON.stringify({
+    workingHours: d.workingHours,
+    note: d.note,
+    items: [...d.items].sort((a, b) => a.weekday - b.weekday),
+  })
+
 const initialPick = (versions: RoutineTemplate[]) => {
   const today = kyivNow().date
   const current = versions.find((v) => v.validFrom <= today && (!v.validTo || today <= v.validTo))
@@ -82,7 +89,8 @@ export const RoutineTemplateTab = ({ groupId }: { groupId: string }) => {
   const [copyDayOpen, setCopyDayOpen] = useState(false)
 
   const selected = versions.find((v) => v.id === selectedId) ?? null
-  const dirty = !!selected && !!draft && JSON.stringify(toDraft(selected)) !== JSON.stringify(draft)
+  const selectedRef = useRef<string | null>(null)
+  const dirty = !!selected && !!draft && draftKey(toDraft(selected)) !== draftKey(draft)
 
   const applyList = useCallback((data: RoutineTemplate[], pickId?: string) => {
     const pick = data.find((v) => v.id === pickId) ?? initialPick(data)
@@ -117,6 +125,12 @@ export const RoutineTemplateTab = ({ groupId }: { groupId: string }) => {
       active = false
     }
   }, [groupId, applyList])
+
+  useEffect(() => {
+    selectedRef.current = selectedId
+  }, [selectedId])
+
+  const reloadOrFail = (pickId?: string) => reload(pickId).catch(() => setFailed(true))
 
   const afterChange = () => {
     reloadSchedule().catch(() => undefined)
@@ -156,8 +170,10 @@ export const RoutineTemplateTab = ({ groupId }: { groupId: string }) => {
         items: draft.items.map((i) => ({ ...i, title: i.title.trim() })),
       })
       setVersions((list) => list.map((v) => (v.id === data.id ? data : v)))
-      setDraft(toDraft(data))
-      setShowError(false)
+      if (selectedRef.current === data.id) {
+        setDraft(toDraft(data))
+        setShowError(false)
+      }
       afterChange()
     } catch {
       return
@@ -172,8 +188,8 @@ export const RoutineTemplateTab = ({ groupId }: { groupId: string }) => {
     try {
       await routineApi.deleteTemplate(selected.id)
       setDeleting(false)
-      await reload()
       afterChange()
+      await reloadOrFail()
     } catch {
       return
     } finally {
@@ -209,15 +225,15 @@ export const RoutineTemplateTab = ({ groupId }: { groupId: string }) => {
     <Box>
       <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap', alignItems: 'center', mb: 2 }}>
         {versions.length > 0 && (
-          <TextField select size="small" label="Версія" value={selectedId ?? ''} onChange={(e) => choose(e.target.value)} sx={{ minWidth: 260 }}>
+          <TextField select size="small" disabled={busy} label="Версія" value={selectedId ?? ''} onChange={(e) => choose(e.target.value)} sx={{ minWidth: 260 }}>
             {versions.map((v) => (
               <MenuItem key={v.id} value={v.id}>{versionLabel(v)}</MenuItem>
             ))}
           </TextField>
         )}
-        <Button onClick={() => guard(() => setNewOpen(true))}>Нова версія з дати</Button>
-        <Button onClick={() => guard(() => setCopyOpen(true))}>Скопіювати з іншої групи</Button>
-        {selected && <Button color="error" onClick={() => guard(() => setDeleting(true))}>Видалити версію</Button>}
+        <Button disabled={busy} onClick={() => guard(() => setNewOpen(true))}>Нова версія з дати</Button>
+        <Button disabled={busy} onClick={() => guard(() => setCopyOpen(true))}>Скопіювати з іншої групи</Button>
+        {selected && <Button color="error" disabled={busy} onClick={() => guard(() => setDeleting(true))}>Видалити версію</Button>}
       </Stack>
 
       {!selected || !draft ? (
@@ -275,7 +291,6 @@ export const RoutineTemplateTab = ({ groupId }: { groupId: string }) => {
             onClick={() => {
               const action = pending
               setPending(null)
-              if (selected) setDraft(toDraft(selected))
               action?.()
             }}
           >
@@ -302,7 +317,7 @@ export const RoutineTemplateTab = ({ groupId }: { groupId: string }) => {
         onClose={() => setNewOpen(false)}
         onCreated={(id) => {
           setNewOpen(false)
-          reload(id).catch(() => undefined)
+          reloadOrFail(id)
           afterChange()
         }}
       />
@@ -331,9 +346,9 @@ export const RoutineTemplateTab = ({ groupId }: { groupId: string }) => {
         open={copyOpen}
         groupId={groupId}
         onClose={() => setCopyOpen(false)}
-        onCopied={() => {
+        onCopied={(id) => {
           setCopyOpen(false)
-          reload().catch(() => undefined)
+          reloadOrFail(id)
           afterChange()
         }}
       />

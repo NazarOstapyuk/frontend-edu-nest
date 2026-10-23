@@ -1,7 +1,7 @@
 import { axiosInstance } from './axiosInstance';
 import type { FinanceCategory, PaymentMethod, ChargeState } from './finance';
 import type { AttendanceStatus, PackageState } from './classes';
-import type { ChildRegisterMonth, CreateNoticeDto, ParentNotice } from './register';
+import type { ChildRegisterMonth, CreateNoticeDto, GroupKind, ParentNotice } from './register';
 import type { ParentLessons, ParentSchedule } from './timetable';
 
 export interface FamilyChild {
@@ -9,7 +9,7 @@ export interface FamilyChild {
   firstName: string;
   lastName: string;
   middleName: string | null;
-  group: { id: string; name: string } | null;
+  group: { id: string; name: string; kind: GroupKind } | null;
   institution: { id: string; name: string } | null;
   due: string;
   overdue: string;
@@ -41,7 +41,7 @@ export interface ChildCard {
   lastName: string;
   middleName: string | null;
   birthDate: string;
-  group: { id: string; name: string } | null;
+  group: { id: string; name: string; kind: GroupKind } | null;
   institution: { id: string; name: string } | null;
   parents: ParentContact[];
   enrollments: { id: string; tariffName: string; startDate: string; endDate: string | null; pauses: { startDate: string; endDate: string | null }[] }[];

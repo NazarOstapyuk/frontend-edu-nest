@@ -5,6 +5,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useFamilyChildStore } from '../model/familyChildStore'
 import { ChildCardTab } from './ChildCardTab'
 import { ScheduleTab } from './ScheduleTab'
+import { RoutineTab } from './RoutineTab'
 import { AttendanceTab } from './AttendanceTab'
 import { MealsTab } from './MealsTab'
 import { ChildFinanceTab } from './ChildFinanceTab'
@@ -21,7 +22,7 @@ export const FamilyChildPage = () => {
   const reloadFinance = useFamilyChildStore((s) => s.reloadFinance)
   const [searchParams] = useSearchParams()
   const [returnInvoice] = useState(() => searchParams.get('invoice'))
-  const [tab, setTab] = useState(returnInvoice ? 4 : 0)
+  const [tab, setTab] = useState(returnInvoice ? 'finance' : 'card')
 
   useEffect(() => {
     if (childId) fetchChild(childId).catch(() => undefined)
@@ -42,6 +43,8 @@ export const FamilyChildPage = () => {
     return <Typography color="text.secondary">Завантаження…</Typography>
   }
 
+  const kindergarten = card.group?.kind === 'kindergarten'
+
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -55,18 +58,19 @@ export const FamilyChildPage = () => {
       {returnInvoice && (
         <PaymentReturnBanner invoiceId={returnInvoice} onSuccess={() => reloadFinance(card.id).catch(() => undefined)} />
       )}
-      <Tabs value={tab} onChange={(_, v: number) => setTab(v)} variant="scrollable" sx={{ mb: 2 }}>
-        <Tab label="Картка" />
-        <Tab label="Розклад" />
-        <Tab label="Відвідування" />
-        <Tab label="Харчування" />
-        <Tab label="Фінанси" />
+      <Tabs value={tab} onChange={(_, v: string) => setTab(v)} variant="scrollable" sx={{ mb: 2 }}>
+        <Tab value="card" label="Картка" />
+        {kindergarten ? <Tab value="routine" label="Розпорядок" /> : <Tab value="schedule" label="Розклад" />}
+        <Tab value="attendance" label="Відвідування" />
+        <Tab value="meals" label="Харчування" />
+        <Tab value="finance" label="Фінанси" />
       </Tabs>
-      {tab === 0 && <ChildCardTab card={card} />}
-      {tab === 1 && <ScheduleTab childId={card.id} />}
-      {tab === 2 && <AttendanceTab childId={card.id} visits={card.visits} />}
-      {tab === 3 && <MealsTab childId={card.id} />}
-      {tab === 4 && <ChildFinanceTab childId={card.id} finance={finance} />}
+      {tab === 'card' && <ChildCardTab card={card} />}
+      {tab === 'routine' && kindergarten && <RoutineTab childId={card.id} />}
+      {tab === 'schedule' && !kindergarten && <ScheduleTab childId={card.id} />}
+      {tab === 'attendance' && <AttendanceTab childId={card.id} visits={card.visits} />}
+      {tab === 'meals' && <MealsTab childId={card.id} />}
+      {tab === 'finance' && <ChildFinanceTab childId={card.id} finance={finance} />}
     </Box>
   )
 }

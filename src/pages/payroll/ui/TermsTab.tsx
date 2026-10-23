@@ -137,7 +137,14 @@ export const TermsTab = () => {
                       </Typography>
                     )}
                   </TableCell>
-                  <TableCell>{formatMoney(item.monthlyRate)}</TableCell>
+                  <TableCell>
+                    {formatMoney(item.monthlyRate)}
+                    {item.extraHourRate && (
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                        Дод. година: {formatMoney(item.extraHourRate)}
+                      </Typography>
+                    )}
+                  </TableCell>
                   <TableCell>{payrollCalendarLabels[item.calendarKind]}</TableCell>
                   <TableCell>
                     {item.rates.length === 0

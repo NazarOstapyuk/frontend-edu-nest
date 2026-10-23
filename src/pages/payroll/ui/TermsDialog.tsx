@@ -39,6 +39,7 @@ const amount = () => yup.string().trim().required('Вкажіть суму').mat
 const schema = yup.object({
   validFrom: yup.string().required('Вкажіть дату'),
   monthlyRate: amount(),
+  extraHourRate: yup.string().trim().default('').matches(AMOUNT, { message: 'Неправильна сума', excludeEmptyString: true }),
   calendarKind: yup.mixed<PayrollCalendar>().oneOf(calendars).required(),
   note: yup.string().trim().max(500, 'Не більше 500 символів').default(''),
   rates: yup
@@ -73,6 +74,7 @@ const toDefaults = (terms: SalaryTerms | null): FormValues =>
     ? {
         validFrom: terms.validFrom,
         monthlyRate: terms.monthlyRate,
+        extraHourRate: terms.extraHourRate ?? '',
         calendarKind: terms.calendarKind,
         note: terms.note ?? '',
         rates: terms.rates.map((rate) => ({
@@ -82,7 +84,7 @@ const toDefaults = (terms: SalaryTerms | null): FormValues =>
         })),
         allowances: terms.allowances.map((allowance) => ({ name: allowance.name, amount: allowance.amount })),
       }
-    : { validFrom: localToday(), monthlyRate: '0', calendarKind: 'all', note: '', rates: [], allowances: [] }
+    : { validFrom: localToday(), monthlyRate: '0', extraHourRate: '', calendarKind: 'all', note: '', rates: [], allowances: [] }
 
 const toRate = (rate: FormValues['rates'][number]): SalaryRateDto => ({
   lessonType: rate.lessonType,
@@ -121,9 +123,16 @@ export const TermsDialog = ({ teacherId, terms, onClose }: Props) => {
       rates: values.rates.map(toRate),
       allowances: values.allowances.map((a) => ({ name: a.name, amount: normalizeAmount(a.amount) })),
     }
+    const extraHourRate = values.extraHourRate ? normalizeAmount(values.extraHourRate) : null
     const action = terms
-      ? () => payrollApi.updateTerms(terms.id, payload)
-      : () => payrollApi.createTerms({ ...payload, teacherId, validFrom: values.validFrom })
+      ? () => payrollApi.updateTerms(terms.id, { ...payload, extraHourRate })
+      : () =>
+          payrollApi.createTerms({
+            ...payload,
+            ...(extraHourRate ? { extraHourRate } : {}),
+            teacherId,
+            validFrom: values.validFrom,
+          })
     runTerms(action).then(onClose).catch(() => undefined)
   }
 
@@ -154,6 +163,19 @@ export const TermsDialog = ({ teacherId, terms, onClose }: Props) => {
               control={control}
               render={({ field, fieldState: { error } }) => (
                 <TextField {...field} label="Місячна ставка, грн" error={!!error} helperText={error?.message} fullWidth />
+              )}
+            />
+            <Controller
+              name="extraHourRate"
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <TextField
+                  {...field}
+                  label="Ставка за додаткову годину, грн"
+                  error={!!error}
+                  helperText={error?.message ?? 'Порожньо — додаткові години не оплачуються за умовами'}
+                  fullWidth
+                />
               )}
             />
             <Controller

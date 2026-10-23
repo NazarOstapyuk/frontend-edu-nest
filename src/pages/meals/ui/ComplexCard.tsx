@@ -7,7 +7,8 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 import { useMealsStore } from '../model/mealsStore'
-import { formatDay, type ComplexPrice, type MealComplex, type MealCourse } from '../../../shared/api'
+import { formatDay, type MealComplex, type MealCourse } from '../../../shared/api'
+import { categoryPrices } from '../model/prices'
 
 interface ComplexCardProps {
   complex: MealComplex
@@ -16,13 +17,6 @@ interface ComplexCardProps {
   canEdit: boolean
   onEdit: () => void
   onAddPrice: (categoryId: string | null) => void
-}
-
-const pricesFor = (prices: ComplexPrice[], categoryId: string, today: string) => {
-  const own = prices.filter((p) => p.priceCategoryId === categoryId).sort((a, b) => a.validFrom.localeCompare(b.validFrom))
-  const current = own.filter((p) => p.validFrom.slice(0, 10) <= today).pop() ?? null
-  const next = own.find((p) => p.validFrom.slice(0, 10) > today) ?? null
-  return { current, next }
 }
 
 export const ComplexCard = ({ complex, categories, today, canEdit, onEdit, onAddPrice }: ComplexCardProps) => {
@@ -83,7 +77,7 @@ export const ComplexCard = ({ complex, categories, today, canEdit, onEdit, onAdd
             </TableRow>
           ) : (
             shownCategories.map((category) => {
-              const { current, next } = pricesFor(complex.prices, category.id, today)
+              const { current, next } = categoryPrices(complex.prices, category.id, today)
               return (
                 <TableRow key={category.id}>
                   <TableCell>{category.name}</TableCell>

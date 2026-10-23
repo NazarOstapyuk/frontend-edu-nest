@@ -1,32 +1,48 @@
-import { Box, Checkbox, FormControlLabel, Typography } from '@mui/material'
+import { Autocomplete, Box, TextField, Typography } from '@mui/material'
 import { useMealsStore } from '../model/mealsStore'
+import type { Dish } from '../../../shared/api'
 
 export const DishPicker = ({ value, onChange }: { value: string[]; onChange: (ids: string[]) => void }) => {
   const courses = useMealsStore((s) => s.courses)
   const dishes = useMealsStore((s) => s.dishes)
-  const visible = dishes.filter((d) => d.active || value.includes(d.id))
-  const toggle = (id: string) => onChange(value.includes(id) ? value.filter((x) => x !== id) : [...value, id])
+  const visible = dishes
+    .filter((d) => d.active || value.includes(d.id))
+    .sort((a, b) => a.name.localeCompare(b.name, 'uk'))
 
   if (visible.length === 0) return <Typography color="text.secondary">Спочатку додайте страви в «Довідниках».</Typography>
 
+  const setCourse = (courseId: string, picked: Dish[]) => {
+    const others = value.filter((id) => visible.find((d) => d.id === id)?.courseId !== courseId)
+    onChange([...others, ...picked.map((d) => d.id)])
+  }
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       {courses.map((course) => {
-        const list = visible.filter((d) => d.courseId === course.id)
-        if (list.length === 0) return null
+        const options = visible.filter((d) => d.courseId === course.id)
+        if (options.length === 0) return null
+        const selected = options.filter((d) => value.includes(d.id))
         return (
-          <Box key={course.id}>
-            <Typography variant="body2" sx={{ fontWeight: 700 }}>{course.name}</Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
-              {list.map((d) => (
-                <FormControlLabel
-                  key={d.id}
-                  control={<Checkbox size="small" checked={value.includes(d.id)} onChange={() => toggle(d.id)} />}
-                  label={d.active ? d.name : `${d.name} (вимкнено)`}
-                />
-              ))}
-            </Box>
-          </Box>
+          <Autocomplete
+            key={course.id}
+            multiple
+            disableCloseOnSelect
+            size="small"
+            options={options}
+            value={selected}
+            onChange={(_, picked) => setCourse(course.id, picked)}
+            getOptionLabel={(d) => (d.active ? d.name : `${d.name} (вимкнено)`)}
+            isOptionEqualToValue={(a, b) => a.id === b.id}
+            noOptionsText="Нічого не знайдено"
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label={course.name}
+                placeholder={selected.length ? '' : 'Пошук страви'}
+                helperText={selected.length > 1 ? 'Кілька страв: батьки виберуть одну' : undefined}
+              />
+            )}
+          />
         )
       })}
     </Box>

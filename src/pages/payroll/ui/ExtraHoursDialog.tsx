@@ -44,6 +44,7 @@ const schema = yup.object({
     .matches(/^\d{1,3}([.,]\d{1,2})?$/, 'Неправильна кількість годин')
     .test('hours', function (value) {
       if (!value || !/^\d{1,3}([.,]\d{1,2})?$/.test(value)) return true
+      if (this.parent.mode === 'month' && this.parent.month > localToday().slice(0, 7)) return this.createError({ message: 'Місяць ще не настав' })
       const hours = toNumber(value)
       if (hours <= 0) return this.createError({ message: 'Години мають бути більшими за 0' })
       if (this.parent.mode === 'day' && hours > 24) return this.createError({ message: 'Не більше 24 годин за день' })

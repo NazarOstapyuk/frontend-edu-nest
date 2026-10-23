@@ -40,7 +40,7 @@ export const AbsenceDialog = ({ onClose }: { onClose: () => void }) => {
   const month = usePayrollStore((s) => s.month)
   const today = localToday()
   const start = today.slice(0, 7) === month ? today : `${month}-01`
-  const { control, handleSubmit, trigger } = useForm<FormValues>({
+  const { control, handleSubmit, trigger, getValues, setValue } = useForm<FormValues>({
     mode: 'all',
     resolver: yupResolver(schema),
     defaultValues: { startDate: start, endDate: start, paid: false, reason: '' },
@@ -78,6 +78,9 @@ export const AbsenceDialog = ({ onClose }: { onClose: () => void }) => {
                 slotProps={{ inputLabel: { shrink: true } }}
                 onChange={(event) => {
                   field.onChange(event)
+                  const newStart = event.target.value
+                  const end = getValues('endDate')
+                  if (newStart && (!end || end < newStart)) setValue('endDate', newStart)
                   trigger('endDate').catch(() => undefined)
                 }}
                 fullWidth

@@ -39,7 +39,12 @@ const amount = () => yup.string().trim().required('Вкажіть суму').mat
 const schema = yup.object({
   validFrom: yup.string().required('Вкажіть дату'),
   monthlyRate: amount(),
-  extraHourRate: yup.string().trim().default('').matches(AMOUNT, { message: 'Неправильна сума', excludeEmptyString: true }),
+  extraHourRate: yup
+    .string()
+    .trim()
+    .default('')
+    .matches(AMOUNT, { message: 'Неправильна сума', excludeEmptyString: true })
+    .test('positive', 'Сума має бути більшою за 0', (value) => !value || !AMOUNT.test(value) || toKopecks(value) > 0),
   calendarKind: yup.mixed<PayrollCalendar>().oneOf(calendars).required(),
   note: yup.string().trim().max(500, 'Не більше 500 символів').default(''),
   rates: yup

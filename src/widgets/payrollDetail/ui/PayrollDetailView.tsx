@@ -221,6 +221,7 @@ export const PayrollDetailView = ({
                       Разом
                     </TableCell>
                     <TableCell align="right" sx={{ fontWeight: 600 }}>
+                      {extraLines.some((l) => l.noRate) && <Chip size="small" color="warning" label="без ставки" sx={{ mr: 1 }} />}
                       {sumOf(extraLines)}
                     </TableCell>
                     {onVoidExtraHours && <TableCell />}
@@ -235,7 +236,10 @@ export const PayrollDetailView = ({
               <TableBody>
                 {extraLines.map((line, index) => (
                   <TableRow key={`${line.sourceId ?? 'extra'}-${index}`}>
-                    <TableCell>{line.title}</TableCell>
+                    <TableCell>
+                      {line.title}
+                      {line.noRate && <Chip size="small" color="warning" label="без ставки" sx={{ ml: 1 }} />}
+                    </TableCell>
                     <TableCell align="right">{formatMoney(line.amount)}</TableCell>
                   </TableRow>
                 ))}

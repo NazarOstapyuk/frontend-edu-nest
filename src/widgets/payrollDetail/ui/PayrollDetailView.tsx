@@ -31,6 +31,9 @@ interface Props {
   detail: PayrollDetail
   onVoidAdjustment?: (id: string) => void
   onVoidPayment?: (id: string) => void
+  onVoidExtraHours?: (id: string) => void
+  onVoidAbsence?: (id: string) => void
+  actions?: { extraHours?: ReactNode; absences?: ReactNode }
   showWarnings?: boolean
 }
 
@@ -38,11 +41,12 @@ const lessonTypes: PayrollLessonType[] = ['school_lesson', 'class_group', 'indiv
 
 const sumOf = (lines: PayrollLine[]) => formatMoney(lines.reduce((sum, line) => sum + toKopecks(line.amount), 0) / 100)
 
-const Section = ({ title, children }: { title: string; children: ReactNode }) => (
+const Section = ({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) => (
   <Box>
-    <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-      {title}
-    </Typography>
+    <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+      <Typography variant="subtitle2">{title}</Typography>
+      {action}
+    </Stack>
     {children}
   </Box>
 )
@@ -93,10 +97,25 @@ const Voided = ({ reason }: { reason: string | null }) => (
   <Chip size="small" label={reason ? `Анульовано: ${reason}` : 'Анульовано'} sx={{ ml: 1 }} />
 )
 
-export const PayrollDetailView = ({ detail, onVoidAdjustment, onVoidPayment, showWarnings = true }: Props) => {
+const personName = (person: { lastName: string; firstName: string }) => `${person.lastName} ${person.firstName}`
+
+export const PayrollDetailView = ({
+  detail,
+  onVoidAdjustment,
+  onVoidPayment,
+  onVoidExtraHours,
+  onVoidAbsence,
+  actions,
+  showWarnings = true,
+}: Props) => {
   const fixed = detail.lines.filter((line) => line.type === 'base' || line.type === 'allowance')
   const lessons = detail.lines.filter((line) => line.type === 'lesson')
   const corrections = detail.lines.filter((line) => line.type === 'correction')
+  const extraLines = detail.lines.filter((line) => line.type === 'extra_hours')
+  const extraHours = detail.extraHours
+  const absences = detail.absences
+  const unpaidDays = detail.days.unpaidAbsenceDays ?? 0
+  const lessonsOnAbsence = detail.warnings.lessonsOnAbsenceDays ?? []
   const balance = toKopecks(detail.totals.balance)
 
   return (
@@ -110,6 +129,13 @@ export const PayrollDetailView = ({ detail, onVoidAdjustment, onVoidPayment, sho
         </Alert>
       )}
 
+      {showWarnings && lessonsOnAbsence.length > 0 && (
+        <Alert severity="warning">
+          Є заняття в дні відсутності: {lessonsOnAbsence.map((day) => formatDay(day)).join(', ')}. Перевірте
+          відсутність або запис заняття.
+        </Alert>
+      )}
+
       <Section title="Ставка і постійні доплати">
         {fixed.length === 0 ? (
           <Empty text="Немає" />
@@ -120,7 +146,13 @@ export const PayrollDetailView = ({ detail, onVoidAdjustment, onVoidPayment, sho
                 <TableRow key={`${line.type}-${index}`}>
                   <TableCell>
                     {line.type === 'base'
-                      ? `Ставка: відпрацьовано ${detail.days.workedDays} з ${detail.days.defaultDays} дн. (норма ${detail.days.normDays})`
+                      ? `Ставка: відпрацьовано ${detail.days.workedDays} з ${detail.days.defaultDays} дн. (норма ${detail.days.normDays})${
+                          unpaidDays > 0
+                            ? `, неоплачувані відсутності: ${unpaidDays} дн.${
+                                detail.days.override ? ' (дні введено вручну, відсутності не враховано)' : ''
+                              }`
+                            : ''
+                        }`
                       : line.title}
                   </TableCell>
                   <TableCell align="right">{formatMoney(line.amount)}</TableCell>
@@ -143,6 +175,125 @@ export const PayrollDetailView = ({ detail, onVoidAdjustment, onVoidPayment, sho
           })
         )}
       </Section>
+
+      {(extraHours || extraLines.length > 0 || actions?.extraHours) && (
+        <Section title="Додаткові години" action={actions?.extraHours}>
+          {extraHours ? (
+            extraHours.length === 0 ? (
+              <Empty text="Немає" />
+            ) : (
+              <Table size="small">
+                <TableBody>
+                  {extraHours.map((item, index) => (
+                    <TableRow key={item.id ?? index} sx={{ opacity: item.voidedAt ? 0.6 : 1 }}>
+                      <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.date ? formatDay(item.date) : 'за місяць'}</TableCell>
+                      <TableCell>
+                        {item.hours} год
+                        {item.rate && (
+                          <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+                            × {formatMoney(item.rate)}
+                          </Typography>
+                        )}
+                        {item.comment ? `, ${item.comment}` : ''}
+                        {item.createdBy && (
+                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                            {personName(item.createdBy)}
+                          </Typography>
+                        )}
+                        {item.voidedAt && <Voided reason={item.voidReason ?? null} />}
+                      </TableCell>
+                      <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
+                        {item.voidedAt ? '' : item.amount === null ? '—' : formatMoney(item.amount)}
+                      </TableCell>
+                      {onVoidExtraHours && (
+                        <TableCell align="right">
+                          {!item.voidedAt && item.id && (
+                            <Button size="small" color="error" onClick={() => onVoidExtraHours(item.id as string)}>
+                              Анулювати
+                            </Button>
+                          )}
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  ))}
+                  <TableRow>
+                    <TableCell colSpan={2} sx={{ fontWeight: 600 }}>
+                      Разом
+                    </TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 600 }}>
+                      {sumOf(extraLines)}
+                    </TableCell>
+                    {onVoidExtraHours && <TableCell />}
+                  </TableRow>
+                </TableBody>
+              </Table>
+            )
+          ) : extraLines.length === 0 ? (
+            <Empty text="Немає" />
+          ) : (
+            <Table size="small">
+              <TableBody>
+                {extraLines.map((line, index) => (
+                  <TableRow key={`${line.sourceId ?? 'extra'}-${index}`}>
+                    <TableCell>{line.title}</TableCell>
+                    <TableCell align="right">{formatMoney(line.amount)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </Section>
+      )}
+
+      {absences && (
+        <Section title="Відсутності" action={actions?.absences}>
+          {absences.length === 0 ? (
+            <Empty text="Немає" />
+          ) : (
+            <Table size="small">
+              <TableBody>
+                {absences.map((item, index) => (
+                  <TableRow key={item.id ?? index} sx={{ opacity: item.voidedAt ? 0.6 : 1 }}>
+                    <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                      {formatDay(item.startDate)}
+                      {item.endDate !== item.startDate ? ` – ${formatDay(item.endDate)}` : ''}
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        size="small"
+                        color={item.paid ? 'default' : 'warning'}
+                        label={item.paid ? 'Оплачувана' : 'Неоплачувана'}
+                        sx={{ mr: 1 }}
+                      />
+                      {item.reason}
+                      {item.workingDays !== undefined && (
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                          робочих днів у місяці: {item.workingDays}
+                        </Typography>
+                      )}
+                      {item.createdBy && (
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                          {personName(item.createdBy)}
+                        </Typography>
+                      )}
+                      {item.voidedAt && <Voided reason={item.voidReason} />}
+                    </TableCell>
+                    {onVoidAbsence && (
+                      <TableCell align="right">
+                        {!item.voidedAt && (
+                          <Button size="small" color="error" onClick={() => onVoidAbsence(item.id)}>
+                            Анулювати
+                          </Button>
+                        )}
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </Section>
+      )}
 
       {corrections.length > 0 && (
         <Section title="Коригування попередніх місяців">

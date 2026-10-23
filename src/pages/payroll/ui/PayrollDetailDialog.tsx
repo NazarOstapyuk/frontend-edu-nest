@@ -7,14 +7,18 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControlLabel,
   Stack,
+  Switch,
   Typography,
 } from '@mui/material'
 import { monthLabel, payrollApi, payrollStatusLabels } from '../../../shared/api'
 import { PayrollDetailView } from '../../../widgets/payrollDetail'
 import { usePayrollStore } from '../model/payrollStore'
 import { useCan } from '../../../entities/user'
+import { AbsenceDialog } from './AbsenceDialog'
 import { AdjustmentDialog } from './AdjustmentDialog'
+import { ExtraHoursDialog } from './ExtraHoursDialog'
 import { PaymentDialog } from './PaymentDialog'
 import { ReasonDialog } from './ReasonDialog'
 import { WorkedDaysForm } from './WorkedDaysForm'
@@ -22,9 +26,13 @@ import { WorkedDaysForm } from './WorkedDaysForm'
 type Modal =
   | { kind: 'adjustment' }
   | { kind: 'payment' }
+  | { kind: 'extraHours' }
+  | { kind: 'absence' }
   | { kind: 'reopen' }
   | { kind: 'voidAdjustment'; id: string }
   | { kind: 'voidPayment'; id: string }
+  | { kind: 'voidExtraHours'; id: string }
+  | { kind: 'voidAbsence'; id: string }
   | null
 
 export const PayrollDetailDialog = () => {
@@ -45,7 +53,36 @@ export const PayrollDetailDialog = () => {
   const approve = () => {
     runDetail((teacherId, month) => payrollApi.approve(teacherId, month)).catch(() => undefined)
   }
-  const voidTarget = modal && (modal.kind === 'voidAdjustment' || modal.kind === 'voidPayment') ? modal : null
+  const voidTarget =
+    modal &&
+    (modal.kind === 'voidAdjustment' ||
+      modal.kind === 'voidPayment' ||
+      modal.kind === 'voidExtraHours' ||
+      modal.kind === 'voidAbsence')
+      ? modal
+      : null
+  const voidTitles = {
+    voidAdjustment: 'Анулювати запис',
+    voidPayment: 'Анулювати виплату',
+    voidExtraHours: 'Анулювати додаткові години',
+    voidAbsence: 'Анулювати відсутність',
+  }
+  const submitVoid = (target: NonNullable<typeof voidTarget>, reason: string) => {
+    if (target.kind === 'voidAdjustment') return runDetail(() => payrollApi.voidAdjustment(target.id, reason))
+    if (target.kind === 'voidPayment') return runDetail(() => payrollApi.voidPayment(target.id, reason))
+    if (target.kind === 'voidExtraHours') return runDetail(() => payrollApi.voidExtraHours(target.id, reason))
+    return runDetail(async (teacherId, month) => {
+      await payrollApi.voidAbsence(target.id, reason)
+      return payrollApi.getDetail(teacherId, month)
+    })
+  }
+  const toggleVisibility = (visible: boolean) => {
+    runDetail(async (teacherId, month) => {
+      await payrollApi.setDetailsVisibility(teacherId, visible)
+      return payrollApi.getDetail(teacherId, month)
+    }).catch(() => undefined)
+  }
+  const editDraft = canEdit && draft
 
   return (
     <Dialog open fullWidth maxWidth="md" onClose={closeDetail}>
@@ -81,11 +118,41 @@ export const PayrollDetailDialog = () => {
                 </Typography>
               )}
             </Stack>
+            {detail.payrollDetailsVisible !== undefined && (
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={detail.payrollDetailsVisible}
+                    disabled={!canEdit || isSaving}
+                    onChange={(event) => toggleVisibility(event.target.checked)}
+                  />
+                }
+                label="Педагог бачить додаткові години й відсутності в «Моя зарплата»"
+              />
+            )}
             {canEdit && draft && (
               <WorkedDaysForm key={`${detail.days.workedDays}-${String(detail.days.override)}`} detail={detail} />
             )}
             <PayrollDetailView
               detail={detail}
+              actions={
+                editDraft
+                  ? {
+                      extraHours: (
+                        <Button size="small" disabled={isSaving} onClick={() => setModal({ kind: 'extraHours' })}>
+                          Додати
+                        </Button>
+                      ),
+                      absences: (
+                        <Button size="small" disabled={isSaving} onClick={() => setModal({ kind: 'absence' })}>
+                          Додати
+                        </Button>
+                      ),
+                    }
+                  : undefined
+              }
+              onVoidExtraHours={editDraft ? (id) => setModal({ kind: 'voidExtraHours', id }) : undefined}
+              onVoidAbsence={editDraft ? (id) => setModal({ kind: 'voidAbsence', id }) : undefined}
               onVoidAdjustment={canEdit && draft ? (id) => setModal({ kind: 'voidAdjustment', id }) : undefined}
               onVoidPayment={canEdit ? (id) => setModal({ kind: 'voidPayment', id }) : undefined}
             />
@@ -118,6 +185,8 @@ export const PayrollDetailDialog = () => {
 
       {modal?.kind === 'adjustment' && <AdjustmentDialog onClose={closeModal} />}
       {modal?.kind === 'payment' && <PaymentDialog onClose={closeModal} />}
+      {modal?.kind === 'extraHours' && <ExtraHoursDialog onClose={closeModal} />}
+      {modal?.kind === 'absence' && <AbsenceDialog onClose={closeModal} />}
       {modal?.kind === 'reopen' && (
         <ReasonDialog
           title="Відкрити відомість повторно"
@@ -127,15 +196,9 @@ export const PayrollDetailDialog = () => {
       )}
       {voidTarget && (
         <ReasonDialog
-          title={voidTarget.kind === 'voidAdjustment' ? 'Анулювати запис' : 'Анулювати виплату'}
+          title={voidTitles[voidTarget.kind]}
           onClose={closeModal}
-          onSubmit={(reason) =>
-            runDetail(() =>
-              voidTarget.kind === 'voidAdjustment'
-                ? payrollApi.voidAdjustment(voidTarget.id, reason)
-                : payrollApi.voidPayment(voidTarget.id, reason),
-            )
-          }
+          onSubmit={(reason) => submitVoid(voidTarget, reason)}
         />
       )}
     </Dialog>

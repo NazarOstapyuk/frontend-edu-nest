@@ -334,8 +334,9 @@ export type { Institution, InstitutionType, CreateInstitutionDto, UpdateInstitut
 export { softList } from './softList';
 export { dashboardApi } from './dashboard';
 export type { TodayDashboard, DashboardPaymentMethod } from './dashboard';
-export { routineApi } from './routine';
+export { routineApi, kyivNow } from './routine';
 export type {
+  RoutineGroup,
   RoutineItem,
   RoutineDay,
   RoutineView,

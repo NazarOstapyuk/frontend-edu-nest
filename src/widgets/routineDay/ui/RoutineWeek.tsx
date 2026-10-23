@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Box, Button, Chip, Stack, Typography } from '@mui/material'
-import { weekdayLabels, type RoutineDay } from '../../../shared/api'
+import { kyivNow, type RoutineDay } from '../../../shared/api'
 
 interface RoutineWeekProps {
   days: RoutineDay[]
@@ -9,9 +9,11 @@ interface RoutineWeekProps {
   onResetDay?: (date: string) => void
 }
 
+const dayLabels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд']
+
 const weekdayIndex = (date: string) => (new Date(`${date}T00:00:00Z`).getUTCDay() + 6) % 7
 
-const chipLabel = (date: string) => `${weekdayLabels[weekdayIndex(date)]} ${date.slice(8, 10)}.${date.slice(5, 7)}`
+const chipLabel = (date: string) => `${dayLabels[weekdayIndex(date)]} ${date.slice(8, 10)}.${date.slice(5, 7)}`
 
 const minutes = (time: string) => Number(time.slice(0, 2)) * 60 + Number(time.slice(3, 5))
 
@@ -20,8 +22,8 @@ export const RoutineWeek = ({ days, today, onEditDay, onResetDay }: RoutineWeekP
   const shown = days.filter((d) => weekdayIndex(d.date) < 5 || d.items.length > 0)
   const fallback = shown.find((d) => d.date === today) ?? shown.find((d) => weekdayIndex(d.date) === 0) ?? shown[0]
   const selected = shown.find((d) => d.date === chosen) ?? fallback
-  const now = new Date()
-  const nowMinutes = now.getHours() * 60 + now.getMinutes()
+  const now = kyivNow()
+  const nowMinutes = now.minutes
 
   if (!selected) return <Typography color="text.secondary">Немає даних.</Typography>
 

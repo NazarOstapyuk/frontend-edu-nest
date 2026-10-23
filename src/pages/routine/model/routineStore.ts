@@ -1,22 +1,18 @@
 import { create } from 'zustand';
 import {
   addDaysIso,
-  groupsApi,
-  localToday,
-  registerApi,
+  kyivNow,
   routineApi,
   weekStart,
+  type RoutineGroup,
   type RoutineDay,
   type RoutineDayDto,
 } from '../../../shared/api';
 
-export interface RoutineGroupOption {
-  id: string;
-  name: string;
-}
 
 interface RoutineState {
-  groups: RoutineGroupOption[];
+  groups: RoutineGroup[];
+  groupsLoaded: boolean;
   groupId: string | null;
   weekFrom: string;
   days: RoutineDay[];
@@ -25,7 +21,7 @@ interface RoutineState {
   metaError: boolean;
   loadError: boolean;
   dayDialog: { isOpen: boolean; day: RoutineDay | null };
-  loadMeta: (useGroupList: boolean) => Promise<void>;
+  loadMeta: () => Promise<void>;
   selectGroup: (groupId: string) => void;
   shiftWeek: (weeks: number) => void;
   load: () => Promise<void>;
@@ -34,46 +30,51 @@ interface RoutineState {
   setDayDialog: (patch: Partial<RoutineState['dayDialog']>) => void;
 }
 
+let loadTicket = 0;
+
 const replaceDay = (days: RoutineDay[], next: RoutineDay) => days.map((d) => (d.date === next.date ? next : d));
 
 export const useRoutineStore = create<RoutineState>((set, get) => ({
   groups: [],
+  groupsLoaded: false,
   groupId: null,
-  weekFrom: weekStart(localToday()),
+  weekFrom: weekStart(kyivNow().date),
   days: [],
   isLoading: false,
   isSaving: false,
   metaError: false,
   loadError: false,
   dayDialog: { isOpen: false, day: null },
-  loadMeta: async (useGroupList) => {
+  loadMeta: async () => {
     set({ metaError: false });
     try {
-      const { data } = useGroupList ? await groupsApi.getList() : await registerApi.getGroups();
-      const groups = data
-        .filter((g) => g.kind === 'kindergarten')
-        .map((g) => ({ id: g.id, name: g.name }));
+      const { data: groups } = await routineApi.getGroups();
       const current = get().groupId;
-      set({ groups, groupId: groups.some((g) => g.id === current) ? current : (groups[0]?.id ?? null) });
+      set({
+        groups,
+        groupsLoaded: true,
+        groupId: groups.some((g) => g.id === current) ? current : (groups[0]?.id ?? null),
+      });
     } catch (error) {
       set({ metaError: true });
       throw error;
     }
   },
   selectGroup: (groupId) => set({ groupId, days: [] }),
-  shiftWeek: (weeks) => set({ weekFrom: addDaysIso(get().weekFrom, weeks * 7) }),
+  shiftWeek: (weeks) => set({ weekFrom: addDaysIso(get().weekFrom, weeks * 7), days: [] }),
   load: async () => {
     const { groupId, weekFrom } = get();
     if (!groupId) return;
+    const ticket = ++loadTicket;
     set({ isLoading: true, loadError: false });
     try {
       const { data } = await routineApi.getRoutine(groupId, weekFrom, addDaysIso(weekFrom, 6));
-      if (get().groupId === groupId && get().weekFrom === weekFrom) set({ days: data.days });
+      if (ticket === loadTicket) set({ days: data.days });
     } catch (error) {
-      if (get().groupId === groupId && get().weekFrom === weekFrom) set({ loadError: true, days: [] });
+      if (ticket === loadTicket) set({ loadError: true, days: [] });
       throw error;
     } finally {
-      set({ isLoading: false });
+      if (ticket === loadTicket) set({ isLoading: false });
     }
   },
   saveDay: async (date, dto) => {

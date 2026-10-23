@@ -1,5 +1,11 @@
 import { axiosInstance } from './axiosInstance';
 
+export interface RoutineGroup {
+  id: string;
+  name: string;
+  institution: { id: string; name: string };
+}
+
 export interface RoutineItem {
   startTime: string;
   endTime: string;
@@ -71,6 +77,27 @@ export const routineApi = {
   copy: (groupId: string, sourceGroupId: string, validFrom: string) =>
     axiosInstance.post<RoutineTemplate>(`/groups/${groupId}/routine/copy`, { sourceGroupId, validFrom }),
 
+  getGroups: () =>
+    axiosInstance.get<RoutineGroup[]>('/routine/groups'),
+
   getChildRoutine: (childId: string, from: string, to: string) =>
     axiosInstance.get<RoutineView>(`/me/children/${childId}/routine`, { params: { from, to } }),
+};
+
+const kyivParts = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Europe/Kyiv',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+});
+
+export const kyivNow = () => {
+  const parts = Object.fromEntries(kyivParts.formatToParts(new Date()).map((p) => [p.type, p.value]));
+  return {
+    date: `${parts.year}-${parts.month}-${parts.day}`,
+    minutes: Number(parts.hour) * 60 + Number(parts.minute),
+  };
 };

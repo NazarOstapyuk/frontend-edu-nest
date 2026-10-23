@@ -18,7 +18,7 @@ const DayOverrideForm = ({ day, onClose }: { day: RoutineDay; onClose: () => voi
   const saveDay = useRoutineStore((s) => s.saveDay)
   const resetDay = useRoutineStore((s) => s.resetDay)
   const [items, setItems] = useState<RoutineItem[]>(() => day.items.map((i) => ({ ...i })))
-  const [note, setNote] = useState(day.note ?? '')
+  const [note, setNote] = useState(day.source === 'override' ? (day.note ?? '') : '')
   const [error, setError] = useState<string | null>(null)
 
   const onSave = async () => {

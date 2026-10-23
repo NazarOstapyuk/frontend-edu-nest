@@ -1,4 +1,5 @@
 import { axiosInstance } from './axiosInstance';
+import type { InstitutionType } from './institutions';
 
 export type FinanceCategory = 'tuition' | 'adaptation' | 'extra_classes' | 'meals';
 export type PaymentMethod = 'cash' | 'bank_transfer' | 'card' | 'online';
@@ -149,6 +150,11 @@ export interface FinanceBalance {
   childId: string;
   firstName: string;
   lastName: string;
+  group: {
+    id: string;
+    name: string;
+    institution: { id: string; name: string; type: InstitutionType };
+  } | null;
   totalDue: string;
   debt: string;
   prepayment: string;

@@ -21,6 +21,7 @@ import {
   financeCategories,
   financeCategoryLabels,
   formatMoney,
+  institutionTypeLabels,
   type FinanceCategory,
 } from '../../../shared/api'
 
@@ -113,6 +114,8 @@ export const FinanceBalancesPage = () => {
             <TableRow sx={{ '& th': { fontWeight: 700, bgcolor: 'grey.50' } }}>
               <TableCell>#</TableCell>
               <TableCell>Учень</TableCell>
+              <TableCell>Заклад</TableCell>
+              <TableCell>Група</TableCell>
               <TableCell align="right">Разом до сплати</TableCell>
               <TableCell align="right">Борг</TableCell>
               <TableCell align="right">Передоплата</TableCell>
@@ -122,7 +125,7 @@ export const FinanceBalancesPage = () => {
           <TableBody>
             {balances.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                <TableCell colSpan={8} align="center" sx={{ py: 6, color: 'text.secondary' }}>
                   Немає учнів за цими фільтрами.
                 </TableCell>
               </TableRow>
@@ -138,6 +141,12 @@ export const FinanceBalancesPage = () => {
                   <TableCell sx={{ fontWeight: 500 }}>
                     {row.lastName} {row.firstName}
                   </TableCell>
+                  <TableCell sx={{ color: 'text.secondary' }}>
+                    {row.group
+                      ? `${institutionTypeLabels[row.group.institution.type]} · ${row.group.institution.name}`
+                      : '—'}
+                  </TableCell>
+                  <TableCell sx={{ color: 'text.secondary' }}>{row.group?.name ?? '—'}</TableCell>
                   <TableCell
                     align="right"
                     sx={{ fontWeight: 600, color: Number(row.totalDue) > 0 ? 'error.main' : 'text.primary' }}

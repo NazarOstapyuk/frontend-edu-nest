@@ -24,7 +24,7 @@ const manualMethods: ManualPaymentMethod[] = ['cash', 'bank_transfer', 'card']
 const schema = yup.object({
   amount: amountSchema,
   method: yup.mixed<ManualPaymentMethod>().oneOf(manualMethods).required("Обов'язкове поле"),
-  reference: yup.string().trim().required("Обов'язкове поле").max(255, 'Максимум 255 символів'),
+  reference: yup.string().trim().default('').max(255, 'Максимум 255 символів'),
   receivedAt: yup.string().required("Обов'язкове поле"),
   category: yup.string().default(''),
   note: yup.string().default('').max(1000, 'Максимум 1000 символів'),
@@ -100,7 +100,7 @@ export const CreatePaymentModal = () => {
     await createPayment(finance.child.id, {
       amount: normalizeAmount(values.amount),
       method: values.method,
-      reference: values.reference.trim(),
+      reference: values.reference.trim() || undefined,
       receivedAt: values.receivedAt,
       category: values.category ? (values.category as FinanceCategory) : undefined,
       note: values.note.trim() || undefined,

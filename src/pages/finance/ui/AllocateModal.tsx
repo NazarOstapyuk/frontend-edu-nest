@@ -81,7 +81,7 @@ export const AllocateModal = () => {
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         {payment && (
           <Typography variant="body2" color="text.secondary">
-            {payment.reference} · {payment.category ? financeCategoryLabels[payment.category] : 'Без категорії'} ·
+            {payment.reference || 'Без реквізиту'} ·{payment.category ? financeCategoryLabels[payment.category] : 'Без категорії'} ·
             вільна сума {formatMoney(payment.free)}
           </Typography>
         )}

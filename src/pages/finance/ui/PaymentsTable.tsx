@@ -49,10 +49,10 @@ const PaymentRow = ({ payment }: { payment: FinancePayment }) => {
         <TableCell>
           {voided ? (
             <Tooltip title={`Причина сторно: ${payment.voidReason ?? ''}`}>
-              <Typography variant="body2" component="span">{payment.reference}</Typography>
+              <Typography variant="body2" component="span">{payment.reference || '—'}</Typography>
             </Tooltip>
           ) : (
-            payment.reference
+            payment.reference || '—'
           )}
         </TableCell>
         <TableCell>{payment.category ? financeCategoryLabels[payment.category] : 'Без категорії'}</TableCell>
@@ -81,7 +81,7 @@ const PaymentRow = ({ payment }: { payment: FinancePayment }) => {
                 onClick={() =>
                   setVoidModal({
                     isOpen: true,
-                    target: { kind: 'payment', id: payment.id, title: payment.reference },
+                    target: { kind: 'payment', id: payment.id, title: payment.reference || 'Оплата' },
                   })
                 }
               >
@@ -142,7 +142,7 @@ const PaymentRow = ({ payment }: { payment: FinancePayment }) => {
                                     target: {
                                       kind: 'allocation',
                                       id: a.id,
-                                      title: `${payment.reference} → ${a.charge.description}`,
+                                      title: `${payment.reference || 'Оплата'} → ${a.charge.description}`,
                                     },
                                   })
                                 }

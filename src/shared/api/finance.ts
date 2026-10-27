@@ -184,7 +184,7 @@ export interface AllocationItem {
 export interface CreatePaymentDto {
   amount: string;
   method: ManualPaymentMethod;
-  reference: string;
+  reference?: string;
   receivedAt: string;
   category?: FinanceCategory;
   note?: string;

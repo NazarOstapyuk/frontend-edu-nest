@@ -8,7 +8,6 @@ export {
   areaLabels,
   levelLabels,
   scopeLabels,
-  accessTemplates,
   levelSatisfies,
 } from './access';
 export type {
@@ -18,8 +17,9 @@ export type {
   PermissionMap,
   PermissionItem,
   UpdateAccessDto,
-  AccessTemplate,
 } from './access';
+export { positionsApi } from './positions';
+export type { Position, PositionDto } from './positions';
 export { groupsApi } from './groups';
 export type { Group, GroupChild, CreateGroupDto, UpdateGroupDto } from './groups';
 export { childrenApi } from './children';

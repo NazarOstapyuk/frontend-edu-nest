@@ -65,13 +65,13 @@ export const useUsersStore = create<UsersState>((set) => ({
   },
 
   applyScope: async (user, accessScope, institutionIds) => {
-    if (sameScope(user, accessScope, institutionIds)) return;
+    if (!user.position || sameScope(user, accessScope, institutionIds)) return;
     set({ isUpdating: true });
     try {
       const { data } = await usersApi.setAccess(user.id, {
+        positionId: user.position.id,
         accessScope,
         ...(accessScope === 'institutions' ? { institutionIds } : {}),
-        permissions: user.permissions ?? [],
       });
       set((state) => ({ users: state.users.map((u) => (u.id === data.id ? data : u)) }));
     } finally {

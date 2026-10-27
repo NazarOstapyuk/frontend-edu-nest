@@ -4,6 +4,12 @@ export type UserRole = 'admin' | 'teacher' | 'parent'
 
 export type SessionRole = 'root' | 'admin' | 'teacher' | 'parent'
 
+export interface PositionRef {
+  id: string
+  name: string
+  teaching: boolean
+}
+
 export interface User {
   id: string
   firstName: string
@@ -18,6 +24,7 @@ export interface User {
   accessScope?: AccessScope
   institutionIds?: string[]
   permissions?: PermissionItem[]
+  position?: PositionRef | null
 }
 
 export interface SessionProfile {
@@ -33,6 +40,7 @@ export interface SessionProfile {
   accessScope: AccessScope
   institutionIds: string[]
   permissions: PermissionMap
+  position: PositionRef | null
 }
 
 export const homePath = (profile: SessionProfile) => {

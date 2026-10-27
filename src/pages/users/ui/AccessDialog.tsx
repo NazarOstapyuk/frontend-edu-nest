@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import * as yup from 'yup'
 import {
   Autocomplete,
@@ -14,27 +14,13 @@ import {
   TableCell,
   TableRow,
   TextField,
-  ToggleButton,
-  ToggleButtonGroup,
   Typography,
 } from '@mui/material'
-import {
-  ALL_AREAS,
-  accessTemplates,
-  areaLabels,
-  levelLabels,
-  levelSatisfies,
-  scopeLabels,
-  usersApi,
-  type AccessScope,
-  type AccessTemplate,
-  type PermissionArea,
-  type PermissionLevel,
-  type PermissionMap,
-} from '../../../shared/api'
+import { areaLabels, levelLabels, scopeLabels, usersApi, type AccessScope } from '../../../shared/api'
 import { useInstitutionStore } from '../../../shared/model/institutionStore'
 import { useAuthStore, type User } from '../../../entities/user'
-import { canChangeAccess, permissionMap, scopeAllowed as scopeAllowedFor } from '../model/accessRules'
+import { canAssignPosition, usePositionsStore } from '../../../entities/position'
+import { canChangeAccess, scopeAllowed as scopeAllowedFor } from '../model/accessRules'
 
 interface Props {
   user: User
@@ -48,60 +34,32 @@ const institutionsSchema = yup.array(yup.string().required()).min(1, 'Обері
 
 export const AccessDialog = ({ user, onClose, onSaved }: Props) => {
   const profile = useAuthStore((s) => s.profile)
+  const positions = usePositionsStore((s) => s.positions)
+  const loadPositions = usePositionsStore((s) => s.load)
+  const [positionId, setPositionId] = useState(user.position?.id ?? '')
+  const [positionError, setPositionError] = useState<string | null>(null)
   const [scope, setScope] = useState<AccessScope>(user.accessScope ?? 'all')
   const institutions = useInstitutionStore((s) => s.institutions)
   const [institutionIds, setInstitutionIds] = useState<string[]>(user.institutionIds ?? [])
   const [institutionsError, setInstitutionsError] = useState<string | null>(null)
-  const [original] = useState<PermissionMap>(() => permissionMap(user))
-  const [permissions, setPermissions] = useState<PermissionMap>(original)
   const [saving, setSaving] = useState(false)
-  const isRoot = profile?.role === 'root'
-  const allowed = (level: PermissionLevel, area: PermissionArea) =>
-    isRoot || levelSatisfies(profile?.permissions?.[area], level)
   const scopeAllowed = (value: AccessScope) => scopeAllowedFor(profile, value)
   const readOnly = !canChangeAccess(profile, user)
-  const locked = (area: PermissionArea) => {
-    const have = original[area]
-    return !isRoot && have !== undefined && !levelSatisfies(profile?.permissions?.[area], have)
-  }
-  const templateAllowed = (template: AccessTemplate) =>
-    isRoot ||
-    (scopeAllowed(template.accessScope) &&
-      ALL_AREAS.every((area) => {
-        const level = template.permissions[area]
-        return locked(area) || level === undefined || allowed(level, area)
-      }))
+  const chosen = positions.find((p) => p.id === positionId)
 
-  const applyTemplate = (name: string) => {
-    const template = accessTemplates.find((t) => t.name === name)
-    if (!template) return
-    setScope(template.accessScope)
-    setInstitutionIds(template.institutionIds)
-    setInstitutionsError(null)
-    setPermissions(
-      Object.fromEntries(
-        ALL_AREAS.flatMap((area) => {
-          const level = locked(area) ? original[area] : template.permissions[area]
-          return level ? [[area, level]] : []
-        }),
-      ),
-    )
-  }
-
-  const setLevel = (area: PermissionArea, value: PermissionLevel | 'none') => {
-    setPermissions((current) => {
-      const next = { ...current }
-      if (value === 'none') delete next[area]
-      else next[area] = value
-      return next
-    })
-  }
+  useEffect(() => {
+    loadPositions().catch(() => undefined)
+  }, [loadPositions])
 
   const options = institutions.filter(
     (institution) => institution.isActive || (user.institutionIds ?? []).includes(institution.id),
   )
 
   const save = () => {
+    if (!positionId) {
+      setPositionError('Оберіть посаду')
+      return
+    }
     if (scope === 'institutions') {
       try {
         institutionsSchema.validateSync(institutionIds)
@@ -113,12 +71,9 @@ export const AccessDialog = ({ user, onClose, onSaved }: Props) => {
     setSaving(true)
     usersApi
       .setAccess(user.id, {
+        positionId,
         accessScope: scope,
         ...(scope === 'institutions' ? { institutionIds } : {}),
-        permissions: ALL_AREAS.flatMap((area) => {
-          const level = permissions[area]
-          return level ? [{ area, level }] : []
-        }),
       })
       .then(({ data }) => {
         onSaved(data)
@@ -142,14 +97,19 @@ export const AccessDialog = ({ user, onClose, onSaved }: Props) => {
           )}
           <TextField
             select
-            label="Шаблон посади"
-            value=""
+            label="Посада"
+            value={positionId}
             disabled={readOnly}
-            onChange={(event) => applyTemplate(event.target.value)}
+            error={!!positionError}
+            helperText={positionError}
+            onChange={(event) => {
+              setPositionId(event.target.value)
+              setPositionError(null)
+            }}
           >
-            {accessTemplates.map((template) => (
-              <MenuItem key={template.name} value={template.name} disabled={!templateAllowed(template)}>
-                {template.name}
+            {positions.map((p) => (
+              <MenuItem key={p.id} value={p.id} disabled={!canAssignPosition(profile, p)}>
+                {p.name}
               </MenuItem>
             ))}
           </TextField>
@@ -190,36 +150,24 @@ export const AccessDialog = ({ user, onClose, onSaved }: Props) => {
               )}
             />
           )}
-          <Table size="small">
-            <TableBody>
-              {ALL_AREAS.map((area) => (
-                <TableRow key={area}>
-                  <TableCell>{areaLabels[area]}</TableCell>
-                  <TableCell align="right">
-                    <ToggleButtonGroup
-                      size="small"
-                      exclusive
-                      disabled={readOnly}
-                      value={permissions[area] ?? 'none'}
-                      onChange={(_, value: PermissionLevel | 'none' | null) => {
-                        if (value) setLevel(area, value)
-                      }}
-                    >
-                      <ToggleButton value="none" disabled={locked(area) && !!permissions[area]}>
-                        Немає
-                      </ToggleButton>
-                      <ToggleButton value="view" disabled={!allowed('view', area) || (locked(area) && permissions[area] !== 'view')}>
-                        {levelLabels.view}
-                      </ToggleButton>
-                      <ToggleButton value="edit" disabled={!allowed('edit', area) || (locked(area) && permissions[area] !== 'edit')}>
-                        {levelLabels.edit}
-                      </ToggleButton>
-                    </ToggleButtonGroup>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          {chosen && (
+            <Table size="small">
+              <TableBody>
+                {chosen.permissions.length === 0 ? (
+                  <TableRow>
+                    <TableCell sx={{ color: 'text.secondary' }}>Посада без доступу до розділів</TableCell>
+                  </TableRow>
+                ) : (
+                  chosen.permissions.map((permission) => (
+                    <TableRow key={permission.area}>
+                      <TableCell>{areaLabels[permission.area]}</TableCell>
+                      <TableCell align="right">{levelLabels[permission.level]}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          )}
         </Stack>
       </DialogContent>
       <DialogActions>

@@ -7,6 +7,7 @@ import { RoleGate } from './RoleGate'
 import { PasswordGate } from './PasswordGate'
 import { DashboardPage } from '../../pages/dashboard'
 import { UsersPage } from '../../pages/users'
+import { PositionsPage } from '../../pages/positions'
 import { GroupsPage } from '../../pages/groups'
 import { ChildrenPage } from '../../pages/children'
 import { ChildFinancePage, FinanceBalancesPage } from '../../pages/finance'
@@ -86,6 +87,7 @@ export const router = createBrowserRouter([
                   { path: 'register',  element: <RegisterPage /> },
                   { path: 'absence-notices', element: <AbsenceNoticesPage /> },
                   { path: 'users',     element: <UsersPage /> },
+                  { path: 'positions', element: <PositionsPage /> },
                   { path: 'groups',    element: <GroupsPage /> },
                   { path: 'students',            element: <ChildrenPage /> },
                   { path: 'finance',             element: <FinanceBalancesPage /> },

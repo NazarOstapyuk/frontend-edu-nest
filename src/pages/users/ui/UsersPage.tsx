@@ -75,7 +75,7 @@ export const UsersPage = () => {
             <TableRow sx={{ '& th': { fontWeight: 700, bgcolor: 'grey.50' } }}>
               <TableCell>#</TableCell>
               <TableCell>Ім'я та прізвище</TableCell>
-              <TableCell>Роль</TableCell>
+              <TableCell>Посада</TableCell>
               <TableCell>Телефон</TableCell>
               <TableCell>Заклади</TableCell>
               <TableCell>Логін</TableCell>
@@ -106,7 +106,7 @@ export const UsersPage = () => {
                   </TableCell>
                   <TableCell>
                     <Chip
-                      label={roleLabels[user.role]}
+                      label={user.role === 'parent' ? roleLabels.parent : (user.position?.name ?? '—')}
                       color={roleColors[user.role]}
                       size="small"
                       variant="outlined"

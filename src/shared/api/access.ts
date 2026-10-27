@@ -21,9 +21,9 @@ export interface PermissionItem {
 }
 
 export interface UpdateAccessDto {
+  positionId: string;
   accessScope: AccessScope;
   institutionIds?: string[];
-  permissions: PermissionItem[];
 }
 
 export const areaLabels: Record<PermissionArea, string> = {
@@ -57,36 +57,3 @@ const RANK: Record<PermissionLevel, number> = { view: 1, edit: 2 };
 
 export const levelSatisfies = (have: PermissionLevel | undefined, need: PermissionLevel) =>
   have !== undefined && RANK[have] >= RANK[need];
-
-export interface AccessTemplate {
-  name: string;
-  accessScope: AccessScope;
-  institutionIds: string[];
-  permissions: PermissionMap;
-}
-
-const all = (level: PermissionLevel): PermissionMap =>
-  Object.fromEntries(ALL_AREAS.map((area) => [area, level]));
-
-export const accessTemplates: AccessTemplate[] = [
-  { name: 'Адміністратор', accessScope: 'all', institutionIds: [], permissions: all('edit') },
-  {
-    name: 'Бухгалтер',
-    accessScope: 'all',
-    institutionIds: [],
-    permissions: { finance: 'edit', tariffs: 'edit', payroll: 'edit', children: 'view' },
-  },
-  {
-    name: 'Завуч школи',
-    accessScope: 'institutions',
-    institutionIds: [],
-    permissions: { register: 'edit', timetable: 'edit', children: 'edit' },
-  },
-  {
-    name: 'Керівник садочка',
-    accessScope: 'institutions',
-    institutionIds: [],
-    permissions: { register: 'edit', children: 'edit', meals: 'edit', finance: 'view' },
-  },
-  { name: 'Відповідальний за харчування', accessScope: 'all', institutionIds: [], permissions: { meals: 'edit' } },
-];

@@ -3,6 +3,7 @@ import BackupIcon from '@mui/icons-material/Backup'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import PeopleIcon from '@mui/icons-material/People'
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts'
+import BadgeIcon from '@mui/icons-material/Badge'
 import ApartmentIcon from '@mui/icons-material/Apartment'
 import SettingsIcon from '@mui/icons-material/Settings'
 import GroupsIcon from '@mui/icons-material/Groups'
@@ -45,6 +46,7 @@ export const navItems: NavItem[] = [
   { path: '/payroll',            label: 'Зарплати',          icon: PaymentsIcon,       area: 'payroll' },
   { path: '/absence-notices',     label: 'Повідомлення',      icon: MarkEmailUnreadIcon, area: 'register', badge: 'pendingNotices' },
   { path: '/users',               label: 'Користувачі',       icon: ManageAccountsIcon, area: 'users' },
+  { path: '/positions',           label: 'Посади',            icon: BadgeIcon,          area: 'users' },
   { path: '/groups',              label: 'Групи',             icon: GroupsIcon,         area: 'children' },
   { path: '/students',            label: 'Учні',              icon: PeopleIcon,         area: 'children' },
   { path: '/finance',             label: 'Фінанси',           icon: AccountBalanceWalletIcon, area: 'finance' },

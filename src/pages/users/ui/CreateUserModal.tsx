@@ -1,4 +1,4 @@
-import {useState} from 'react'
+import {useEffect, useState} from 'react'
 import {useForm, useWatch, Controller, FormProvider} from 'react-hook-form'
 import {yupResolver} from '@hookform/resolvers/yup'
 import * as yup from 'yup'
@@ -14,7 +14,8 @@ import {
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import {RHFTextField} from "../../../shared/ui/RHFTextField.tsx";
-import {useAuthStore, type UserRole} from "../../../entities/user";
+import {useAuthStore} from "../../../entities/user";
+import {canAssignPosition, usePositionsStore} from "../../../entities/position";
 import type {AccessScope} from "../../../shared/api";
 import {defaultScope} from "../model/accessRules.ts";
 import {InstitutionScopeFields} from "./InstitutionScopeFields.tsx";
@@ -24,18 +25,18 @@ import {isValidPhone, normalizePhone} from "../../../shared/lib/phone.ts";
 const schema = yup.object({
     firstName: yup.string().min(3, 'Мінімум 3 символи').required("Обов'язкове поле"),
     lastName: yup.string().min(3, 'Мінімум 3 символи').required("Обов'язкове поле"),
-    role: yup.string().required("Обов'язкове поле"),
+    position: yup.string().required('Оберіть посаду'),
     login: yup.string().min(3, 'Мінімум 3 символи').required("Обов'язкове поле"),
     password: yup.string().min(6, 'Мінімум 6 символів').required("Обов'язкове поле"),
     middleName: yup.string().default('').max(100, 'Максимум 100 символів'),
-    phone: yup.string().default('').when('role', {
+    phone: yup.string().default('').when('position', {
         is: 'parent',
         then: (s) => s.required('Для батьків потрібен телефон'),
     }).test('phone', 'Формат +380XXXXXXXXX', (value) => !value || isValidPhone(normalizePhone(value))),
     email: yup.string().default('').email('Невірний email').max(200, 'Максимум 200 символів'),
     accessScope: yup.mixed<AccessScope>().oneOf(['all', 'institutions']).required(),
-    institutionIds: yup.array(yup.string().required()).default([]).when(['role', 'accessScope'], {
-        is: (role: string, scope: AccessScope) => role !== 'parent' && scope === 'institutions',
+    institutionIds: yup.array(yup.string().required()).default([]).when(['position', 'accessScope'], {
+        is: (position: string, scope: AccessScope) => position !== 'parent' && scope === 'institutions',
         then: (s) => s.min(1, 'Оберіть хоча б один заклад'),
     }),
 })
@@ -49,13 +50,19 @@ export const CreateUserModal = () => {
     const setCreateUserModal = useUsersStore((s) => s.setCreateUserModal)
 
     const [showPassword, setShowPassword] = useState(false)
+    const positions = usePositionsStore((s) => s.positions)
+    const loadPositions = usePositionsStore((s) => s.load)
+
+    useEffect(() => {
+        if (isOpen) loadPositions().catch(() => undefined)
+    }, [isOpen, loadPositions])
 
     const methods = useForm({
         mode: 'all',
         defaultValues: {
             firstName: '',
             lastName: '',
-            role: 'teacher',
+            position: '',
             login: '',
             password: '',
             middleName: '',
@@ -66,7 +73,7 @@ export const CreateUserModal = () => {
         resolver: yupResolver(schema),
     });
 
-    const role = useWatch({control: methods.control, name: 'role'})
+    const position = useWatch({control: methods.control, name: 'position'})
 
     const handleClose = () => {
         methods.reset()
@@ -77,7 +84,7 @@ export const CreateUserModal = () => {
         const created = await createUser({
             firstName: values.firstName,
             lastName: values.lastName,
-            role: values.role as UserRole,
+            ...(values.position === 'parent' ? {role: 'parent' as const} : {positionId: values.position}),
             login: values.login,
             password: values.password,
             middleName: values.middleName.trim() || undefined,
@@ -85,7 +92,7 @@ export const CreateUserModal = () => {
             email: values.email.trim() || undefined,
         })
         handleClose()
-        if (values.role !== 'parent') {
+        if (values.position !== 'parent') {
             await applyScope(created, values.accessScope, values.institutionIds).catch(() => undefined)
         }
     }
@@ -129,25 +136,28 @@ export const CreateUserModal = () => {
                         />
 
                         <Controller
-                            name="role"
+                            name="position"
                             control={methods.control}
                             render={({field, fieldState: {error}}) => (
                                 <TextField
                                     {...field}
                                     select
-                                    label="Роль"
+                                    label="Посада"
                                     fullWidth
                                     error={!!error}
                                     helperText={error?.message}
                                 >
-                                    <MenuItem value="admin">Адміністратор</MenuItem>
-                                    <MenuItem value="teacher">Педагог</MenuItem>
+                                    {positions.map((p) => (
+                                        <MenuItem key={p.id} value={p.id} disabled={!canAssignPosition(profile, p)}>
+                                            {p.name}
+                                        </MenuItem>
+                                    ))}
                                     <MenuItem value="parent">Батьки</MenuItem>
                                 </TextField>
                             )}
                         />
 
-                        {role !== 'parent' && <InstitutionScopeFields control={methods.control}/>}
+                        {position !== 'parent' && <InstitutionScopeFields control={methods.control}/>}
 
                         <RHFTextField
                             name="phone"

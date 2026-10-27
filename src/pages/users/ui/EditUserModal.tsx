@@ -19,25 +19,26 @@ import { RHFTextField } from '../../../shared/ui/RHFTextField.tsx'
 import { useUsersStore } from '../model/usersStore.ts'
 import { isValidPhone, normalizePhone } from '../../../shared/lib/phone.ts'
 import type { AccessScope, UpdateUserDto } from '../../../shared/api'
-import { useAuthStore, type UserRole } from '../../../entities/user'
+import { useAuthStore } from '../../../entities/user'
+import { canAssignPosition, usePositionsStore } from '../../../entities/position'
 import { canChangeAccess } from '../model/accessRules.ts'
 import { InstitutionScopeFields } from './InstitutionScopeFields.tsx'
 
 const schema = yup.object({
   firstName: yup.string().min(3, 'Мінімум 3 символи').required("Обов'язкове поле"),
   lastName: yup.string().min(3, 'Мінімум 3 символи').required("Обов'язкове поле"),
-  role: yup.string().required("Обов'язкове поле"),
+  position: yup.string().required('Оберіть посаду'),
   login: yup.string().min(3, 'Мінімум 3 символи').required("Обов'язкове поле"),
   password: yup.string().transform((v) => v === '' ? undefined : v).min(6, 'Мінімум 6 символів').optional(),
   middleName: yup.string().default('').max(100, 'Максимум 100 символів'),
-  phone: yup.string().default('').when('role', {
+  phone: yup.string().default('').when('position', {
       is: 'parent',
       then: (s) => s.required('Для батьків потрібен телефон'),
   }).test('phone', 'Формат +380XXXXXXXXX', (value) => !value || isValidPhone(normalizePhone(value))),
   email: yup.string().default('').email('Невірний email').max(200, 'Максимум 200 символів'),
   accessScope: yup.mixed<AccessScope>().oneOf(['all', 'institutions']).required(),
-  institutionIds: yup.array(yup.string().required()).default([]).when(['role', 'accessScope'], {
-    is: (role: string, scope: AccessScope) => role !== 'parent' && scope === 'institutions',
+  institutionIds: yup.array(yup.string().required()).default([]).when(['position', 'accessScope'], {
+    is: (position: string, scope: AccessScope) => position !== 'parent' && scope === 'institutions',
     then: (s) => s.min(1, 'Оберіть хоча б один заклад'),
   }),
 })
@@ -53,13 +54,19 @@ export const EditUserModal = () => {
   const setEditUserModal = useUsersStore((s) => s.setEditUserModal)
 
   const [showPassword, setShowPassword] = useState(false)
+  const positions = usePositionsStore((s) => s.positions)
+  const loadPositions = usePositionsStore((s) => s.load)
+
+  useEffect(() => {
+    if (isOpen) loadPositions().catch(() => undefined)
+  }, [isOpen, loadPositions])
 
   const methods = useForm<any>({
     mode: 'all',
     defaultValues: {
       firstName: '',
       lastName: '',
-      role: 'teacher',
+      position: '',
       login: '',
       password: '',
       middleName: '',
@@ -76,7 +83,7 @@ export const EditUserModal = () => {
       methods.reset({
         firstName: user.firstName,
         lastName: user.lastName,
-        role: user.role,
+        position: user.role === 'parent' ? 'parent' : (user.position?.id ?? ''),
         login: user.login,
         password: '',
         middleName: user.middleName ?? '',
@@ -93,15 +100,15 @@ export const EditUserModal = () => {
     setEditUserModal({ isOpen: false, user: null })
   }
 
-  const role = useWatch({ control: methods.control, name: 'role' })
-  const scopeEditable = !!user && role !== 'parent' && canChangeAccess(profile, user)
+  const position = useWatch({ control: methods.control, name: 'position' })
+  const scopeEditable = !!user && position !== 'parent' && canChangeAccess(profile, user)
 
   const onSubmit = async (values: FormValues) => {
     if (!user) return
     const dto: UpdateUserDto = {
       firstName: values.firstName,
       lastName: values.lastName,
-      role: values.role as UserRole,
+      ...(values.position === 'parent' ? { role: 'parent' as const } : { positionId: values.position as string }),
       login: values.login,
       middleName: values.middleName.trim() || null,
       phone: values.phone ? normalizePhone(values.phone) : null,
@@ -142,19 +149,22 @@ export const EditUserModal = () => {
           />
 
           <Controller
-            name="role"
+            name="position"
             control={methods.control}
             render={({ field, fieldState: { error } }) => (
               <TextField
                 {...field}
                 select
-                label="Роль"
+                label="Посада"
                 fullWidth
                 error={!!error}
                 helperText={error?.message}
               >
-                <MenuItem value="admin">Адміністратор</MenuItem>
-                <MenuItem value="teacher">Педагог</MenuItem>
+                {positions.map((p) => (
+                  <MenuItem key={p.id} value={p.id} disabled={!canAssignPosition(profile, p)}>
+                    {p.name}
+                  </MenuItem>
+                ))}
                 <MenuItem value="parent">Батьки</MenuItem>
               </TextField>
             )}

@@ -1,4 +1,4 @@
-import type { User, UserRole } from '../../entities/user';
+import type { User } from '../../entities/user';
 import type { UpdateAccessDto } from './access';
 import { axiosInstance } from './axiosInstance';
 
@@ -7,7 +7,8 @@ export interface CreateUserDto {
   lastName: string;
   login: string;
   password: string;
-  role: UserRole;
+  role?: 'parent';
+  positionId?: string;
   middleName?: string;
   phone?: string;
   email?: string;
@@ -18,7 +19,8 @@ export interface UpdateUserDto {
   lastName: string;
   login: string;
   password?: string;
-  role: UserRole;
+  role?: 'parent';
+  positionId?: string;
   middleName?: string | null;
   phone?: string | null;
   email?: string | null;

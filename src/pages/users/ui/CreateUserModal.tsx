@@ -140,6 +140,7 @@ export const CreateUserModal = () => {
                                     error={!!error}
                                     helperText={error?.message}
                                 >
+                                    <MenuItem value="admin">Адміністратор</MenuItem>
                                     <MenuItem value="teacher">Педагог</MenuItem>
                                     <MenuItem value="parent">Батьки</MenuItem>
                                 </TextField>

@@ -137,6 +137,9 @@ export const TariffModal = () => {
           {canEdit && (
             <>
               <Typography sx={{ fontWeight: 600 }}>Нова ціна</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Якщо на цю дату ціна вже є, її буде замінено. Уже створені нарахування не зміняться.
+              </Typography>
               <Box sx={{ display: 'flex', gap: 2 }}>
                 <Controller
                   name="price"
@@ -169,7 +172,7 @@ export const TariffModal = () => {
             </Button>
             {canEdit && (
               <Button onClick={handleSubmit(onAddPrice)} variant="contained" disabled={isSaving} sx={{ width: '100%' }}>
-                Додати ціну
+                Зберегти ціну
               </Button>
             )}
           </Box>

@@ -17,7 +17,7 @@ import {
 import AddIcon from '@mui/icons-material/Add'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
-import { useCan } from '../../../entities/user'
+import { useCan, useCanManageShared } from '../../../entities/user'
 import { usePositionsStore } from '../../../entities/position'
 import { usePositionsPageStore } from '../model/positionsPageStore'
 import { PositionDialog } from './PositionDialog'
@@ -29,7 +29,9 @@ export const PositionsPage = () => {
   const setCreateModal = usePositionsPageStore((s) => s.setCreateModal)
   const setEditModal = usePositionsPageStore((s) => s.setEditModal)
   const setDeleteModal = usePositionsPageStore((s) => s.setDeleteModal)
-  const canEdit = useCan('users', 'edit')
+  const canEditUsers = useCan('users', 'edit')
+  const canManageShared = useCanManageShared()
+  const canEdit = canEditUsers && canManageShared
 
   useEffect(() => {
     load().catch(() => undefined)

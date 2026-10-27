@@ -29,7 +29,7 @@ import { usePositionsPageStore } from '../model/positionsPageStore'
 type Level = PermissionLevel | 'none'
 
 const schema = yup.object({
-  name: yup.string().trim().min(2, 'Мінімум 2 символи').max(100, 'Максимум 100 символів').required("Обов'язкове поле"),
+  name: yup.string().trim().min(1, "Обов'язкове поле").max(100, 'Максимум 100 символів').required("Обов'язкове поле"),
   teaching: yup.boolean().required(),
   levels: yup
     .mixed<Record<PermissionArea, Level>>()

@@ -72,7 +72,7 @@ export const MenuTab = () => {
           label="Заклад"
           value={institutionId}
           onChange={(e) => go({ institutionId: e.target.value })}
-          sx={{ minWidth: 200, flex: { xs: '1 1 100%', sm: '0 0 auto' } }}
+          sx={{ minWidth: 200, flex: { xs: '1 1 100%', sm: '0 1 auto' } }}
         >
           {institutions.map((i) => <MenuItem key={i.id} value={i.id}>{i.name}</MenuItem>)}
         </TextField>

@@ -70,6 +70,9 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps) => {
   useEffect(() => {
     if (canSeeRegister) refreshPending().catch(() => undefined)
   }, [canSeeRegister, refreshPending])
+  useEffect(() => {
+    if (!isNarrow) onClose()
+  }, [isNarrow, onClose])
   const visible = (item: NavItem) =>
     (!item.roles && !item.area && !item.areas) ||
     (role !== undefined && !!item.roles?.includes(role)) ||

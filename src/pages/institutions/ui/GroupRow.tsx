@@ -122,7 +122,7 @@ export const GroupCard = ({ group, childrenById, canEdit }: Omit<GroupRowProps, 
         <IconButton size="small" onClick={() => setOpen((v) => !v)}>
           {open ? <KeyboardArrowDownIcon fontSize="small" /> : <KeyboardArrowRightIcon fontSize="small" />}
         </IconButton>
-        <Typography sx={{ fontWeight: 600, flex: 1 }} onClick={() => setOpen((v) => !v)}>
+        <Typography sx={{ fontWeight: 600, flex: 1, cursor: 'pointer' }} onClick={() => setOpen((v) => !v)}>
           {group.name}
         </Typography>
       </Box>

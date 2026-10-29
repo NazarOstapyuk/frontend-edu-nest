@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { Box, Toolbar } from '@mui/material'
 import { Sidebar, SIDEBAR_WIDTH } from '../../widgets/sidebar'
@@ -9,9 +9,10 @@ import { useInstitutionStore } from '../../shared/model/institutionStore'
 export const AdminLayout = () => {
   const institutionId = useInstitutionStore((s) => s.selectedId)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const closeMobile = useCallback(() => setMobileOpen(false), [])
   return (
   <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-    <Sidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
+    <Sidebar mobileOpen={mobileOpen} onClose={closeMobile} />
 
     <Box
       component="main"

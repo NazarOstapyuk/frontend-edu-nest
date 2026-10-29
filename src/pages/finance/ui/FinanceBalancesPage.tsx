@@ -154,7 +154,7 @@ export const FinanceBalancesPage = () => {
               count={balances.length}
               page={currentPage}
               rowsPerPage={rowsPerPage}
-              rowsPerPageOptions={[10, 25, 50, 100]}
+              rowsPerPageOptions={[]}
               onPageChange={(_, next) => setPaging({ page: next, filters })}
               onRowsPerPageChange={(e) => {
                 setRowsPerPage(Number(e.target.value))

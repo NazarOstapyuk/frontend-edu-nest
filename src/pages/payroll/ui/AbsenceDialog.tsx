@@ -14,6 +14,7 @@ import {
   TextField,
 } from '@mui/material'
 import { addDaysIso, localToday, payrollApi } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { usePayrollStore } from '../model/payrollStore'
 
 const schema = yup.object({
@@ -35,6 +36,7 @@ const schema = yup.object({
 type FormValues = yup.InferType<typeof schema>
 
 export const AbsenceDialog = ({ onClose }: { onClose: () => void }) => {
+  const isPhone = useIsPhone()
   const runDetail = usePayrollStore((s) => s.runDetail)
   const isSaving = usePayrollStore((s) => s.isSaving)
   const month = usePayrollStore((s) => s.month)
@@ -61,7 +63,7 @@ export const AbsenceDialog = ({ onClose }: { onClose: () => void }) => {
   }
 
   return (
-    <Dialog open fullWidth maxWidth="sm" onClose={onClose}>
+    <Dialog fullScreen={isPhone} open fullWidth maxWidth="sm" onClose={onClose}>
       <DialogTitle>Відсутність</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>

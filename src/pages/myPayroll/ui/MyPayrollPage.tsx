@@ -21,10 +21,13 @@ import {
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { formatMoney, monthLabel, payrollStatusLabels } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardList, CardField } from '../../../shared/ui/CardList'
 import { PayrollDetailView } from '../../../widgets/payrollDetail'
 import { useMyPayrollStore } from '../model/myPayrollStore'
 
 export const MyPayrollPage = () => {
+  const isPhone = useIsPhone()
   const year = useMyPayrollStore((s) => s.year)
   const data = useMyPayrollStore((s) => s.data)
   const failed = useMyPayrollStore((s) => s.failed)
@@ -61,6 +64,31 @@ export const MyPayrollPage = () => {
         <Alert severity="error" action={<Button onClick={() => load().catch(() => undefined)}>Спробувати ще</Button>}>
           Не вдалося завантажити дані.
         </Alert>
+      ) : isPhone ? (
+        months === null ? (
+          <Typography color="text.secondary">Завантаження…</Typography>
+        ) : (
+          <CardList
+            items={months}
+            getKey={(item) => item.month}
+            empty={<Typography color="text.secondary">За цей рік даних про зарплату немає</Typography>}
+            renderCard={(item) => (
+              <Box sx={{ cursor: 'pointer' }} onClick={() => openMonth(item.month)}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                  <Typography sx={{ fontWeight: 600, flex: 1, minWidth: 0 }}>{monthLabel(item.month)}</Typography>
+                  <Chip
+                    size="small"
+                    label={payrollStatusLabels[item.status]}
+                    color={item.status === 'approved' ? 'success' : 'default'}
+                  />
+                </Box>
+                <CardField label="Нараховано">{formatMoney(item.accrued)}</CardField>
+                <CardField label="Виплачено">{formatMoney(item.paid)}</CardField>
+                <CardField label="Залишок">{formatMoney(item.balance)}</CardField>
+              </Box>
+            )}
+          />
+        )
       ) : (
         <Paper elevation={0} sx={{ border: 1, borderColor: 'divider', overflowX: 'auto' }}>
           <Table size="small">
@@ -108,7 +136,7 @@ export const MyPayrollPage = () => {
         </Paper>
       )}
 
-      <Dialog open={month !== null} fullWidth maxWidth="md" onClose={closeMonth}>
+      <Dialog fullScreen={isPhone} open={month !== null} fullWidth maxWidth="md" onClose={closeMonth}>
         <DialogTitle>{month ? monthLabel(month) : ''}</DialogTitle>
         <DialogContent dividers>
           {detailFailed ? (

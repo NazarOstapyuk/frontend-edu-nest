@@ -24,7 +24,13 @@ export const PayrollPage = () => {
           Не вдалося завантажити дані.
         </Alert>
       )}
-      <Tabs value={tab} onChange={(_, value: number) => setTab(value)} sx={{ mb: 2 }}>
+      <Tabs
+        value={tab}
+        onChange={(_, value: number) => setTab(value)}
+        variant="scrollable"
+        allowScrollButtonsMobile
+        sx={{ mb: 2 }}
+      >
         <Tab label="Відомість" />
         <Tab label="Умови" />
       </Tabs>

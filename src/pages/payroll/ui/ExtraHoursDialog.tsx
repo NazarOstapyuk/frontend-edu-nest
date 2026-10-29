@@ -13,6 +13,7 @@ import {
   ToggleButtonGroup,
 } from '@mui/material'
 import { localToday, normalizeAmount, payrollApi, toKopecks, type ExtraHoursDto } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { usePayrollStore } from '../model/payrollStore'
 
 type Mode = 'day' | 'month'
@@ -63,6 +64,7 @@ const schema = yup.object({
 type FormValues = yup.InferType<typeof schema>
 
 export const ExtraHoursDialog = ({ onClose }: { onClose: () => void }) => {
+  const isPhone = useIsPhone()
   const runDetail = usePayrollStore((s) => s.runDetail)
   const isSaving = usePayrollStore((s) => s.isSaving)
   const month = usePayrollStore((s) => s.month)
@@ -94,7 +96,7 @@ export const ExtraHoursDialog = ({ onClose }: { onClose: () => void }) => {
   }
 
   return (
-    <Dialog open fullWidth maxWidth="sm" onClose={onClose}>
+    <Dialog fullScreen={isPhone} open fullWidth maxWidth="sm" onClose={onClose}>
       <DialogTitle>Додаткові години</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>

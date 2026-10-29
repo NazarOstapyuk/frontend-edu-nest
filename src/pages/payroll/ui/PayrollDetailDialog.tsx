@@ -13,6 +13,7 @@ import {
   Typography,
 } from '@mui/material'
 import { monthLabel, payrollApi, payrollStatusLabels } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { PayrollDetailView } from '../../../widgets/payrollDetail'
 import { usePayrollStore } from '../model/payrollStore'
 import { useCan } from '../../../entities/user'
@@ -36,6 +37,7 @@ type Modal =
   | null
 
 export const PayrollDetailDialog = () => {
+  const isPhone = useIsPhone()
   const canEdit = useCan('payroll', 'edit')
   const detailTeacherId = usePayrollStore((s) => s.detailTeacherId)
   const detail = usePayrollStore((s) => s.detail)
@@ -85,7 +87,7 @@ export const PayrollDetailDialog = () => {
   const editDraft = canEdit && draft
 
   return (
-    <Dialog open fullWidth maxWidth="md" onClose={closeDetail}>
+    <Dialog fullScreen={isPhone} open fullWidth maxWidth="md" onClose={closeDetail}>
       <DialogTitle>
         {detail ? `${detail.teacher.lastName} ${detail.teacher.firstName}` : 'Відомість'}
         {detail && (

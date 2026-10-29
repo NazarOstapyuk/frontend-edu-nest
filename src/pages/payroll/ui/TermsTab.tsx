@@ -35,6 +35,8 @@ import {
 } from '../../../shared/api'
 import { usePayrollStore } from '../model/payrollStore'
 import { useCan } from '../../../entities/user'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardList, CardField } from '../../../shared/ui/CardList'
 import { TermsDialog } from './TermsDialog'
 import { CloseTermsDialog } from './CloseTermsDialog'
 import { HistoryButton } from '../../../widgets/auditHistory'
@@ -47,6 +49,7 @@ const rateLabel = (rate: SalaryRate) => {
 }
 
 export const TermsTab = () => {
+  const isPhone = useIsPhone()
   const canEdit = useCan('payroll', 'edit')
   const teachers = usePayrollStore((s) => s.teachers)
   const termsTeacherId = usePayrollStore((s) => s.termsTeacherId)
@@ -60,6 +63,33 @@ export const TermsTab = () => {
   const [editing, setEditing] = useState<EditState>(null)
   const [closing, setClosing] = useState<SalaryTerms | null>(null)
   const [deleting, setDeleting] = useState<SalaryTerms | null>(null)
+
+  const renderActions = (item: SalaryTerms) => (
+    <>
+      <HistoryButton entityType="salary-terms" entityId={item.id} title={`Умови з ${item.validFrom}`} />
+      {canEdit && !item.started && (
+        <>
+          <Tooltip title="Редагувати">
+            <IconButton size="small" disabled={isSaving} onClick={() => setEditing({ terms: item })}>
+              <EditIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Видалити">
+            <IconButton size="small" disabled={isSaving} onClick={() => setDeleting(item)}>
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </>
+      )}
+      {canEdit && item.validTo === null && (
+        <Tooltip title="Закрити умови">
+          <IconButton size="small" disabled={isSaving} onClick={() => setClosing(item)}>
+            <EventBusyIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
+    </>
+  )
 
   const confirmDelete = () => {
     if (!deleting) return
@@ -77,7 +107,7 @@ export const TermsTab = () => {
           label="Педагог"
           value={termsTeacherId}
           onChange={(event) => setTermsTeacher(event.target.value)}
-          sx={{ minWidth: 280 }}
+          sx={{ minWidth: { sm: 280 } }}
         >
           {teachers.map((teacher) => (
             <MenuItem key={teacher.id} value={teacher.id}>
@@ -105,6 +135,51 @@ export const TermsTab = () => {
         >
           Не вдалося завантажити дані.
         </Alert>
+      ) : isPhone ? (
+        <CardList
+          items={terms}
+          getKey={(item) => item.id}
+          empty={<Typography color="text.secondary">{termsLoading ? 'Завантаження…' : 'Умов ще немає'}</Typography>}
+          renderCard={(item) => (
+            <Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mb: 0.5 }}>
+                <Typography sx={{ fontWeight: 600 }}>
+                  {formatDay(item.validFrom)} – {item.validTo ? formatDay(item.validTo) : 'дотепер'}
+                </Typography>
+                {!item.started && <Chip size="small" label="Ще не діє" />}
+              </Box>
+              {item.note && (
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                  {item.note}
+                </Typography>
+              )}
+              <CardField label="Ставка">{formatMoney(item.monthlyRate)}</CardField>
+              {item.extraHourRate && <CardField label="Дод. година">{formatMoney(item.extraHourRate)}</CardField>}
+              <CardField label="Календар">{payrollCalendarLabels[item.calendarKind]}</CardField>
+              <CardField label="Ставки за заняття">
+                {item.rates.length === 0
+                  ? '—'
+                  : item.rates.map((rate) => (
+                      <Typography key={rate.id} variant="body2">
+                        {rateLabel(rate)}
+                      </Typography>
+                    ))}
+              </CardField>
+              <CardField label="Доплати">
+                {item.allowances.length === 0
+                  ? '—'
+                  : item.allowances.map((allowance) => (
+                      <Typography key={allowance.id} variant="body2">
+                        {allowance.name} — {formatMoney(allowance.amount)}
+                      </Typography>
+                    ))}
+              </CardField>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, flexWrap: 'wrap', mt: 1 }}>
+                {renderActions(item)}
+              </Box>
+            </Box>
+          )}
+        />
       ) : (
         <Paper elevation={0} sx={{ border: 1, borderColor: 'divider', overflowX: 'auto' }}>
           <Table size="small">
@@ -165,28 +240,7 @@ export const TermsTab = () => {
                         ))}
                   </TableCell>
                   <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
-                    <HistoryButton entityType="salary-terms" entityId={item.id} title={`Умови з ${item.validFrom}`} />
-                    {canEdit && !item.started && (
-                      <>
-                        <Tooltip title="Редагувати">
-                          <IconButton size="small" disabled={isSaving} onClick={() => setEditing({ terms: item })}>
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Видалити">
-                          <IconButton size="small" disabled={isSaving} onClick={() => setDeleting(item)}>
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </>
-                    )}
-                    {canEdit && item.validTo === null && (
-                      <Tooltip title="Закрити умови">
-                        <IconButton size="small" disabled={isSaving} onClick={() => setClosing(item)}>
-                          <EventBusyIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    )}
+                    {renderActions(item)}
                   </TableCell>
                 </TableRow>
               ))}
@@ -204,7 +258,7 @@ export const TermsTab = () => {
         />
       )}
       {closing && <CloseTermsDialog terms={closing} onClose={() => setClosing(null)} />}
-      <Dialog open={!!deleting} onClose={() => setDeleting(null)}>
+      <Dialog fullScreen={isPhone} open={!!deleting} onClose={() => setDeleting(null)}>
         <DialogTitle>Видалити умови?</DialogTitle>
         <DialogContent>
           <Typography variant="body2">Ця версія ще не діє, її буде видалено.</Typography>

@@ -9,6 +9,7 @@ import {
   toKopecks,
   type PayrollAdjustmentKind,
 } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { usePayrollStore } from '../model/payrollStore'
 
 const kinds = Object.keys(payrollAdjustmentKindLabels) as PayrollAdjustmentKind[]
@@ -27,6 +28,7 @@ const schema = yup.object({
 type FormValues = yup.InferType<typeof schema>
 
 export const AdjustmentDialog = ({ onClose }: { onClose: () => void }) => {
+  const isPhone = useIsPhone()
   const runDetail = usePayrollStore((s) => s.runDetail)
   const isSaving = usePayrollStore((s) => s.isSaving)
   const { control, handleSubmit } = useForm<FormValues>({
@@ -48,7 +50,7 @@ export const AdjustmentDialog = ({ onClose }: { onClose: () => void }) => {
   }
 
   return (
-    <Dialog open fullWidth maxWidth="sm" onClose={onClose}>
+    <Dialog fullScreen={isPhone} open fullWidth maxWidth="sm" onClose={onClose}>
       <DialogTitle>Доплата або утримання</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>

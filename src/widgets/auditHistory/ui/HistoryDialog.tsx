@@ -11,6 +11,7 @@ import {
   Typography,
 } from '@mui/material'
 import { auditApi, changeActionLabels, formatDateTime, type AuditChange } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { ChangesTable } from './ChangesTable'
 
 const PAGE_SIZE = 50
@@ -31,6 +32,7 @@ interface Props {
 }
 
 export const HistoryDialog = ({ open, onClose, entityType, entityId, title }: Props) => {
+  const isPhone = useIsPhone()
   const [page, setPage] = useState(1)
   const [attempt, setAttempt] = useState(0)
   const [loaded, setLoaded] = useState<Loaded | null>(null)
@@ -62,7 +64,7 @@ export const HistoryDialog = ({ open, onClose, entityType, entityId, title }: Pr
   const current = loaded && loaded.key === key ? loaded : null
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
+    <Dialog fullScreen={isPhone} open={open} onClose={handleClose} fullWidth maxWidth="md">
       <DialogTitle sx={{ fontWeight: 700 }}>Історія: {title}</DialogTitle>
       <DialogContent>
         {current === null ? (

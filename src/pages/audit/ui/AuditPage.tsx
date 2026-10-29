@@ -9,7 +9,12 @@ export const AuditPage = () => {
 
   return (
     <Stack spacing={2}>
-      <Tabs value={tab} onChange={(_, value: number) => setTab(value)}>
+      <Tabs
+        value={tab}
+        onChange={(_, value: number) => setTab(value)}
+        variant="scrollable"
+        allowScrollButtonsMobile
+      >
         <Tab label="Дії" />
         <Tab label="Входи" />
       </Tabs>

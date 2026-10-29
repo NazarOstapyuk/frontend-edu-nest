@@ -1,16 +1,18 @@
 import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from '@mui/material'
 import { actionLabel, changeActionLabels, entityTypeLabels } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { ChangesTable } from '../../../widgets/auditHistory'
 import { useAuditStore } from '../model/auditStore'
 
 export const EventDialog = () => {
+  const isPhone = useIsPhone()
   const selectedId = useAuditStore((s) => s.selectedId)
   const detail = useAuditStore((s) => s.detail)
   const failed = useAuditStore((s) => s.detailFailed)
   const closeEvent = useAuditStore((s) => s.closeEvent)
 
   return (
-    <Dialog open={selectedId !== null} onClose={closeEvent} fullWidth maxWidth="md">
+    <Dialog fullScreen={isPhone} open={selectedId !== null} onClose={closeEvent} fullWidth maxWidth="md">
       <DialogTitle>{detail ? actionLabel(detail.route) : 'Подія'}</DialogTitle>
       <DialogContent>
         {failed ? (

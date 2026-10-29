@@ -18,11 +18,14 @@ import {
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import WarningAmberIcon from '@mui/icons-material/WarningAmber'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardList, CardField } from '../../../shared/ui/CardList'
 import { formatMoney, monthLabel, payrollStatusLabels, shiftMonth } from '../../../shared/api'
 import { usePayrollStore } from '../model/payrollStore'
 import { PayrollDetailDialog } from './PayrollDetailDialog'
 
 export const SheetTab = () => {
+  const isPhone = useIsPhone()
   const month = usePayrollStore((s) => s.month)
   const list = usePayrollStore((s) => s.list)
   const listFailed = usePayrollStore((s) => s.listFailed)
@@ -42,7 +45,7 @@ export const SheetTab = () => {
         <IconButton aria-label="Попередній місяць" onClick={() => setMonth(shiftMonth(month, -1))}>
           <ChevronLeftIcon />
         </IconButton>
-        <Typography variant="h6" sx={{ minWidth: 200, textAlign: 'center' }}>
+        <Typography variant="h6" sx={{ minWidth: { xs: 0, sm: 200 }, flex: { xs: 1, sm: 'none' }, textAlign: 'center' }}>
           {monthLabel(month)}
         </Typography>
         <IconButton aria-label="Наступний місяць" onClick={() => setMonth(shiftMonth(month, 1))}>
@@ -57,6 +60,52 @@ export const SheetTab = () => {
         >
           Не вдалося завантажити дані.
         </Alert>
+      ) : isPhone ? (
+        rows === null ? (
+          <Typography color="text.secondary">Завантаження…</Typography>
+        ) : (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <CardList
+              items={rows}
+              getKey={(row) => row.teacher.id}
+              empty={
+                <Typography color="text.secondary">У цьому місяці немає педагогів з умовами оплати</Typography>
+              }
+              renderCard={(row) => (
+                <Box sx={{ cursor: 'pointer' }} onClick={() => openDetail(row.teacher.id)}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                    <Typography sx={{ fontWeight: 600, flex: 1, minWidth: 0 }}>
+                      {row.teacher.lastName} {row.teacher.firstName}
+                    </Typography>
+                    <Chip
+                      size="small"
+                      label={payrollStatusLabels[row.status]}
+                      color={row.status === 'approved' ? 'success' : 'default'}
+                    />
+                  </Box>
+                  {(row.warnings.noRate > 0 || row.warnings.lessonsWithoutTerms > 0) && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'warning.main', mb: 0.5 }}>
+                      <WarningAmberIcon fontSize="small" />
+                      <Typography variant="body2">Є заняття без ставки або поза умовами</Typography>
+                    </Box>
+                  )}
+                  <CardField label="Занять">{row.lessons}</CardField>
+                  <CardField label="Нараховано">{formatMoney(row.accrued)}</CardField>
+                  <CardField label="Виплачено">{formatMoney(row.paid)}</CardField>
+                  <CardField label="Залишок">{formatMoney(row.balance)}</CardField>
+                </Box>
+              )}
+            />
+            {list && rows.length > 0 && (
+              <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 2 }}>
+                <Typography sx={{ fontWeight: 600 }}>Разом</Typography>
+                <CardField label="Нараховано">{formatMoney(list.totals.accrued)}</CardField>
+                <CardField label="Виплачено">{formatMoney(list.totals.paid)}</CardField>
+                <CardField label="Залишок">{formatMoney(list.totals.balance)}</CardField>
+              </Box>
+            )}
+          </Box>
+        )
       ) : (
         <Paper elevation={0} sx={{ border: 1, borderColor: 'divider', overflowX: 'auto' }}>
           <Table size="small">

@@ -3,6 +3,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from '@mui/material'
 import { localToday, payrollApi, type SalaryTerms } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { usePayrollStore } from '../model/payrollStore'
 
 const schema = yup.object({ validTo: yup.string().required('Вкажіть дату') })
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export const CloseTermsDialog = ({ terms, onClose }: Props) => {
+  const isPhone = useIsPhone()
   const runTerms = usePayrollStore((s) => s.runTerms)
   const isSaving = usePayrollStore((s) => s.isSaving)
   const { control, handleSubmit } = useForm<FormValues>({
@@ -28,7 +30,7 @@ export const CloseTermsDialog = ({ terms, onClose }: Props) => {
   }
 
   return (
-    <Dialog open fullWidth maxWidth="xs" onClose={onClose}>
+    <Dialog fullScreen={isPhone} open fullWidth maxWidth="xs" onClose={onClose}>
       <DialogTitle>Закрити умови</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>

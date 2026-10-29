@@ -28,6 +28,7 @@ import {
   type SalaryRateDto,
   type SalaryTerms,
 } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { usePayrollStore } from '../model/payrollStore'
 
 const calendars = Object.keys(payrollCalendarLabels) as PayrollCalendar[]
@@ -102,6 +103,7 @@ const toRate = (rate: FormValues['rates'][number]): SalaryRateDto => ({
 })
 
 export const TermsDialog = ({ teacherId, terms, onClose }: Props) => {
+  const isPhone = useIsPhone()
   const subjects = usePayrollStore((s) => s.subjects)
   const classGroups = usePayrollStore((s) => s.classGroups)
   const runTerms = usePayrollStore((s) => s.runTerms)
@@ -142,7 +144,7 @@ export const TermsDialog = ({ teacherId, terms, onClose }: Props) => {
   }
 
   return (
-    <Dialog open fullWidth maxWidth="md" onClose={onClose}>
+    <Dialog fullScreen={isPhone} open fullWidth maxWidth="md" onClose={onClose}>
       <DialogTitle>{terms ? 'Редагувати умови' : 'Нова версія умов'}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
@@ -205,7 +207,7 @@ export const TermsDialog = ({ teacherId, terms, onClose }: Props) => {
             )}
           />
           <Box>
-            <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+            <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
               <Typography variant="subtitle2">Ставки за заняття</Typography>
               <Button
                 size="small"
@@ -233,7 +235,7 @@ export const TermsDialog = ({ teacherId, terms, onClose }: Props) => {
                         select
                         size="small"
                         label="Тип"
-                        sx={{ minWidth: 200 }}
+                        sx={{ minWidth: { sm: 200 } }}
                         value={field.value}
                         onChange={(event) => {
                           field.onChange(event.target.value)
@@ -257,7 +259,7 @@ export const TermsDialog = ({ teacherId, terms, onClose }: Props) => {
                         select
                         size="small"
                         label={lessonType === 'school_lesson' ? 'Предмет' : 'Гурток'}
-                        sx={{ minWidth: 220, flex: 1 }}
+                        sx={{ minWidth: { sm: 220 }, flex: 1 }}
                       >
                         <MenuItem value="">Усі</MenuItem>
                         {targets(lessonType, current).map((target) => (
@@ -282,7 +284,7 @@ export const TermsDialog = ({ teacherId, terms, onClose }: Props) => {
                       />
                     )}
                   />
-                  <IconButton aria-label="Видалити ставку" onClick={() => rateFields.remove(index)}>
+                  <IconButton aria-label="Видалити ставку" sx={{ alignSelf: { xs: 'flex-end', sm: 'center' } }} onClick={() => rateFields.remove(index)}>
                     <DeleteIcon fontSize="small" />
                   </IconButton>
                 </Stack>
@@ -290,7 +292,7 @@ export const TermsDialog = ({ teacherId, terms, onClose }: Props) => {
             })}
           </Box>
           <Box>
-            <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+            <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
               <Typography variant="subtitle2">Постійні доплати (щомісяця)</Typography>
               <Button size="small" startIcon={<AddIcon />} onClick={() => allowanceFields.append({ name: '', amount: '' })}>
                 Додати доплату
@@ -326,7 +328,7 @@ export const TermsDialog = ({ teacherId, terms, onClose }: Props) => {
                     />
                   )}
                 />
-                <IconButton aria-label="Видалити доплату" onClick={() => allowanceFields.remove(index)}>
+                <IconButton aria-label="Видалити доплату" sx={{ alignSelf: { xs: 'flex-end', sm: 'center' } }} onClick={() => allowanceFields.remove(index)}>
                   <DeleteIcon fontSize="small" />
                 </IconButton>
               </Stack>

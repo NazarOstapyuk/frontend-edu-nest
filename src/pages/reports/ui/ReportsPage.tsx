@@ -35,6 +35,7 @@ export const ReportsPage = () => {
         value={definition ? definition.key : false}
         onChange={(_, key: ReportKey) => select(key)}
         variant="scrollable"
+        allowScrollButtonsMobile
       >
         {visible.map((d) => (
           <Tab key={d.key} value={d.key} label={d.label} />
@@ -43,7 +44,7 @@ export const ReportsPage = () => {
       {definition && <ReportFilters definition={definition} />}
       {loading && <LinearProgress />}
       {failed && (
-        <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+        <Stack direction="row" spacing={2} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
           <Typography color="error">Не вдалося завантажити дані.</Typography>
           <Button size="small" onClick={() => load()}>
             Спробувати ще

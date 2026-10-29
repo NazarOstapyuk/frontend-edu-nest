@@ -10,6 +10,7 @@ import {
   toKopecks,
   type PayrollPaymentMethod,
 } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { usePayrollStore } from '../model/payrollStore'
 
 const methods = Object.keys(payrollPaymentMethodLabels) as PayrollPaymentMethod[]
@@ -32,6 +33,7 @@ const schema = yup.object({
 type FormValues = yup.InferType<typeof schema>
 
 export const PaymentDialog = ({ onClose }: { onClose: () => void }) => {
+  const isPhone = useIsPhone()
   const runDetail = usePayrollStore((s) => s.runDetail)
   const isSaving = usePayrollStore((s) => s.isSaving)
   const { control, handleSubmit } = useForm<FormValues>({
@@ -54,7 +56,7 @@ export const PaymentDialog = ({ onClose }: { onClose: () => void }) => {
   }
 
   return (
-    <Dialog open fullWidth maxWidth="sm" onClose={onClose}>
+    <Dialog fullScreen={isPhone} open fullWidth maxWidth="sm" onClose={onClose}>
       <DialogTitle>Виплата</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>

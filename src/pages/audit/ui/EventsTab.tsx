@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   Alert,
   Autocomplete,
+  Box,
   Button,
   Chip,
   FormControlLabel,
@@ -20,11 +21,14 @@ import {
 } from '@mui/material'
 import { actionLabel, entityTypeLabels, softList, usersApi } from '../../../shared/api'
 import type { User } from '../../../entities/user'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardList, CardField } from '../../../shared/ui/CardList'
 import { useAuditStore } from '../model/auditStore'
 
 const PAGE_SIZE = 50
 
 export const EventsTab = () => {
+  const isPhone = useIsPhone()
   const query = useAuditStore((s) => s.eventsQuery)
   const events = useAuditStore((s) => s.events)
   const failed = useAuditStore((s) => s.eventsFailed)
@@ -53,7 +57,12 @@ export const EventsTab = () => {
 
   return (
     <Stack spacing={2}>
-      <Stack direction="row" spacing={2} useFlexGap sx={{ flexWrap: 'wrap', alignItems: 'center' }}>
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        spacing={2}
+        useFlexGap
+        sx={{ flexWrap: 'wrap', alignItems: { xs: 'stretch', sm: 'center' } }}
+      >
         <TextField
           label="Від"
           type="date"
@@ -74,7 +83,7 @@ export const EventsTab = () => {
           select
           label="Тип об'єкта"
           size="small"
-          sx={{ minWidth: 220 }}
+          sx={{ minWidth: { sm: 220 } }}
           value={query.entityType ?? ''}
           onChange={(e) => update({ entityType: e.target.value || undefined })}
           slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}
@@ -88,7 +97,7 @@ export const EventsTab = () => {
         </TextField>
         <Autocomplete
           size="small"
-          sx={{ minWidth: 240 }}
+          sx={{ minWidth: { sm: 240 } }}
           options={staff}
           getOptionLabel={(u) => `${u.lastName} ${u.firstName}`}
           value={staff.find((u) => u.id === query.actorId) ?? null}
@@ -111,8 +120,43 @@ export const EventsTab = () => {
         </Alert>
       ) : !events ? (
         <Typography color="text.secondary">Завантаження…</Typography>
+      ) : isPhone ? (
+        <Box>
+          <CardList
+            items={events.items}
+            getKey={(event) => event.id}
+            empty={<Typography color="text.secondary">Записів немає</Typography>}
+            renderCard={(event) => (
+              <Box sx={{ cursor: 'pointer' }} onClick={() => openEvent(event.id).catch(() => undefined)}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                  <Typography sx={{ fontWeight: 600, flex: 1, minWidth: 0 }}>{actionLabel(event.route)}</Typography>
+                  <Chip
+                    size="small"
+                    label={event.statusCode}
+                    color={event.statusCode >= 400 ? 'error' : 'success'}
+                  />
+                </Box>
+                <CardField label="Час">{new Date(event.at).toLocaleString('uk-UA')}</CardField>
+                <CardField label="Хто">
+                  {event.actor ? `${event.actor.lastName} ${event.actor.firstName}` : '—'}
+                </CardField>
+                <CardField label="Об'єкт">
+                  {event.entityType ? (entityTypeLabels[event.entityType] ?? event.entityType) : '—'}
+                </CardField>
+              </Box>
+            )}
+          />
+          <TablePagination
+            component="div"
+            count={events.total}
+            page={events.page - 1}
+            rowsPerPage={PAGE_SIZE}
+            rowsPerPageOptions={[]}
+            onPageChange={(_, page) => update({ page: page + 1 })}
+          />
+        </Box>
       ) : (
-        <Paper elevation={0} sx={{ border: 1, borderColor: 'divider' }}>
+        <Paper elevation={0} sx={{ border: 1, borderColor: 'divider', overflowX: 'auto' }}>
           <Table size="small">
             <TableHead>
               <TableRow>

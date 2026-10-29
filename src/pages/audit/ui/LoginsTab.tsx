@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import {
   Alert,
+  Box,
   Button,
   MenuItem,
   Paper,
@@ -16,12 +17,15 @@ import {
   Typography,
 } from '@mui/material'
 import { authReasonLabels, authTypeLabels, type AuthEventType } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardList, CardField } from '../../../shared/ui/CardList'
 import { useAuditStore } from '../model/auditStore'
 
 const PAGE_SIZE = 50
 const AGENT_LIMIT = 60
 
 export const LoginsTab = () => {
+  const isPhone = useIsPhone()
   const query = useAuditStore((s) => s.authQuery)
   const logins = useAuditStore((s) => s.logins)
   const failed = useAuditStore((s) => s.loginsFailed)
@@ -45,7 +49,12 @@ export const LoginsTab = () => {
 
   return (
     <Stack spacing={2}>
-      <Stack direction="row" spacing={2} useFlexGap sx={{ flexWrap: 'wrap', alignItems: 'center' }}>
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        spacing={2}
+        useFlexGap
+        sx={{ flexWrap: 'wrap', alignItems: { xs: 'stretch', sm: 'center' } }}
+      >
         <TextField
           label="Від"
           type="date"
@@ -72,7 +81,7 @@ export const LoginsTab = () => {
           select
           label="Подія"
           size="small"
-          sx={{ minWidth: 220 }}
+          sx={{ minWidth: { sm: 220 } }}
           value={query.type ?? ''}
           onChange={(e) => update({ type: (e.target.value || undefined) as AuthEventType | undefined })}
           slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}
@@ -91,8 +100,39 @@ export const LoginsTab = () => {
         </Alert>
       ) : !logins ? (
         <Typography color="text.secondary">Завантаження…</Typography>
+      ) : isPhone ? (
+        <Box>
+          <CardList
+            items={logins.items}
+            getKey={(item) => item.id}
+            empty={<Typography color="text.secondary">Записів немає</Typography>}
+            renderCard={(item) => (
+              <Box>
+                <Typography sx={{ fontWeight: 600, mb: 0.5 }}>
+                  {authTypeLabels[item.type]}
+                  {item.reason ? `: ${authReasonLabels[item.reason] ?? item.reason}` : ''}
+                </Typography>
+                <CardField label="Час">{new Date(item.at).toLocaleString('uk-UA')}</CardField>
+                <CardField label="Логін">{item.login}</CardField>
+                <CardField label="Користувач">
+                  {item.user ? `${item.user.lastName} ${item.user.firstName}` : '—'}
+                </CardField>
+                <CardField label="IP">{item.ip ?? '—'}</CardField>
+                <CardField label="Браузер">{item.userAgent ?? '—'}</CardField>
+              </Box>
+            )}
+          />
+          <TablePagination
+            component="div"
+            count={logins.total}
+            page={logins.page - 1}
+            rowsPerPage={PAGE_SIZE}
+            rowsPerPageOptions={[]}
+            onPageChange={(_, page) => update({ page: page + 1 })}
+          />
+        </Box>
       ) : (
-        <Paper elevation={0} sx={{ border: 1, borderColor: 'divider' }}>
+        <Paper elevation={0} sx={{ border: 1, borderColor: 'divider', overflowX: 'auto' }}>
           <Table size="small">
             <TableHead>
               <TableRow>

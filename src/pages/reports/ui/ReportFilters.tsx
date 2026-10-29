@@ -142,7 +142,12 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
           ))}
         </Stack>
       )}
-      <Stack direction="row" spacing={2} useFlexGap sx={{ flexWrap: 'wrap', alignItems: 'center' }}>
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        spacing={2}
+        useFlexGap
+        sx={{ flexWrap: 'wrap', alignItems: { xs: 'stretch', sm: 'center' } }}
+      >
         {definition.period && (
           <>
             <TextField
@@ -168,7 +173,7 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
             select
             label="Заклад"
             size="small"
-            sx={{ minWidth: 180 }}
+            sx={{ minWidth: { sm: 180 } }}
             value={query.institutionId ?? ''}
             onChange={(e) => update({ institutionId: e.target.value || undefined })}
             helperText={definition.key === 'lessons' ? 'Не впливає на уроки гуртків' : undefined}
@@ -187,7 +192,7 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
             select
             label="Тип групи"
             size="small"
-            sx={{ minWidth: 140 }}
+            sx={{ minWidth: { sm: 140 } }}
             value={query.kind ?? ''}
             onChange={(e) =>
               update({
@@ -205,7 +210,7 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
         {has('group') && (
           <Autocomplete
             size="small"
-            sx={{ minWidth: 220 }}
+            sx={{ minWidth: { sm: 220 } }}
             options={visibleGroups}
             getOptionLabel={(g) => g.name}
             value={visibleGroups.find((g) => g.id === query.groupId) ?? null}
@@ -216,7 +221,7 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
         {has('child') && (
           <Autocomplete
             size="small"
-            sx={{ minWidth: 240 }}
+            sx={{ minWidth: { sm: 240 } }}
             options={children}
             getOptionLabel={(c) => `${c.lastName} ${c.firstName}`}
             value={children.find((c) => c.id === query.childId) ?? null}
@@ -227,7 +232,7 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
         {has('teacher') && (
           <Autocomplete
             size="small"
-            sx={{ minWidth: 240 }}
+            sx={{ minWidth: { sm: 240 } }}
             options={teachers}
             getOptionLabel={(u) => `${u.lastName} ${u.firstName}`}
             value={teachers.find((u) => u.id === query.teacherId) ?? null}

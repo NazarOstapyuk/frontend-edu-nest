@@ -3,6 +3,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material'
 import { usePayrollStore } from '../model/payrollStore'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const schema = yup.object({
   reason: yup.string().trim().required('Вкажіть причину').max(500, 'Не більше 500 символів'),
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export const ReasonDialog = ({ title, onClose, onSubmit }: Props) => {
+  const isPhone = useIsPhone()
   const isSaving = usePayrollStore((s) => s.isSaving)
   const { control, handleSubmit } = useForm<FormValues>({
     mode: 'all',
@@ -29,7 +31,7 @@ export const ReasonDialog = ({ title, onClose, onSubmit }: Props) => {
   }
 
   return (
-    <Dialog open fullWidth maxWidth="sm" onClose={onClose}>
+    <Dialog fullScreen={isPhone} open fullWidth maxWidth="sm" onClose={onClose}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <Controller

@@ -1,4 +1,5 @@
 import {
+  Box,
   Chip,
   IconButton,
   Paper,
@@ -14,6 +15,8 @@ import {
 import BlockIcon from '@mui/icons-material/Block'
 import { useChildFinanceStore } from '../model/childFinanceStore'
 import { useCan } from '../../../entities/user'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardList, CardField } from '../../../shared/ui/CardList'
 import {
   chargeStateLabels,
   financeCategoryLabels,
@@ -44,12 +47,75 @@ interface ChargesTableProps {
 export const ChargesTable = ({ charges }: ChargesTableProps) => {
   const setVoidModal = useChildFinanceStore((s) => s.setVoidModal)
   const canEdit = useCan('finance', 'edit')
+  const isPhone = useIsPhone()
+
+  const voidButton = (charge: FinanceCharge) => (
+    <Tooltip title="Сторнувати">
+      <IconButton
+        size="small"
+        color="error"
+        onClick={() =>
+          setVoidModal({
+            isOpen: true,
+            target: { kind: 'charge', id: charge.id, title: charge.description },
+          })
+        }
+      >
+        <BlockIcon fontSize="small" />
+      </IconButton>
+    </Tooltip>
+  )
+
+  const stateChip = (charge: FinanceCharge) =>
+    charge.voidedAt ? (
+      <Chip label="Сторновано" size="small" />
+    ) : (
+      <Chip
+        label={chargeStateLabels[charge.state]}
+        size="small"
+        color={stateColors[charge.state]}
+        variant="outlined"
+      />
+    )
+
+  if (isPhone) {
+    return (
+      <CardList
+        items={charges}
+        getKey={(c) => c.id}
+        empty={
+          <Typography color="text.secondary" align="center" sx={{ py: 6 }}>
+            Нарахувань ще немає.
+          </Typography>
+        }
+        renderCard={(charge) => {
+          const voided = Boolean(charge.voidedAt)
+          return (
+            <Box sx={voided ? { color: 'text.disabled' } : undefined}>
+              <Typography sx={{ fontWeight: 600, mb: 0.5, textDecoration: voided ? 'line-through' : undefined }}>
+                {charge.description}
+              </Typography>
+              <Box sx={{ mb: 0.5 }}>{stateChip(charge)}</Box>
+              <CardField label="Період / дата">{formatPeriod(charge)}</CardField>
+              <CardField label="Категорія">{financeCategoryLabels[charge.category]}</CardField>
+              <CardField label="Сума">{formatMoney(charge.amount)}</CardField>
+              <CardField label="Сплачено">{formatMoney(charge.paid)}</CardField>
+              {voided && <CardField label="Причина сторно">{charge.voidReason ?? '—'}</CardField>}
+              {canEdit && !voided && (
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5, mt: 1 }}>{voidButton(charge)}</Box>
+              )}
+            </Box>
+          )
+        }}
+      />
+    )
+  }
 
   return (
     <TableContainer
       component={Paper}
       elevation={0}
-      sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}
+      sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflowX: 'auto' }}
     >
       <Table>
         <TableHead>

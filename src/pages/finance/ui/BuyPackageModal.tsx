@@ -4,6 +4,7 @@ import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, MenuItem, TextField } from '@mui/material'
 import { usePackagesStore } from '../model/packagesStore'
 import { formatMoney, localToday } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const schema = yup.object({
   directionId: yup.string().required("Обов'язкове поле"),
@@ -14,6 +15,7 @@ const schema = yup.object({
 type FormValues = yup.InferType<typeof schema>
 
 export const BuyPackageModal = () => {
+  const isPhone = useIsPhone()
   const open = usePackagesStore((s) => s.buyOpen)
   const setOpen = usePackagesStore((s) => s.setBuyOpen)
   const directions = usePackagesStore((s) => s.directions)
@@ -40,7 +42,7 @@ export const BuyPackageModal = () => {
   }
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm" fullScreen={isPhone}>
       <DialogTitle sx={{ fontWeight: 700 }}>Купити пакет</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         <Controller

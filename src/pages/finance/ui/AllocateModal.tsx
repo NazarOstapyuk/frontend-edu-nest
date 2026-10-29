@@ -13,6 +13,7 @@ import {
   toKopecks,
   type SuggestionLine,
 } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const schema = yup.object({
   allocations: yup.array().of(allocationItemSchema).default([]),
@@ -21,6 +22,7 @@ const schema = yup.object({
 type FormValues = yup.InferType<typeof schema>
 
 export const AllocateModal = () => {
+  const isPhone = useIsPhone()
   const childId = useChildFinanceStore((s) => s.finance?.child.id)
   const { isOpen, payment } = useChildFinanceStore((s) => s.allocateModal)
   const setAllocateModal = useChildFinanceStore((s) => s.setAllocateModal)
@@ -76,7 +78,7 @@ export const AllocateModal = () => {
   }
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="md">
+    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="md" fullScreen={isPhone}>
       <DialogTitle sx={{ fontWeight: 700 }}>Розподілити оплату</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         {payment && (

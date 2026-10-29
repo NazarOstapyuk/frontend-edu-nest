@@ -4,6 +4,7 @@ import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, TextField, Typography } from '@mui/material'
 import { usePackagesStore } from '../model/packagesStore'
 import { formatDay } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const schema = yup.object({
   newExpiresAt: yup.string().required("Обов'язкове поле"),
@@ -13,6 +14,7 @@ const schema = yup.object({
 type FormValues = yup.InferType<typeof schema>
 
 export const ExtendPackageModal = () => {
+  const isPhone = useIsPhone()
   const target = usePackagesStore((s) => s.extendTarget)
   const setTarget = usePackagesStore((s) => s.setExtendTarget)
   const extend = usePackagesStore((s) => s.extend)
@@ -36,7 +38,7 @@ export const ExtendPackageModal = () => {
   }
 
   return (
-    <Dialog open={target !== null} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog open={target !== null} onClose={handleClose} fullWidth maxWidth="sm" fullScreen={isPhone}>
       <DialogTitle sx={{ fontWeight: 700 }}>Продовжити пакет</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         <Typography variant="body2" color="text.secondary">

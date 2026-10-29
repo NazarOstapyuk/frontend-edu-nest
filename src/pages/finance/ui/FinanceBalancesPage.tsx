@@ -16,6 +16,8 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardList, CardField } from '../../../shared/ui/CardList'
 import { useFinanceBalancesStore } from '../model/financeBalancesStore'
 import { useGroupsStore } from '../../groups/model/groupsStore'
 import {
@@ -32,6 +34,7 @@ export const FinanceBalancesPage = () => {
   const setFilters = useFinanceBalancesStore((s) => s.setFilters)
   const fetchBalances = useFinanceBalancesStore((s) => s.fetchBalances)
   const navigate = useNavigate()
+  const isPhone = useIsPhone()
   const groups = useGroupsStore((s) => s.groups)
   const fetchGroups = useGroupsStore((s) => s.fetchGroups)
   const sortedGroups = useMemo(
@@ -66,7 +69,7 @@ export const FinanceBalancesPage = () => {
           label="Група"
           value={groupId ?? ''}
           onChange={(e) => setFilters({ groupId: e.target.value || undefined })}
-          sx={{ minWidth: 220 }}
+          sx={{ minWidth: { xs: '100%', sm: 220 } }}
         >
           <MenuItem value="">Усі групи</MenuItem>
           {sortedGroups.map((g) => (
@@ -83,7 +86,7 @@ export const FinanceBalancesPage = () => {
           onChange={(e) =>
             setFilters({ category: (e.target.value || undefined) as FinanceCategory | undefined })
           }
-          sx={{ minWidth: 220 }}
+          sx={{ minWidth: { xs: '100%', sm: 220 } }}
         >
           <MenuItem value="">Усі категорії</MenuItem>
           {financeCategories.map((key) => (
@@ -110,10 +113,64 @@ export const FinanceBalancesPage = () => {
         />
       </Box>
 
+      {isPhone ? (
+        <>
+          <CardList
+            items={pagedBalances}
+            getKey={(r) => r.childId}
+            empty={
+              <Typography color="text.secondary" align="center" sx={{ py: 6 }}>
+                Немає учнів за цими фільтрами.
+              </Typography>
+            }
+            renderCard={(row) => (
+              <Box onClick={() => navigate(`/finance/${row.childId}`)} sx={{ cursor: 'pointer' }}>
+                <Typography sx={{ fontWeight: 600, mb: 0.5 }}>
+                  {row.lastName} {row.firstName}
+                </Typography>
+                <CardField label="Заклад">
+                  {row.group
+                    ? `${institutionTypeLabels[row.group.institution.type]} · ${row.group.institution.name}`
+                    : '—'}
+                </CardField>
+                <CardField label="Група">{row.group?.name ?? '—'}</CardField>
+                <CardField label="Разом до сплати">
+                  <Box
+                    component="span"
+                    sx={{ fontWeight: 600, color: Number(row.totalDue) > 0 ? 'error.main' : 'text.primary' }}
+                  >
+                    {formatMoney(row.totalDue)}
+                  </Box>
+                </CardField>
+                <CardField label="Борг">{formatMoney(row.debt)}</CardField>
+                <CardField label="Передоплата">{formatMoney(row.prepayment)}</CardField>
+                <CardField label="Нерозподілено">{formatMoney(row.unallocated)}</CardField>
+              </Box>
+            )}
+          />
+          {balances.length > 0 && (
+            <TablePagination
+              component="div"
+              count={balances.length}
+              page={currentPage}
+              rowsPerPage={rowsPerPage}
+              rowsPerPageOptions={[10, 25, 50, 100]}
+              onPageChange={(_, next) => setPaging({ page: next, filters })}
+              onRowsPerPageChange={(e) => {
+                setRowsPerPage(Number(e.target.value))
+                setPaging({ page: 0, filters })
+              }}
+              labelRowsPerPage="Рядків на сторінці:"
+              labelDisplayedRows={({ from, to, count }) => `${from}–${to} з ${count}`}
+              sx={{ borderTop: '1px solid', borderColor: 'divider', mt: 1 }}
+            />
+          )}
+        </>
+      ) : (
       <TableContainer
         component={Paper}
         elevation={0}
-        sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}
+        sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflowX: 'auto' }}
       >
         <Table>
           <TableHead>
@@ -185,6 +242,7 @@ export const FinanceBalancesPage = () => {
           />
         )}
       </TableContainer>
+      )}
     </Box>
   )
 }

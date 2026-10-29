@@ -25,6 +25,8 @@ import {
   type PaymentRequestView,
 } from '../../../shared/api'
 import { useCan } from '../../../entities/user'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardList, CardField } from '../../../shared/ui/CardList'
 
 const formatDateTime = (value: string) => new Date(value).toLocaleString('uk-UA')
 
@@ -81,8 +83,58 @@ const RequestRow = ({ request, onCancel }: { request: PaymentRequestView; onCanc
   )
 }
 
+const RequestCard = ({ request, onCancel }: { request: PaymentRequestView; onCancel: (id: string) => void }) => {
+  const [open, setOpen] = useState(false)
+  const canEdit = useCan('finance', 'edit')
+  const author = request.createdBy ? `${request.createdBy.lastName} ${request.createdBy.firstName}` : '—'
+
+  return (
+    <>
+      <Typography sx={{ fontWeight: 600, mb: 0.5 }}>{formatDateTime(request.createdAt)}</Typography>
+      <Box sx={{ mb: 0.5 }}>
+        <Chip
+          size="small"
+          variant="outlined"
+          color={request.status === 'paid' ? 'success' : request.status === 'open' ? 'warning' : 'default'}
+          label={linkStateLabels[request.status]}
+        />
+      </Box>
+      <CardField label="Категорія">{financeCategoryLabels[request.category]}</CardField>
+      <CardField label="Сума">{formatMoney(request.amount)}</CardField>
+      <CardField label="Джерело">{requestSourceLabels[request.source]}</CardField>
+      <CardField label="Хто створив">{author}</CardField>
+      <Collapse in={open} unmountOnExit>
+        <Box sx={{ pt: 1 }}>
+          {request.invoices.length === 0 && (
+            <Typography variant="body2" color="text.secondary">
+              Спроб оплати ще не було
+            </Typography>
+          )}
+          {request.invoices.map((invoice) => (
+            <Typography key={invoice.id} variant="body2">
+              {formatDateTime(invoice.createdAt)}: {invoiceStatusLabels[invoice.status]}, {formatMoney(invoice.amount)}
+              {invoice.failureReason ? `, причина: ${invoice.failureReason}` : ''}
+            </Typography>
+          ))}
+        </Box>
+      </Collapse>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5, mt: 1 }}>
+        <IconButton size="small" aria-label="Спроби оплати" onClick={() => setOpen(!open)}>
+          {open ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+        </IconButton>
+        {canEdit && request.status === 'open' && (
+          <Button size="small" color="error" onClick={() => onCancel(request.id)}>
+            Скасувати
+          </Button>
+        )}
+      </Box>
+    </>
+  )
+}
+
 export const OnlinePaymentsTab = ({ childId }: { childId: string }) => {
   const [requests, setRequests] = useState<PaymentRequestView[] | null>(null)
+  const isPhone = useIsPhone()
 
   useEffect(() => {
     onlinePaymentsApi
@@ -98,6 +150,18 @@ export const OnlinePaymentsTab = ({ childId }: { childId: string }) => {
     } catch {
       return
     }
+  }
+
+  if (isPhone) {
+    if (requests === null) return <Typography color="text.secondary">Завантаження…</Typography>
+    return (
+      <CardList
+        items={requests}
+        getKey={(r) => r.id}
+        empty={<Typography color="text.secondary">Онлайн-оплат немає.</Typography>}
+        renderCard={(r) => <RequestCard request={r} onCancel={cancel} />}
+      />
+    )
   }
 
   return (

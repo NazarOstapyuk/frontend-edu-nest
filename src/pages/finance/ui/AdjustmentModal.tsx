@@ -10,6 +10,7 @@ import {
   toKopecks,
   type AdjustmentType,
 } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const amountPattern = /^\d{1,8}([.,]\d{1,2})?$/
 
@@ -42,6 +43,7 @@ type FormValues = yup.InferType<typeof schema>
 const defaults: FormValues = { type: 'discount_percent', value: '', startDate: '', endDate: '', reason: '' }
 
 export const AdjustmentModal = () => {
+  const isPhone = useIsPhone()
   const { isOpen, enrollment } = useEnrollmentsStore((s) => s.adjustmentModal)
   const setAdjustmentModal = useEnrollmentsStore((s) => s.setAdjustmentModal)
   const addAdjustment = useEnrollmentsStore((s) => s.addAdjustment)
@@ -72,7 +74,7 @@ export const AdjustmentModal = () => {
   }
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm" fullScreen={isPhone}>
       <DialogTitle sx={{ fontWeight: 700 }}>Умова: {enrollment?.tariff.name}</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         <Controller
@@ -101,7 +103,7 @@ export const AdjustmentModal = () => {
             )}
           />
         )}
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
           <Controller
             name="startDate"
             control={control}

@@ -10,6 +10,7 @@ import {
   type FinanceCategory,
 } from '../../../shared/api'
 import { useNotifyStore } from '../../../shared/model/notifyStore'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 interface PaymentLinkModalProps {
   childId: string
@@ -24,6 +25,7 @@ const debtOf = (categories: CategorySummary[], category: FinanceCategory) => {
 }
 
 export const PaymentLinkModal = ({ childId, categories, onClose, onCreated }: PaymentLinkModalProps) => {
+  const isPhone = useIsPhone()
   const [category, setCategory] = useState<FinanceCategory>(financeCategories[0])
   const [amount, setAmount] = useState(() => debtOf(categories, financeCategories[0]))
   const [comment, setComment] = useState('')
@@ -67,7 +69,7 @@ export const PaymentLinkModal = ({ childId, categories, onClose, onCreated }: Pa
   }
 
   return (
-    <Dialog open onClose={isSending ? undefined : onClose} fullWidth maxWidth="sm">
+    <Dialog open onClose={isSending ? undefined : onClose} fullWidth maxWidth="sm" fullScreen={isPhone}>
       <DialogTitle>Посилання на оплату</DialogTitle>
       <DialogContent>
         {result ? (

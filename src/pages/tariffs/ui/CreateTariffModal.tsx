@@ -19,6 +19,7 @@ import {
   type FinanceCategory,
   type TariffUnit,
 } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const amountPattern = /^\d{1,8}([.,]\d{1,2})?$/
 
@@ -63,6 +64,7 @@ const defaults: FormValues = {
 }
 
 export const CreateTariffModal = () => {
+  const isPhone = useIsPhone()
   const { isOpen } = useTariffsStore((s) => s.createTariffModal)
   const setCreateTariffModal = useTariffsStore((s) => s.setCreateTariffModal)
   const createTariff = useTariffsStore((s) => s.createTariff)
@@ -115,7 +117,7 @@ export const CreateTariffModal = () => {
   }
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm" fullScreen={isPhone}>
       <DialogTitle sx={{ fontWeight: 700 }}>Новий тариф</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         <Controller
@@ -148,7 +150,7 @@ export const CreateTariffModal = () => {
             </TextField>
           )}
         />
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
           <Controller
             name="unit"
             control={control}
@@ -197,7 +199,7 @@ export const CreateTariffModal = () => {
             </TextField>
           )}
         />
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
           <Controller
             name="price"
             control={control}

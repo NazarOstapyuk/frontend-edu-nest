@@ -19,6 +19,8 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import { useTariffsStore } from '../model/tariffsStore'
 import { useInstitutionStore } from '../../../shared/model/institutionStore'
 import { useCan } from '../../../entities/user'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardList, CardField } from '../../../shared/ui/CardList'
 import {
   billingModeLabels,
   financeCategoryLabels,
@@ -44,6 +46,7 @@ export const TariffsPage = () => {
   const canEditSettings = useCan('settings', 'edit')
   const institutions = useInstitutionStore((s) => s.institutions)
   const [leadInput, setLeadInput] = useState<string | null>(null)
+  const isPhone = useIsPhone()
 
   useEffect(() => {
     fetchAll()
@@ -66,7 +69,7 @@ export const TariffsPage = () => {
             value={leadValue}
             onChange={(e) => setLeadInput(e.target.value)}
             error={leadInput !== null && !leadValid}
-            sx={{ width: 200 }}
+            sx={{ width: { xs: '100%', sm: 200 } }}
           />
         )}
         {canEditSettings && (
@@ -111,7 +114,48 @@ export const TariffsPage = () => {
         </Alert>
       )}
 
-      <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
+      {isPhone ? (
+        <CardList
+          items={tariffs}
+          getKey={(t) => t.id}
+          empty={
+            <Typography color="text.secondary" align="center" sx={{ py: 6 }}>
+              Тарифів ще немає. Натисніть «Створити тариф».
+            </Typography>
+          }
+          renderCard={(t) => (
+            <Box onClick={() => setTariffModal({ isOpen: true, tariffId: t.id })} sx={{ cursor: 'pointer' }}>
+              <Typography sx={{ fontWeight: 600, mb: 0.5 }}>{t.name}</Typography>
+              <Box sx={{ mb: 0.5 }}>
+                <Chip
+                  size="small"
+                  label={t.isActive ? 'Активний' : 'Неактивний'}
+                  color={t.isActive ? 'success' : 'default'}
+                  variant="outlined"
+                />
+              </Box>
+              <CardField label="Заклад">
+                {t.institutionId ? (institutions.find((i) => i.id === t.institutionId)?.name ?? '—') : 'Спільний'}
+              </CardField>
+              <CardField label="Категорія">{financeCategoryLabels[t.category]}</CardField>
+              <CardField label="Одиниця">
+                {tariffUnitLabels[t.unit]}
+                {t.packageSize ? ` (${t.packageSize})` : ''}
+              </CardField>
+              <CardField label="Режим">{billingModeLabels[t.billingMode]}</CardField>
+              <CardField label="Поточна ціна">{t.currentPrice ? formatMoney(t.currentPrice) : '—'}</CardField>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5, mt: 1 }}>
+                <HistoryButton entityType="tariffs" entityId={t.id} title={t.name} />
+              </Box>
+            </Box>
+          )}
+        />
+      ) : (
+      <TableContainer
+        component={Paper}
+        elevation={0}
+        sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflowX: 'auto' }}
+      >
         <Table>
           <TableHead>
             <TableRow sx={{ '& th': { fontWeight: 700, bgcolor: 'grey.50' } }}>
@@ -168,6 +212,7 @@ export const TariffsPage = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      )}
 
       <CreateTariffModal />
       <TariffModal />

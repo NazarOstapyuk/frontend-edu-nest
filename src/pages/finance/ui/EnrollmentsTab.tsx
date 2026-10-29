@@ -21,6 +21,8 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { useEnrollmentsStore } from '../model/enrollmentsStore'
 import { useCan } from '../../../entities/user'
 import { ReasonDialog } from '../../../shared/ui/ReasonDialog'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardList, CardField } from '../../../shared/ui/CardList'
 import {
   adjustmentTypeLabels,
   billingModeLabels,
@@ -181,6 +183,137 @@ const EnrollmentRow = ({ enrollment }: { enrollment: Enrollment }) => {
   )
 }
 
+const periodStateLabel = (p: Enrollment['billedPeriods'][number]) =>
+  p.needsRecalculation
+    ? 'Потребує перерахунку'
+    : p.note === 'pause'
+      ? 'Пауза'
+      : p.chargeVoided
+        ? 'Нарахування сторновано'
+        : p.chargeState
+          ? chargeStateLabels[p.chargeState]
+          : '—'
+
+const EnrollmentCard = ({ enrollment }: { enrollment: Enrollment }) => {
+  const [open, setOpen] = useState(() => enrollment.billedPeriods.some((p) => p.needsRecalculation))
+  const setEndEnrollmentModal = useEnrollmentsStore((s) => s.setEndEnrollmentModal)
+  const setAdjustmentModal = useEnrollmentsStore((s) => s.setAdjustmentModal)
+  const setReasonTarget = useEnrollmentsStore((s) => s.setReasonTarget)
+  const billNow = useEnrollmentsStore((s) => s.billNow)
+  const isSaving = useEnrollmentsStore((s) => s.isSaving)
+  const canEdit = useCan('tariffs', 'edit')
+  const next = enrollment.nextPeriod
+  const activeAdjustments = enrollment.adjustments.filter((a) => !a.voidedAt)
+
+  return (
+    <>
+      <Typography sx={{ fontWeight: 600, mb: 0.5 }}>{enrollment.tariff.name}</Typography>
+      {enrollment.billedPeriods.some((p) => p.needsRecalculation) && (
+        <Box sx={{ mb: 0.5 }}>
+          <Chip size="small" color="warning" label="Потрібен перерахунок" />
+        </Box>
+      )}
+      <CardField label="Період запису">
+        {formatDate(enrollment.startDate)} – {enrollment.endDate ? formatDate(enrollment.endDate) : '…'}
+      </CardField>
+      <CardField label="Режим">
+        {billingModeLabels[enrollment.effectiveBillingMode]}
+        {enrollment.billingMode ? ' (свій)' : ''}
+      </CardField>
+      <CardField label="Наступне нарахування">
+        {next === null ? (
+          '—'
+        ) : next.problem ? (
+          <Typography variant="body2" color="error.main" component="span">
+            Немає ціни на {formatDate(next.periodStart)}
+          </Typography>
+        ) : (
+          <>
+            {formatMoney(next.amount ?? '0')} з {formatDate(next.periodStart)}
+            {next.description && (
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                {next.description}
+              </Typography>
+            )}
+          </>
+        )}
+      </CardField>
+      {activeAdjustments.length > 0 && (
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, my: 0.5 }}>
+          {activeAdjustments.map((a) => (
+            <Chip
+              key={a.id}
+              size="small"
+              variant="outlined"
+              label={adjustmentLabel(a)}
+              onDelete={() =>
+                setReasonTarget({ kind: 'adjustment', id: a.id, title: `Сторнувати умову: ${adjustmentLabel(a)}` })
+              }
+            />
+          ))}
+        </Box>
+      )}
+      <Collapse in={open} unmountOnExit>
+        <Box sx={{ pt: 1 }}>
+          {enrollment.billedPeriods.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">
+              Ще нічого не нараховано.
+            </Typography>
+          ) : (
+            enrollment.billedPeriods.map((p) => (
+              <Box key={p.id} sx={{ py: 1, borderTop: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  {formatDate(p.periodStart)} – {formatDate(p.periodEnd)}
+                </Typography>
+                <CardField label="Сума">{formatMoney(p.amount)}</CardField>
+                <CardField label="Стан">{periodStateLabel(p)}</CardField>
+                {canEdit && (
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 0.5 }}>
+                    <Button
+                      size="small"
+                      color={p.needsRecalculation ? 'warning' : 'inherit'}
+                      onClick={() =>
+                        setReasonTarget({
+                          kind: 'recalculate',
+                          id: p.id,
+                          title: `Перерахувати період ${formatDate(p.periodStart)} – ${formatDate(p.periodEnd)}`,
+                        })
+                      }
+                    >
+                      Перерахувати
+                    </Button>
+                  </Box>
+                )}
+              </Box>
+            ))
+          )}
+        </Box>
+      </Collapse>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
+        <IconButton size="small" onClick={() => setOpen(!open)}>
+          {open ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+        </IconButton>
+        <HistoryButton entityType="enrollments" entityId={enrollment.id} title={enrollment.tariff.name} />
+        {canEdit && (
+          <Button size="small" disabled={isSaving} onClick={() => billNow(enrollment.id)}>
+            Нарахувати
+          </Button>
+        )}
+        {canEdit && (
+          <Button size="small" onClick={() => setAdjustmentModal({ isOpen: true, enrollment })}>
+            Умова
+          </Button>
+        )}
+        {canEdit && !enrollment.endDate && (
+          <Button size="small" color="error" onClick={() => setEndEnrollmentModal({ isOpen: true, enrollment })}>
+            Завершити
+          </Button>
+        )}
+      </Box>
+    </>
+  )
+}
+
 interface EnrollmentsTabProps {
   childId: string
 }
@@ -195,6 +328,7 @@ export const EnrollmentsTab = ({ childId }: EnrollmentsTabProps) => {
   const submitReason = useEnrollmentsStore((s) => s.submitReason)
   const isSaving = useEnrollmentsStore((s) => s.isSaving)
   const canEdit = useCan('tariffs', 'edit')
+  const isPhone = useIsPhone()
 
   useEffect(() => {
     fetchEnrollments(childId)
@@ -204,14 +338,30 @@ export const EnrollmentsTab = ({ childId }: EnrollmentsTabProps) => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: { xs: 'stretch', sm: 'flex-end' }, mb: 2, '& .MuiButton-root': { flexGrow: { xs: 1, sm: 0 } } }}>
         {canEdit && (
           <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateEnrollmentModal({ isOpen: true })}>
             Записати на тариф
           </Button>
         )}
       </Box>
-      <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
+      {isPhone ? (
+        <CardList
+          items={rows}
+          getKey={(e) => e.id}
+          empty={
+            <Typography color="text.secondary" align="center" sx={{ py: 6 }}>
+              Записів на тарифи ще немає.
+            </Typography>
+          }
+          renderCard={(e) => <EnrollmentCard enrollment={e} />}
+        />
+      ) : (
+      <TableContainer
+        component={Paper}
+        elevation={0}
+        sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflowX: 'auto' }}
+      >
         <Table>
           <TableHead>
             <TableRow sx={{ '& th': { fontWeight: 700, bgcolor: 'grey.50' } }}>
@@ -237,6 +387,7 @@ export const EnrollmentsTab = ({ childId }: EnrollmentsTabProps) => {
           </TableBody>
         </Table>
       </TableContainer>
+      )}
 
       <CreateEnrollmentModal />
       <EndEnrollmentModal />

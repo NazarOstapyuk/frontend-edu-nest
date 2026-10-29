@@ -10,6 +10,7 @@ import {
   toKopecks,
   type ReconcileOutcome,
 } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const outcomes = Object.keys(reconcileOutcomeLabels) as ReconcileOutcome[]
 const amountPattern = /^\d{1,8}([.,]\d{1,2})?$/
@@ -25,6 +26,7 @@ type FormValues = yup.InferType<typeof schema>
 const defaults: FormValues = { outcome: 'paid_full', paidAmount: '', note: '' }
 
 export const ReconcileModal = () => {
+  const isPhone = useIsPhone()
   const target = usePackagesStore((s) => s.reconcileTarget)
   const setTarget = usePackagesStore((s) => s.setReconcileTarget)
   const reconcile = usePackagesStore((s) => s.reconcile)
@@ -61,7 +63,7 @@ export const ReconcileModal = () => {
   }
 
   return (
-    <Dialog open={target !== null} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog open={target !== null} onClose={handleClose} fullWidth maxWidth="sm" fullScreen={isPhone}>
       <DialogTitle sx={{ fontWeight: 700 }}>Звірка пакета</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         <Typography variant="body2" color="text.secondary">

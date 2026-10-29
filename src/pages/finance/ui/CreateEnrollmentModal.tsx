@@ -4,6 +4,7 @@ import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, MenuItem, TextField } from '@mui/material'
 import { useEnrollmentsStore } from '../model/enrollmentsStore'
 import { billingModeLabels, billingModes, formatMoney, type BillingMode } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const schema = yup.object({
   tariffId: yup.string().required("Обов'язкове поле"),
@@ -24,6 +25,7 @@ type FormValues = yup.InferType<typeof schema>
 const defaults: FormValues = { tariffId: '', startDate: '', endDate: '', billingMode: '', note: '' }
 
 export const CreateEnrollmentModal = () => {
+  const isPhone = useIsPhone()
   const { isOpen } = useEnrollmentsStore((s) => s.createEnrollmentModal)
   const setCreateEnrollmentModal = useEnrollmentsStore((s) => s.setCreateEnrollmentModal)
   const tariffOptions = useEnrollmentsStore((s) => s.tariffOptions)
@@ -54,7 +56,7 @@ export const CreateEnrollmentModal = () => {
   }
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm" fullScreen={isPhone}>
       <DialogTitle sx={{ fontWeight: 700 }}>Записати на тариф</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         <Controller
@@ -71,7 +73,7 @@ export const CreateEnrollmentModal = () => {
             </TextField>
           )}
         />
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
           <Controller
             name="startDate"
             control={control}

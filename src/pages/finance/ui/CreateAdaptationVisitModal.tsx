@@ -4,6 +4,7 @@ import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, MenuItem, TextField, Typography } from '@mui/material'
 import { useAdaptationStore } from '../model/adaptationStore'
 import { formatMoney, normalizeAmount, toKopecks } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const amountPattern = /^\d{1,8}([.,]\d{1,2})?$/
 const hoursPattern = /^\d{1,2}([.,]\d{1,2})?$/
@@ -36,6 +37,7 @@ const schema = yup.object({
 type FormValues = yup.InferType<typeof schema>
 
 export const CreateAdaptationVisitModal = () => {
+  const isPhone = useIsPhone()
   const { isOpen } = useAdaptationStore((s) => s.createVisitModal)
   const setCreateVisitModal = useAdaptationStore((s) => s.setCreateVisitModal)
   const tariffOptions = useAdaptationStore((s) => s.tariffOptions)
@@ -72,7 +74,7 @@ export const CreateAdaptationVisitModal = () => {
   }
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm" fullScreen={isPhone}>
       <DialogTitle sx={{ fontWeight: 700 }}>Відвідування адаптації</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         <Controller
@@ -89,7 +91,7 @@ export const CreateAdaptationVisitModal = () => {
             </TextField>
           )}
         />
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
           <Controller
             name="date"
             control={control}

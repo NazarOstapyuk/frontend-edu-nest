@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
-import { Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
+import { Box, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardList, CardField } from '../../../shared/ui/CardList'
 import { financeCategoryLabels, formatMoney, type SuggestionLine } from '../../../shared/api'
 
 interface AllocationTableProps {
@@ -8,11 +10,33 @@ interface AllocationTableProps {
 }
 
 export const AllocationTable = ({ lines, renderAmountField }: AllocationTableProps) => {
+  const isPhone = useIsPhone()
+
   if (lines.length === 0) {
     return (
       <Typography variant="body2" color="text.secondary">
         Відкритих нарахувань немає.
       </Typography>
+    )
+  }
+
+  if (isPhone) {
+    return (
+      <CardList
+        items={lines.map((line, index) => ({ line, index }))}
+        getKey={({ line }) => line.chargeId}
+        renderCard={({ line, index }) => (
+          <>
+            <Typography sx={{ fontWeight: 600 }}>{line.description}</Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+              {new Date(line.periodStart ?? line.createdAt).toLocaleDateString('uk-UA')}
+            </Typography>
+            <CardField label="Категорія">{financeCategoryLabels[line.category]}</CardField>
+            <CardField label="Залишок">{formatMoney(line.remaining)}</CardField>
+            <Box sx={{ mt: 1 }}>{renderAmountField(index)}</Box>
+          </>
+        )}
+      />
     )
   }
 

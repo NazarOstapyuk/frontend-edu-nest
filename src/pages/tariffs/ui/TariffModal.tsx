@@ -30,6 +30,8 @@ import {
   tariffUnitLabels,
   toKopecks,
 } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardList, CardField } from '../../../shared/ui/CardList'
 
 const amountPattern = /^\d{1,8}([.,]\d{1,2})?$/
 
@@ -46,6 +48,7 @@ const priceSchema = yup.object({
 type PriceValues = yup.InferType<typeof priceSchema>
 
 export const TariffModal = () => {
+  const isPhone = useIsPhone()
   const { isOpen, tariffId } = useTariffsStore((s) => s.tariffModal)
   const tariffs = useTariffsStore((s) => s.tariffs)
   const setTariffModal = useTariffsStore((s) => s.setTariffModal)
@@ -82,7 +85,7 @@ export const TariffModal = () => {
   }
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm" fullScreen={isPhone}>
       <DialogTitle sx={{ fontWeight: 700 }}>{tariff?.name}</DialogTitle>
       {tariff && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
@@ -118,6 +121,20 @@ export const TariffModal = () => {
             }
             label="Активний"
           />
+          {isPhone ? (
+            <CardList
+              items={tariff.prices}
+              getKey={(p) => p.id}
+              renderCard={(p) => (
+                <>
+                  <CardField label="Діє з">
+                    {new Date(p.effectiveFrom).toLocaleDateString('uk-UA', { timeZone: 'UTC' })}
+                  </CardField>
+                  <CardField label="Ціна">{formatMoney(p.price)}</CardField>
+                </>
+              )}
+            />
+          ) : (
           <Table size="small">
             <TableHead>
               <TableRow>
@@ -134,13 +151,14 @@ export const TariffModal = () => {
               ))}
             </TableBody>
           </Table>
+          )}
           {canEdit && (
             <>
               <Typography sx={{ fontWeight: 600 }}>Нова ціна</Typography>
               <Typography variant="body2" color="text.secondary">
                 Якщо на цю дату ціна вже є, її буде замінено. Уже створені нарахування не зміняться.
               </Typography>
-              <Box sx={{ display: 'flex', gap: 2 }}>
+              <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
                 <Controller
                   name="price"
                   control={control}

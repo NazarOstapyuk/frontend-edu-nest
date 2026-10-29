@@ -88,7 +88,7 @@ export const ChildFinancePage = () => {
           entityId={finance.child.id}
           title={`${finance.child.lastName} ${finance.child.firstName}`}
         />
-        <Box sx={{ ml: 'auto', textAlign: 'right' }}>
+        <Box sx={{ ml: { xs: 0, sm: 'auto' }, textAlign: { xs: 'left', sm: 'right' }, width: { xs: '100%', sm: 'auto' } }}>
           <Typography sx={{ fontWeight: 700, color: totalDue > 0 ? 'error.main' : 'success.main' }}>
             {totalDue >= 0
               ? `Разом до сплати: ${formatMoney(totalDue)}`
@@ -101,17 +101,27 @@ export const ChildFinancePage = () => {
           )}
         </Box>
         {canEdit && (
-          <Button variant="outlined" startIcon={<AddIcon />} onClick={() => setCreateChargeModal({ isOpen: true })}>
+          <Button
+            variant="outlined"
+            startIcon={<AddIcon />}
+            onClick={() => setCreateChargeModal({ isOpen: true })}
+            sx={{ flexGrow: { xs: 1, sm: 0 } }}
+          >
             Додати нарахування
           </Button>
         )}
         {canEdit && onlineEnabled && (
-          <Button variant="outlined" onClick={() => setLinkOpen(true)}>
+          <Button variant="outlined" onClick={() => setLinkOpen(true)} sx={{ flexGrow: { xs: 1, sm: 0 } }}>
             Посилання на оплату
           </Button>
         )}
         {canEdit && (
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreatePaymentModal({ isOpen: true })}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setCreatePaymentModal({ isOpen: true })}
+            sx={{ flexGrow: { xs: 1, sm: 0 } }}
+          >
             Внести оплату
           </Button>
         )}
@@ -119,7 +129,13 @@ export const ChildFinancePage = () => {
 
       <CategoryTiles categories={finance.categories} />
 
-      <Tabs value={tab} onChange={(_, value: string) => setSelected(value)} sx={{ mb: 2 }}>
+      <Tabs
+        value={tab}
+        onChange={(_, value: string) => setSelected(value)}
+        variant="scrollable"
+        allowScrollButtonsMobile
+        sx={{ mb: 2 }}
+      >
         {tabs.map((t) => (
           <Tab key={t.key} value={t.key} label={t.label} />
         ))}

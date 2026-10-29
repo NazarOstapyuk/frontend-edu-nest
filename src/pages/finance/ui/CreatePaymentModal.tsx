@@ -18,6 +18,7 @@ import {
   type ManualPaymentMethod,
   type SuggestionLine,
 } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const manualMethods: ManualPaymentMethod[] = ['cash', 'bank_transfer', 'card']
 
@@ -41,6 +42,7 @@ const today = () => {
 }
 
 export const CreatePaymentModal = () => {
+  const isPhone = useIsPhone()
   const finance = useChildFinanceStore((s) => s.finance)
   const { isOpen } = useChildFinanceStore((s) => s.createPaymentModal)
   const setCreatePaymentModal = useChildFinanceStore((s) => s.setCreatePaymentModal)
@@ -115,10 +117,10 @@ export const CreatePaymentModal = () => {
   const anyOver = watch('allocations').some((item, index) => isOver(index, item.amount))
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="md">
+    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="md" fullScreen={isPhone}>
       <DialogTitle sx={{ fontWeight: 700 }}>Внести оплату</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
           <Controller
             name="amount"
             control={control}
@@ -148,7 +150,7 @@ export const CreatePaymentModal = () => {
             )}
           />
         </Box>
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
           <Controller
             name="reference"
             control={control}

@@ -3,6 +3,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, TextField, Typography } from '@mui/material'
 import { useEnrollmentsStore } from '../model/enrollmentsStore'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const schema = yup.object({
   endDate: yup.string().required("Обов'язкове поле"),
@@ -11,6 +12,7 @@ const schema = yup.object({
 type FormValues = yup.InferType<typeof schema>
 
 export const EndEnrollmentModal = () => {
+  const isPhone = useIsPhone()
   const { isOpen, enrollment } = useEnrollmentsStore((s) => s.endEnrollmentModal)
   const setEndEnrollmentModal = useEnrollmentsStore((s) => s.setEndEnrollmentModal)
   const endEnrollment = useEnrollmentsStore((s) => s.endEnrollment)
@@ -34,7 +36,7 @@ export const EndEnrollmentModal = () => {
   }
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm" fullScreen={isPhone}>
       <DialogTitle sx={{ fontWeight: 700 }}>Завершити запис</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         <Typography variant="body2" color="text.secondary">

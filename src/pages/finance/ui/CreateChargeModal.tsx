@@ -10,6 +10,7 @@ import {
   normalizeAmount,
   type FinanceCategory,
 } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const schema = yup.object({
   category: yup.mixed<FinanceCategory>().oneOf(financeCategories).required("Обов'язкове поле"),
@@ -28,6 +29,7 @@ const schema = yup.object({
 type FormValues = yup.InferType<typeof schema>
 
 export const CreateChargeModal = () => {
+  const isPhone = useIsPhone()
   const finance = useChildFinanceStore((s) => s.finance)
   const { isOpen } = useChildFinanceStore((s) => s.createChargeModal)
   const setCreateChargeModal = useChildFinanceStore((s) => s.setCreateChargeModal)
@@ -58,7 +60,7 @@ export const CreateChargeModal = () => {
   }
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm" fullScreen={isPhone}>
       <DialogTitle sx={{ fontWeight: 700 }}>Нове нарахування</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         <Controller
@@ -86,7 +88,7 @@ export const CreateChargeModal = () => {
             <TextField {...field} label="Опис" fullWidth error={!!error} helperText={error?.message} />
           )}
         />
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
           <Controller
             name="periodStart"
             control={control}

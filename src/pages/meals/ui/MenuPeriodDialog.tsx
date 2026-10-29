@@ -3,8 +3,10 @@ import { Box, Button, Dialog, DialogTitle, Typography } from '@mui/material'
 import { useMealsStore } from '../model/mealsStore'
 import { InstitutionMultiSelect } from './InstitutionMultiSelect'
 import { addDaysIso, formatDay } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 export const MenuPeriodDialog = ({ mode, onClose }: { mode: 'publish' | 'unpublish'; onClose: () => void }) => {
+  const isPhone = useIsPhone()
   const current = useMealsStore((s) => s.menuInstitutionId)
   const start = useMealsStore((s) => s.menuStart)
   const weeks = useMealsStore((s) => s.menuWeeks)
@@ -17,7 +19,7 @@ export const MenuPeriodDialog = ({ mode, onClose }: { mode: 'publish' | 'unpubli
   const submit = () => (publishing ? publishPeriod(ids) : unpublishPeriod(ids)).then(onClose).catch(() => undefined)
 
   return (
-    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog fullScreen={isPhone} open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle sx={{ fontWeight: 700 }}>{publishing ? 'Опублікувати період' : 'Зняти публікацію'}</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: '20px' }}>
         <Typography variant="body2" color="text.secondary">

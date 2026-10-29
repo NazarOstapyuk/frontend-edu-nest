@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { Alert, Autocomplete, Box, Button, Dialog, DialogTitle, MenuItem, TextField, Typography } from '@mui/material'
 import { useMealsStore } from '../model/mealsStore'
 import { mealsApi, type Child, type MenuDayView } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 export const AdminOrderDialog = ({ onClose }: { onClose: () => void }) => {
+  const isPhone = useIsPhone()
   const children = useMealsStore((s) => s.children)
   const complexes = useMealsStore((s) => s.complexes)
   const ordersDate = useMealsStore((s) => s.ordersDate)
@@ -51,7 +53,7 @@ export const AdminOrderDialog = ({ onClose }: { onClose: () => void }) => {
       : undefined
 
   return (
-    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog fullScreen={isPhone} open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle sx={{ fontWeight: 700 }}>Нове замовлення</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: '20px' }}>
         <Autocomplete

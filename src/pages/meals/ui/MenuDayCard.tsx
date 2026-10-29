@@ -2,6 +2,7 @@ import { Box, Button, Chip, Paper, Tooltip, Typography } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import RestaurantOutlinedIcon from '@mui/icons-material/RestaurantOutlined'
 import type { MealComplex, MenuDayView } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { groupDishesByCourse } from '../model/dayDishes'
 import { complexAvailability, dayState, longDate, weekdayNames } from '../model/menuDay'
 import { ComplexChips } from './ComplexChips'
@@ -27,6 +28,7 @@ interface MenuDayCardProps {
 }
 
 export const MenuDayCard = ({ day, weekdayIndex, isToday, compact, canEdit, complexes, onOpen }: MenuDayCardProps) => {
+  const isPhone = useIsPhone()
   const state = dayState(day)
   const clickable = canEdit && day.working
   const rows = groupDishesByCourse(day.menu?.dishes ?? [])
@@ -37,21 +39,23 @@ export const MenuDayCard = ({ day, weekdayIndex, isToday, compact, canEdit, comp
       <Box
         sx={{
           borderRadius: 1.5,
-          minHeight: compact ? 96 : 220,
-          px: 1,
-          py: 1.5,
+          minHeight: isPhone ? 44 : compact ? 96 : 220,
+          px: isPhone ? 1.5 : 1,
+          py: isPhone ? 1 : 1.5,
           display: 'flex',
-          flexDirection: 'column',
+          flexDirection: isPhone ? 'row' : 'column',
           alignItems: 'center',
-          gap: 0.5,
+          gap: isPhone ? 1.5 : 0.5,
           color: 'text.disabled',
           backgroundImage: 'repeating-linear-gradient(135deg, rgba(0,0,0,0.035) 0 6px, transparent 6px 12px)',
           border: '1px solid',
           borderColor: 'divider',
         }}
       >
-        <Typography variant="body2" sx={{ fontWeight: 600 }}>{weekdayNames[weekdayIndex].slice(0, 2)}</Typography>
-        <Typography variant="caption" sx={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          {isPhone ? `${weekdayNames[weekdayIndex]}, ${longDate(day.date)}` : weekdayNames[weekdayIndex].slice(0, 2)}
+        </Typography>
+        <Typography variant="caption" sx={isPhone ? undefined : { writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
           {day.title ?? 'Вихідний'}
         </Typography>
       </Box>
@@ -79,7 +83,7 @@ export const MenuDayCard = ({ day, weekdayIndex, isToday, compact, canEdit, comp
         borderColor: isToday ? 'primary.main' : 'divider',
         boxShadow: isToday ? (t) => `0 0 0 1px ${t.palette.primary.main}` : 'none',
         bgcolor: state === 'off' ? 'grey.50' : 'background.paper',
-        minHeight: compact ? 96 : 220,
+        minHeight: isPhone ? 0 : compact ? 96 : 220,
         display: 'flex',
         flexDirection: 'column',
         cursor: clickable ? 'pointer' : 'default',

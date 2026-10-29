@@ -1,6 +1,7 @@
 import { Box, Paper, Tooltip, Typography } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import type { MealComplex } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import type { DayDishRow } from '../model/dayDishes'
 import { availabilityFor, weekdayNames } from '../model/menuDay'
 import { ComplexChips } from './ComplexChips'
@@ -17,6 +18,7 @@ interface TemplateDayCardProps {
 }
 
 export const TemplateDayCard = ({ weekdayIndex, rows, courseIds, narrow, canEdit, complexes, onOpen }: TemplateDayCardProps) => {
+  const isPhone = useIsPhone()
   const empty = rows.length === 0
   const name = weekdayNames[weekdayIndex]
   const keyboard = (e: React.KeyboardEvent) => {
@@ -37,10 +39,11 @@ export const TemplateDayCard = ({ weekdayIndex, rows, courseIds, narrow, canEdit
           aria-label={`${name}: додати страви`}
           sx={{
             borderRadius: 1.5,
-            minHeight: 200,
+            minHeight: isPhone ? 48 : 200,
             py: 1.5,
             display: 'flex',
-            flexDirection: 'column',
+            flexDirection: isPhone ? 'row' : 'column',
+            justifyContent: isPhone ? 'center' : undefined,
             alignItems: 'center',
             gap: 1,
             color: 'text.disabled',
@@ -52,8 +55,9 @@ export const TemplateDayCard = ({ weekdayIndex, rows, courseIds, narrow, canEdit
             '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 2 },
           }}
         >
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>{name.slice(0, 2)}</Typography>
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>{isPhone ? name : name.slice(0, 2)}</Typography>
           {canEdit && <AddIcon fontSize="small" />}
+          {isPhone && canEdit && <Typography variant="body2">Додати страви</Typography>}
         </Box>
       </Tooltip>
     )

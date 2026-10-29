@@ -9,12 +9,14 @@ import { InstitutionMultiSelect } from './InstitutionMultiSelect'
 import { longDate } from '../model/menuDay'
 import { useNotifyStore } from '../../../shared/model/notifyStore'
 import { addDaysIso, weekStart } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const weeksLabel = (n: number) => (n === 1 ? '1 тиждень' : n < 5 ? `${n} тижні` : `${n} тижнів`)
 
 const PREVIEW_LIMIT = 8
 
 export const ApplyTemplateDialog = ({ onClose }: { onClose: () => void }) => {
+  const isPhone = useIsPhone()
   const templates = useMealsStore((s) => s.templates)
   const current = useMealsStore((s) => s.menuInstitutionId)
   const menuStart = useMealsStore((s) => s.menuStart)
@@ -53,7 +55,7 @@ export const ApplyTemplateDialog = ({ onClose }: { onClose: () => void }) => {
       .catch(() => undefined)
 
   return (
-    <Dialog open fullWidth maxWidth="md">
+    <Dialog fullScreen={isPhone} open fullWidth maxWidth="md">
       <DialogTitle sx={{ fontWeight: 700, pr: 7 }}>
         Заповнити меню з шаблону
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -134,7 +136,7 @@ export const ApplyTemplateDialog = ({ onClose }: { onClose: () => void }) => {
                     {mondays.slice(0, PREVIEW_LIMIT).map((monday, i) => (
                       <Box
                         key={monday}
-                        sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 1.5, py: 0.75, borderTop: i ? '1px solid' : 0, borderColor: 'divider', bgcolor: i % 2 ? 'grey.50' : 'background.paper' }}
+                        sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 1.5, py: 0.75, flexWrap: 'wrap', borderTop: i ? '1px solid' : 0, borderColor: 'divider', bgcolor: i % 2 ? 'grey.50' : 'background.paper' }}
                       >
                         <Typography variant="body2" sx={{ flex: 1 }}>
                           {longDate(monday)} – {longDate(addDaysIso(monday, 6))}

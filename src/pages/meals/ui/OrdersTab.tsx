@@ -7,11 +7,14 @@ import { useMealsStore } from '../model/mealsStore'
 import { CancelOrderDialog } from './CancelOrderDialog'
 import { AdminOrderDialog } from './AdminOrderDialog'
 import { useCan } from '../../../entities/user'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardField, CardList } from '../../../shared/ui/CardList'
 import { groupKindLabels, groupKinds, type AdminMealOrder, type GroupKind } from '../../../shared/api'
 
 const roleLabel = (role: string) => (role === 'parent' ? 'батьки' : 'адміністратор')
 
 export const OrdersTab = () => {
+  const isPhone = useIsPhone()
   const canEdit = useCan('meals', 'edit')
   const date = useMealsStore((s) => s.ordersDate)
   const kind = useMealsStore((s) => s.ordersKind)
@@ -42,8 +45,12 @@ export const OrdersTab = () => {
           <MenuItem value="">Усі</MenuItem>
           {groups.filter((g) => !kind || g.kind === kind).map((g) => <MenuItem key={g.id} value={g.id}>{g.name}</MenuItem>)}
         </TextField>
-        <Box sx={{ flex: 1 }} />
-        {canEdit && <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreating(true)}>Замовлення</Button>}
+        <Box sx={{ flex: 1, display: { xs: 'none', sm: 'block' } }} />
+        {canEdit && (
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreating(true)} sx={{ width: { xs: '100%', sm: 'auto' } }}>
+            Замовлення
+          </Button>
+        )}
       </Box>
 
       {failed && key === `${date}/${kind}/${groupId}` ? (
@@ -67,6 +74,37 @@ export const OrdersTab = () => {
               </>
             )}
           </Paper>
+          {isPhone ? (
+            <CardList
+              items={orders}
+              getKey={(o) => o.id}
+              empty={<Typography color="text.secondary">Замовлень немає.</Typography>}
+              renderCard={(o) => (
+                <Box sx={{ opacity: o.cancelledAt ? 0.7 : 1 }}>
+                  <Typography sx={{ fontWeight: 600, mb: 0.5 }}>{o.child.lastName} {o.child.firstName}</Typography>
+                  <CardField label="Група">{o.group?.name ?? '—'}</CardField>
+                  <CardField label="Комплекс">{o.complex.name}</CardField>
+                  <CardField label="Страви">{o.items.map((i) => i.dishName).join(', ')}</CardField>
+                  <CardField label="Ціна">{o.price} грн</CardField>
+                  <CardField label="Замовив">{o.createdBy.lastName} {o.createdBy.firstName} ({roleLabel(o.createdBy.role)})</CardField>
+                  <Box sx={{ mt: 0.75 }}>
+                    {o.cancelledAt ? (
+                      <Typography variant="body2" color="text.secondary">
+                        Скасовано{o.cancelReason ? `: ${o.cancelReason}` : ''}{o.cancelledBy ? ` (${o.cancelledBy.lastName} ${o.cancelledBy.firstName})` : ''}
+                      </Typography>
+                    ) : (
+                      <Chip size="small" color="success" label="Активне" />
+                    )}
+                  </Box>
+                  {canEdit && !o.cancelledAt && (
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 1 }}>
+                      <Button color="error" sx={{ minHeight: 40 }} onClick={() => setCancelling(o)}>Скасувати</Button>
+                    </Box>
+                  )}
+                </Box>
+              )}
+            />
+          ) : (
           <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflowX: 'auto' }}>
             <Table size="small">
               <TableHead>
@@ -109,6 +147,7 @@ export const OrdersTab = () => {
               </TableBody>
             </Table>
           </Paper>
+          )}
         </>
       )}
       {cancelling && <CancelOrderDialog order={cancelling} onClose={() => setCancelling(null)} />}

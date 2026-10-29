@@ -3,6 +3,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, TextField } from '@mui/material'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const schema = yup.object({
   name: yup.string().trim().required("Обов'язкове поле").max(100, 'Максимум 100 символів'),
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export const SortedNameDialog = ({ open, title, initial, isSaving, onClose, onSubmit }: Props) => {
+  const isPhone = useIsPhone()
   const { control, handleSubmit, reset } = useForm<FormValues>({
     mode: 'all',
     defaultValues: initial,
@@ -37,7 +39,7 @@ export const SortedNameDialog = ({ open, title, initial, isSaving, onClose, onSu
   }
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog fullScreen={isPhone} open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle sx={{ fontWeight: 700 }}>{title}</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: '20px' }}>
         <Controller

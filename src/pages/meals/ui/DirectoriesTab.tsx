@@ -84,6 +84,7 @@ export const DirectoriesTab = () => {
         value={section}
         onChange={(_, v: Section) => setSection(v)}
         variant="scrollable"
+        allowScrollButtonsMobile
         sx={{ mb: 2.5, minHeight: 40, borderBottom: '1px solid', borderColor: 'divider', '& .MuiTab-root': { minHeight: 40, textTransform: 'none', fontWeight: 600 } }}
       >
         <Tab value="dishes" label={`Страви (${dishes.length})`} />

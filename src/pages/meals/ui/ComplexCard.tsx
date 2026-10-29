@@ -9,6 +9,8 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 import { useMealsStore } from '../model/mealsStore'
 import { formatDay, type MealComplex, type MealCourse } from '../../../shared/api'
 import { categoryPrices } from '../model/prices'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardField, CardList } from '../../../shared/ui/CardList'
 
 interface ComplexCardProps {
   complex: MealComplex
@@ -20,6 +22,7 @@ interface ComplexCardProps {
 }
 
 export const ComplexCard = ({ complex, categories, today, canEdit, onEdit, onAddPrice }: ComplexCardProps) => {
+  const isPhone = useIsPhone()
   const saveComplex = useMealsStore((s) => s.saveComplex)
   const deletePrice = useMealsStore((s) => s.deletePrice)
   const isSaving = useMealsStore((s) => s.isSaving)
@@ -61,6 +64,34 @@ export const ComplexCard = ({ complex, categories, today, canEdit, onEdit, onAdd
         )}
       </Box>
 
+      {isPhone ? (
+        <Box sx={{ borderTop: '1px solid', borderColor: 'divider', p: 1.5 }}>
+          <CardList
+            items={shownCategories}
+            getKey={(c) => c.id}
+            empty={<Typography variant="body2" color="text.secondary">Спочатку створіть цінові категорії.</Typography>}
+            renderCard={(category) => {
+              const { current, next } = categoryPrices(complex.prices, category.id, today)
+              return (
+                <>
+                  <Typography sx={{ fontWeight: 600, mb: 0.5 }}>{category.name}</Typography>
+                  <CardField label="Ціна зараз">
+                    <Box component="span" sx={{ fontWeight: 600, color: current ? 'text.primary' : 'warning.dark' }}>
+                      {current ? `${current.price} грн` : 'не задано'}
+                    </Box>
+                  </CardField>
+                  <CardField label="Наступна зміна">{next ? `${next.price} грн з ${formatDay(next.validFrom)}` : '—'}</CardField>
+                  {canEdit && (
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 0.5 }}>
+                      <Button sx={{ minHeight: 40 }} onClick={() => onAddPrice(category.id)}>Змінити</Button>
+                    </Box>
+                  )}
+                </>
+              )
+            }}
+          />
+        </Box>
+      ) : (
       <Table size="small" sx={{ borderTop: '1px solid', borderColor: 'divider' }}>
         <TableHead>
           <TableRow sx={{ '& th': { fontWeight: 600, color: 'text.secondary', bgcolor: 'grey.50' } }}>
@@ -98,6 +129,7 @@ export const ComplexCard = ({ complex, categories, today, canEdit, onEdit, onAdd
           )}
         </TableBody>
       </Table>
+      )}
 
       {complex.prices.length > 0 && (
         <>
@@ -117,6 +149,33 @@ export const ComplexCard = ({ complex, categories, today, canEdit, onEdit, onAdd
             Історія цін ({complex.prices.length})
           </Box>
           <Collapse in={history} unmountOnExit>
+            {isPhone ? (
+              <Box sx={{ p: 1.5 }}>
+                <CardList
+                  items={sortedHistory}
+                  getKey={(p) => p.id}
+                  renderCard={(p) => (
+                    <>
+                      <Typography sx={{ fontWeight: 600, mb: 0.5 }}>{p.priceCategoryName}</Typography>
+                      <CardField label="Ціна">{p.price} грн</CardField>
+                      <CardField label="Діє">з {formatDay(p.validFrom)}</CardField>
+                      {canEdit && p.validFrom.slice(0, 10) > today && (
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 0.5 }}>
+                          <IconButton
+                            sx={{ width: 40, height: 40 }}
+                            disabled={isSaving}
+                            aria-label="Видалити майбутню ціну"
+                            onClick={() => deletePrice(complex.id, p.id).catch(() => undefined)}
+                          >
+                            <DeleteOutlineIcon fontSize="small" />
+                          </IconButton>
+                        </Box>
+                      )}
+                    </>
+                  )}
+                />
+              </Box>
+            ) : (
             <Table size="small">
               <TableBody>
                 {sortedHistory.map((p) => (
@@ -137,6 +196,7 @@ export const ComplexCard = ({ complex, categories, today, canEdit, onEdit, onAdd
                 ))}
               </TableBody>
             </Table>
+            )}
           </Collapse>
         </>
       )}

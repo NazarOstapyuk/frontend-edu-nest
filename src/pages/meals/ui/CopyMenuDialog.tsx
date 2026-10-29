@@ -4,8 +4,10 @@ import { useMealsStore } from '../model/mealsStore'
 import { InstitutionMultiSelect } from './InstitutionMultiSelect'
 import { useNotifyStore } from '../../../shared/model/notifyStore'
 import { addDaysIso } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 export const CopyMenuDialog = ({ onClose }: { onClose: () => void }) => {
+  const isPhone = useIsPhone()
   const current = useMealsStore((s) => s.menuInstitutionId)
   const menuStart = useMealsStore((s) => s.menuStart)
   const menuWeeks = useMealsStore((s) => s.menuWeeks)
@@ -28,10 +30,10 @@ export const CopyMenuDialog = ({ onClose }: { onClose: () => void }) => {
       .catch(() => undefined)
 
   return (
-    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog fullScreen={isPhone} open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle sx={{ fontWeight: 700 }}>Копіювати меню</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: '20px' }}>
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
           <TextField type="date" label="Звідки: з" value={fromStart} onChange={(e) => setFromStart(e.target.value)} slotProps={{ inputLabel: { shrink: true } }} fullWidth />
           <TextField type="date" label="по" value={fromEnd} onChange={(e) => setFromEnd(e.target.value)} slotProps={{ inputLabel: { shrink: true } }} fullWidth />
         </Box>

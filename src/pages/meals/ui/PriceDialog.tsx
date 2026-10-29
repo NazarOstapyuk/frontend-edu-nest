@@ -6,6 +6,7 @@ import { Box, Button, Dialog, DialogTitle, MenuItem, TextField } from '@mui/mate
 import { useMealsStore } from '../model/mealsStore'
 import { localToday, type MealComplex } from '../../../shared/api'
 import { categoryPrices } from '../model/prices'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const schema = yup.object({
   priceCategoryId: yup.string().required("Обов'язкове поле"),
@@ -31,6 +32,7 @@ export const PriceDialog = ({
   presetCategoryId?: string | null
   onClose: () => void
 }) => {
+  const isPhone = useIsPhone()
   const categories = useMealsStore((s) => s.priceCategories)
   const isSaving = useMealsStore((s) => s.isSaving)
   const addPrice = useMealsStore((s) => s.addPrice)
@@ -51,7 +53,7 @@ export const PriceDialog = ({
   }
 
   return (
-    <Dialog open={complex !== null} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog fullScreen={isPhone} open={complex !== null} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle sx={{ fontWeight: 700 }}>Ціна комплексу «{complex?.name}»</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: '20px' }}>
         <Controller

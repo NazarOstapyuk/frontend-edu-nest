@@ -5,8 +5,10 @@ import { useMealsStore } from '../model/mealsStore'
 import { DishPicker } from './DishPicker'
 import { InstitutionMultiSelect } from './InstitutionMultiSelect'
 import { formatDay, menuStatusLabels, type MenuDayView } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 export const MenuDayDialog = ({ day, onClose }: { day: MenuDayView; onClose: () => void }) => {
+  const isPhone = useIsPhone()
   const isSaving = useMealsStore((s) => s.isSaving)
   const current = useMealsStore((s) => s.menuInstitutionId)
   const saveMenuDay = useMealsStore((s) => s.saveMenuDay)
@@ -20,6 +22,7 @@ export const MenuDayDialog = ({ day, onClose }: { day: MenuDayView; onClose: () 
 
   return (
     <Dialog
+      fullScreen={isPhone}
       open
       fullWidth
       maxWidth="sm"
@@ -36,7 +39,7 @@ export const MenuDayDialog = ({ day, onClose }: { day: MenuDayView; onClose: () 
         )}
         <DishPicker value={selected} onChange={setSelected} />
         <InstitutionMultiSelect label="Також для закладів" value={institutionIds} onChange={setInstitutionIds} currentId={current} lockCurrent />
-        <Box sx={{ display: 'flex', gap: '10px' }}>
+        <Box sx={{ display: 'flex', flexWrap: { xs: 'wrap', sm: 'nowrap' }, gap: '10px' }}>
           {day.menu?.status === 'draft' && (
             <Button color="error" onClick={remove} disabled={isSaving} sx={{ width: '100%' }}>Видалити чернетку</Button>
           )}

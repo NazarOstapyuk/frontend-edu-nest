@@ -5,6 +5,7 @@ import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, MenuItem, TextField } from '@mui/material'
 import { useMealsStore } from '../model/mealsStore'
 import type { Dish } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const schema = yup.object({
   name: yup.string().trim().required("Обов'язкове поле").max(150, 'Максимум 150 символів'),
@@ -25,6 +26,7 @@ export const DishDialog = ({
   open: boolean
   onClose: () => void
 }) => {
+  const isPhone = useIsPhone()
   const courses = useMealsStore((s) => s.courses)
   const isSaving = useMealsStore((s) => s.isSaving)
   const saveDish = useMealsStore((s) => s.saveDish)
@@ -55,7 +57,7 @@ export const DishDialog = ({
   }
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog fullScreen={isPhone} open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle sx={{ fontWeight: 700 }}>{dish ? 'Страва' : 'Нова страва'}</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: '20px' }}>
         <Controller

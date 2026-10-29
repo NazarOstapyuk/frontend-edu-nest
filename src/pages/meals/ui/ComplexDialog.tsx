@@ -5,6 +5,7 @@ import * as yup from 'yup'
 import { Autocomplete, Box, Button, Dialog, DialogTitle, TextField } from '@mui/material'
 import { useMealsStore } from '../model/mealsStore'
 import type { MealComplex } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const schema = yup.object({
   name: yup.string().trim().required("Обов'язкове поле").max(100, 'Максимум 100 символів'),
@@ -16,6 +17,7 @@ const schema = yup.object({
 type FormValues = yup.InferType<typeof schema>
 
 export const ComplexDialog = ({ complex, open, onClose }: { complex: MealComplex | null; open: boolean; onClose: () => void }) => {
+  const isPhone = useIsPhone()
   const courses = useMealsStore((s) => s.courses)
   const isSaving = useMealsStore((s) => s.isSaving)
   const saveComplex = useMealsStore((s) => s.saveComplex)
@@ -47,7 +49,7 @@ export const ComplexDialog = ({ complex, open, onClose }: { complex: MealComplex
   }
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog fullScreen={isPhone} open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle sx={{ fontWeight: 700 }}>{complex ? 'Комплекс' : 'Новий комплекс'}</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: '20px' }}>
         <Controller

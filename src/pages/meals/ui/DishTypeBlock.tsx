@@ -21,6 +21,8 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 import { useMealsStore } from '../model/mealsStore'
 import type { Dish, MealCourse } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardField, CardList } from '../../../shared/ui/CardList'
 
 interface DishTypeBlockProps {
   course: MealCourse
@@ -32,6 +34,7 @@ interface DishTypeBlockProps {
 }
 
 export const DishTypeBlock = ({ course, dishes, canEdit, onAdd, onEdit, forceExpanded = false }: DishTypeBlockProps) => {
+  const isPhone = useIsPhone()
   const saveDish = useMealsStore((s) => s.saveDish)
   const [open, setExpanded] = useState(false)
   const expanded = forceExpanded || open
@@ -66,6 +69,37 @@ export const DishTypeBlock = ({ course, dishes, canEdit, onAdd, onEdit, forceExp
 
       <Collapse in={expanded} unmountOnExit>
         <Box sx={{ borderTop: '1px solid', borderColor: 'divider', overflowX: 'auto' }}>
+          {isPhone ? (
+            <Box sx={{ p: 1.5 }}>
+              <CardList
+                items={paged}
+                getKey={(d) => d.id}
+                empty={<Typography variant="body2" color="text.secondary">Страв цього типу ще немає.</Typography>}
+                renderCard={(d) => (
+                  <Box sx={{ opacity: d.active ? 1 : 0.6 }}>
+                    <Typography sx={{ fontWeight: 600 }}>{d.name}</Typography>
+                    {d.description && <Typography variant="body2" color="text.secondary">{d.description}</Typography>}
+                    <CardField label="Активна">
+                      <Switch
+                        size="small"
+                        checked={d.active}
+                        disabled={!canEdit}
+                        onChange={(e) => saveDish(d.id, { active: e.target.checked }).catch(() => undefined)}
+                        slotProps={{ input: { 'aria-label': `${d.name}: активна` } }}
+                      />
+                    </CardField>
+                    {canEdit && (
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 0.5 }}>
+                        <IconButton sx={{ width: 40, height: 40 }} onClick={() => onEdit(d)} aria-label={`Редагувати ${d.name}`}>
+                          <EditOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    )}
+                  </Box>
+                )}
+              />
+            </Box>
+          ) : (
           <Table size="small">
             <TableHead>
               <TableRow sx={{ '& th': { fontWeight: 700, bgcolor: 'grey.50' } }}>
@@ -104,13 +138,14 @@ export const DishTypeBlock = ({ course, dishes, canEdit, onAdd, onEdit, forceExp
               )}
             </TableBody>
           </Table>
+          )}
           {dishes.length > 0 && (
             <TablePagination
               component="div"
               count={dishes.length}
               page={currentPage}
               rowsPerPage={rowsPerPage}
-              rowsPerPageOptions={[10, 25, 50, 100]}
+              rowsPerPageOptions={isPhone ? [] : [10, 25, 50, 100]}
               onPageChange={(_, next) => setPage(next)}
               onRowsPerPageChange={(e) => {
                 setRowsPerPage(Number(e.target.value))

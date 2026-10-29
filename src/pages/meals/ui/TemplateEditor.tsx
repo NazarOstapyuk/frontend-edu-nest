@@ -8,6 +8,7 @@ import { groupDishesByCourse } from '../model/dayDishes'
 import { weekdayNames } from '../model/menuDay'
 import { useCan } from '../../../entities/user'
 import type { MenuTemplate } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 type Item = { week: number; weekday: number; dishId: string }
 
@@ -17,6 +18,7 @@ const ALL_DAYS = [1, 2, 3, 4, 5, 6, 7]
 const toItems = (template: MenuTemplate): Item[] => template.items.map(({ week, weekday, dishId }) => ({ week, weekday, dishId }))
 
 export const TemplateEditor = ({ template }: { template: MenuTemplate }) => {
+  const isPhone = useIsPhone()
   const canEdit = useCan('meals', 'edit')
   const dishes = useMealsStore((s) => s.dishes)
   const courses = useMealsStore((s) => s.courses)
@@ -73,7 +75,7 @@ export const TemplateEditor = ({ template }: { template: MenuTemplate }) => {
               </Typography>
             </Box>
             <Box sx={{ overflowX: 'auto', pb: 0.5 }}>
-              <Box sx={{ display: 'grid', gridTemplateColumns: columns, gap: 1.25, minWidth: 'min-content' }}>
+              <Box sx={{ display: 'grid', gridTemplateColumns: isPhone ? '1fr' : columns, gap: 1.25, minWidth: isPhone ? 0 : 'min-content' }}>
                 {ALL_DAYS.map((d) => {
                   const list = dayDishes(week, d)
                   return (
@@ -121,7 +123,7 @@ export const TemplateEditor = ({ template }: { template: MenuTemplate }) => {
         </Paper>
       )}
 
-      <Dialog open={cell !== null} fullWidth maxWidth="sm">
+      <Dialog fullScreen={isPhone} open={cell !== null} fullWidth maxWidth="sm">
         <DialogTitle sx={{ fontWeight: 700, pr: 7 }}>
           Тиждень {cell?.week}, {cell ? weekdayNames[cell.weekday - 1].toLowerCase() : ''}
           <IconButton aria-label="Закрити" onClick={() => setCell(null)} sx={{ position: 'absolute', right: 12, top: 12 }}>

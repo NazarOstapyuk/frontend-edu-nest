@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { Box, Button, Dialog, DialogTitle, TextField, Typography } from '@mui/material'
 import { useMealsStore } from '../model/mealsStore'
 import { formatDay, type AdminMealOrder } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 export const CancelOrderDialog = ({ order, onClose }: { order: AdminMealOrder; onClose: () => void }) => {
+  const isPhone = useIsPhone()
   const isSaving = useMealsStore((s) => s.isSaving)
   const cancelOrder = useMealsStore((s) => s.cancelOrder)
   const [reason, setReason] = useState('')
@@ -11,7 +13,7 @@ export const CancelOrderDialog = ({ order, onClose }: { order: AdminMealOrder; o
   const submit = () => cancelOrder(order.id, reason.trim() || undefined).then(onClose).catch(() => undefined)
 
   return (
-    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog fullScreen={isPhone} open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle sx={{ fontWeight: 700 }}>Скасувати замовлення</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: '20px' }}>
         <Typography>

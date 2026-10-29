@@ -125,6 +125,7 @@ export const MarkLessonPage = () => {
                 <ToggleButtonGroup
                   exclusive
                   fullWidth
+                  orientation="vertical"
                   value={draft[row.child.id] ?? null}
                   onChange={(_, value: AttendanceStatus | null) => {
                     if (value) setStatus(row.child.id, value)

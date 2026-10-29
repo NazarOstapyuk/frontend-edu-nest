@@ -1,4 +1,4 @@
-import { useForm, Controller } from 'react-hook-form'
+import { useForm, useWatch, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, MenuItem, TextField } from '@mui/material'
@@ -22,14 +22,30 @@ export const BuyPackageModal = () => {
   const tariffs = usePackagesStore((s) => s.tariffs)
   const purchase = usePackagesStore((s) => s.purchase)
   const isSaving = usePackagesStore((s) => s.isSaving)
-  const packageTariffs = tariffs.filter((t) => t.unit === 'package' && t.isActive)
   const activeDirections = directions.filter((d) => d.isActive)
 
-  const { control, handleSubmit, reset } = useForm<FormValues>({
+  const { control, handleSubmit, reset, setValue } = useForm<FormValues>({
     mode: 'all',
     defaultValues: { directionId: '', tariffId: '', purchaseDate: localToday() },
     resolver: yupResolver(schema),
   })
+  const directionId = useWatch({ control, name: 'directionId' })
+  const allPackageTariffs = tariffs.filter((t) => t.unit === 'package' && t.isActive)
+  const tariffsOf = (id: string) => {
+    const linked = new Set(
+      (directions.find((d) => d.id === id)?.groups ?? [])
+        .filter((g) => g.isActive && g.packageTariff)
+        .map((g) => g.packageTariff!.id),
+    )
+    const own = allPackageTariffs.filter((t) => linked.has(t.id))
+    return own.length > 0 ? own : allPackageTariffs
+  }
+  const packageTariffs = directionId ? tariffsOf(directionId) : []
+
+  const selectDirection = (id: string) => {
+    const options = tariffsOf(id)
+    setValue('tariffId', options.length === 1 ? options[0].id : '', { shouldValidate: options.length === 1 })
+  }
 
   const handleClose = () => {
     reset({ directionId: '', tariffId: '', purchaseDate: localToday() })
@@ -49,7 +65,18 @@ export const BuyPackageModal = () => {
           name="directionId"
           control={control}
           render={({ field, fieldState: { error } }) => (
-            <TextField {...field} select label="Напрям" fullWidth error={!!error} helperText={error?.message}>
+            <TextField
+              {...field}
+              onChange={(e) => {
+                field.onChange(e)
+                selectDirection(e.target.value)
+              }}
+              select
+              label="Напрям"
+              fullWidth
+              error={!!error}
+              helperText={error?.message}
+            >
               {activeDirections.map((d) => (
                 <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>
               ))}
@@ -60,7 +87,15 @@ export const BuyPackageModal = () => {
           name="tariffId"
           control={control}
           render={({ field, fieldState: { error } }) => (
-            <TextField {...field} select label="Тариф пакета" fullWidth error={!!error} helperText={error?.message}>
+            <TextField
+              {...field}
+              select
+              label="Тариф пакета"
+              fullWidth
+              disabled={!directionId}
+              error={!!error}
+              helperText={error?.message ?? (directionId ? undefined : 'Спершу оберіть напрям')}
+            >
               {packageTariffs.map((t) => (
                 <MenuItem key={t.id} value={t.id}>
                   {t.name}

@@ -70,14 +70,14 @@ export const BellScheduleModal = ({ open, schedule, onClose }: { open: boolean; 
               name={`periods.${i}.startTime`}
               control={control}
               render={({ field, fieldState: { error } }) => (
-                <TextField {...field} type="time" size="small" label="Початок" sx={{ flex: 1, minWidth: 0 }} slotProps={{ inputLabel: { shrink: true } }} error={!!error} helperText={error?.message} />
+                <TextField {...field} type="time" size="small" label="Початок" sx={{ flex: { xs: 1, sm: '0 1 auto' }, minWidth: 0 }} slotProps={{ inputLabel: { shrink: true } }} error={!!error} helperText={error?.message} />
               )}
             />
             <Controller
               name={`periods.${i}.endTime`}
               control={control}
               render={({ field, fieldState: { error } }) => (
-                <TextField {...field} type="time" size="small" label="Кінець" sx={{ flex: 1, minWidth: 0 }} slotProps={{ inputLabel: { shrink: true } }} error={!!error} helperText={error?.message} />
+                <TextField {...field} type="time" size="small" label="Кінець" sx={{ flex: { xs: 1, sm: '0 1 auto' }, minWidth: 0 }} slotProps={{ inputLabel: { shrink: true } }} error={!!error} helperText={error?.message} />
               )}
             />
             <IconButton size="small" disabled={fields.length === 1} onClick={() => remove(i)}><DeleteOutlineIcon fontSize="small" /></IconButton>

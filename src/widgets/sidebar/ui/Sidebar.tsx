@@ -10,6 +10,8 @@ import {
   ListItemText,
   Typography,
   Divider,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import SchoolIcon from '@mui/icons-material/School'
 import { navItems, bottomNavItems } from '../model/nav-items'
@@ -53,7 +55,14 @@ const NavButton = ({ item }: { item: NavItem }) => {
   )
 }
 
-export const Sidebar = () => {
+interface SidebarProps {
+  mobileOpen: boolean
+  onClose: () => void
+}
+
+export const Sidebar = ({ mobileOpen, onClose }: SidebarProps) => {
+  const theme = useTheme()
+  const isNarrow = useMediaQuery(theme.breakpoints.down('md'))
   const profile = useAuthStore((s) => s.profile)
   const role = profile?.role as SessionRole | undefined
   const canSeeRegister = canAccess(profile, 'register', 'view')
@@ -69,9 +78,12 @@ export const Sidebar = () => {
 
   return (
     <Drawer
-      variant="permanent"
+      variant={isNarrow ? 'temporary' : 'permanent'}
+      open={isNarrow ? mobileOpen : true}
+      onClose={onClose}
+      onClick={isNarrow ? onClose : undefined}
       sx={{
-        width: SIDEBAR_WIDTH,
+        width: isNarrow ? 'auto' : SIDEBAR_WIDTH,
         flexShrink: 0,
         '& .MuiDrawer-paper': {
           width: SIDEBAR_WIDTH,

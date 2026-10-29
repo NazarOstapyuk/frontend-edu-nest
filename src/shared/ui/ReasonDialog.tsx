@@ -1,6 +1,7 @@
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
+import { useIsPhone } from '../lib/useIsPhone'
 import { Box, Button, Dialog, DialogTitle, TextField, Typography } from '@mui/material'
 
 const schema = yup.object({
@@ -28,6 +29,7 @@ export const ReasonDialog = ({
   onClose,
   onSubmit,
 }: ReasonDialogProps) => {
+  const isPhone = useIsPhone()
   const { control, handleSubmit, reset } = useForm<FormValues>({
     mode: 'all',
     defaultValues: { reason: '' },
@@ -45,7 +47,7 @@ export const ReasonDialog = ({
   }
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm" fullScreen={isPhone}>
       <DialogTitle sx={{ fontWeight: 700 }}>{title}</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         {subtitle && (

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { AppBar, Avatar, Box, Menu, MenuItem, Toolbar, Typography } from '@mui/material'
+import { AppBar, Avatar, Box, IconButton, Menu, MenuItem, Toolbar, Typography } from '@mui/material'
+import MenuIcon from '@mui/icons-material/Menu'
 import { useAuthStore } from '../../../entities/user'
 import { SIDEBAR_WIDTH } from '../../sidebar/ui/Sidebar'
 import { InstitutionSwitcher } from './InstitutionSwitcher'
@@ -30,7 +31,11 @@ const pageTitles: Record<string, string> = {
 
 const roleCaption = { root: 'Адміністратор', admin: 'Адміністратор', teacher: 'Педагог', parent: 'Батьки' } as const
 
-export const Header = () => {
+interface HeaderProps {
+  onMenuClick: () => void
+}
+
+export const Header = ({ onMenuClick }: HeaderProps) => {
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const profile = useAuthStore((s) => s.profile)
@@ -53,16 +58,19 @@ export const Header = () => {
       position="fixed"
       elevation={0}
       sx={{
-        width: `calc(100% - ${SIDEBAR_WIDTH}px)`,
-        ml: `${SIDEBAR_WIDTH}px`,
+        width: { xs: '100%', md: `calc(100% - ${SIDEBAR_WIDTH}px)` },
+        ml: { xs: 0, md: `${SIDEBAR_WIDTH}px` },
         backgroundColor: '#fff',
         borderBottom: '1px solid',
         borderColor: 'divider',
         color: 'text.primary',
       }}
     >
-      <Toolbar sx={{ gap: 2 }}>
-        <Typography variant="h6" sx={{ flex: 1, fontWeight: 600, color: 'text.primary' }}>
+      <Toolbar sx={{ gap: { xs: 1, sm: 2 } }}>
+        <IconButton edge="start" aria-label="Меню" onClick={onMenuClick} sx={{ display: { xs: 'inline-flex', md: 'none' } }}>
+          <MenuIcon />
+        </IconButton>
+        <Typography variant="h6" noWrap sx={{ flex: 1, minWidth: 0, fontWeight: 600, color: 'text.primary' }}>
           {pageTitles[pathname] ?? 'EduNest'}
         </Typography>
 

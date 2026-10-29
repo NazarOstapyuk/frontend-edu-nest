@@ -12,7 +12,7 @@ export const InstitutionSwitcher = () => {
 
   if (institutions.length === 1) {
     return (
-      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+      <Typography variant="body2" noWrap sx={{ fontWeight: 600, minWidth: 0 }}>
         {institutions[0].name}
       </Typography>
     )
@@ -23,7 +23,7 @@ export const InstitutionSwitcher = () => {
       size="small"
       value={selectedId ?? ALL}
       onChange={(e) => select(e.target.value === ALL ? null : e.target.value)}
-      sx={{ minWidth: 200 }}
+      sx={{ minWidth: { xs: 0, sm: 200 }, maxWidth: { xs: 140, sm: 'none' } }}
     >
       <MenuItem value={ALL}>Усі заклади</MenuItem>
       {institutions.map((institution) => (

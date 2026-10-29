@@ -131,6 +131,10 @@ Backend error contract (backend repo `backend-edu-nest`, see its CLAUDE.md):
 
 Don't write code comments. Exceptions: lint directives required by the codebase, and a one-line comment only when the code would otherwise look like a bug (a deliberate workaround). Don't delete or rewrite existing comments.
 
+## Mobile
+
+Phone = `theme.breakpoints.down('sm')` (use `useIsPhone` from `shared/lib/useIsPhone`); narrow = `down('md')` (sidebar becomes a temporary drawer opened by the header menu button). `md`+ must stay identical to desktop. Tables: phone renders `CardList` + `CardField` (`shared/ui/CardList`, `renderCard` returns inner content incl. row actions), `sm`+ keeps the table inside an `overflowX: 'auto'` container. Dialogs: `fullScreen={isPhone}`, flex rows `flexDirection: { xs: 'column', sm: 'row' }`. Page headers `flexWrap: 'wrap'`; scrollable `Tabs` where they can overflow; tooltip-only data must be visible on cards; frequent tap targets >= 40px on phones. Spec: `docs/superpowers/specs/2026-10-29-mobile-responsive-design.md`.
+
 ## Roadmap (order matters)
 
 This is the team's plan, not a task list for the agent. Don't start Roadmap items on your own and don't refuse other requests because of it; at most mention once that a requested module will inherit the gaps. Remove items from this list as soon as they are done.

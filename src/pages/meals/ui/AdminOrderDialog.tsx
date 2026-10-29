@@ -1,14 +1,17 @@
 import { useState } from 'react'
 import { Alert, Autocomplete, Box, Button, Dialog, DialogTitle, MenuItem, TextField, Typography } from '@mui/material'
 import { useMealsStore } from '../model/mealsStore'
-import { mealsApi, type Child, type MenuDayView } from '../../../shared/api'
+import { mealsApi, type Child, type MealComplex, type MenuDayView } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { categoryPrices } from '../model/prices'
 
 export const AdminOrderDialog = ({ onClose }: { onClose: () => void }) => {
   const isPhone = useIsPhone()
   const children = useMealsStore((s) => s.children)
   const complexes = useMealsStore((s) => s.complexes)
   const ordersDate = useMealsStore((s) => s.ordersDate)
+  const ordersKind = useMealsStore((s) => s.ordersKind)
+  const ordersGroupId = useMealsStore((s) => s.ordersGroupId)
   const isSaving = useMealsStore((s) => s.isSaving)
   const createOrders = useMealsStore((s) => s.createOrders)
   const [child, setChild] = useState<Child | null>(null)
@@ -39,7 +42,16 @@ export const AdminOrderDialog = ({ onClose }: { onClose: () => void }) => {
 
   const day = menu && menu.key === menuKey ? menu.day : null
   const published = day?.menu?.status === 'published' ? day.menu : null
-  const complex = complexes.find((c) => c.id === complexId)
+  const categoryId = child?.group?.mealPriceCategoryId ?? null
+  const priceOf = (c: MealComplex) => (categoryId ? categoryPrices(c.prices, categoryId, date).current : null)
+  const available = complexes.filter(
+    (c) =>
+      c.active &&
+      priceOf(c) &&
+      c.courses.every((course) => (published?.dishes ?? []).some((d) => d.course.id === course.id)),
+  )
+  const effectiveComplexId = complexId || (available.length === 1 ? available[0].id : '')
+  const complex = available.find((c) => c.id === effectiveComplexId)
   const choiceCourses = (complex?.courses ?? [])
     .map((course) => ({ course, options: (published?.dishes ?? []).filter((d) => d.course.id === course.id) }))
     .filter((c) => c.options.length > 1)
@@ -57,8 +69,10 @@ export const AdminOrderDialog = ({ onClose }: { onClose: () => void }) => {
       <DialogTitle sx={{ fontWeight: 700 }}>Нове замовлення</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: '20px' }}>
         <Autocomplete
-          options={children.filter((c) => c.group)}
-          getOptionLabel={(c) => `${c.lastName} ${c.firstName}${c.group ? ` · ${c.group.name}` : ''}`}
+          options={children.filter(
+            (c) => c.group && (!ordersKind || c.group.kind === ordersKind) && (!ordersGroupId || c.group.id === ordersGroupId),
+          )}
+          getOptionLabel={(c) => `${c.lastName} ${c.firstName}${c.group ? ` · ${c.group.institution.name}, ${c.group.name}` : ''}`}
           value={child}
           onChange={(_, value) => choose(value, date)}
           renderInput={(params) => <TextField {...params} label="Дитина" />}
@@ -70,9 +84,17 @@ export const AdminOrderDialog = ({ onClose }: { onClose: () => void }) => {
         )}
         {published && (
           <>
-            <TextField select label="Комплекс" value={complexId} onChange={(e) => { setComplexId(e.target.value); setPicks({}) }}>
-              {complexes.filter((c) => c.active).map((c) => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
-            </TextField>
+            {available.length === 0 ? (
+              <Alert severity="warning">
+                {categoryId
+                  ? 'Немає комплексу з ціною для цінової категорії групи на цю дату та зі стравами в меню на кожен курс.'
+                  : 'Групі дитини не призначено цінову категорію.'}
+              </Alert>
+            ) : (
+              <TextField select label="Комплекс" value={effectiveComplexId} onChange={(e) => { setComplexId(e.target.value); setPicks({}) }}>
+                {available.map((c) => <MenuItem key={c.id} value={c.id}>{c.name} · {priceOf(c)?.price} грн</MenuItem>)}
+              </TextField>
+            )}
             {choiceCourses.map(({ course, options }) => (
               <TextField
                 key={course.id}
@@ -84,7 +106,7 @@ export const AdminOrderDialog = ({ onClose }: { onClose: () => void }) => {
                 {options.map((d) => <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>)}
               </TextField>
             ))}
-            <Typography variant="body2" color="text.secondary">Ціну рахує сервер за ціновою категорією групи.</Typography>
+            {complex && <Typography variant="body2" color="text.secondary">Ціна: {priceOf(complex)?.price} грн (за ціновою категорією групи).</Typography>}
           </>
         )}
         <Box sx={{ display: 'flex', gap: '10px' }}>

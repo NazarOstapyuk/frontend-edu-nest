@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Alert, Box, Button, Dialog, DialogTitle, IconButton } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import { useMealsStore } from '../model/mealsStore'
 import { DishPicker } from './DishPicker'
 import { InstitutionMultiSelect } from './InstitutionMultiSelect'
-import { formatDay, menuStatusLabels, type MenuDayView } from '../../../shared/api'
+import { formatDay, mealsApi, menuStatusLabels, type MenuDayView } from '../../../shared/api'
+import { useEffectiveInstitutions } from '../../../shared/model/institutionStore'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 export const MenuDayDialog = ({ day, onClose }: { day: MenuDayView; onClose: () => void }) => {
@@ -16,6 +17,24 @@ export const MenuDayDialog = ({ day, onClose }: { day: MenuDayView; onClose: () 
   const [selected, setSelected] = useState<string[]>(day.menu?.dishes.map((d) => d.id) ?? [])
 
   const [institutionIds, setInstitutionIds] = useState<string[]>([current])
+  const institutions = useEffectiveInstitutions()
+  const [others, setOthers] = useState<Record<string, string[] | null>>({})
+  const missing = institutionIds.filter((id) => id !== current && !(id in others)).join(',')
+
+  useEffect(() => {
+    if (!missing) return
+    missing.split(',').forEach((id) => {
+      mealsApi
+        .getMenuDays(id, day.date, day.date)
+        .then(({ data }) => setOthers((o) => ({ ...o, [id]: data[0]?.menu?.dishes.map((d) => d.id) ?? null })))
+        .catch(() => undefined)
+    })
+  }, [missing, day.date])
+
+  const replaced = institutionIds.filter((id) => {
+    const dishes = others[id]
+    return id !== current && dishes && (dishes.length !== selected.length || dishes.some((d) => !selected.includes(d)))
+  })
 
   const save = () => saveMenuDay(day.date, institutionIds, selected).then(onClose).catch(() => undefined)
   const remove = () => deleteMenuDay(day.date).then(onClose).catch(() => undefined)
@@ -39,6 +58,11 @@ export const MenuDayDialog = ({ day, onClose }: { day: MenuDayView; onClose: () 
         )}
         <DishPicker value={selected} onChange={setSelected} />
         <InstitutionMultiSelect label="Також для закладів" value={institutionIds} onChange={setInstitutionIds} currentId={current} lockCurrent />
+        {replaced.length > 0 && (
+          <Alert severity="warning">
+            Буде замінено меню на цю дату: {replaced.map((id) => institutions.find((i) => i.id === id)?.name ?? id).join(', ')}.
+          </Alert>
+        )}
         <Box sx={{ display: 'flex', flexWrap: { xs: 'wrap', sm: 'nowrap' }, gap: '10px' }}>
           {day.menu?.status === 'draft' && (
             <Button color="error" onClick={remove} disabled={isSaving} sx={{ width: '100%' }}>Видалити чернетку</Button>

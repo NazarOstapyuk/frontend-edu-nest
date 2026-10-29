@@ -27,7 +27,7 @@ export const ApplyTemplateDialog = ({ onClose }: { onClose: () => void }) => {
   const active = templates.filter((t) => t.active)
   const [templateId, setTemplateId] = useState(active[0]?.id ?? '')
   const [from, setFrom] = useState(menuStart)
-  const [to, setTo] = useState(addDaysIso(menuStart, menuWeeks * 7 - 1))
+  const [to, setTo] = useState(addDaysIso(weekStart(menuStart), menuWeeks * 7 - 3))
   const [startWeek, setStartWeek] = useState(1)
   const [overwrite, setOverwrite] = useState(false)
   const [institutionIds, setInstitutionIds] = useState<string[]>([current])

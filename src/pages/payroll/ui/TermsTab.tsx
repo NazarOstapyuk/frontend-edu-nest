@@ -3,11 +3,13 @@ import {
   Alert,
   Box,
   Button,
+  Checkbox,
   Chip,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControlLabel,
   IconButton,
   MenuItem,
   Paper,
@@ -63,6 +65,10 @@ export const TermsTab = () => {
   const [editing, setEditing] = useState<EditState>(null)
   const [closing, setClosing] = useState<SalaryTerms | null>(null)
   const [deleting, setDeleting] = useState<SalaryTerms | null>(null)
+  const [showInactive, setShowInactive] = useState(false)
+  const selectedTeacher = teachers.find((t) => t.id === termsTeacherId)
+  const teacherOptions = teachers.filter((t) => showInactive || t.isActive || t.id === termsTeacherId)
+  const latest = terms.reduce<SalaryTerms | null>((a, b) => (a && a.validFrom >= b.validFrom ? a : b), null)
 
   const renderActions = (item: SalaryTerms) => (
     <>
@@ -109,16 +115,20 @@ export const TermsTab = () => {
           onChange={(event) => setTermsTeacher(event.target.value)}
           sx={{ minWidth: { sm: 280 } }}
         >
-          {teachers.map((teacher) => (
+          {teacherOptions.map((teacher) => (
             <MenuItem key={teacher.id} value={teacher.id}>
-              {teacher.name}
+              {teacher.name}{teacher.isActive ? '' : ' (неактивний)'}
             </MenuItem>
           ))}
         </TextField>
+        <FormControlLabel
+          control={<Checkbox size="small" checked={showInactive} onChange={(event) => setShowInactive(event.target.checked)} />}
+          label="Показати неактивних"
+        />
         {canEdit && (
           <Button
             variant="contained"
-            disabled={!termsTeacherId || isSaving}
+            disabled={!termsTeacherId || isSaving || termsLoading || selectedTeacher?.isActive === false}
             onClick={() => setEditing({ terms: null })}
           >
             Нова версія умов
@@ -254,6 +264,7 @@ export const TermsTab = () => {
           key={editing.terms?.id ?? 'new'}
           teacherId={termsTeacherId}
           terms={editing.terms}
+          prefill={editing.terms ? null : latest}
           onClose={() => setEditing(null)}
         />
       )}

@@ -18,12 +18,14 @@ import {
 export interface TeacherOption {
   id: string;
   name: string;
+  isActive: boolean;
 }
 
 export interface ClassGroupOption {
   id: string;
   name: string;
   format: ClassFormat;
+  active: boolean;
 }
 
 const fromKopecks = (value: number) => (value / 100).toFixed(2);
@@ -93,14 +95,13 @@ export const usePayrollStore = create<PayrollState>((set, get) => ({
     set({ refsFailed: false });
     try {
       const [users, subjects, directions] = await Promise.all([
-        softList(usersApi.getList()),
+        softList(usersApi.lookup('teacher', true)),
         softList(timetableApi.getSubjects()),
         softList(directionsApi.getList()),
       ]);
       set({
         teachers: users
-          .filter((user) => user.role === 'teacher')
-          .map((user) => ({ id: user.id, name: `${user.lastName} ${user.firstName}` }))
+          .map((user) => ({ id: user.id, name: `${user.lastName} ${user.firstName}`, isActive: user.isActive }))
           .sort((a, b) => a.name.localeCompare(b.name, 'uk')),
         subjects,
         classGroups: directions.flatMap((direction) =>
@@ -108,6 +109,7 @@ export const usePayrollStore = create<PayrollState>((set, get) => ({
             id: group.id,
             name: `${direction.name}: ${group.name}`,
             format: group.format,
+            active: direction.isActive && group.isActive,
           })),
         ),
       });

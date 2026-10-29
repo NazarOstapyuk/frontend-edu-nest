@@ -36,10 +36,11 @@ export const PaymentDialog = ({ onClose }: { onClose: () => void }) => {
   const isPhone = useIsPhone()
   const runDetail = usePayrollStore((s) => s.runDetail)
   const isSaving = usePayrollStore((s) => s.isSaving)
+  const balance = usePayrollStore((s) => s.detail?.totals.balance ?? '')
   const { control, handleSubmit } = useForm<FormValues>({
     mode: 'all',
     resolver: yupResolver(schema),
-    defaultValues: { date: localToday(), amount: '', method: 'cash', comment: '' },
+    defaultValues: { date: localToday(), amount: toKopecks(balance) > 0 ? balance : '', method: 'cash', comment: '' },
   })
 
   const onSubmit = (values: FormValues) => {

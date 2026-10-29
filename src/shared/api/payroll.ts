@@ -195,6 +195,7 @@ export interface PayrollDetail {
   extraHours?: PayrollExtraHours[];
   absences?: TeacherAbsence[];
   payrollDetailsVisible?: boolean;
+  extraHourRate?: string | null;
   warnings: PayrollWarnings;
   lessons: number;
   totals: PayrollTotals;

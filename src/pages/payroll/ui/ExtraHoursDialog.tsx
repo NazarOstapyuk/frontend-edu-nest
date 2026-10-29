@@ -2,6 +2,7 @@ import { Controller, useForm, useWatch } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import {
+  Alert,
   Button,
   Dialog,
   DialogActions,
@@ -12,7 +13,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from '@mui/material'
-import { localToday, normalizeAmount, payrollApi, toKopecks, type ExtraHoursDto } from '../../../shared/api'
+import { formatMoney, localToday, normalizeAmount, payrollApi, toKopecks, type ExtraHoursDto } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { usePayrollStore } from '../model/payrollStore'
 
@@ -68,6 +69,7 @@ export const ExtraHoursDialog = ({ onClose }: { onClose: () => void }) => {
   const runDetail = usePayrollStore((s) => s.runDetail)
   const isSaving = usePayrollStore((s) => s.isSaving)
   const month = usePayrollStore((s) => s.month)
+  const termsRate = usePayrollStore((s) => s.detail?.extraHourRate ?? null)
   const today = localToday()
   const { control, handleSubmit, trigger } = useForm<FormValues>({
     mode: 'all',
@@ -82,6 +84,7 @@ export const ExtraHoursDialog = ({ onClose }: { onClose: () => void }) => {
     },
   })
   const mode = useWatch({ control, name: 'mode' })
+  const ownRate = useWatch({ control, name: 'rate' })
 
   const onSubmit = (values: FormValues) => {
     const dto: ExtraHoursDto = {
@@ -100,6 +103,11 @@ export const ExtraHoursDialog = ({ onClose }: { onClose: () => void }) => {
       <DialogTitle>Додаткові години</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
+          {!termsRate && !ownRate && (
+            <Alert severity="warning">
+              В умовах оплати немає ставки за додаткову годину: без власної ставки години рахуватимуться з сумою 0.
+            </Alert>
+          )}
           <Controller
             name="mode"
             control={control}
@@ -151,7 +159,9 @@ export const ExtraHoursDialog = ({ onClose }: { onClose: () => void }) => {
                 {...field}
                 label="Власна ставка, грн/год"
                 error={!!error}
-                helperText={error?.message ?? 'Порожньо — ставка з умов оплати'}
+                helperText={
+                  error?.message ?? (termsRate ? `Порожньо — ставка з умов оплати: ${formatMoney(termsRate)}` : 'Порожньо — ставки в умовах немає')
+                }
                 fullWidth
               />
             )}

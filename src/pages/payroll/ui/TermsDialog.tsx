@@ -2,6 +2,7 @@ import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import {
+  Alert,
   Box,
   Button,
   Dialog,
@@ -17,6 +18,7 @@ import {
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import {
+  formatDay,
   localToday,
   normalizeAmount,
   payrollApi,
@@ -72,25 +74,28 @@ type FormValues = yup.InferType<typeof schema>
 interface Props {
   teacherId: string
   terms: SalaryTerms | null
+  prefill?: SalaryTerms | null
   onClose: () => void
 }
 
-const toDefaults = (terms: SalaryTerms | null): FormValues =>
-  terms
+const toDefaults = (terms: SalaryTerms | null, prefill: SalaryTerms | null): FormValues => {
+  const source = terms ?? prefill
+  return source
     ? {
-        validFrom: terms.validFrom,
-        monthlyRate: terms.monthlyRate,
-        extraHourRate: terms.extraHourRate ?? '',
-        calendarKind: terms.calendarKind,
-        note: terms.note ?? '',
-        rates: terms.rates.map((rate) => ({
+        validFrom: terms ? terms.validFrom : localToday(),
+        monthlyRate: source.monthlyRate,
+        extraHourRate: source.extraHourRate ?? '',
+        calendarKind: source.calendarKind,
+        note: source.note ?? '',
+        rates: source.rates.map((rate) => ({
           lessonType: rate.lessonType,
           targetId: rate.subjectId ?? rate.classGroupId ?? '',
           amount: rate.amount,
         })),
-        allowances: terms.allowances.map((allowance) => ({ name: allowance.name, amount: allowance.amount })),
+        allowances: source.allowances.map((allowance) => ({ name: allowance.name, amount: allowance.amount })),
       }
     : { validFrom: localToday(), monthlyRate: '0', extraHourRate: '', calendarKind: 'all', note: '', rates: [], allowances: [] }
+}
 
 const toRate = (rate: FormValues['rates'][number]): SalaryRateDto => ({
   lessonType: rate.lessonType,
@@ -102,7 +107,7 @@ const toRate = (rate: FormValues['rates'][number]): SalaryRateDto => ({
     : {}),
 })
 
-export const TermsDialog = ({ teacherId, terms, onClose }: Props) => {
+export const TermsDialog = ({ teacherId, terms, prefill = null, onClose }: Props) => {
   const isPhone = useIsPhone()
   const subjects = usePayrollStore((s) => s.subjects)
   const classGroups = usePayrollStore((s) => s.classGroups)
@@ -111,7 +116,7 @@ export const TermsDialog = ({ teacherId, terms, onClose }: Props) => {
   const { control, handleSubmit, setValue } = useForm<FormValues>({
     mode: 'all',
     resolver: yupResolver(schema),
-    defaultValues: toDefaults(terms),
+    defaultValues: toDefaults(terms, prefill),
   })
   const rateFields = useFieldArray({ control, name: 'rates' })
   const allowanceFields = useFieldArray({ control, name: 'allowances' })
@@ -120,7 +125,7 @@ export const TermsDialog = ({ teacherId, terms, onClose }: Props) => {
   const targets = (lessonType: PayrollLessonType, current: string) =>
     lessonType === 'school_lesson'
       ? subjects.filter((s) => s.active || s.id === current).map((s) => ({ id: s.id, name: s.name }))
-      : classGroups.filter((g) => (lessonType === 'individual') === (g.format === 'individual'))
+      : classGroups.filter((g) => (g.active || g.id === current) && (lessonType === 'individual') === (g.format === 'individual'))
 
   const onSubmit = (values: FormValues) => {
     const payload = {
@@ -148,6 +153,11 @@ export const TermsDialog = ({ teacherId, terms, onClose }: Props) => {
       <DialogTitle>{terms ? 'Редагувати умови' : 'Нова версія умов'}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
+          {!terms && prefill && (
+            <Alert severity="info">
+              Умови скопійовано з версії від {formatDay(prefill.validFrom)}. Змініть потрібне й вкажіть дату початку.
+            </Alert>
+          )}
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
             <Controller
               name="validFrom"

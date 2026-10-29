@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Autocomplete, Button, MenuItem, Stack, TextField } from '@mui/material'
-import { useAuthStore, useCan, type User } from '../../../entities/user'
+import { useAuthStore, useCan } from '../../../entities/user'
 import {
   childrenApi,
   groupsApi,
@@ -8,6 +8,7 @@ import {
   usersApi,
   type Child,
   type Group,
+  type UserLookup,
   type ReportDefinition,
   type ReportFilter,
   type ReportQuery,
@@ -81,18 +82,17 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
   const selectedInstitutionId = useInstitutionStore((s) => s.selectedId)
   const [groups, setGroups] = useState<Group[]>([])
   const [children, setChildren] = useState<Child[]>([])
-  const [teachers, setTeachers] = useState<User[]>([])
+  const [teachers, setTeachers] = useState<UserLookup[]>([])
 
   const canListGroups = useCan('children', 'view')
   const canListChildren = useCan('children', 'view')
-  const canListUsers = useCan('users', 'view')
 
   const available: Record<ReportFilter, boolean> = {
     institution: true,
     kind: true,
     group: canListGroups,
     child: canListChildren,
-    teacher: canListUsers,
+    teacher: true,
   }
   const has = (filter: ReportFilter) => definition.filters.includes(filter) && available[filter]
   const showInstitution = has('institution')
@@ -114,8 +114,8 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
       })
     }
     if (showTeacher) {
-      softList(usersApi.getList()).then((list) => {
-        if (!stale) setTeachers(list.filter((u) => u.role === 'teacher'))
+      softList(usersApi.lookup('teacher')).then((list) => {
+        if (!stale) setTeachers(list)
       })
     }
     return () => {
@@ -127,8 +127,25 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
     if (showInstitution) setQuery({ institutionId: selectedInstitutionId ?? undefined })
   }, [showInstitution, selectedInstitutionId, setQuery])
 
-  const update = (partial: Partial<ReportQuery>) => setQuery(partial)
-  const visibleGroups = groups.filter((g) => !query.kind || g.kind === query.kind)
+  const matchesGroup = (g: Group | null, q: ReportQuery) =>
+    !!g &&
+    (!q.institutionId || g.institution.id === q.institutionId) &&
+    (!q.kind || g.kind === q.kind) &&
+    (!q.groupId || g.id === q.groupId)
+  const update = (partial: Partial<ReportQuery>) => {
+    const next = { ...query, ...partial }
+    if (partial.institutionId !== undefined && next.groupId && !groups.some((g) => g.id === next.groupId && matchesGroup(g, { ...next, groupId: undefined }))) {
+      next.groupId = undefined
+      partial = { ...partial, groupId: undefined }
+    }
+    const scopeChanged = 'institutionId' in partial || 'groupId' in partial || 'kind' in partial
+    if (scopeChanged && next.childId && !children.some((c) => c.id === next.childId && matchesGroup(c.group, next))) {
+      partial = { ...partial, childId: undefined }
+    }
+    setQuery(partial)
+  }
+  const visibleGroups = groups.filter((g) => matchesGroup(g, { ...query, groupId: undefined }))
+  const visibleChildren = children.filter((c) => matchesGroup(c.group, query))
   const busy = loading || downloading
 
   return (
@@ -175,7 +192,7 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
             size="small"
             sx={{ minWidth: { sm: 180 } }}
             value={query.institutionId ?? ''}
-            onChange={(e) => update({ institutionId: e.target.value || undefined })}
+            onChange={(e) => update({ institutionId: e.target.value || undefined, ...(e.target.value ? { kind: undefined } : {}) })}
             helperText={definition.key === 'lessons' ? 'Не впливає на уроки гуртків' : undefined}
             slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}
           >
@@ -187,7 +204,7 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
             ))}
           </TextField>
         )}
-        {has('kind') && canPickKind && (
+        {has('kind') && canPickKind && !query.institutionId && (
           <TextField
             select
             label="Тип групи"
@@ -212,7 +229,7 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
             size="small"
             sx={{ minWidth: { sm: 220 } }}
             options={visibleGroups}
-            getOptionLabel={(g) => g.name}
+            getOptionLabel={(g) => (query.institutionId ? g.name : `${g.institution.name}, ${g.name}`)}
             value={visibleGroups.find((g) => g.id === query.groupId) ?? null}
             onChange={(_, group) => update({ groupId: group?.id })}
             renderInput={(params) => <TextField {...params} label="Група" />}
@@ -222,9 +239,9 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
           <Autocomplete
             size="small"
             sx={{ minWidth: { sm: 240 } }}
-            options={children}
+            options={visibleChildren}
             getOptionLabel={(c) => `${c.lastName} ${c.firstName}`}
-            value={children.find((c) => c.id === query.childId) ?? null}
+            value={visibleChildren.find((c) => c.id === query.childId) ?? null}
             onChange={(_, child) => update({ childId: child?.id })}
             renderInput={(params) => <TextField {...params} label="Дитина" />}
           />

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField, Typography } from '@mui/material'
 import { kyivNow, routineApi } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { useRoutineStore } from '../model/routineStore'
 
 interface CopyRoutineDialogProps {
@@ -68,8 +69,11 @@ const CopyForm = ({ groupId, onClose, onCopied }: Omit<CopyRoutineDialogProps, '
   )
 }
 
-export const CopyRoutineDialog = ({ open, ...rest }: CopyRoutineDialogProps) => (
-  <Dialog open={open} onClose={rest.onClose} fullWidth maxWidth="xs">
-    <CopyForm {...rest} />
-  </Dialog>
-)
+export const CopyRoutineDialog = ({ open, ...rest }: CopyRoutineDialogProps) => {
+  const isPhone = useIsPhone()
+  return (
+    <Dialog open={open} onClose={rest.onClose} fullWidth maxWidth="xs" fullScreen={isPhone}>
+      <CopyForm {...rest} />
+    </Dialog>
+  )
+}

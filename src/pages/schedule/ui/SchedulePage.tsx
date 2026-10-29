@@ -29,7 +29,7 @@ export const SchedulePage = () => {
 
   return (
     <Box>
-      <TextField select size="small" label="Клас" value={classId ?? ''} onChange={(e) => setClassId(e.target.value)} sx={{ minWidth: 200, mb: 2 }}>
+      <TextField select size="small" label="Клас" value={classId ?? ''} onChange={(e) => setClassId(e.target.value)} sx={{ minWidth: { xs: 0, sm: 200 }, width: { xs: '100%', sm: 'auto' }, mb: 2 }}>
         {classes.map((c) => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
       </TextField>
       {classFailed && (
@@ -37,7 +37,7 @@ export const SchedulePage = () => {
           Не вдалося завантажити дані.
         </Alert>
       )}
-      <Tabs value={tab} onChange={(_, v: number) => setTab(v)} sx={{ mb: 2 }}>
+      <Tabs value={tab} onChange={(_, v: number) => setTab(v)} variant="scrollable" allowScrollButtonsMobile sx={{ mb: 2 }}>
         <Tab label="Розклад" />
         <Tab label="Тиждень" />
       </Tabs>

@@ -3,6 +3,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, MenuItem, TextField } from '@mui/material'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { useScheduleStore } from '../model/scheduleStore'
 import { weekParities, weekParityLabels, weekdayLabels, type TimetableEntry, type WeekParity } from '../../../shared/api'
 
@@ -27,6 +28,7 @@ interface EntryModalProps {
 }
 
 export const EntryModal = ({ open, weekday, period, entry, onClose, onSave, onDelete }: EntryModalProps) => {
+  const isPhone = useIsPhone()
   const subjects = useScheduleStore((s) => s.subjects)
   const rooms = useScheduleStore((s) => s.rooms)
   const teachers = useScheduleStore((s) => s.teachers)
@@ -75,7 +77,7 @@ export const EntryModal = ({ open, weekday, period, entry, onClose, onSave, onDe
   )
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" fullScreen={isPhone}>
       <DialogTitle sx={{ fontWeight: 700 }}>{weekdayLabels[weekday - 1]}, {period}-й урок</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: '20px' }}>
         {select('subjectId', 'Предмет', subjects.filter((s) => s.active || s.id === entry?.subjectId).map((s) => ({ id: s.id, label: s.name })))}

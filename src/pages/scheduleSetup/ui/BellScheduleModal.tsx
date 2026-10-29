@@ -4,6 +4,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, IconButton, TextField, Typography } from '@mui/material'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { useScheduleSetupStore } from '../model/scheduleSetupStore'
 import type { BellSchedule } from '../../../shared/api'
 
@@ -34,6 +35,7 @@ type FormValues = yup.InferType<typeof schema>
 const empty: FormValues = { name: '', periods: [{ startTime: '08:30', endTime: '09:15' }] }
 
 export const BellScheduleModal = ({ open, schedule, onClose }: { open: boolean; schedule: BellSchedule | null; onClose: () => void }) => {
+  const isPhone = useIsPhone()
   const saveBellSchedule = useScheduleSetupStore((s) => s.saveBellSchedule)
   const isSaving = useScheduleSetupStore((s) => s.isSaving)
   const { control, handleSubmit, reset } = useForm<FormValues>({ mode: 'all', defaultValues: empty, resolver: yupResolver(schema) })
@@ -53,7 +55,7 @@ export const BellScheduleModal = ({ open, schedule, onClose }: { open: boolean; 
   }
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" fullScreen={isPhone}>
       <DialogTitle sx={{ fontWeight: 700 }}>{schedule ? 'Розклад дзвінків' : 'Новий розклад дзвінків'}</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: '20px' }}>
         <Controller
@@ -62,8 +64,8 @@ export const BellScheduleModal = ({ open, schedule, onClose }: { open: boolean; 
           render={({ field, fieldState: { error } }) => <TextField {...field} label="Назва" error={!!error} helperText={error?.message} />}
         />
         {fields.map((f, i) => (
-          <Box key={f.id} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-            <Typography sx={{ width: 64 }}>{i + 1}-й</Typography>
+          <Box key={f.id} sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+            <Typography sx={{ width: { xs: 40, sm: 64 }, flexShrink: 0, pt: 1 }}>{i + 1}-й</Typography>
             <Controller
               name={`periods.${i}.startTime`}
               control={control}

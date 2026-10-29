@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { Box, Button, Dialog, DialogTitle, TextField } from '@mui/material'
 
 const schema = yup.object({
@@ -20,6 +21,7 @@ interface NameDialogProps {
 }
 
 export const NameDialog = ({ open, title, initial, isSaving, onClose, onSubmit }: NameDialogProps) => {
+  const isPhone = useIsPhone()
   const { control, handleSubmit, reset } = useForm<FormValues>({
     mode: 'all',
     defaultValues: { name: initial },
@@ -36,7 +38,7 @@ export const NameDialog = ({ open, title, initial, isSaving, onClose, onSubmit }
   }
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" fullScreen={isPhone}>
       <DialogTitle sx={{ fontWeight: 700 }}>{title}</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: '20px' }}>
         <Controller

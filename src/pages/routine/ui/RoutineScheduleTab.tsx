@@ -3,9 +3,11 @@ import { Alert, Box, Button, CircularProgress, Dialog, DialogActions, DialogCont
 import { useCan } from '../../../entities/user'
 import { formatDay, kyivNow } from '../../../shared/api'
 import { RoutineWeek } from '../../../widgets/routineDay'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { useRoutineStore } from '../model/routineStore'
 
 export const RoutineScheduleTab = () => {
+  const isPhone = useIsPhone()
   const days = useRoutineStore((s) => s.days)
   const isLoading = useRoutineStore((s) => s.isLoading)
   const isSaving = useRoutineStore((s) => s.isSaving)
@@ -49,7 +51,7 @@ export const RoutineScheduleTab = () => {
         }
         onResetDay={canEdit ? (date) => setResetDate(date) : undefined}
       />
-      <Dialog open={resetDate !== null} onClose={() => setResetDate(null)}>
+      <Dialog open={resetDate !== null} onClose={() => setResetDate(null)} fullScreen={isPhone}>
         <DialogTitle>Скинути до шаблону?</DialogTitle>
         <DialogContent>
           <DialogContentText>

@@ -15,7 +15,7 @@ export const RoutineItemsEditor = ({ value, onChange, error }: RoutineItemsEdito
   return (
     <Box>
       {value.map((item, index) => (
-        <Box key={index} sx={{ display: 'flex', gap: 1, mb: 1, alignItems: 'flex-start' }}>
+        <Box key={index} sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1, alignItems: 'flex-start' }}>
           <TextField
             size="small"
             type="time"
@@ -40,7 +40,7 @@ export const RoutineItemsEditor = ({ value, onChange, error }: RoutineItemsEdito
             value={item.title}
             onChange={(e) => patch(index, { title: e.target.value })}
             slotProps={{ htmlInput: { maxLength: 300 } }}
-            sx={{ flex: 1 }}
+            sx={{ flex: '1 1 200px' }}
           />
           <IconButton aria-label="Видалити пункт" onClick={() => onChange(value.filter((_, i) => i !== index))}>
             <DeleteOutlinedIcon />

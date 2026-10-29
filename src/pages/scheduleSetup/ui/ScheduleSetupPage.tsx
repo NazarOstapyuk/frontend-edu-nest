@@ -24,7 +24,7 @@ export const ScheduleSetupPage = () => {
 
   return (
     <Box>
-      <Tabs value={tab} onChange={(_, v: number) => setTab(v)} variant="scrollable" sx={{ mb: 2 }}>
+      <Tabs value={tab} onChange={(_, v: number) => setTab(v)} variant="scrollable" allowScrollButtonsMobile sx={{ mb: 2 }}>
         <Tab label="Предмети" />
         <Tab label="Кабінети" />
         <Tab label="Дзвінки" />

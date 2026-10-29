@@ -26,6 +26,7 @@ import {
   type RoutineTemplateItem,
 } from '../../../shared/api'
 import { useRoutineStore } from '../model/routineStore'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CopyRoutineDialog } from './CopyRoutineDialog'
 import { RoutineItemsEditor } from './RoutineItemsEditor'
 
@@ -73,6 +74,7 @@ const initialPick = (versions: RoutineTemplate[]) => {
 }
 
 export const RoutineTemplateTab = ({ groupId }: { groupId: string }) => {
+  const isPhone = useIsPhone()
   const reloadSchedule = useRoutineStore((s) => s.load)
   const [versions, setVersions] = useState<RoutineTemplate[]>([])
   const [loaded, setLoaded] = useState(false)
@@ -225,7 +227,7 @@ export const RoutineTemplateTab = ({ groupId }: { groupId: string }) => {
     <Box>
       <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap', alignItems: 'center', mb: 2 }}>
         {versions.length > 0 && (
-          <TextField select size="small" disabled={busy} label="Версія" value={selectedId ?? ''} onChange={(e) => choose(e.target.value)} sx={{ minWidth: 260 }}>
+          <TextField select size="small" disabled={busy} label="Версія" value={selectedId ?? ''} onChange={(e) => choose(e.target.value)} sx={{ minWidth: { xs: 0, sm: 260 }, width: { xs: '100%', sm: 'auto' } }}>
             {versions.map((v) => (
               <MenuItem key={v.id} value={v.id}>{versionLabel(v)}</MenuItem>
             ))}
@@ -279,7 +281,7 @@ export const RoutineTemplateTab = ({ groupId }: { groupId: string }) => {
         </Box>
       )}
 
-      <Dialog open={pending !== null} onClose={() => setPending(null)}>
+      <Dialog open={pending !== null} onClose={() => setPending(null)} fullScreen={isPhone}>
         <DialogTitle>Відкинути зміни?</DialogTitle>
         <DialogContent>
           <DialogContentText>У версії є незбережені зміни.</DialogContentText>
@@ -299,7 +301,7 @@ export const RoutineTemplateTab = ({ groupId }: { groupId: string }) => {
         </DialogActions>
       </Dialog>
 
-      <Dialog open={deleting} onClose={() => setDeleting(false)}>
+      <Dialog open={deleting} onClose={() => setDeleting(false)} fullScreen={isPhone}>
         <DialogTitle>Видалити версію?</DialogTitle>
         <DialogContent>
           <DialogContentText>{selected ? `Версію ${versionLabel(selected)} буде видалено.` : ''}</DialogContentText>
@@ -415,11 +417,14 @@ const NewVersionForm = ({ groupId, base, onClose, onCreated }: Omit<NewVersionDi
   )
 }
 
-const NewVersionDialog = ({ open, ...rest }: NewVersionDialogProps) => (
-  <Dialog open={open} onClose={rest.onClose} fullWidth maxWidth="xs">
-    <NewVersionForm {...rest} />
-  </Dialog>
-)
+const NewVersionDialog = ({ open, ...rest }: NewVersionDialogProps) => {
+  const isPhone = useIsPhone()
+  return (
+    <Dialog open={open} onClose={rest.onClose} fullWidth maxWidth="xs" fullScreen={isPhone}>
+      <NewVersionForm {...rest} />
+    </Dialog>
+  )
+}
 
 interface CopyDayDialogProps {
   open: boolean
@@ -459,8 +464,11 @@ const CopyDayForm = ({ weekday, onClose, onApply }: Omit<CopyDayDialogProps, 'op
   )
 }
 
-const CopyDayDialog = ({ open, ...rest }: CopyDayDialogProps) => (
-  <Dialog open={open} onClose={rest.onClose} fullWidth maxWidth="xs">
-    <CopyDayForm {...rest} />
-  </Dialog>
-)
+const CopyDayDialog = ({ open, ...rest }: CopyDayDialogProps) => {
+  const isPhone = useIsPhone()
+  return (
+    <Dialog open={open} onClose={rest.onClose} fullWidth maxWidth="xs" fullScreen={isPhone}>
+      <CopyDayForm {...rest} />
+    </Dialog>
+  )
+}

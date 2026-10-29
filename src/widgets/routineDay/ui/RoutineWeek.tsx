@@ -47,6 +47,7 @@ export const RoutineWeek = ({ days, today, onEditDay, onResetDay }: RoutineWeekP
             color={d.date === selected.date ? 'primary' : 'default'}
             variant={d.date === selected.date ? 'filled' : 'outlined'}
             onClick={() => setChosen(d.date)}
+            sx={{ height: { xs: 40, sm: 32 } }}
           />
         ))}
       </Stack>

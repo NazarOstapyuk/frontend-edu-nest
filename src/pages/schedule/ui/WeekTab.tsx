@@ -38,9 +38,9 @@ export const WeekTab = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'space-between', sm: 'flex-start' }, mb: 2 }}>
         <IconButton onClick={() => setWeek(addDaysIso(week, -7))}><ChevronLeftIcon /></IconButton>
-        <Typography sx={{ minWidth: 200, textAlign: 'center' }}>{formatDay(week)} – {formatDay(addDaysIso(week, 5))}</Typography>
+        <Typography sx={{ minWidth: { xs: 0, sm: 200 }, textAlign: 'center' }}>{formatDay(week)} – {formatDay(addDaysIso(week, 5))}</Typography>
         <IconButton onClick={() => setWeek(addDaysIso(week, 7))}><ChevronRightIcon /></IconButton>
       </Box>
       {weekFailed ? (
@@ -63,13 +63,13 @@ export const WeekTab = () => {
                   {s.source === 'extra' && <Chip size="small" color="info" label="Додатковий" sx={{ mr: 0.5 }} />}
                   {s.lessonId && <Chip size="small" color="success" variant="outlined" label="Проведено" />}
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
-                    {canEdit && !s.cancelled && <Button size="small" onClick={() => setAction({ kind: 'replace', date: d.date, slot: s })}>Заміна</Button>}
-                    {canEdit && !s.cancelled && s.source === 'timetable' && <Button size="small" color="error" onClick={() => setAction({ kind: 'cancel', date: d.date, slot: s })}>Скасувати</Button>}
-                    {canEdit && s.changeId && <Button size="small" onClick={() => setAction({ kind: 'void', date: d.date, slot: s })}>Відмінити зміну</Button>}
+                    {canEdit && !s.cancelled && <Button size="small" sx={{ minHeight: { xs: 40, sm: 'auto' } }} onClick={() => setAction({ kind: 'replace', date: d.date, slot: s })}>Заміна</Button>}
+                    {canEdit && !s.cancelled && s.source === 'timetable' && <Button size="small" color="error" sx={{ minHeight: { xs: 40, sm: 'auto' } }} onClick={() => setAction({ kind: 'cancel', date: d.date, slot: s })}>Скасувати</Button>}
+                    {canEdit && s.changeId && <Button size="small" sx={{ minHeight: { xs: 40, sm: 'auto' } }} onClick={() => setAction({ kind: 'void', date: d.date, slot: s })}>Відмінити зміну</Button>}
                   </Box>
                 </Box>
               ))}
-              {canEdit && d.working && <Button size="small" sx={{ mt: 1 }} onClick={() => setAction({ kind: 'extra', date: d.date })}>Додатковий урок</Button>}
+              {canEdit && d.working && <Button size="small" sx={{ mt: 1, minHeight: { xs: 40, sm: 'auto' } }} onClick={() => setAction({ kind: 'extra', date: d.date })}>Додатковий урок</Button>}
             </Paper>
           ))}
         </Box>

@@ -3,6 +3,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Alert, Box, Button, Dialog, DialogTitle, MenuItem, TextField } from '@mui/material'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { useScheduleStore } from '../model/scheduleStore'
 import { conflictText, formatDay, type LessonChangeDto, type ScheduleSlot } from '../../../shared/api'
 
@@ -26,6 +27,7 @@ interface ChangeDialogProps {
 }
 
 export const ChangeDialog = ({ mode, date, slot, onClose }: ChangeDialogProps) => {
+  const isPhone = useIsPhone()
   const subjects = useScheduleStore((s) => s.subjects)
   const teachers = useScheduleStore((s) => s.teachers)
   const rooms = useScheduleStore((s) => s.rooms)
@@ -72,7 +74,7 @@ export const ChangeDialog = ({ mode, date, slot, onClose }: ChangeDialogProps) =
   )
 
   return (
-    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm" fullScreen={isPhone}>
       <DialogTitle sx={{ fontWeight: 700 }}>
         {mode === 'replace' ? `Заміна: ${formatDay(date)}, ${slot?.period}-й урок` : `Додатковий урок: ${formatDay(date)}`}
       </DialogTitle>

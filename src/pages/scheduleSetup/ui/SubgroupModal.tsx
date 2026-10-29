@@ -3,6 +3,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Autocomplete, Box, Button, Dialog, DialogTitle, TextField } from '@mui/material'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { useScheduleSetupStore } from '../model/scheduleSetupStore'
 import type { Subgroup } from '../../../shared/api'
 
@@ -14,6 +15,7 @@ const schema = yup.object({
 type FormValues = yup.InferType<typeof schema>
 
 export const SubgroupModal = ({ open, subgroup, onClose }: { open: boolean; subgroup: Subgroup | null; onClose: () => void }) => {
+  const isPhone = useIsPhone()
   const children = useScheduleSetupStore((s) => s.children)
   const classId = useScheduleSetupStore((s) => s.classId)
   const saveSubgroup = useScheduleSetupStore((s) => s.saveSubgroup)
@@ -31,7 +33,7 @@ export const SubgroupModal = ({ open, subgroup, onClose }: { open: boolean; subg
   }
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" fullScreen={isPhone}>
       <DialogTitle sx={{ fontWeight: 700 }}>{subgroup ? 'Підгрупа' : 'Нова підгрупа'}</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: '20px' }}>
         <Controller

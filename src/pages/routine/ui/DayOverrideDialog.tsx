@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material'
 import { formatDay, type RoutineDay, type RoutineItem } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { useRoutineStore } from '../model/routineStore'
 import { RoutineItemsEditor } from './RoutineItemsEditor'
 
@@ -61,7 +62,7 @@ const DayOverrideForm = ({ day, onClose }: { day: RoutineDay; onClose: () => voi
         />
         <RoutineItemsEditor value={items} onChange={setItems} error={error} />
       </DialogContent>
-      <DialogActions>
+      <DialogActions sx={{ flexWrap: 'wrap' }}>
         {day.source === 'override' && (
           <Button color="inherit" disabled={isSaving} onClick={onReset} sx={{ mr: 'auto' }}>
             Скинути до шаблону
@@ -75,12 +76,13 @@ const DayOverrideForm = ({ day, onClose }: { day: RoutineDay; onClose: () => voi
 }
 
 export const DayOverrideDialog = () => {
+  const isPhone = useIsPhone()
   const { isOpen, day } = useRoutineStore((s) => s.dayDialog)
   const setDayDialog = useRoutineStore((s) => s.setDayDialog)
   const close = () => setDayDialog({ isOpen: false })
 
   return (
-    <Dialog open={isOpen} onClose={close} fullWidth maxWidth="md">
+    <Dialog open={isOpen} onClose={close} fullWidth maxWidth="md" fullScreen={isPhone}>
       {day && <DayOverrideForm day={day} onClose={close} />}
     </Dialog>
   )

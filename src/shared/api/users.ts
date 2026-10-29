@@ -26,7 +26,20 @@ export interface UpdateUserDto {
   email?: string | null;
 }
 
+export interface UserLookup {
+  id: string;
+  firstName: string;
+  lastName: string;
+  middleName: string | null;
+  phone: string | null;
+  isActive: boolean;
+  institutionIds: string[];
+}
+
 export const usersApi = {
+  lookup: (role: 'teacher' | 'parent', includeInactive = false) =>
+    axiosInstance.get<UserLookup[]>('/users/lookup', { params: { role, includeInactive: includeInactive || undefined } }),
+
   getList: () =>
     axiosInstance.get<User[]>('/users'),
 

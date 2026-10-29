@@ -63,12 +63,13 @@ export const CalendarDayModal = () => {
     resolver: yupResolver(schema),
   })
   const scope = useWatch({ control, name: 'scope' })
+  const institutionName = (id?: string) => allInstitutions.find((i) => i.id === id)?.name
 
   useEffect(() => {
     if (!isOpen) return
     reset({
       ...empty,
-      scope: canShare ? 'all' : 'institution',
+      scope: selectedInstitutionId || !canShare ? 'institution' : 'all',
       institutionId: selectedInstitutionId ?? (canShare ? '' : (institutions[0]?.id ?? '')),
     })
     if (allInstitutions.length === 0) void loadInstitutions().catch(() => undefined)
@@ -135,7 +136,12 @@ export const CalendarDayModal = () => {
             control={control}
             render={({ field, fieldState: { error } }) => (
               <TextField {...field} select label="Група" error={!!error} helperText={error?.message}>
-                {groups.map((g) => <MenuItem key={g.id} value={g.id}>{g.name}</MenuItem>)}
+                {groups.map((g) => (
+                  <MenuItem key={g.id} value={g.id}>
+                    {g.name}
+                    {allInstitutions.length > 1 && institutionName(g.institutionId) ? ` · ${institutionName(g.institutionId)}` : ''}
+                  </MenuItem>
+                ))}
               </TextField>
             )}
           />

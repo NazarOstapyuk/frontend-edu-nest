@@ -102,6 +102,7 @@ export interface LessonRoster {
   date: string;
   lessonId: string | null;
   conductedBy: PersonRef | null;
+  hasSingleTariff: boolean;
   rows: RosterRow[];
 }
 

@@ -1,11 +1,11 @@
 import { useEffect } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm, Controller, useWatch } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { Autocomplete, Box, Button, Dialog, DialogTitle, FormControlLabel, MenuItem, Switch, TextField } from '@mui/material'
+import { Alert, Autocomplete, Box, Button, Dialog, DialogTitle, FormControlLabel, MenuItem, Switch, TextField } from '@mui/material'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { useClassesStore } from '../model/classesStore'
-import { classFormatLabels, classFormats, type ClassFormat } from '../../../shared/api'
+import { classFormatLabels, classFormats, type ClassFormat, type Tariff } from '../../../shared/api'
 
 const schema = yup.object({
   name: yup.string().trim().required("Обов'язкове поле").min(2, 'Мінімум 2 символи').max(100, 'Максимум 100 символів'),
@@ -28,14 +28,29 @@ export const GroupModal = () => {
   const teachers = useClassesStore((s) => s.teachers)
   const isSaving = useClassesStore((s) => s.isSaving)
   const isPhone = useIsPhone()
-  const sessionTariffs = tariffs.filter((t) => t.unit === 'session')
-  const packageTariffs = tariffs.filter((t) => t.unit === 'package')
+  const tariffLabel = (t: Tariff) =>
+    [t.name, t.currentPrice ? `${t.currentPrice} грн` : null, t.packageSize ? `${t.packageSize} занять` : null].filter(Boolean).join(' · ')
+  const tariffOptions = (unit: Tariff['unit'], current: { id: string; name: string } | null | undefined) => {
+    const options = tariffs
+      .filter((t) => t.unit === unit && ((t.institutionId === null && t.isActive) || t.id === current?.id))
+      .map((t) => ({ id: t.id, label: tariffLabel(t) }))
+    if (current && !options.some((o) => o.id === current.id)) options.push({ id: current.id, label: current.name })
+    return options
+  }
+  const sessionTariffs = tariffOptions('session', group?.singleTariff)
+  const packageTariffs = tariffOptions('package', group?.packageTariff)
+  const teacherOptions = [
+    ...teachers,
+    ...(group?.teachers ?? []).filter((gt) => !teachers.some((t) => t.id === gt.id)),
+  ]
 
   const { control, handleSubmit, reset } = useForm<FormValues>({
     mode: 'all',
     defaultValues: defaults,
     resolver: yupResolver(schema),
   })
+
+  const singleTariffId = useWatch({ control, name: 'singleTariffId' })
 
   useEffect(() => {
     if (!isOpen) return
@@ -104,9 +119,9 @@ export const GroupModal = () => {
             <Autocomplete
               multiple
               disableCloseOnSelect
-              options={teachers}
+              options={teacherOptions}
               getOptionLabel={(t) => `${t.lastName} ${t.firstName}`}
-              value={teachers.filter((t) => field.value.includes(t.id))}
+              value={teacherOptions.filter((t) => field.value.includes(t.id))}
               onChange={(_, selected) => field.onChange(selected.map((t) => t.id))}
               renderInput={(params) => <TextField {...params} label="Педагоги" />}
             />
@@ -119,11 +134,16 @@ export const GroupModal = () => {
             <TextField {...field} select label="Тариф разового заняття" fullWidth>
               <MenuItem value="">Немає</MenuItem>
               {sessionTariffs.map((t) => (
-                <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>
+                <MenuItem key={t.id} value={t.id}>{t.label}</MenuItem>
               ))}
             </TextField>
           )}
         />
+        {!singleTariffId && (
+          <Alert severity="warning">
+            Без тарифу разового заняття дітей без пакета не можна буде відмітити на занятті.
+          </Alert>
+        )}
         <Controller
           name="packageTariffId"
           control={control}
@@ -131,7 +151,7 @@ export const GroupModal = () => {
             <TextField {...field} select label="Тариф пакета" fullWidth>
               <MenuItem value="">Немає</MenuItem>
               {packageTariffs.map((t) => (
-                <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>
+                <MenuItem key={t.id} value={t.id}>{t.label}</MenuItem>
               ))}
             </TextField>
           )}

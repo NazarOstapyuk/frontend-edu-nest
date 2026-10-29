@@ -14,7 +14,8 @@ interface CopyRoutineDialogProps {
 const CopyForm = ({ groupId, onClose, onCopied }: Omit<CopyRoutineDialogProps, 'open'>) => {
   const groups = useRoutineStore((s) => s.groups)
   const manyInstitutions = new Set(groups.map((g) => g.institution.id)).size > 1
-  const sources = groups.filter((g) => g.id !== groupId)
+  const others = groups.filter((g) => g.id !== groupId)
+  const sources = others.filter((g) => g.hasTemplate)
   const [sourceId, setSourceId] = useState(sources[0]?.id ?? '')
   const [validFrom, setValidFrom] = useState(kyivNow().date)
   const [isSaving, setIsSaving] = useState(false)
@@ -35,8 +36,11 @@ const CopyForm = ({ groupId, onClose, onCopied }: Omit<CopyRoutineDialogProps, '
     <>
       <DialogTitle>Скопіювати з іншої групи</DialogTitle>
       <DialogContent>
-        {sources.length === 0 && (
+        {others.length === 0 && (
           <Typography color="text.secondary" sx={{ mt: 1 }}>Немає інших садкових груп</Typography>
+        )}
+        {others.length > 0 && sources.length === 0 && (
+          <Typography color="text.secondary" sx={{ mt: 1 }}>Немає інших груп із розпорядком, який можна скопіювати</Typography>
         )}
         <TextField
           select

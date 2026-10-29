@@ -46,6 +46,10 @@ export const RegisterDayTab = () => {
   }
 
   const dirty = day.children.some((row) => draft[row.child.id] && !sameDraft(draft[row.child.id], rowDraft(row)))
+  const noReasonCount = day.children.filter((row) => {
+    const d = draft[row.child.id] ?? rowDraft(row)
+    return d.status === 'absent' && !d.reasonId
+  }).length
   const reasonName = (id: string | null) => allReasons.find((r) => r.id === id)?.name ?? ''
   const requiresDocument = (id: string | null) => allReasons.find((r) => r.id === id)?.requiresDocument ?? false
 
@@ -71,6 +75,11 @@ export const RegisterDayTab = () => {
             Зберегти
           </Button>
         </Box>
+      )}
+      {day.canEdit && noReasonCount > 0 && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          Відсутніх без причини: {noReasonCount}. Такі пропуски потраплять у статистику як без поважної причини.
+        </Alert>
       )}
       {day.children.length === 0 && <Typography color="text.secondary">У групі немає дітей.</Typography>}
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
@@ -122,6 +131,9 @@ export const RegisterDayTab = () => {
                     size="small"
                     label="Причина"
                     disabled={!day.canEdit}
+                    color={d.reasonId ? undefined : 'warning'}
+                    focused={d.reasonId ? undefined : true}
+                    helperText={d.reasonId ? undefined : 'Вкажіть причину'}
                     value={d.reasonId ?? ''}
                     onChange={(e) => setDraft(row.child.id, { reasonId: e.target.value || null, documentProvided: false })}
                     sx={{ minWidth: { xs: 0, sm: 200 }, width: { xs: '100%', sm: 'auto' } }}

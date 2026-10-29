@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Alert, Box, Button, Dialog, DialogTitle, MenuItem, TextField } from '@mui/material'
@@ -15,6 +15,9 @@ const schema = yup.object({
   teacherId: yup.string().default('').when('mode', { is: 'extra', then: (s) => s.required('Оберіть вчителя') }),
   roomId: yup.string().default(''),
   reason: yup.string().trim().required('Вкажіть причину').max(500, 'Максимум 500 символів'),
+}).test('replace-something', 'Оберіть, що замінити: предмет, вчителя або кабінет', function (value) {
+  if (value.mode !== 'replace' || value.subjectId || value.teacherId || value.roomId) return true
+  return this.createError({ path: 'subjectId', message: 'Оберіть предмет, вчителя або кабінет для заміни' })
 })
 
 type FormValues = yup.InferType<typeof schema>
@@ -37,7 +40,14 @@ export const ChangeDialog = ({ mode, date, slot, onClose }: ChangeDialogProps) =
   const createChange = useScheduleStore((s) => s.createChange)
   const changeConflicts = useScheduleStore((s) => s.changeConflicts)
   const clearChangeConflicts = useScheduleStore((s) => s.clearChangeConflicts)
+  const weekData = useScheduleStore((s) => s.weekData)
   const { control, handleSubmit, reset } = useForm<FormValues>({ mode: 'all', resolver: yupResolver(schema) })
+  const extraSubgroupId = useWatch({ control, name: 'subgroupId' })
+  const busyPeriods = new Set(
+    (weekData?.days.find((d) => d.date === date)?.slots ?? [])
+      .filter((s) => !s.cancelled && (!extraSubgroupId || !s.subgroupId || s.subgroupId === extraSubgroupId))
+      .map((s) => s.period),
+  )
 
   useEffect(() => {
     clearChangeConflicts()
@@ -60,14 +70,14 @@ export const ChangeDialog = ({ mode, date, slot, onClose }: ChangeDialogProps) =
     onClose()
   }
 
-  const select = (name: keyof FormValues, label: string, options: { id: string; label: string }[]) => (
+  const select = (name: keyof FormValues, label: string, options: { id: string; label: string; disabled?: boolean }[]) => (
     <Controller
       name={name}
       control={control}
       render={({ field, fieldState: { error } }) => (
         <TextField {...field} select label={label} error={!!error} helperText={error?.message}>
           <MenuItem value="">{mode === 'replace' ? 'Без змін' : 'Не вказано'}</MenuItem>
-          {options.map((o) => <MenuItem key={o.id} value={o.id}>{o.label}</MenuItem>)}
+          {options.map((o) => <MenuItem key={o.id} value={o.id} disabled={o.disabled}>{o.label}</MenuItem>)}
         </TextField>
       )}
     />
@@ -84,10 +94,14 @@ export const ChangeDialog = ({ mode, date, slot, onClose }: ChangeDialogProps) =
             {changeConflicts.map((c, i) => <div key={i}>{conflictText(c)}</div>)}
           </Alert>
         )}
-        {mode === 'extra' && select('period', 'Урок', (periods ?? []).map((p) => ({ id: String(p.number), label: `${p.number}-й (${p.startTime}–${p.endTime})` })))}
+        {mode === 'extra' && select('period', 'Урок', (periods ?? []).map((p) => ({
+          id: String(p.number),
+          label: `${p.number}-й (${p.startTime}–${p.endTime})${busyPeriods.has(p.number) ? ' · зайнято' : ''}`,
+          disabled: busyPeriods.has(p.number),
+        })))}
         {mode === 'extra' && select('subgroupId', 'Підгрупа', subgroups.filter((g) => g.active).map((g) => ({ id: g.id, label: g.name })))}
         {select('subjectId', 'Предмет', subjects.filter((s) => s.active).map((s) => ({ id: s.id, label: s.name })))}
-        {select('teacherId', 'Вчитель', teachers.map((t) => ({ id: t.id, label: `${t.lastName} ${t.firstName}` })))}
+        {select('teacherId', 'Вчитель', teachers.filter((t) => t.isActive).map((t) => ({ id: t.id, label: `${t.lastName} ${t.firstName}` })))}
         {select('roomId', 'Кабінет', rooms.filter((r) => r.active).map((r) => ({ id: r.id, label: r.name })))}
         <Controller
           name="reason"

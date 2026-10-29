@@ -152,6 +152,8 @@ export const errorMessages: Record<string, string> = {
   'Bell period is in use': 'Цей урок використовується в розкладі',
   'Bell schedule not found': 'Розклад дзвінків не знайдено',
   'Bell schedule already exists': 'Такий розклад дзвінків уже існує',
+  'Bell schedule is inactive': 'Розклад дзвінків неактивний',
+  'Teacher is inactive': 'Вчитель неактивний',
   'Not a school class': 'Це не шкільний клас',
   'Class has no bell schedule': 'Спочатку оберіть класу розклад дзвінків',
   'User is not a teacher': 'Обраний користувач не вчитель',

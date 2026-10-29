@@ -47,7 +47,7 @@ export const RoutineItemsEditor = ({ value, onChange, error }: RoutineItemsEdito
           </IconButton>
         </Box>
       ))}
-      <Button size="small" onClick={() => onChange([...value, { startTime: '', endTime: '', title: '' }])}>
+      <Button size="small" onClick={() => onChange([...value, { startTime: value[value.length - 1]?.endTime ?? '', endTime: '', title: '' }])}>
         + Пункт
       </Button>
       {error && (

@@ -16,10 +16,16 @@ type FormValues = yup.InferType<typeof schema>
 export const AddMemberModal = () => {
   const open = useClassGroupStore((s) => s.addMemberOpen)
   const setOpen = useClassGroupStore((s) => s.setAddMemberOpen)
-  const children = useClassGroupStore((s) => s.children)
+  const allChildren = useClassGroupStore((s) => s.children)
+  const members = useClassGroupStore((s) => s.group?.members)
   const addMember = useClassGroupStore((s) => s.addMember)
   const isSaving = useClassGroupStore((s) => s.isSaving)
   const isPhone = useIsPhone()
+  const today = localToday()
+  const activeIds = new Set(
+    (members ?? []).filter((m) => !m.endDate || m.endDate.slice(0, 10) >= today).map((m) => m.child.id),
+  )
+  const children = allChildren.filter((c) => !activeIds.has(c.id))
 
   const { control, handleSubmit, reset } = useForm<FormValues>({
     mode: 'all',

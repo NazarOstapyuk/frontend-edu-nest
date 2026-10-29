@@ -2,7 +2,7 @@ export { axiosInstance, setSessionHandlers } from './axiosInstance';
 export { authApi } from './auth';
 export type { ContactsDto } from './auth';
 export { usersApi } from './users';
-export type { CreateUserDto, UpdateUserDto } from './users';
+export type { CreateUserDto, UpdateUserDto, UserLookup } from './users';
 export {
   ALL_AREAS,
   areaLabels,

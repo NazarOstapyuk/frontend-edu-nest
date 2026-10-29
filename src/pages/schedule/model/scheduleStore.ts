@@ -17,14 +17,14 @@ import {
   type Subgroup,
   type TimetableEntry,
   type TimetableVersion,
+  type UserLookup,
 } from '../../../shared/api';
-import type { User } from '../../../entities/user';
 
 interface ScheduleState {
   classes: Group[];
   subjects: NamedItem[];
   rooms: NamedItem[];
-  teachers: User[];
+  teachers: UserLookup[];
   bellSchedules: BellSchedule[];
   metaFailed: boolean;
   classId: string | null;
@@ -90,7 +90,7 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
         softList(groupsApi.getList()),
         timetableApi.getSubjects(),
         timetableApi.getRooms(),
-        softList(usersApi.getList()),
+        softList(usersApi.lookup('teacher', true)),
         timetableApi.getBellSchedules(),
       ]);
       const classes = groups.filter((g) => g.kind === 'school_class');
@@ -98,7 +98,7 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
         classes,
         subjects: subjects.data,
         rooms: rooms.data,
-        teachers: users.filter((u) => u.role === 'teacher'),
+        teachers: users,
         bellSchedules: bells.data,
         classId: classes.some((c) => c.id === state.classId) ? state.classId : (classes[0]?.id ?? null),
       }));

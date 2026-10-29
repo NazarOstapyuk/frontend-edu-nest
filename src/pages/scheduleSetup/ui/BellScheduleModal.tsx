@@ -32,19 +32,38 @@ const schema = yup.object({
 
 type FormValues = yup.InferType<typeof schema>
 
+const toMinutes = (value: string) => {
+  if (!TIME.test(value)) return null
+  const [h, m] = value.split(':').map(Number)
+  return h * 60 + m
+}
+
+const toTime = (minutes: number) =>
+  `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`
+
 const empty: FormValues = { name: '', periods: [{ startTime: '08:30', endTime: '09:15' }] }
 
 export const BellScheduleModal = ({ open, schedule, onClose }: { open: boolean; schedule: BellSchedule | null; onClose: () => void }) => {
   const isPhone = useIsPhone()
   const saveBellSchedule = useScheduleSetupStore((s) => s.saveBellSchedule)
   const isSaving = useScheduleSetupStore((s) => s.isSaving)
-  const { control, handleSubmit, reset } = useForm<FormValues>({ mode: 'all', defaultValues: empty, resolver: yupResolver(schema) })
+  const { control, handleSubmit, reset, getValues } = useForm<FormValues>({ mode: 'all', defaultValues: empty, resolver: yupResolver(schema) })
   const { fields, append, remove } = useFieldArray({ control, name: 'periods' })
 
   useEffect(() => {
     if (!open) return
     reset(schedule ? { name: schedule.name, periods: schedule.periods.map((p) => ({ startTime: p.startTime, endTime: p.endTime })) } : empty)
   }, [open, schedule, reset])
+
+  const nextPeriod = () => {
+    const list = getValues('periods')
+    const last = list[list.length - 1]
+    const start = last ? toMinutes(last.endTime) : null
+    const prevStart = last ? toMinutes(last.startTime) : null
+    if (start === null) return { startTime: '', endTime: '' }
+    const end = prevStart !== null && start > prevStart ? start + (start - prevStart) : null
+    return { startTime: toTime(start), endTime: end !== null && end < 24 * 60 ? toTime(end) : '' }
+  }
 
   const submit = async (values: FormValues) => {
     await saveBellSchedule(schedule?.id ?? null, {
@@ -83,7 +102,7 @@ export const BellScheduleModal = ({ open, schedule, onClose }: { open: boolean; 
             <IconButton size="small" disabled={fields.length === 1} onClick={() => remove(i)}><DeleteOutlineIcon fontSize="small" /></IconButton>
           </Box>
         ))}
-        <Button onClick={() => append({ startTime: '', endTime: '' })}>Додати урок</Button>
+        <Button onClick={() => append(nextPeriod())}>Додати урок</Button>
         <Box sx={{ display: 'flex', gap: '10px' }}>
           <Button onClick={onClose} color="inherit" sx={{ width: '100%' }}>Скасувати</Button>
           <Button onClick={handleSubmit((v) => submit(v).catch(() => undefined))} variant="contained" disabled={isSaving} sx={{ width: '100%' }}>

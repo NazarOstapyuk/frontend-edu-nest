@@ -2,7 +2,7 @@ import { axiosInstance } from './axiosInstance';
 
 export type GroupKind = 'kindergarten' | 'school_class';
 export const groupKindLabels: Record<GroupKind, string> = {
-  kindergarten: 'Садок',
+  kindergarten: 'Усі садки (за типом)',
   school_class: 'Клас',
 };
 export const groupKinds = Object.keys(groupKindLabels) as GroupKind[];
@@ -33,11 +33,11 @@ export const calendarDayTypeLabels: Record<CalendarDayType, string> = {
 
 export type CalendarScope = 'all' | 'kindergarten' | 'school_class' | 'group' | 'institution';
 export const calendarScopeLabels: Record<CalendarScope, string> = {
-  all: 'Усі',
-  kindergarten: 'Садок',
-  school_class: 'Школа',
+  all: 'Усі заклади',
+  kindergarten: 'Усі садки (за типом)',
+  school_class: 'Усі школи (за типом)',
   group: 'Одна група',
-  institution: 'Заклад',
+  institution: 'Один заклад',
 };
 
 export type NoticeStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
@@ -96,6 +96,7 @@ export interface RegisterGroup {
   id: string;
   name: string;
   kind: GroupKind;
+  institutionId?: string;
 }
 
 interface PersonRef {

@@ -4,6 +4,7 @@ export interface RoutineGroup {
   id: string;
   name: string;
   institution: { id: string; name: string };
+  hasTemplate: boolean;
 }
 
 export interface RoutineItem {

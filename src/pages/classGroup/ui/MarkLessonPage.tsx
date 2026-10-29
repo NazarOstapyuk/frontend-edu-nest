@@ -1,10 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
+  Alert,
   Autocomplete,
   Box,
   Button,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   IconButton,
   Paper,
   Table,
@@ -44,11 +50,13 @@ export const MarkLessonPage = () => {
   const isSaving = useMarkLessonStore((s) => s.isSaving)
   const load = useMarkLessonStore((s) => s.load)
   const setStatus = useMarkLessonStore((s) => s.setStatus)
+  const markPresent = useMarkLessonStore((s) => s.markPresent)
   const addGuest = useMarkLessonStore((s) => s.addGuest)
   const save = useMarkLessonStore((s) => s.save)
   const isPhone = useIsPhone()
   const [reasonOpen, setReasonOpen] = useState(false)
   const [guest, setGuest] = useState<Child | null>(null)
+  const [unmarkedOpen, setUnmarkedOpen] = useState(false)
 
   useEffect(() => {
     if (groupId && date) load(groupId, date, true).catch(() => undefined)
@@ -70,7 +78,33 @@ export const MarkLessonPage = () => {
     })),
   ]
 
-  const handleSave = () => {
+  const isBlocked = (row: (typeof rows)[number]) =>
+    row.isMember && !row.packageInfo && !roster.hasSingleTariff && !row.attendance
+  const blockedCount = rows.filter(isBlocked).length
+  const unmarkedCount = rows.filter((r) => !draft[r.child.id] && !isBlocked(r)).length
+  const availableGuests = allChildren.filter(
+    (c) => !roster.rows.some((r) => r.child.id === c.id) && !guests.some((g) => g.id === c.id),
+  )
+
+  const packageChip = (row: (typeof rows)[number]) =>
+    row.packageInfo ? (
+      <Chip
+        size="small"
+        color="success"
+        variant="outlined"
+        label={`Пакет: ${row.packageInfo.remaining} з ${row.packageInfo.total}${
+          row.packageInfo.expiresAt ? `, до ${formatDay(row.packageInfo.expiresAt)}` : ''
+        }`}
+      />
+    ) : row.isMember ? (
+      <Chip size="small" color="warning" variant="outlined" label="Без пакета — разове заняття" />
+    ) : null
+
+  const handleSave = (confirmed = false) => {
+    if (!confirmed && unmarkedCount > 0) {
+      setUnmarkedOpen(true)
+      return
+    }
     if (isAdmin && isLate && hasCorrections) {
       setReasonOpen(true)
       return
@@ -91,10 +125,24 @@ export const MarkLessonPage = () => {
             {roster.conductedBy ? ` · провів ${roster.conductedBy.lastName} ${roster.conductedBy.firstName}` : ''}
           </Typography>
         </Box>
-        <Button variant="contained" disabled={isSaving} onClick={handleSave} sx={{ minHeight: { xs: 40, sm: 'unset' } }}>
+        <Button
+          variant="outlined"
+          disabled={isSaving || unmarkedCount === 0}
+          onClick={() => markPresent(rows.filter((r) => !isBlocked(r)).map((r) => r.child.id))}
+          sx={{ minHeight: { xs: 40, sm: 'unset' } }}
+        >
+          Усі присутні
+        </Button>
+        <Button variant="contained" disabled={isSaving} onClick={() => handleSave()} sx={{ minHeight: { xs: 40, sm: 'unset' } }}>
           Зберегти
         </Button>
       </Box>
+
+      {blockedCount > 0 && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          Для цієї групи не задано тариф разового заняття, тому дітей без пакета відмітити не можна. Задайте тариф у налаштуваннях групи або продайте пакет.
+        </Alert>
+      )}
 
       {isPhone ? (
         <Box sx={{ mb: 2 }}>
@@ -108,23 +156,11 @@ export const MarkLessonPage = () => {
                   <Typography sx={{ fontWeight: 600 }}>{row.child.lastName} {row.child.firstName}</Typography>
                   {!row.isMember && <Chip size="small" label="Разово" />}
                 </Box>
-                <Box sx={{ mb: 1 }}>
-                  {row.packageInfo ? (
-                    <Chip
-                      size="small"
-                      color="success"
-                      variant="outlined"
-                      label={`Пакет: ${row.packageInfo.remaining} з ${row.packageInfo.total}${
-                        row.packageInfo.expiresAt ? `, до ${formatDay(row.packageInfo.expiresAt)}` : ''
-                      }`}
-                    />
-                  ) : (
-                    <Chip size="small" color="warning" variant="outlined" label="Без пакета — разове заняття" />
-                  )}
-                </Box>
+                {packageChip(row) && <Box sx={{ mb: 1 }}>{packageChip(row)}</Box>}
                 <ToggleButtonGroup
                   exclusive
                   fullWidth
+                  disabled={isBlocked(row)}
                   orientation="vertical"
                   value={draft[row.child.id] ?? null}
                   onChange={(_, value: AttendanceStatus | null) => {
@@ -163,24 +199,12 @@ export const MarkLessonPage = () => {
                     {row.child.lastName} {row.child.firstName}
                     {!row.isMember && <Chip size="small" label="Разово" sx={{ ml: 1 }} />}
                   </TableCell>
-                  <TableCell>
-                    {row.packageInfo ? (
-                      <Chip
-                        size="small"
-                        color="success"
-                        variant="outlined"
-                        label={`Пакет: ${row.packageInfo.remaining} з ${row.packageInfo.total}${
-                          row.packageInfo.expiresAt ? `, до ${formatDay(row.packageInfo.expiresAt)}` : ''
-                        }`}
-                      />
-                    ) : (
-                      <Chip size="small" color="warning" variant="outlined" label="Без пакета — разове заняття" />
-                    )}
-                  </TableCell>
+                  <TableCell>{packageChip(row)}</TableCell>
                   <TableCell>
                     <ToggleButtonGroup
                       size="small"
                       exclusive
+                      disabled={isBlocked(row)}
                       value={draft[row.child.id] ?? null}
                       onChange={(_, value: AttendanceStatus | null) => {
                         if (value) setStatus(row.child.id, value)
@@ -204,7 +228,7 @@ export const MarkLessonPage = () => {
       <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
         <Autocomplete
           sx={{ minWidth: { xs: 0, sm: 320 }, width: { xs: '100%', sm: 'auto' } }}
-          options={allChildren}
+          options={availableGuests}
           getOptionLabel={(c) => `${c.lastName} ${c.firstName}`}
           value={guest}
           onChange={(_, selected) => setGuest(selected)}
@@ -220,6 +244,27 @@ export const MarkLessonPage = () => {
           Додати
         </Button>
       </Box>
+
+      <Dialog open={unmarkedOpen} onClose={() => setUnmarkedOpen(false)} fullWidth maxWidth="xs">
+        <DialogTitle sx={{ fontWeight: 700 }}>Є діти без відмітки</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Без відмітки: {unmarkedCount}. Для них не буде створено запис відвідування і не спишеться заняття.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button color="inherit" onClick={() => setUnmarkedOpen(false)}>Повернутися</Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setUnmarkedOpen(false)
+              handleSave(true)
+            }}
+          >
+            Зберегти так
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <ReasonDialog
         open={reasonOpen}

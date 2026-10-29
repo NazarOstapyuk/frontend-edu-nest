@@ -81,7 +81,7 @@ export const EntryModal = ({ open, weekday, period, entry, onClose, onSave, onDe
       <DialogTitle sx={{ fontWeight: 700 }}>{weekdayLabels[weekday - 1]}, {period}-й урок</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: '20px' }}>
         {select('subjectId', 'Предмет', subjects.filter((s) => s.active || s.id === entry?.subjectId).map((s) => ({ id: s.id, label: s.name })))}
-        {select('teacherId', 'Вчитель', teachers.map((t) => ({ id: t.id, label: `${t.lastName} ${t.firstName}` })))}
+        {select('teacherId', 'Вчитель', teachers.filter((t) => t.isActive || t.id === entry?.teacherId).map((t) => ({ id: t.id, label: `${t.lastName} ${t.firstName}` })))}
         {select('roomId', 'Кабінет', rooms.filter((r) => r.active || r.id === entry?.roomId).map((r) => ({ id: r.id, label: r.name })), true)}
         {select('subgroupId', 'Підгрупа', subgroups.filter((g) => g.active || g.id === entry?.subgroupId).map((g) => ({ id: g.id, label: g.name })), true)}
         {select('parity', 'Тижні', weekParities.map((p) => ({ id: p, label: weekParityLabels[p] })))}

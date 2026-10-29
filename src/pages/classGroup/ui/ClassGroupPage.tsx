@@ -70,6 +70,14 @@ export const ClassGroupPage = () => {
           variant="contained"
           startIcon={<EventAvailableIcon />}
           sx={{ minHeight: { xs: 40, sm: 'unset' } }}
+          onClick={() => navigate(`/classes/${group.id}/lessons/${localToday()}`)}
+        >
+          Відмітити сьогодні
+        </Button>
+        <Button
+          variant="outlined"
+          startIcon={<EventAvailableIcon />}
+          sx={{ minHeight: { xs: 40, sm: 'unset' } }}
           disabled={!lessonDate}
           onClick={() => navigate(`/classes/${group.id}/lessons/${lessonDate}`)}
         >

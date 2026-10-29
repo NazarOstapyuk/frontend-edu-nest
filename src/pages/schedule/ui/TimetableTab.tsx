@@ -64,7 +64,15 @@ export const TimetableTab = () => {
           <Button variant="contained" disabled={isSaving} onClick={() => saveVersion().catch(() => undefined)} sx={{ ml: 'auto' }}>Зберегти</Button>
         )}
       </Box>
-      {canEdit && !editable && versionId && <Alert severity="info" sx={{ mb: 2 }}>Ця версія вже діє. Щоб змінити розклад, створіть нову версію з потрібної дати.</Alert>}
+      {canEdit && !editable && versionId && (
+        <Alert
+          severity="info"
+          sx={{ mb: 2 }}
+          action={validFrom ? <Button color="inherit" size="small" onClick={() => startNewVersion(validFrom)}>Створити нову версію</Button> : undefined}
+        >
+          Ця версія вже діє. Щоб змінити розклад, створіть нову версію з потрібної дати.
+        </Alert>
+      )}
       {versions.length === 0 && versionId === null && <Typography color="text.secondary" sx={{ mb: 2 }}>Розкладу ще немає. Створіть першу версію.</Typography>}
       {conflicts.length > 0 && (
         <Alert severity="error" sx={{ mb: 2 }}>

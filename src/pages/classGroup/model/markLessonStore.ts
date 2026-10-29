@@ -11,6 +11,7 @@ interface MarkLessonState {
   isSaving: boolean;
   load: (groupId: string, date: string, withChildren: boolean) => Promise<void>;
   setStatus: (childId: string, status: AttendanceStatus) => void;
+  markPresent: (childIds: string[]) => void;
   addGuest: (child: Child) => void;
   save: (reason?: string) => Promise<void>;
 }
@@ -44,6 +45,11 @@ export const useMarkLessonStore = create<MarkLessonState>((set, get) => ({
   },
 
   setStatus: (childId, status) => set((state) => ({ draft: { ...state.draft, [childId]: status } })),
+
+  markPresent: (childIds) =>
+    set((state) => ({
+      draft: { ...state.draft, ...Object.fromEntries(childIds.filter((id) => !state.draft[id]).map((id) => [id, 'present' as AttendanceStatus])) },
+    })),
 
   addGuest: (child) =>
     set((state) =>

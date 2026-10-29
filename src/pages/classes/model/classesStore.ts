@@ -12,13 +12,13 @@ import {
   type DirectionDto,
   type ReconciliationItem,
   type Tariff,
+  type UserLookup,
 } from '../../../shared/api';
-import type { User } from '../../../entities/user';
 
 interface ClassesState {
   directions: Direction[];
   tariffs: Tariff[];
-  teachers: User[];
+  teachers: UserLookup[];
   reconciliation: ReconciliationItem[];
   isLoading: boolean;
   isSaving: boolean;
@@ -61,8 +61,8 @@ export const useClassesStore = create<ClassesState>((set, get) => {
     fetchAll: async () => {
       set({ isLoading: true });
       try {
-        const [tariffs, users] = await Promise.all([softList(tariffsApi.getList()), softList(usersApi.getList())]);
-        set({ tariffs, teachers: users.filter((u) => u.role === 'teacher') });
+        const [tariffs, users] = await Promise.all([softList(tariffsApi.getList()), softList(usersApi.lookup('teacher'))]);
+        set({ tariffs, teachers: users });
         await refreshDirections();
       } finally {
         set({ isLoading: false });

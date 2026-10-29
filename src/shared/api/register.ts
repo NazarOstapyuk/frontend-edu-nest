@@ -2,7 +2,7 @@ import { axiosInstance } from './axiosInstance';
 
 export type GroupKind = 'kindergarten' | 'school_class';
 export const groupKindLabels: Record<GroupKind, string> = {
-  kindergarten: 'Усі садки (за типом)',
+  kindergarten: 'Садок',
   school_class: 'Клас',
 };
 export const groupKinds = Object.keys(groupKindLabels) as GroupKind[];

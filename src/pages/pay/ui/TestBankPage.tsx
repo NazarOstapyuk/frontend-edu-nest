@@ -37,7 +37,7 @@ export const TestBankPage = () => {
 
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2, bgcolor: 'grey.50' }}>
-      <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: 4, width: '100%', maxWidth: 420 }}>
+      <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: { xs: 2.5, sm: 4 }, width: '100%', maxWidth: 420 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Typography variant="h6" sx={{ fontWeight: 700 }}>Тестовий банк</Typography>
           {done ? (
@@ -48,9 +48,9 @@ export const TestBankPage = () => {
           ) : (
             <>
               <Typography color="text.secondary">Це імітація сторінки оплати</Typography>
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <Button variant="contained" onClick={() => send('success')} disabled={isSending}>Оплатити</Button>
-                <Button variant="outlined" color="error" onClick={() => send('failure')} disabled={isSending}>Відхилити</Button>
+              <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+                <Button variant="contained" size="large" onClick={() => send('success')} disabled={isSending}>Оплатити</Button>
+                <Button variant="outlined" color="error" size="large" onClick={() => send('failure')} disabled={isSending}>Відхилити</Button>
               </Box>
             </>
           )}

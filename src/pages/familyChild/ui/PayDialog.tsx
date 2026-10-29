@@ -7,6 +7,7 @@ import {
   payAmountError,
   type FinanceCategory,
 } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 interface PayDialogProps {
   childId: string
@@ -16,6 +17,7 @@ interface PayDialogProps {
 }
 
 export const PayDialog = ({ childId, category, due, onClose }: PayDialogProps) => {
+  const isPhone = useIsPhone()
   const [amount, setAmount] = useState(Number(due) > 0 ? due : '')
   const [touched, setTouched] = useState(false)
   const [isSending, setIsSending] = useState(false)
@@ -34,7 +36,7 @@ export const PayDialog = ({ childId, category, due, onClose }: PayDialogProps) =
   }
 
   return (
-    <Dialog open onClose={isSending ? undefined : onClose} fullWidth maxWidth="xs">
+    <Dialog open onClose={isSending ? undefined : onClose} fullWidth maxWidth="xs" fullScreen={isPhone}>
       <DialogTitle>Оплата онлайн</DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>

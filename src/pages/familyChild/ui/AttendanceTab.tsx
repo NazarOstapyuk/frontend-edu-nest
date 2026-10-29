@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Box, Button, Chip, IconButton, Paper, Typography } from '@mui/material'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { useChildAttendanceStore } from '../model/childAttendanceStore'
 import { NoticeDialog } from './NoticeDialog'
 import { VisitsTab } from './VisitsTab'
@@ -63,6 +64,7 @@ export const AttendanceTab = ({ childId, visits }: { childId: string; visits: Vi
   const setMonth = useChildAttendanceStore((s) => s.setMonth)
   const cancelNotice = useChildAttendanceStore((s) => s.cancelNotice)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const isPhone = useIsPhone()
 
   useEffect(() => {
     open(childId).catch(() => undefined)
@@ -78,7 +80,7 @@ export const AttendanceTab = ({ childId, visits }: { childId: string; visits: Vi
         <IconButton onClick={() => setMonth(shiftMonth(month, -1)).catch(() => undefined)}><ChevronLeftIcon /></IconButton>
         <Typography sx={{ minWidth: 140, textAlign: 'center', fontWeight: 600 }}>{monthLabel(month)}</Typography>
         <IconButton onClick={() => setMonth(shiftMonth(month, 1)).catch(() => undefined)}><ChevronRightIcon /></IconButton>
-        <Button variant="contained" sx={{ ml: 'auto' }} onClick={() => setDialogOpen(true)}>Повідомити про відсутність</Button>
+        <Button variant="contained" sx={{ ml: { xs: 0, sm: 'auto' }, width: { xs: '100%', sm: 'auto' }, minHeight: { xs: 40, sm: 'auto' } }} onClick={() => setDialogOpen(true)}>Повідомити про відсутність</Button>
       </Box>
 
       {!ready ? (
@@ -131,7 +133,7 @@ export const AttendanceTab = ({ childId, visits }: { childId: string; visits: Vi
             </Box>
             <Chip size="small" label={noticeStatusLabels[n.status]} color={n.status === 'approved' ? 'success' : n.status === 'rejected' ? 'error' : 'default'} />
             {n.status === 'pending' && (
-              <Button size="small" color="error" disabled={isSaving} onClick={() => cancelNotice(n.id).catch(() => undefined)}>Скасувати</Button>
+              <Button size="small" color="error" disabled={isSaving} sx={{ minHeight: isPhone ? 40 : undefined }} onClick={() => cancelNotice(n.id).catch(() => undefined)}>Скасувати</Button>
             )}
           </Paper>
         ))

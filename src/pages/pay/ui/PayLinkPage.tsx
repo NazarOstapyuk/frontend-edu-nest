@@ -131,7 +131,7 @@ export const PayLinkPage = () => {
         <Typography>Дитина: {link.payer}</Typography>
         <Typography variant="h5" sx={{ fontWeight: 700 }}>{formatMoney(link.amount)}</Typography>
         {enabled ? (
-          <Button variant="contained" size="large" onClick={pay} disabled={isSending}>Оплатити</Button>
+          <Button variant="contained" size="large" fullWidth onClick={pay} disabled={isSending}>Оплатити</Button>
         ) : (
           <Typography color="text.secondary">Онлайн-оплата тимчасово недоступна</Typography>
         )}
@@ -141,7 +141,7 @@ export const PayLinkPage = () => {
 
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2, bgcolor: 'grey.50' }}>
-      <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: 4, width: '100%', maxWidth: 420 }}>
+      <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: { xs: 2.5, sm: 4 }, width: '100%', maxWidth: 420 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Typography variant="h6" sx={{ fontWeight: 700 }}>{link?.institution ?? 'EduNest'}</Typography>
           {body}

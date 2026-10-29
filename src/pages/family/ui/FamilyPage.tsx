@@ -34,7 +34,7 @@ export const FamilyPage = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: 3, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+      <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: { xs: 2, sm: 3 }, display: 'flex', flexWrap: 'wrap', gap: { xs: 2, sm: 4 } }}>
         <Box>
           <Typography variant="body2" color="text.secondary">До оплати</Typography>
           <Typography variant="h5" sx={{ fontWeight: 700, color: due > 0 ? 'error.main' : 'success.main' }}>
@@ -74,7 +74,7 @@ export const FamilyPage = () => {
               )}
             </CardContent>
             <CardActions>
-              <Button size="small" variant="contained" onClick={() => navigate(`/family/${child.id}`)}>
+              <Button size="small" variant="contained" sx={{ minHeight: { xs: 40, sm: 'auto' } }} onClick={() => navigate(`/family/${child.id}`)}>
                 Детальніше
               </Button>
             </CardActions>

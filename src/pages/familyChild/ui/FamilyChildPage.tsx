@@ -51,14 +51,14 @@ export const FamilyChildPage = () => {
         <IconButton onClick={() => navigate('/family')}>
           <ArrowBackIcon />
         </IconButton>
-        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, minWidth: 0, overflowWrap: 'anywhere' }}>
           {[card.lastName, card.firstName, card.middleName].filter(Boolean).join(' ')}
         </Typography>
       </Box>
       {returnInvoice && (
         <PaymentReturnBanner invoiceId={returnInvoice} onSuccess={() => reloadFinance(card.id).catch(() => undefined)} />
       )}
-      <Tabs value={tab} onChange={(_, v: string) => setTab(v)} variant="scrollable" sx={{ mb: 2 }}>
+      <Tabs value={tab} onChange={(_, v: string) => setTab(v)} variant="scrollable" allowScrollButtonsMobile sx={{ mb: 2 }}>
         <Tab value="card" label="Картка" />
         {kindergarten ? <Tab value="routine" label="Розпорядок" /> : <Tab value="schedule" label="Розклад" />}
         <Tab value="attendance" label="Відвідування" />

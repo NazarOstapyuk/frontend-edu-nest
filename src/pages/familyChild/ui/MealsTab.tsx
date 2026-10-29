@@ -4,6 +4,7 @@ import {
 } from '@mui/material'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { useChildMealsStore } from '../model/childMealsStore'
 import { addDaysIso, formatDay, isoWeekdayLabels, type ParentMenu, type ParentMenuDay } from '../../../shared/api'
 
@@ -26,6 +27,7 @@ const issueTexts = {
 }
 
 const Week = ({ childId, data }: { childId: string; data: ParentMenu }) => {
+  const isPhone = useIsPhone()
   const isSaving = useChildMealsStore((s) => s.isSaving)
   const order = useChildMealsStore((s) => s.order)
   const cancel = useChildMealsStore((s) => s.cancel)
@@ -78,7 +80,7 @@ const Week = ({ childId, data }: { childId: string; data: ParentMenu }) => {
                 <Chip color="success" label={`Замовлено: ${placed.complex.name}, ${placed.price} грн`} />
                 <Typography variant="body2">{placed.items.map((i) => i.dishName).join(', ')}</Typography>
                 {day.canCancel && (
-                  <Button size="small" color="error" disabled={isSaving} onClick={() => cancel(childId, placed.id).catch(() => undefined)}>
+                  <Button size="small" color="error" disabled={isSaving} sx={{ minHeight: isPhone ? 40 : undefined }} onClick={() => cancel(childId, placed.id).catch(() => undefined)}>
                     Скасувати
                   </Button>
                 )}
@@ -90,7 +92,7 @@ const Week = ({ childId, data }: { childId: string; data: ParentMenu }) => {
                   control={<Checkbox checked={!!s?.include} onChange={(e) => update(day.date, { include: e.target.checked })} />}
                   label="Замовити"
                 />
-                <TextField select size="small" label="Комплекс" value={s?.complexId ?? ''} onChange={(e) => update(day.date, { complexId: e.target.value, picks: {}, include: true })} sx={{ minWidth: 220 }}>
+                <TextField select size="small" label="Комплекс" value={s?.complexId ?? ''} onChange={(e) => update(day.date, { complexId: e.target.value, picks: {}, include: true })} sx={{ minWidth: { xs: '100%', sm: 220 } }}>
                   {day.complexes.map((c) => <MenuItem key={c.id} value={c.id}>{c.name} — {c.price} грн</MenuItem>)}
                 </TextField>
                 {s?.complexId && choiceCourses(day, s.complexId).map((course) => (
@@ -101,7 +103,7 @@ const Week = ({ childId, data }: { childId: string; data: ParentMenu }) => {
                     label={course.name}
                     value={s.picks[course.id] ?? ''}
                     onChange={(e) => update(day.date, { picks: { ...s.picks, [course.id]: e.target.value } })}
-                    sx={{ minWidth: 180 }}
+                    sx={{ minWidth: { xs: '100%', sm: 180 } }}
                   >
                     {course.options.map((o) => <MenuItem key={o.id} value={o.id}>{o.name}</MenuItem>)}
                   </TextField>
@@ -111,9 +113,9 @@ const Week = ({ childId, data }: { childId: string; data: ParentMenu }) => {
           </Paper>
         )
       })}
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 2 }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'flex-end', alignItems: { xs: 'stretch', sm: 'center' }, gap: 2 }}>
         {chosen.length > 0 && <Typography>Днів: {chosen.length}, разом {total.toFixed(2)} грн</Typography>}
-        <Button variant="contained" disabled={chosen.length === 0 || isSaving} onClick={submit}>Замовити</Button>
+        <Button variant="contained" disabled={chosen.length === 0 || isSaving} sx={{ minHeight: isPhone ? 44 : undefined }} onClick={submit}>Замовити</Button>
       </Box>
     </Box>
   )

@@ -49,7 +49,7 @@ export const GroupsPage = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, mb: 3 }}>
         <Typography variant="body2" color="text.secondary">
           Всього груп: {groups.length}
         </Typography>

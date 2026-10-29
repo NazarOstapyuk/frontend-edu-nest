@@ -4,6 +4,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, TextField } from '@mui/material'
 import { useSubscriptionTypesStore } from '../model/subscriptionTypesStore'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const schema = yup.object({
   name: yup.string().min(2, 'Мінімум 2 символи').required("Обов'язкове поле"),
@@ -20,6 +21,7 @@ const schema = yup.object({
 type FormValues = yup.InferType<typeof schema>
 
 export const EditSubscriptionTypeModal = () => {
+  const isPhone = useIsPhone()
   const updateSubscriptionType = useSubscriptionTypesStore((s) => s.updateSubscriptionType)
   const isUpdating = useSubscriptionTypesStore((s) => s.isUpdating)
   const { isOpen, subscriptionType } = useSubscriptionTypesStore((s) => s.editModal)
@@ -55,7 +57,7 @@ export const EditSubscriptionTypeModal = () => {
   }
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog fullScreen={isPhone} open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
       <DialogTitle sx={{ fontWeight: 700 }}>Редагувати тип абонементу</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         <Controller

@@ -1,7 +1,9 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { usePositionsPageStore } from '../model/positionsPageStore'
 
 export const DeletePositionDialog = () => {
+  const isPhone = useIsPhone()
   const { isOpen, position } = usePositionsPageStore((s) => s.deleteModal)
   const setDeleteModal = usePositionsPageStore((s) => s.setDeleteModal)
   const deletePosition = usePositionsPageStore((s) => s.deletePosition)
@@ -16,7 +18,7 @@ export const DeletePositionDialog = () => {
   }
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="xs">
+    <Dialog open={isOpen} onClose={handleClose} fullScreen={isPhone} fullWidth maxWidth="xs">
       <DialogTitle sx={{ fontWeight: 700 }}>Видалити посаду</DialogTitle>
       <DialogContent>
         <DialogContentText>Видалити посаду «{position?.name}»?</DialogContentText>

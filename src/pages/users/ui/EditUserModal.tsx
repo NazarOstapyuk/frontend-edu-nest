@@ -15,6 +15,7 @@ import {
 } from '@mui/material'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
+import { useIsPhone } from '../../../shared/lib/useIsPhone.ts'
 import { RHFTextField } from '../../../shared/ui/RHFTextField.tsx'
 import { useUsersStore } from '../model/usersStore.ts'
 import { isValidPhone, normalizePhone } from '../../../shared/lib/phone.ts'
@@ -46,6 +47,7 @@ const schema = yup.object({
 type FormValues = yup.InferType<typeof schema>
 
 export const EditUserModal = () => {
+  const isPhone = useIsPhone()
   const updateUser = useUsersStore((s) => s.updateUser)
   const applyScope = useUsersStore((s) => s.applyScope)
   const profile = useAuthStore((s) => s.profile)
@@ -121,12 +123,12 @@ export const EditUserModal = () => {
   }
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog open={isOpen} onClose={handleClose} fullScreen={isPhone} fullWidth maxWidth="sm">
       <DialogTitle sx={{ fontWeight: 700 }}>Редагувати користувача</DialogTitle>
 
       <FormProvider {...methods}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '25px', padding: '20px' }}>
-          <Box sx={{ display: 'flex', gap: '10px' }}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: '10px' }}>
             <RHFTextField
               name="firstName"
               control={methods.control}

@@ -14,6 +14,7 @@ import {
 import type { BellSchedule, Group, MealPriceCategory, UpdateGroupDto } from '../../../shared/api'
 import type { User } from '../../../entities/user'
 import { useEffectiveInstitutions, useInstitutionStore } from '../../../shared/model/institutionStore'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const schema = yup.object({
   name: yup.string().min(2, 'Мінімум 2 символи').required("Обов'язкове поле"),
@@ -48,6 +49,8 @@ export const EditGroupModal = ({
   onSubmit: submit,
   onClose,
 }: EditGroupModalProps) => {
+
+  const isPhone = useIsPhone()
 
   const allInstitutions = useInstitutionStore((s) => s.institutions)
   const institutions = useEffectiveInstitutions()
@@ -97,7 +100,7 @@ export const EditGroupModal = ({
   }
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog fullScreen={isPhone} open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
       <DialogTitle sx={{ fontWeight: 700 }}>{title}</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         <Controller

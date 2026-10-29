@@ -51,6 +51,7 @@ export const LoginPage = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    p: 2,
                 }}
             >
                 <Box
@@ -58,8 +59,10 @@ export const LoginPage = () => {
                         bgcolor: 'background.paper',
                         borderRadius: 3,
                         boxShadow: '0 4px 24px rgba(0,0,0,0.10)',
-                        p: '40px 36px',
-                        width: 400,
+                        p: { xs: 3, sm: '40px 36px' },
+                        width: '100%',
+                        maxWidth: 400,
+                        boxSizing: 'border-box',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',

@@ -17,6 +17,7 @@ import {
   Typography,
 } from '@mui/material'
 import { areaLabels, levelLabels, scopeLabels, usersApi, type AccessScope } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { useInstitutionStore } from '../../../shared/model/institutionStore'
 import { useAuthStore, type User } from '../../../entities/user'
 import { canAssignPosition, usePositionsStore } from '../../../entities/position'
@@ -33,6 +34,7 @@ const scopes = Object.keys(scopeLabels) as AccessScope[]
 const institutionsSchema = yup.array(yup.string().required()).min(1, 'Оберіть хоча б один заклад')
 
 export const AccessDialog = ({ user, onClose, onSaved }: Props) => {
+  const isPhone = useIsPhone()
   const profile = useAuthStore((s) => s.profile)
   const positions = usePositionsStore((s) => s.positions)
   const loadPositions = usePositionsStore((s) => s.load)
@@ -84,7 +86,7 @@ export const AccessDialog = ({ user, onClose, onSaved }: Props) => {
   }
 
   return (
-    <Dialog open fullWidth maxWidth="sm" onClose={onClose}>
+    <Dialog open fullScreen={isPhone} fullWidth maxWidth="sm" onClose={onClose}>
       <DialogTitle>
         Доступ: {user.lastName} {user.firstName}
       </DialogTitle>

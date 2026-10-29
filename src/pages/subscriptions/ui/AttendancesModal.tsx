@@ -17,6 +17,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import EventAvailableIcon from '@mui/icons-material/EventAvailable'
 import { useAttendancesStore } from '../model/attendancesStore'
 import { subscriptionStatusLabels, type SubscriptionStatus } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const statusColors: Record<SubscriptionStatus, 'success' | 'default' | 'warning'> = {
   active: 'success',
@@ -25,6 +26,7 @@ const statusColors: Record<SubscriptionStatus, 'success' | 'default' | 'warning'
 }
 
 export const AttendancesModal = () => {
+  const isPhone = useIsPhone()
   const { isOpen, subscription, attendances, isLoading, isCreating, isDeleting } = useAttendancesStore()
   const close = useAttendancesStore((s) => s.close)
   const createAttendance = useAttendancesStore((s) => s.createAttendance)
@@ -48,7 +50,7 @@ export const AttendancesModal = () => {
     : 0
 
   return (
-    <Dialog open={isOpen} onClose={close} fullWidth maxWidth="sm">
+    <Dialog fullScreen={isPhone} open={isOpen} onClose={close} fullWidth maxWidth="sm">
       <DialogTitle sx={{ fontWeight: 700, pb: 0 }}>
         Відвідування
       </DialogTitle>
@@ -82,7 +84,7 @@ export const AttendancesModal = () => {
       <Divider />
 
       {subscription?.status === 'active' && (
-        <Box sx={{ px: 3, py: 2, display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
+        <Box sx={{ px: 3, py: 2, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 1.5, alignItems: { xs: 'stretch', sm: 'flex-start' } }}>
           <TextField
             label="Дата і час"
             type="datetime-local"
@@ -90,7 +92,7 @@ export const AttendancesModal = () => {
             value={date}
             onChange={(e) => setDate(e.target.value)}
             slotProps={{ inputLabel: { shrink: true } }}
-            sx={{ flex: '0 0 200px' }}
+            sx={{ flex: { xs: '0 0 auto', sm: '0 0 200px' } }}
           />
           <TextField
             label="Нотатка"
@@ -98,7 +100,7 @@ export const AttendancesModal = () => {
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="необов'язково"
-            sx={{ flex: 1 }}
+            sx={{ flex: { xs: '0 0 auto', sm: 1 } }}
           />
           <Button
             variant="contained"
@@ -114,7 +116,7 @@ export const AttendancesModal = () => {
 
       <Divider />
 
-      <Box sx={{ px: 3, py: 2, minHeight: 120, maxHeight: 360, overflowY: 'auto' }}>
+      <Box sx={{ px: 3, py: 2, minHeight: 120, maxHeight: { xs: 'none', sm: 360 }, overflowY: 'auto' }}>
         {isLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
             <CircularProgress size={28} />

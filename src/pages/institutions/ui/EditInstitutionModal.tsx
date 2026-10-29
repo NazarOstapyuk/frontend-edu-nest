@@ -5,6 +5,7 @@ import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, FormControlLabel, MenuItem, Switch, TextField } from '@mui/material'
 import { useInstitutionsStore } from '../model/institutionsStore'
 import { institutionTypeLabels, type InstitutionType, type UpdateInstitutionDto } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const schema = yup.object({
   name: yup
@@ -20,6 +21,7 @@ const schema = yup.object({
 type FormValues = yup.InferType<typeof schema>
 
 export const EditInstitutionModal = () => {
+  const isPhone = useIsPhone()
   const updateInstitution = useInstitutionsStore((s) => s.updateInstitution)
   const isUpdating = useInstitutionsStore((s) => s.isUpdating)
   const { isOpen, institution } = useInstitutionsStore((s) => s.editInstitutionModal)
@@ -53,7 +55,7 @@ export const EditInstitutionModal = () => {
   }
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog open={isOpen} onClose={handleClose} fullScreen={isPhone} fullWidth maxWidth="sm">
       <DialogTitle sx={{ fontWeight: 700 }}>Редагувати заклад</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         <Controller

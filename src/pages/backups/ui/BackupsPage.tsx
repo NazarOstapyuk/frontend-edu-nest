@@ -24,9 +24,12 @@ import {
 } from '../../../shared/api'
 import { useBackupsStore } from '../model/backupsStore'
 import { useCan } from '../../../entities/user'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardList, CardField } from '../../../shared/ui/CardList'
 
 export const BackupsPage = () => {
   const canEdit = useCan('backups', 'edit')
+  const isPhone = useIsPhone()
   const status = useBackupsStore((s) => s.status)
   const runs = useBackupsStore((s) => s.runs)
   const failed = useBackupsStore((s) => s.failed)
@@ -92,6 +95,23 @@ export const BackupsPage = () => {
         <Typography variant="subtitle1" sx={{ mb: 1 }}>
           Файли копій
         </Typography>
+        {isPhone ? (
+          <CardList
+            items={status.files}
+            getKey={(f) => f.name}
+            empty={<Typography color="text.secondary">Копій ще немає</Typography>}
+            renderCard={(file) => (
+              <>
+                <Typography sx={{ fontWeight: 600, mb: 0.5 }}>{formatTakenAt(file.takenAt)}</Typography>
+                <CardField label="Тип">{backupKindLabels[file.kind]}</CardField>
+                <CardField label="Розмір">{formatBytes(file.sizeBytes)}</CardField>
+                <CardField label="Файл">
+                  <Box component="span" sx={{ fontFamily: 'monospace', fontSize: 12 }}>{file.name}</Box>
+                </CardField>
+              </>
+            )}
+          />
+        ) : (
         <Paper elevation={0} sx={{ border: 1, borderColor: 'divider', overflowX: 'auto' }}>
           <Table size="small">
             <TableHead>
@@ -121,12 +141,37 @@ export const BackupsPage = () => {
             </TableBody>
           </Table>
         </Paper>
+        )}
       </Box>
 
       <Box>
         <Typography variant="subtitle1" sx={{ mb: 1 }}>
           Останні запуски
         </Typography>
+        {isPhone ? (
+          <CardList
+            items={runs}
+            getKey={(r) => r.id}
+            empty={<Typography color="text.secondary">Запусків ще не було</Typography>}
+            renderCard={(run) => (
+              <>
+                <Typography sx={{ fontWeight: 600, mb: 0.5 }}>{formatDateTime(run.startedAt)}</Typography>
+                <Box sx={{ mb: 0.5 }}>
+                  <Chip
+                    size="small"
+                    label={backupRunStatusLabels[run.status]}
+                    color={run.status === 'succeeded' ? 'success' : run.status === 'failed' ? 'error' : 'default'}
+                  />
+                </Box>
+                <CardField label="Тип">{backupKindLabels[run.kind]}</CardField>
+                <CardField label="Хто">
+                  {run.createdBy ? `${run.createdBy.lastName} ${run.createdBy.firstName}` : 'Автоматично'}
+                </CardField>
+                {run.error && <CardField label="Помилка">{backupErrorLabel(run.error)}</CardField>}
+              </>
+            )}
+          />
+        ) : (
         <Paper elevation={0} sx={{ border: 1, borderColor: 'divider', overflowX: 'auto' }}>
           <Table size="small">
             <TableHead>
@@ -164,6 +209,7 @@ export const BackupsPage = () => {
             </TableBody>
           </Table>
         </Paper>
+        )}
       </Box>
     </Stack>
   )

@@ -26,6 +26,8 @@ import { EditUserModal } from './EditUserModal.tsx'
 import { AccessDialog } from './AccessDialog.tsx'
 import { useInstitutionStore } from '../../../shared/model/institutionStore'
 import { HistoryButton } from '../../../widgets/auditHistory'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardList, CardField } from '../../../shared/ui/CardList'
 
 const roleColors: Record<string, 'primary' | 'secondary' | 'default'> = {
   admin: 'default',
@@ -43,6 +45,52 @@ export const UsersPage = () => {
   const canEditUsers = useCan('users', 'edit')
   const institutions = useInstitutionStore((s) => s.institutions)
   const [accessUser, setAccessUser] = useState<User | null>(null)
+  const isPhone = useIsPhone()
+
+  const fullName = (user: User) => [user.lastName, user.firstName, user.middleName].filter(Boolean).join(' ')
+  const scopeText = (user: User) =>
+    user.role === 'parent'
+      ? '—'
+      : user.accessScope === 'institutions'
+        ? (user.institutionIds ?? [])
+            .map((id) => institutions.find((i) => i.id === id)?.name)
+            .filter(Boolean)
+            .join(', ') || '—'
+        : scopeLabels.all
+  const roleChip = (user: User) => (
+    <Chip
+      label={user.role === 'parent' ? roleLabels.parent : (user.position?.name ?? '—')}
+      color={roleColors[user.role]}
+      size="small"
+      variant="outlined"
+    />
+  )
+  const actions = (user: User) => (
+    <>
+      <HistoryButton entityType="users" entityId={user.id} title={`${user.lastName} ${user.firstName}`} />
+      {canEditUsers && user.role !== 'parent' && (
+        <Tooltip title="Доступ">
+          <IconButton size="small" onClick={() => setAccessUser(user)}>
+            <AdminPanelSettingsIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
+      {canEditUsers && (
+        <Tooltip title="Редагувати">
+          <IconButton size="small" onClick={() => setEditUserModal({ isOpen: true, user })}>
+            <EditOutlinedIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
+      {canEditUsers && (
+        <Tooltip title="Видалити">
+          <IconButton size="small" color="error" onClick={() => deleteUser(user.id)}>
+            <DeleteOutlineIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
+    </>
+  )
 
   useEffect(() => {
     fetchUsers()
@@ -50,7 +98,7 @@ export const UsersPage = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, mb: 3 }}>
         <Typography variant="body2" color="text.secondary">
           Всього користувачів: {users.length}
         </Typography>
@@ -65,10 +113,41 @@ export const UsersPage = () => {
         )}
       </Box>
 
+      {isPhone ? (
+        <CardList
+          items={users}
+          getKey={(u) => u.id}
+          empty={
+            <Typography color="text.secondary" align="center" sx={{ py: 6 }}>
+              Користувачів ще немає. Натисніть «Створити користувача».
+            </Typography>
+          }
+          renderCard={(user) => (
+            <>
+              <Typography sx={{ fontWeight: 600, mb: 0.5 }}>{fullName(user)}</Typography>
+              <Box sx={{ mb: 0.5 }}>{roleChip(user)}</Box>
+              <CardField label="Телефон">
+                {user.phone ?? '—'}
+                {user.role === 'parent' && !user.phone && (
+                  <Chip size="small" color="warning" label="немає телефону" sx={{ ml: 1 }} />
+                )}
+              </CardField>
+              <CardField label="Заклади">{scopeText(user)}</CardField>
+              <CardField label="Логін">
+                <Box component="span" sx={{ fontFamily: 'monospace' }}>{user.login}</Box>
+              </CardField>
+              <CardField label="Створено">
+                {new Date(user.createdAt).toLocaleDateString('uk-UA', { timeZone: 'Europe/Kyiv' })}
+              </CardField>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5, mt: 1 }}>{actions(user)}</Box>
+            </>
+          )}
+        />
+      ) : (
       <TableContainer
         component={Paper}
         elevation={0}
-        sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}
+        sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflowX: 'auto' }}
       >
         <Table>
           <TableHead>
@@ -166,6 +245,7 @@ export const UsersPage = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      )}
 
       <CreateUserModal />
       <EditUserModal />

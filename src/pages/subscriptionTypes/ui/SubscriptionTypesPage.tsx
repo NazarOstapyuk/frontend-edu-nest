@@ -19,6 +19,8 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { useSubscriptionTypesStore } from '../model/subscriptionTypesStore'
 import { CreateSubscriptionTypeModal } from './CreateSubscriptionTypeModal'
 import { EditSubscriptionTypeModal } from './EditSubscriptionTypeModal'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardList, CardField } from '../../../shared/ui/CardList'
 
 export const SubscriptionTypesPage = () => {
   const subscriptionTypes = useSubscriptionTypesStore((s) => s.subscriptionTypes)
@@ -26,6 +28,15 @@ export const SubscriptionTypesPage = () => {
   const setCreateModal = useSubscriptionTypesStore((s) => s.setCreateModal)
   const setEditModal = useSubscriptionTypesStore((s) => s.setEditModal)
   const deleteSubscriptionType = useSubscriptionTypesStore((s) => s.deleteSubscriptionType)
+  const isPhone = useIsPhone()
+
+  const priceText = (value: number) =>
+    value.toLocaleString('uk-UA', {
+      style: 'currency',
+      currency: 'UAH',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    })
 
   useEffect(() => {
     fetchSubscriptionTypes()
@@ -33,7 +44,7 @@ export const SubscriptionTypesPage = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, mb: 3 }}>
         <Typography variant="body2" color="text.secondary">
           Всього типів: {subscriptionTypes.length}
         </Typography>
@@ -46,10 +57,39 @@ export const SubscriptionTypesPage = () => {
         </Button>
       </Box>
 
+      {isPhone ? (
+        <CardList
+          items={subscriptionTypes}
+          getKey={(t) => t.id}
+          empty={
+            <Typography color="text.secondary" align="center" sx={{ py: 6 }}>
+              Типів абонементів ще немає. Натисніть «Створити тип».
+            </Typography>
+          }
+          renderCard={(item) => (
+            <>
+              <Typography sx={{ fontWeight: 600, mb: 0.5 }}>{item.name}</Typography>
+              <CardField label="Ціна за заняття">{priceText(item.pricePerSession)}</CardField>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5, mt: 1 }}>
+                <Tooltip title="Редагувати">
+                  <IconButton size="small" onClick={() => setEditModal({ isOpen: true, subscriptionType: item })}>
+                    <EditOutlinedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Видалити">
+                  <IconButton size="small" color="error" onClick={() => deleteSubscriptionType(item.id)}>
+                    <DeleteOutlineIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            </>
+          )}
+        />
+      ) : (
       <TableContainer
         component={Paper}
         elevation={0}
-        sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}
+        sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflowX: 'auto' }}
       >
         <Table>
           <TableHead>
@@ -106,6 +146,7 @@ export const SubscriptionTypesPage = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      )}
 
       <CreateSubscriptionTypeModal />
       <EditSubscriptionTypeModal />

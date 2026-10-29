@@ -13,6 +13,7 @@ import {
 } from '@mui/material'
 import type { User } from '../../../entities/user'
 import { genderLabels, type CreateChildDto, type Gender, type Group } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const schema = yup.object({
   firstName: yup.string().min(2, 'Мінімум 2 символи').required("Обов'язкове поле"),
@@ -45,6 +46,7 @@ export const CreateChildModal = ({
   onSubmit: submit,
   onClose,
 }: CreateChildModalProps) => {
+  const isPhone = useIsPhone()
   const parents = users.filter((u) => u.role === 'parent')
 
   const { control, handleSubmit, reset, setValue } = useForm<FormValues>({
@@ -76,7 +78,7 @@ export const CreateChildModal = ({
   }
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog fullScreen={isPhone} open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
       <DialogTitle sx={{ fontWeight: 700 }}>Новий учень</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         <Controller

@@ -4,6 +4,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, TextField, Typography } from '@mui/material'
 import { useSubscriptionsStore } from '../model/subscriptionsStore'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const schema = yup.object({
   totalSessions: yup
@@ -17,6 +18,7 @@ const schema = yup.object({
 type FormValues = yup.InferType<typeof schema>
 
 export const EditSubscriptionModal = () => {
+  const isPhone = useIsPhone()
   const updateSubscription = useSubscriptionsStore((s) => s.updateSubscription)
   const isUpdating = useSubscriptionsStore((s) => s.isUpdating)
   const { isOpen, subscription } = useSubscriptionsStore((s) => s.editModal)
@@ -46,7 +48,7 @@ export const EditSubscriptionModal = () => {
   }
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="xs">
+    <Dialog fullScreen={isPhone} open={isOpen} onClose={handleClose} fullWidth maxWidth="xs">
       <DialogTitle sx={{ fontWeight: 700 }}>Редагувати абонемент</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         {subscription && (

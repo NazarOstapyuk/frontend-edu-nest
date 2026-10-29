@@ -29,6 +29,8 @@ import { genderLabels } from '../../../shared/api'
 import { useCan } from '../../../entities/user'
 import { CreateChildModal, EditChildModal } from '../../../widgets/childForms'
 import { HistoryButton } from '../../../widgets/auditHistory'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardList, CardField } from '../../../shared/ui/CardList'
 
 export const ChildrenPage = () => {
   const children = useChildrenStore((s) => s.children)
@@ -43,6 +45,7 @@ export const ChildrenPage = () => {
   const isCreating = useChildrenStore((s) => s.isCreating)
   const isUpdating = useChildrenStore((s) => s.isUpdating)
   const navigate = useNavigate()
+  const isPhone = useIsPhone()
   const users = useUsersStore((s) => s.users)
   const fetchUsers = useUsersStore((s) => s.fetchUsers)
   const groups = useGroupsStore((s) => s.groups)
@@ -66,6 +69,48 @@ export const ChildrenPage = () => {
   const currentPage = Math.min(page, lastPage)
   const pagedChildren = visibleChildren.slice(currentPage * rowsPerPage, (currentPage + 1) * rowsPerPage)
 
+  const childName = (child: (typeof children)[number]) =>
+    [child.lastName, child.firstName, child.middleName].filter(Boolean).join(' ')
+  const groupLabel = (child: (typeof children)[number]) =>
+    child.group ? (child.group.institution ? `${child.group.name} · ${child.group.institution.name}` : child.group.name) : null
+  const parentChips = (child: (typeof children)[number]) => (
+    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+      {child.parents.length === 0 ? (
+        <Typography variant="body2" color="text.secondary">—</Typography>
+      ) : (
+        child.parents.map((parent) => (
+          <Chip key={parent.id} label={`${parent.lastName} ${parent.firstName}`} size="small" variant="outlined" />
+        ))
+      )}
+    </Box>
+  )
+  const actions = (child: (typeof children)[number]) => (
+    <>
+      <HistoryButton entityType="children" entityId={child.id} title={`${child.lastName} ${child.firstName}`} />
+      {canViewFinance && (
+        <Tooltip title="Фінанси">
+          <IconButton size="small" onClick={() => navigate(`/finance/${child.id}`)}>
+            <AccountBalanceWalletOutlinedIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
+      {canEdit && (
+        <Tooltip title="Редагувати">
+          <IconButton size="small" onClick={() => setEditChildModal({ isOpen: true, child })}>
+            <EditOutlinedIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
+      {canEdit && (
+        <Tooltip title="Видалити">
+          <IconButton size="small" color="error" onClick={() => deleteChild(child.id)}>
+            <DeleteOutlineIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
+    </>
+  )
+
   useEffect(() => {
     fetchChildren()
     fetchUsers()
@@ -74,8 +119,8 @@ export const ChildrenPage = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
           <TextField
             select
             size="small"
@@ -85,7 +130,7 @@ export const ChildrenPage = () => {
               setGroupId(e.target.value)
               setPage(0)
             }}
-            sx={{ minWidth: 220 }}
+            sx={{ minWidth: { xs: 0, sm: 220 }, width: { xs: '100%', sm: 'auto' } }}
           >
             <MenuItem value="">Усі групи</MenuItem>
             {sortedGroups.map((g) => (
@@ -109,10 +154,44 @@ export const ChildrenPage = () => {
         )}
       </Box>
 
+      {isPhone ? (
+        <>
+          <CardList
+            items={pagedChildren}
+            getKey={(c) => c.id}
+            empty={
+              <Typography color="text.secondary" align="center" sx={{ py: 6 }}>
+                {groupId ? 'У цій групі учнів немає.' : 'Учнів ще немає. Натисніть «Створити учня».'}
+              </Typography>
+            }
+            renderCard={(child) => (
+              <>
+                <Typography sx={{ fontWeight: 600, mb: 0.5 }}>{childName(child)}</Typography>
+                <CardField label="Дата народження">{new Date(child.birthDate).toLocaleDateString('uk-UA')}</CardField>
+                <CardField label="Стать">{genderLabels[child.gender]}</CardField>
+                <CardField label="Група">{groupLabel(child) ?? '—'}</CardField>
+                <CardField label="Батьки">{parentChips(child)}</CardField>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5, mt: 1 }}>{actions(child)}</Box>
+              </>
+            )}
+          />
+          {visibleChildren.length > 0 && (
+            <TablePagination
+              component="div"
+              count={visibleChildren.length}
+              page={currentPage}
+              rowsPerPage={rowsPerPage}
+              rowsPerPageOptions={[]}
+              onPageChange={(_, next) => setPage(next)}
+              labelDisplayedRows={({ from, to, count }) => `${from}–${to} з ${count}`}
+            />
+          )}
+        </>
+      ) : (
       <TableContainer
         component={Paper}
         elevation={0}
-        sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}
+        sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflowX: 'auto' }}
       >
         <Table>
           <TableHead>
@@ -224,6 +303,7 @@ export const ChildrenPage = () => {
           />
         )}
       </TableContainer>
+      )}
 
       <CreateChildModal
         isOpen={createChildModal.isOpen}

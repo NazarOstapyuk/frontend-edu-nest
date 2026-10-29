@@ -4,6 +4,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Box, Button, Checkbox, Dialog, DialogTitle, FormControlLabel, TextField } from '@mui/material'
 import { useAbsenceReasonsStore } from '../model/absenceReasonsStore'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const schema = yup.object({
   name: yup.string().trim().required("Обов'язкове поле").max(100, 'Максимум 100 символів'),
@@ -17,6 +18,7 @@ type FormValues = yup.InferType<typeof schema>
 const empty: FormValues = { name: '', excused: true, requiresDocument: false, sortOrder: 0 }
 
 export const AbsenceReasonModal = () => {
+  const isPhone = useIsPhone()
   const modal = useAbsenceReasonsStore((s) => s.modal)
   const setModal = useAbsenceReasonsStore((s) => s.setModal)
   const createReason = useAbsenceReasonsStore((s) => s.createReason)
@@ -56,7 +58,7 @@ export const AbsenceReasonModal = () => {
   }
 
   return (
-    <Dialog open={modal.isOpen} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog fullScreen={isPhone} open={modal.isOpen} onClose={handleClose} fullWidth maxWidth="sm">
       <DialogTitle sx={{ fontWeight: 700 }}>{modal.reason ? 'Редагувати причину' : 'Нова причина'}</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: '20px' }}>
         <Controller

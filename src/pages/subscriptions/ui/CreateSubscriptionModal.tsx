@@ -5,6 +5,7 @@ import { Autocomplete, Box, Button, Dialog, DialogTitle, TextField } from '@mui/
 import { useSubscriptionsStore } from '../model/subscriptionsStore'
 import { useChildrenStore } from '../../children/model/childrenStore'
 import { useSubscriptionTypesStore } from '../../subscriptionTypes/model/subscriptionTypesStore'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const schema = yup.object({
   childIds: yup.array().of(yup.string().required()).min(1, 'Оберіть хоча б одного учня').required(),
@@ -20,6 +21,7 @@ const schema = yup.object({
 type FormValues = yup.InferType<typeof schema>
 
 export const CreateSubscriptionModal = () => {
+  const isPhone = useIsPhone()
   const createSubscription = useSubscriptionsStore((s) => s.createSubscription)
   const isCreating = useSubscriptionsStore((s) => s.isCreating)
   const { isOpen } = useSubscriptionsStore((s) => s.createModal)
@@ -49,7 +51,7 @@ export const CreateSubscriptionModal = () => {
   }
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog fullScreen={isPhone} open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
       <DialogTitle sx={{ fontWeight: 700 }}>Новий абонемент</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         <Controller

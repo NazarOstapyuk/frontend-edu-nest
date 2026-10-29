@@ -5,6 +5,8 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { useAbsenceReasonsStore } from '../model/absenceReasonsStore'
 import { useCan } from '../../../entities/user'
 import { AbsenceReasonModal } from './AbsenceReasonModal'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardList, CardField } from '../../../shared/ui/CardList'
 
 export const AbsenceReasonsPage = () => {
   const reasons = useAbsenceReasonsStore((s) => s.reasons)
@@ -12,6 +14,7 @@ export const AbsenceReasonsPage = () => {
   const updateReason = useAbsenceReasonsStore((s) => s.updateReason)
   const setModal = useAbsenceReasonsStore((s) => s.setModal)
   const canEdit = useCan('register', 'edit')
+  const isPhone = useIsPhone()
 
   useEffect(() => {
     fetchReasons().catch(() => undefined)
@@ -19,7 +22,7 @@ export const AbsenceReasonsPage = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, mb: 3 }}>
         <Typography variant="body2" color="text.secondary">Всього причин: {reasons.length}</Typography>
         {canEdit && (
           <Button variant="contained" startIcon={<AddIcon />} onClick={() => setModal({ isOpen: true, reason: null })}>
@@ -27,6 +30,34 @@ export const AbsenceReasonsPage = () => {
           </Button>
         )}
       </Box>
+      {isPhone ? (
+        <CardList
+          items={reasons}
+          getKey={(r) => r.id}
+          empty={<Typography color="text.secondary" align="center" sx={{ py: 6 }}>Причин ще немає.</Typography>}
+          renderCard={(reason) => (
+            <Box sx={{ opacity: reason.active ? 1 : 0.5 }}>
+              <Typography sx={{ fontWeight: 600, mb: 0.5 }}>{reason.name}</Typography>
+              <CardField label="Поважна">{reason.excused ? 'Так' : 'Ні'}</CardField>
+              <CardField label="Потрібна довідка">{reason.requiresDocument ? 'Так' : 'Ні'}</CardField>
+              <CardField label="Порядок">{reason.sortOrder}</CardField>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 0.5, mt: 1 }}>
+                <Typography variant="body2" color="text.secondary">Активна</Typography>
+                <Switch
+                  checked={reason.active}
+                  disabled={!canEdit}
+                  onChange={(e) => updateReason(reason.id, { active: e.target.checked }).catch(() => undefined)}
+                />
+                {canEdit && (
+                  <IconButton size="small" onClick={() => setModal({ isOpen: true, reason })}>
+                    <EditOutlinedIcon fontSize="small" />
+                  </IconButton>
+                )}
+              </Box>
+            </Box>
+          )}
+        />
+      ) : (
       <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflowX: 'auto' }}>
         <Table>
           <TableHead>
@@ -71,6 +102,7 @@ export const AbsenceReasonsPage = () => {
           </TableBody>
         </Table>
       </Paper>
+      )}
       <AbsenceReasonModal />
     </Box>
   )

@@ -23,7 +23,9 @@ import { institutionTypeLabels, type Child, type Group, type Institution } from 
 import { useInstitutionsStore } from '../model/institutionsStore'
 import { useStructureStore } from '../model/structureStore'
 import { unitWording } from '../model/wording'
-import { GroupRow } from './GroupRow'
+import { GroupRow, GroupCard } from './GroupRow'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardList } from '../../../shared/ui/CardList'
 
 interface InstitutionBlockProps {
   institution: Institution
@@ -45,6 +47,7 @@ export const InstitutionBlock = ({
   canEditGroups,
 }: InstitutionBlockProps) => {
   const [expanded, setExpanded] = useState(defaultExpanded)
+  const isPhone = useIsPhone()
   const setEditInstitutionModal = useInstitutionsStore((s) => s.setEditInstitutionModal)
   const deleteInstitution = useInstitutionsStore((s) => s.deleteInstitution)
   const isDeleting = useInstitutionsStore((s) => s.isDeleting)
@@ -107,6 +110,22 @@ export const InstitutionBlock = ({
 
       {canViewGroups && (
         <Collapse in={expanded} timeout="auto" unmountOnExit>
+          {isPhone ? (
+            <Box sx={{ borderTop: '1px solid', borderColor: 'divider', p: 1.5 }}>
+              <CardList
+                items={groups}
+                getKey={(g) => g.id}
+                empty={
+                  <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 2 }}>
+                    {wording.empty}
+                  </Typography>
+                }
+                renderCard={(group) => (
+                  <GroupCard group={group} childrenById={childrenById} canEdit={canEditGroups} />
+                )}
+              />
+            </Box>
+          ) : (
           <Box sx={{ borderTop: '1px solid', borderColor: 'divider', overflowX: 'auto' }}>
             <Table size="small">
               <TableHead>
@@ -139,6 +158,7 @@ export const InstitutionBlock = ({
               </TableBody>
             </Table>
           </Box>
+          )}
           {canEditGroups && institution.isActive && (
             <Box sx={{ px: 2, py: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
               <Button

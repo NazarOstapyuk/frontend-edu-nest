@@ -24,6 +24,7 @@ import {
   type PermissionLevel,
 } from '../../../shared/api'
 import { useAuthStore } from '../../../entities/user'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { usePositionsPageStore } from '../model/positionsPageStore'
 
 type Level = PermissionLevel | 'none'
@@ -55,6 +56,7 @@ const toPermissions = (levels: Record<PermissionArea, Level>): PermissionItem[] 
   })
 
 export const PositionDialog = () => {
+  const isPhone = useIsPhone()
   const profile = useAuthStore((s) => s.profile)
   const createModal = usePositionsPageStore((s) => s.createModal)
   const editModal = usePositionsPageStore((s) => s.editModal)
@@ -112,7 +114,7 @@ export const PositionDialog = () => {
   }
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog open={isOpen} onClose={handleClose} fullScreen={isPhone} fullWidth maxWidth="sm">
       <DialogTitle sx={{ fontWeight: 700 }}>{isEdit ? 'Редагувати посаду' : 'Нова посада'}</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '20px' }}>
         <Controller

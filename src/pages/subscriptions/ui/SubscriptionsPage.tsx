@@ -15,6 +15,7 @@ import {
   TableRow,
   TextField,
   Tooltip,
+  Typography,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import BlockIcon from '@mui/icons-material/Block'
@@ -29,6 +30,8 @@ import { subscriptionStatusLabels, type SubscriptionStatus } from '../../../shar
 import { CreateSubscriptionModal } from './CreateSubscriptionModal'
 import { EditSubscriptionModal } from './EditSubscriptionModal'
 import { AttendancesModal } from './AttendancesModal'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardList, CardField } from '../../../shared/ui/CardList'
 
 const statusColors: Record<SubscriptionStatus, 'success' | 'default' | 'warning'> = {
   active: 'success',
@@ -50,6 +53,7 @@ export const SubscriptionsPage = () => {
   const deleteSubscription = useSubscriptionsStore((s) => s.deleteSubscription)
   const isCancelling = useSubscriptionsStore((s) => s.isCancelling)
   const isDeleting = useSubscriptionsStore((s) => s.isDeleting)
+  const isPhone = useIsPhone()
 
   const children = useChildrenStore((s) => s.children)
   const fetchChildren = useChildrenStore((s) => s.fetchChildren)
@@ -80,12 +84,39 @@ export const SubscriptionsPage = () => {
       maximumFractionDigits: 2,
     })
 
+  const actions = (sub: (typeof subscriptions)[number]) => (
+    <>
+      <Tooltip title="Відвідування">
+        <IconButton size="small" color="primary" onClick={() => openAttendances(sub)}>
+          <EventNoteIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Редагувати">
+        <IconButton size="small" onClick={() => setEditModal({ isOpen: true, subscription: sub })}>
+          <EditOutlinedIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+      {sub.status === 'active' && (
+        <Tooltip title="Скасувати абонемент">
+          <IconButton size="small" color="warning" disabled={isCancelling} onClick={() => cancelSubscription(sub.id)}>
+            <BlockIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
+      <Tooltip title="Видалити">
+        <IconButton size="small" color="error" disabled={isDeleting} onClick={() => deleteSubscription(sub.id)}>
+          <DeleteOutlineIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    </>
+  )
+
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, gap: 2, flexWrap: 'wrap' }}>
-        <Box sx={{ display: 'flex', gap: 2, flex: 1, minWidth: 0 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, flex: 1, minWidth: 0, width: { xs: '100%', sm: 'auto' } }}>
           <Autocomplete
-            sx={{ minWidth: 240 }}
+            sx={{ minWidth: { xs: 0, sm: 240 } }}
             options={children}
             getOptionLabel={(option) => `${option.lastName} ${option.firstName}`}
             value={children.find((c) => c.id === filters.childId) ?? null}
@@ -97,7 +128,7 @@ export const SubscriptionsPage = () => {
             select
             size="small"
             label="Статус"
-            sx={{ minWidth: 160 }}
+            sx={{ minWidth: { xs: 0, sm: 160 } }}
             value={filters.status ?? ALL_STATUSES}
             onChange={(e) => handleStatusFilter(e.target.value)}
           >
@@ -117,10 +148,43 @@ export const SubscriptionsPage = () => {
         </Button>
       </Box>
 
+      {isPhone ? (
+        <CardList
+          items={subscriptions}
+          getKey={(s) => s.id}
+          empty={
+            <Typography color="text.secondary" align="center" sx={{ py: 6 }}>
+              Абонементів ще немає. Натисніть «Створити абонемент».
+            </Typography>
+          }
+          renderCard={(sub) => (
+            <>
+              <Typography sx={{ fontWeight: 600, mb: 0.5 }}>
+                {sub.child.lastName} {sub.child.firstName}
+              </Typography>
+              <Box sx={{ mb: 0.5 }}>
+                <Chip
+                  label={subscriptionStatusLabels[sub.status]}
+                  size="small"
+                  color={statusColors[sub.status]}
+                  variant={sub.status === 'active' ? 'filled' : 'outlined'}
+                />
+              </Box>
+              <CardField label="Тип абонементу">{sub.subscriptionType.name}</CardField>
+              <CardField label="Залишилось">
+                {sub.remainingSessions} / {sub.totalSessions}
+              </CardField>
+              <CardField label="Ціна / заняття">{formatPrice(sub.pricePerSession)}</CardField>
+              <CardField label="Загальна ціна">{formatPrice(sub.totalPrice)}</CardField>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5, mt: 1 }}>{actions(sub)}</Box>
+            </>
+          )}
+        />
+      ) : (
       <TableContainer
         component={Paper}
         elevation={0}
-        sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}
+        sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflowX: 'auto' }}
       >
         <Table>
           <TableHead>
@@ -211,6 +275,7 @@ export const SubscriptionsPage = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      )}
 
       <CreateSubscriptionModal />
       <EditSubscriptionModal />

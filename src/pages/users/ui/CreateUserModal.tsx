@@ -13,6 +13,7 @@ import {
 } from '@mui/material'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
+import {useIsPhone} from "../../../shared/lib/useIsPhone.ts";
 import {RHFTextField} from "../../../shared/ui/RHFTextField.tsx";
 import {useAuthStore} from "../../../entities/user";
 import {canAssignPosition, usePositionsStore} from "../../../entities/position";
@@ -42,6 +43,7 @@ const schema = yup.object({
 })
 
 export const CreateUserModal = () => {
+    const isPhone = useIsPhone()
     const createUser = useUsersStore((s) => s.createUser)
     const applyScope = useUsersStore((s) => s.applyScope)
     const profile = useAuthStore((s) => s.profile)
@@ -98,7 +100,7 @@ export const CreateUserModal = () => {
     }
 
     return (
-        <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
+        <Dialog open={isOpen} onClose={handleClose} fullScreen={isPhone} fullWidth maxWidth="sm">
             <DialogTitle sx={{fontWeight: 700}}>Новий користувач</DialogTitle>
 
             <FormProvider {...methods}>
@@ -110,6 +112,7 @@ export const CreateUserModal = () => {
                     }}>
                         <Box sx={{
                             display: 'flex',
+                            flexDirection: {xs: 'column', sm: 'row'},
                             gap: '10px',
                         }}>
                             <RHFTextField

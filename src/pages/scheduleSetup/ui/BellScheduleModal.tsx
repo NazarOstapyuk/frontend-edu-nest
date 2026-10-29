@@ -64,8 +64,8 @@ export const BellScheduleModal = ({ open, schedule, onClose }: { open: boolean; 
           render={({ field, fieldState: { error } }) => <TextField {...field} label="Назва" error={!!error} helperText={error?.message} />}
         />
         {fields.map((f, i) => (
-          <Box key={f.id} sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-            <Typography sx={{ width: { xs: 40, sm: 64 }, flexShrink: 0, pt: 1 }}>{i + 1}-й</Typography>
+          <Box key={f.id} sx={{ display: 'flex', gap: 1, alignItems: { xs: 'flex-start', sm: 'center' } }}>
+            <Typography sx={{ width: { xs: 40, sm: 64 }, flexShrink: 0, pt: { xs: 1, sm: 0 } }}>{i + 1}-й</Typography>
             <Controller
               name={`periods.${i}.startTime`}
               control={control}

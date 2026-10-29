@@ -10,7 +10,9 @@ import {
     MenuItem,
     IconButton,
     InputAdornment, Box,
+    Tooltip,
 } from '@mui/material'
+import AutorenewIcon from '@mui/icons-material/Autorenew'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import {useIsPhone} from "../../../shared/lib/useIsPhone.ts";
@@ -45,7 +47,6 @@ const schema = yup.object({
 export const CreateUserModal = () => {
     const isPhone = useIsPhone()
     const createUser = useUsersStore((s) => s.createUser)
-    const applyScope = useUsersStore((s) => s.applyScope)
     const profile = useAuthStore((s) => s.profile)
     const isCreating = useUsersStore((s) => s.isCreating)
     const {isOpen} = useUsersStore((s) => s.createUserModal)
@@ -76,6 +77,24 @@ export const CreateUserModal = () => {
     });
 
     const position = useWatch({control: methods.control, name: 'position'})
+    const phone = useWatch({control: methods.control, name: 'phone'})
+    const loginDirty = !!methods.formState.dirtyFields.login
+
+    useEffect(() => {
+        if (position !== 'parent' || !phone || loginDirty) return
+        const normalized = normalizePhone(phone)
+        if (isValidPhone(normalized)) methods.setValue('login', normalized, {shouldValidate: true})
+    }, [position, phone, loginDirty, methods])
+
+    const generatePassword = () => {
+        const alphabet = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+        const values = crypto.getRandomValues(new Uint32Array(10))
+        methods.setValue('password', Array.from(values, (v) => alphabet[v % alphabet.length]).join(''), {
+            shouldValidate: true,
+            shouldDirty: true,
+        })
+        setShowPassword(true)
+    }
 
     const handleClose = () => {
         methods.reset()
@@ -83,7 +102,8 @@ export const CreateUserModal = () => {
     }
 
     const onSubmit = async (values: yup.InferType<typeof schema>) => {
-        const created = await createUser({
+        const isStaff = values.position !== 'parent'
+        await createUser({
             firstName: values.firstName,
             lastName: values.lastName,
             ...(values.position === 'parent' ? {role: 'parent' as const} : {positionId: values.position}),
@@ -92,11 +112,14 @@ export const CreateUserModal = () => {
             middleName: values.middleName.trim() || undefined,
             phone: values.phone ? normalizePhone(values.phone) : undefined,
             email: values.email.trim() || undefined,
+            ...(isStaff
+                ? {
+                    accessScope: values.accessScope,
+                    ...(values.accessScope === 'institutions' ? {institutionIds: values.institutionIds} : {}),
+                }
+                : {}),
         })
         handleClose()
-        if (values.position !== 'parent') {
-            await applyScope(created, values.accessScope, values.institutionIds).catch(() => undefined)
-        }
     }
 
     return (
@@ -196,6 +219,11 @@ export const CreateUserModal = () => {
                                 input: {
                                     endAdornment: (
                                         <InputAdornment position="end">
+                                            <Tooltip title="Згенерувати пароль">
+                                                <IconButton onClick={generatePassword}>
+                                                    <AutorenewIcon/>
+                                                </IconButton>
+                                            </Tooltip>
                                             <IconButton onClick={() => setShowPassword(v => !v)} edge="end">
                                                 {showPassword ? <VisibilityOffIcon/> : <VisibilityIcon/>}
                                             </IconButton>

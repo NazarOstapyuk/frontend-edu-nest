@@ -50,7 +50,7 @@ export const useGroupsStore = create<GroupsState>((set) => ({
 
   fetchBellSchedules: async () => {
     const { data } = await timetableApi.getBellSchedules();
-    set({ bellSchedules: data.filter((b) => b.active) });
+    set({ bellSchedules: data });
   },
 
   fetchMealCategories: async () => {

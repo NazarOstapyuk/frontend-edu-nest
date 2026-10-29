@@ -43,7 +43,7 @@ export const ProfilePage = () => {
       setError('phone', { message: 'Для батьків потрібен телефон' })
       return
     }
-    await updateContacts({ phone: phone || undefined, email: values.email.trim() || null })
+    await updateContacts({ phone: phone || null, email: values.email.trim() || null })
     push('Контакти збережено', 'success')
   }
 
@@ -56,7 +56,12 @@ export const ProfilePage = () => {
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
           Логін: {profile.login}
         </Typography>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <Box
+          component="form"
+          noValidate
+          onSubmit={handleSubmit((v) => saveContacts(v).catch(() => undefined))}
+          sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+        >
           <Controller
             name="phone"
             control={control}
@@ -71,7 +76,7 @@ export const ProfilePage = () => {
               <TextField {...field} label="Email" fullWidth error={!!error} helperText={error?.message} />
             )}
           />
-          <Button variant="contained" disabled={formState.isSubmitting} onClick={handleSubmit((v) => saveContacts(v).catch(() => undefined))}>
+          <Button type="submit" variant="contained" disabled={formState.isSubmitting}>
             Зберегти контакти
           </Button>
         </Box>

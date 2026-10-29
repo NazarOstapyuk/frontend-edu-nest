@@ -1,4 +1,5 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog'
 import {
   Autocomplete,
   Box,
@@ -39,6 +40,7 @@ const statusColors: Record<SubscriptionStatus, 'success' | 'default' | 'warning'
 const ALL_STATUSES = '' as const
 
 export const SubscriptionsPage = () => {
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const subscriptions = useSubscriptionsStore((s) => s.subscriptions)
   const filters = useSubscriptionsStore((s) => s.filters)
   const fetchSubscriptions = useSubscriptionsStore((s) => s.fetchSubscriptions)
@@ -100,7 +102,7 @@ export const SubscriptionsPage = () => {
         </Tooltip>
       )}
       <Tooltip title="Видалити">
-        <IconButton size="small" color="error" disabled={isDeleting} onClick={() => deleteSubscription(sub.id)}>
+        <IconButton size="small" color="error" disabled={isDeleting} onClick={() => setDeletingId(sub.id)}>
           <DeleteOutlineIcon fontSize="small" />
         </IconButton>
       </Tooltip>
@@ -251,7 +253,7 @@ export const SubscriptionsPage = () => {
                         size="small"
                         color="error"
                         disabled={isDeleting}
-                        onClick={() => deleteSubscription(sub.id)}
+                        onClick={() => setDeletingId(sub.id)}
                       >
                         <DeleteOutlineIcon fontSize="small" />
                       </IconButton>
@@ -265,6 +267,13 @@ export const SubscriptionsPage = () => {
       </TableContainer>
       )}
 
+      <ConfirmDialog
+        open={deletingId !== null}
+        title="Видалити абонемент?"
+        text="Абонемент буде видалено без можливості відновлення."
+        onConfirm={() => deletingId && deleteSubscription(deletingId)}
+        onClose={() => setDeletingId(null)}
+      />
       <EditSubscriptionModal />
       <AttendancesModal />
     </Box>

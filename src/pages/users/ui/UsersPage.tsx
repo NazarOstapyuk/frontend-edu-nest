@@ -28,6 +28,7 @@ import { useInstitutionStore } from '../../../shared/model/institutionStore'
 import { HistoryButton } from '../../../widgets/auditHistory'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardList, CardField } from '../../../shared/ui/CardList'
+import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog'
 
 const roleColors: Record<string, 'primary' | 'secondary' | 'default'> = {
   admin: 'default',
@@ -45,6 +46,7 @@ export const UsersPage = () => {
   const canEditUsers = useCan('users', 'edit')
   const institutions = useInstitutionStore((s) => s.institutions)
   const [accessUser, setAccessUser] = useState<User | null>(null)
+  const [deletingUser, setDeletingUser] = useState<User | null>(null)
   const isPhone = useIsPhone()
 
   const fullName = (user: User) => [user.lastName, user.firstName, user.middleName].filter(Boolean).join(' ')
@@ -84,7 +86,7 @@ export const UsersPage = () => {
       )}
       {canEditUsers && (
         <Tooltip title="Видалити">
-          <IconButton size="small" color="error" onClick={() => deleteUser(user.id)}>
+          <IconButton size="small" color="error" onClick={() => setDeletingUser(user)}>
             <DeleteOutlineIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -233,7 +235,7 @@ export const UsersPage = () => {
                     )}
                     {canEditUsers && (
                       <Tooltip title="Видалити">
-                        <IconButton size="small" color="error" onClick={() => deleteUser(user.id)}>
+                        <IconButton size="small" color="error" onClick={() => setDeletingUser(user)}>
                           <DeleteOutlineIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
@@ -247,6 +249,13 @@ export const UsersPage = () => {
       </TableContainer>
       )}
 
+      <ConfirmDialog
+        open={deletingUser !== null}
+        title="Видалити користувача?"
+        text={deletingUser ? `${fullName(deletingUser)} буде видалено без можливості відновлення.` : undefined}
+        onConfirm={() => deletingUser && deleteUser(deletingUser.id)}
+        onClose={() => setDeletingUser(null)}
+      />
       <CreateUserModal />
       <EditUserModal />
       {accessUser && (

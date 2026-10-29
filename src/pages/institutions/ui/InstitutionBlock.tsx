@@ -26,6 +26,7 @@ import { unitWording } from '../model/wording'
 import { GroupRow, GroupCard } from './GroupRow'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardList } from '../../../shared/ui/CardList'
+import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog'
 
 interface InstitutionBlockProps {
   institution: Institution
@@ -47,6 +48,7 @@ export const InstitutionBlock = ({
   canEditGroups,
 }: InstitutionBlockProps) => {
   const [expanded, setExpanded] = useState(defaultExpanded)
+  const [deleting, setDeleting] = useState(false)
   const isPhone = useIsPhone()
   const setEditInstitutionModal = useInstitutionsStore((s) => s.setEditInstitutionModal)
   const deleteInstitution = useInstitutionsStore((s) => s.deleteInstitution)
@@ -99,7 +101,7 @@ export const InstitutionBlock = ({
                 size="small"
                 color="error"
                 disabled={isDeleting}
-                onClick={() => deleteInstitution(institution.id).catch(() => undefined)}
+                onClick={() => setDeleting(true)}
               >
                 <DeleteOutlineIcon fontSize="small" />
               </IconButton>
@@ -172,6 +174,13 @@ export const InstitutionBlock = ({
           )}
         </Collapse>
       )}
+      <ConfirmDialog
+        open={deleting}
+        title="Видалити заклад?"
+        text={`«${institution.name}» буде видалено, якщо він не використовується.`}
+        onConfirm={() => deleteInstitution(institution.id)}
+        onClose={() => setDeleting(false)}
+      />
     </Paper>
   )
 }

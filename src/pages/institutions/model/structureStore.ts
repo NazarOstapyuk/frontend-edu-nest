@@ -11,15 +11,16 @@ import {
   type CreateGroupDto,
   type Group,
   type MealPriceCategory,
+  type UserLookup,
   type UpdateChildDto,
   type UpdateGroupDto,
 } from '../../../shared/api';
-import type { User } from '../../../entities/user';
 
 interface StructureState {
   groups: Group[];
   children: Child[];
-  users: User[];
+  teachers: UserLookup[];
+  parents: UserLookup[];
   bellSchedules: BellSchedule[];
   mealCategories: MealPriceCategory[];
   isLoading: boolean;
@@ -52,7 +53,8 @@ export const useStructureStore = create<StructureState>((set, get) => {
   return {
     groups: [],
     children: [],
-    users: [],
+    teachers: [],
+    parents: [],
     bellSchedules: [],
     mealCategories: [],
     isLoading: false,
@@ -91,14 +93,16 @@ export const useStructureStore = create<StructureState>((set, get) => {
     },
 
     fetchLookups: async () => {
-      const [usersRes, bellRes, mealRes] = await Promise.allSettled([
-        usersApi.getList(),
+      const [teachersRes, parentsRes, bellRes, mealRes] = await Promise.allSettled([
+        usersApi.lookup('teacher', true),
+        usersApi.lookup('parent', true),
         timetableApi.getBellSchedules(),
         mealsApi.getPriceCategories(),
       ]);
       set({
-        users: usersRes.status === 'fulfilled' ? usersRes.value.data : [],
-        bellSchedules: bellRes.status === 'fulfilled' ? bellRes.value.data.filter((b) => b.active) : [],
+        teachers: teachersRes.status === 'fulfilled' ? teachersRes.value.data : [],
+        parents: parentsRes.status === 'fulfilled' ? parentsRes.value.data : [],
+        bellSchedules: bellRes.status === 'fulfilled' ? bellRes.value.data : [],
         mealCategories: mealRes.status === 'fulfilled' ? mealRes.value.data : [],
       });
     },

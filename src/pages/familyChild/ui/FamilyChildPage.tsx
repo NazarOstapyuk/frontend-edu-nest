@@ -22,7 +22,8 @@ export const FamilyChildPage = () => {
   const reloadFinance = useFamilyChildStore((s) => s.reloadFinance)
   const [searchParams] = useSearchParams()
   const [returnInvoice] = useState(() => searchParams.get('invoice'))
-  const [tab, setTab] = useState(returnInvoice ? 'finance' : 'card')
+  const [requestedTab] = useState(() => searchParams.get('tab'))
+  const [pickedTab, setTab] = useState<string | null>(null)
 
   useEffect(() => {
     if (childId) fetchChild(childId).catch(() => undefined)
@@ -44,6 +45,9 @@ export const FamilyChildPage = () => {
   }
 
   const kindergarten = card.group?.kind === 'kindergarten'
+  const tab =
+    pickedTab ??
+    (returnInvoice ? 'finance' : (requestedTab ?? (finance.summary.some((s) => Number(s.due) > 0) ? 'finance' : 'card')))
 
   return (
     <Box>

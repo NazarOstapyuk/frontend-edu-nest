@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { Box, Button, Card, CardActions, CardContent, Paper, Typography } from '@mui/material'
 import { useFamilyStore } from '../model/familyStore'
 import { formatMoney } from '../../../shared/api'
@@ -28,6 +28,8 @@ export const FamilyPage = () => {
     }
     return <Typography color="text.secondary">Завантаження…</Typography>
   }
+
+  if (family.children.length === 1) return <Navigate to={`/family/${family.children[0].id}`} replace />
 
   const due = Number(family.totals.due)
   const overdue = Number(family.totals.overdue)
@@ -74,7 +76,12 @@ export const FamilyPage = () => {
               )}
             </CardContent>
             <CardActions>
-              <Button size="small" variant="contained" sx={{ minHeight: { xs: 40, sm: 'auto' } }} onClick={() => navigate(`/family/${child.id}`)}>
+              {Number(child.due) > 0 && (
+                <Button size="small" variant="contained" sx={{ minHeight: { xs: 40, sm: 'auto' } }} onClick={() => navigate(`/family/${child.id}?tab=finance`)}>
+                  Оплатити
+                </Button>
+              )}
+              <Button size="small" variant={Number(child.due) > 0 ? 'outlined' : 'contained'} sx={{ minHeight: { xs: 40, sm: 'auto' } }} onClick={() => navigate(`/family/${child.id}`)}>
                 Детальніше
               </Button>
             </CardActions>

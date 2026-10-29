@@ -11,6 +11,7 @@ import { formatDay, type MealComplex, type MealCourse } from '../../../shared/ap
 import { categoryPrices } from '../model/prices'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardField, CardList } from '../../../shared/ui/CardList'
+import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog'
 
 interface ComplexCardProps {
   complex: MealComplex
@@ -27,6 +28,7 @@ export const ComplexCard = ({ complex, categories, today, canEdit, onEdit, onAdd
   const deletePrice = useMealsStore((s) => s.deletePrice)
   const isSaving = useMealsStore((s) => s.isSaving)
   const [history, setHistory] = useState(false)
+  const [deletingPriceId, setDeletingPriceId] = useState<string | null>(null)
   const shownCategories = categories.filter((c) => c.active || complex.prices.some((p) => p.priceCategoryId === c.id))
   const sortedHistory = [...complex.prices].sort(
     (a, b) => a.priceCategoryName.localeCompare(b.priceCategoryName, 'uk') || b.validFrom.localeCompare(a.validFrom),
@@ -165,7 +167,7 @@ export const ComplexCard = ({ complex, categories, today, canEdit, onEdit, onAdd
                             sx={{ width: 40, height: 40 }}
                             disabled={isSaving}
                             aria-label="Видалити майбутню ціну"
-                            onClick={() => deletePrice(complex.id, p.id).catch(() => undefined)}
+                            onClick={() => setDeletingPriceId(p.id)}
                           >
                             <DeleteOutlineIcon fontSize="small" />
                           </IconButton>
@@ -186,7 +188,7 @@ export const ComplexCard = ({ complex, categories, today, canEdit, onEdit, onAdd
                     <TableCell align="right">
                       {canEdit && p.validFrom.slice(0, 10) > today && (
                         <Tooltip title="Видалити майбутню ціну">
-                          <IconButton size="small" disabled={isSaving} onClick={() => deletePrice(complex.id, p.id).catch(() => undefined)}>
+                          <IconButton size="small" disabled={isSaving} onClick={() => setDeletingPriceId(p.id)}>
                             <DeleteOutlineIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
@@ -200,6 +202,12 @@ export const ComplexCard = ({ complex, categories, today, canEdit, onEdit, onAdd
           </Collapse>
         </>
       )}
+      <ConfirmDialog
+        open={deletingPriceId !== null}
+        title="Видалити майбутню ціну?"
+        onConfirm={() => deletingPriceId && deletePrice(complex.id, deletingPriceId)}
+        onClose={() => setDeletingPriceId(null)}
+      />
     </Paper>
   )
 }

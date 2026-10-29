@@ -1,4 +1,4 @@
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, MenuItem, TextField } from '@mui/material'
@@ -33,11 +33,14 @@ export const NoticeDialog = ({ open, onClose }: { open: boolean; onClose: () => 
   const createNotice = useChildAttendanceStore((s) => s.createNotice)
   const empty: FormValues = { startDate: localToday(), endDate: localToday(), reasonId: '', comment: '' }
 
-  const { control, handleSubmit, reset } = useForm<FormValues>({
+  const { control, handleSubmit, reset, setValue, getValues } = useForm<FormValues>({
     mode: 'all',
     defaultValues: empty,
     resolver: yupResolver(schema),
   })
+
+  const startDate = useWatch({ control, name: 'startDate' })
+  const endDate = useWatch({ control, name: 'endDate' })
 
   const handleClose = () => {
     reset(empty)
@@ -62,7 +65,18 @@ export const NoticeDialog = ({ open, onClose }: { open: boolean; onClose: () => 
           name="startDate"
           control={control}
           render={({ field, fieldState: { error } }) => (
-            <TextField {...field} type="date" label="З дати" slotProps={{ inputLabel: { shrink: true }, htmlInput: { min: localToday() } }} error={!!error} helperText={error?.message} />
+            <TextField
+              {...field}
+              type="date"
+              label="З дати"
+              slotProps={{ inputLabel: { shrink: true }, htmlInput: { min: localToday() } }}
+              error={!!error}
+              helperText={error?.message}
+              onChange={(e) => {
+                field.onChange(e)
+                if (e.target.value && getValues('endDate') < e.target.value) setValue('endDate', e.target.value, { shouldValidate: true })
+              }}
+            />
           )}
         />
         <Controller
@@ -72,6 +86,9 @@ export const NoticeDialog = ({ open, onClose }: { open: boolean; onClose: () => 
             <TextField {...field} type="date" label="По дату" slotProps={{ inputLabel: { shrink: true }, htmlInput: { min: localToday() } }} error={!!error} helperText={error?.message} />
           )}
         />
+        <Button size="small" disabled={!startDate || endDate === startDate} onClick={() => setValue('endDate', startDate, { shouldValidate: true })} sx={{ alignSelf: 'flex-start', mt: -1, minHeight: isPhone ? 40 : undefined }}>
+          Один день
+        </Button>
         <Controller
           name="reasonId"
           control={control}

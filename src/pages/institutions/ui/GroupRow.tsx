@@ -16,9 +16,10 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
-import type { Child, Group } from '../../../shared/api'
+import type { Child, Group, GroupChild } from '../../../shared/api'
 import { useStructureStore } from '../model/structureStore'
 import { CardField } from '../../../shared/ui/CardList'
+import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog'
 
 interface GroupRowProps {
   group: Group
@@ -42,10 +43,19 @@ const GroupChildren = ({ group, childrenById, canEdit, sx }: GroupChildrenProps)
   const setEditChildModal = useStructureStore((s) => s.setEditChildModal)
   const deleteChild = useStructureStore((s) => s.deleteChild)
   const isDeleting = useStructureStore((s) => s.isDeleting)
+  const [deletingChild, setDeletingChild] = useState<GroupChild | null>(null)
 
   const children = sortedChildren(group)
 
   return (
+    <>
+      <ConfirmDialog
+        open={deletingChild !== null}
+        title="Видалити дитину?"
+        text={deletingChild ? `${fullName(deletingChild)} буде видалено без можливості відновлення.` : undefined}
+        onConfirm={() => deletingChild && deleteChild(deletingChild.id)}
+        onClose={() => setDeletingChild(null)}
+      />
       <Box sx={sx}>
         {children.length === 0 ? (
           <Typography variant="body2" color="text.secondary" sx={{ py: 0.5 }}>
@@ -84,7 +94,7 @@ const GroupChildren = ({ group, childrenById, canEdit, sx }: GroupChildrenProps)
                           size="small"
                           color="error"
                           disabled={isDeleting}
-                          onClick={() => deleteChild(child.id).catch(() => undefined)}
+                          onClick={() => setDeletingChild(child)}
                         >
                           <DeleteOutlineIcon fontSize="small" />
                         </IconButton>
@@ -107,17 +117,26 @@ const GroupChildren = ({ group, childrenById, canEdit, sx }: GroupChildrenProps)
           </Button>
         )}
       </Box>
+    </>
   )
 }
 
 export const GroupCard = ({ group, childrenById, canEdit }: Omit<GroupRowProps, 'columns'>) => {
   const [open, setOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const setEditGroupModal = useStructureStore((s) => s.setEditGroupModal)
   const deleteGroup = useStructureStore((s) => s.deleteGroup)
   const isDeleting = useStructureStore((s) => s.isDeleting)
 
   return (
     <>
+      <ConfirmDialog
+        open={deleting}
+        title="Видалити групу?"
+        text={`«${group.name}» буде видалено без можливості відновлення.`}
+        onConfirm={() => deleteGroup(group.id)}
+        onClose={() => setDeleting(false)}
+      />
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
         <IconButton size="small" onClick={() => setOpen((v) => !v)}>
           {open ? <KeyboardArrowDownIcon fontSize="small" /> : <KeyboardArrowRightIcon fontSize="small" />}
@@ -153,7 +172,7 @@ export const GroupCard = ({ group, childrenById, canEdit }: Omit<GroupRowProps, 
               size="small"
               color="error"
               disabled={isDeleting}
-              onClick={() => deleteGroup(group.id).catch(() => undefined)}
+              onClick={() => setDeleting(true)}
             >
               <DeleteOutlineIcon fontSize="small" />
             </IconButton>
@@ -172,6 +191,7 @@ const sortedChildren = (group: Group) =>
 
 export const GroupRow = ({ group, childrenById, canEdit, columns }: GroupRowProps) => {
   const [open, setOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const setEditGroupModal = useStructureStore((s) => s.setEditGroupModal)
   const deleteGroup = useStructureStore((s) => s.deleteGroup)
   const isDeleting = useStructureStore((s) => s.isDeleting)
@@ -180,6 +200,13 @@ export const GroupRow = ({ group, childrenById, canEdit, columns }: GroupRowProp
 
   return (
     <>
+      <ConfirmDialog
+        open={deleting}
+        title="Видалити групу?"
+        text={`«${group.name}» буде видалено без можливості відновлення.`}
+        onConfirm={() => deleteGroup(group.id)}
+        onClose={() => setDeleting(false)}
+      />
       <TableRow hover sx={{ '& > td': { borderBottom: open ? 0 : undefined } }}>
         <TableCell sx={{ width: 48, pr: 0 }}>
           <IconButton size="small" onClick={() => setOpen((v) => !v)}>
@@ -218,7 +245,7 @@ export const GroupRow = ({ group, childrenById, canEdit, columns }: GroupRowProp
                 size="small"
                 color="error"
                 disabled={isDeleting}
-                onClick={() => deleteGroup(group.id).catch(() => undefined)}
+                onClick={() => setDeleting(true)}
               >
                 <DeleteOutlineIcon fontSize="small" />
               </IconButton>

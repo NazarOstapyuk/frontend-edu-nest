@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Box,
   Button,
@@ -16,9 +16,10 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { useGroupsStore } from '../model/groupsStore'
 import { useUsersStore } from '../../users/model/usersStore'
-import { groupKindLabels } from '../../../shared/api'
+import { groupKindLabels, type Group } from '../../../shared/api'
 import { useCan } from '../../../entities/user'
 import { CreateGroupModal, EditGroupModal } from '../../../widgets/groupForms'
+import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog'
 
 export const GroupsPage = () => {
   const groups = useGroupsStore((s) => s.groups)
@@ -36,16 +37,17 @@ export const GroupsPage = () => {
   const isUpdating = useGroupsStore((s) => s.isUpdating)
   const bellSchedules = useGroupsStore((s) => s.bellSchedules)
   const mealCategories = useGroupsStore((s) => s.mealCategories)
-  const users = useUsersStore((s) => s.users)
-  const fetchUsers = useUsersStore((s) => s.fetchUsers)
+  const teachers = useUsersStore((s) => s.teachers)
+  const fetchTeachers = useUsersStore((s) => s.fetchTeachers)
+  const [deletingGroup, setDeletingGroup] = useState<Group | null>(null)
   const canEdit = useCan('children', 'edit')
 
   useEffect(() => {
     fetchGroups()
-    fetchUsers()
+    fetchTeachers().catch(() => undefined)
     fetchBellSchedules().catch(() => undefined)
     fetchMealCategories().catch(() => undefined)
-  }, [fetchGroups, fetchUsers, fetchBellSchedules, fetchMealCategories])
+  }, [fetchGroups, fetchTeachers, fetchBellSchedules, fetchMealCategories])
 
   return (
     <Box>
@@ -112,7 +114,7 @@ export const GroupsPage = () => {
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Видалити">
-                      <IconButton size="small" color="error" onClick={() => deleteGroup(group.id)}>
+                      <IconButton size="small" color="error" onClick={() => setDeletingGroup(group)}>
                         <DeleteOutlineIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
@@ -124,10 +126,17 @@ export const GroupsPage = () => {
         </Grid>
       )}
 
+      <ConfirmDialog
+        open={deletingGroup !== null}
+        title="Видалити групу?"
+        text={deletingGroup ? `Групу «${deletingGroup.name}» буде видалено без можливості відновлення.` : undefined}
+        onConfirm={() => deletingGroup && deleteGroup(deletingGroup.id)}
+        onClose={() => setDeletingGroup(null)}
+      />
       <CreateGroupModal
         isOpen={createGroupModal.isOpen}
         isSubmitting={isCreating}
-        users={users}
+        teachers={teachers}
         bellSchedules={bellSchedules}
         mealCategories={mealCategories}
         onSubmit={createGroup}
@@ -137,7 +146,7 @@ export const GroupsPage = () => {
         isOpen={editGroupModal.isOpen}
         group={editGroupModal.group}
         isSubmitting={isUpdating}
-        users={users}
+        teachers={teachers}
         bellSchedules={bellSchedules}
         mealCategories={mealCategories}
         onSubmit={updateGroup}

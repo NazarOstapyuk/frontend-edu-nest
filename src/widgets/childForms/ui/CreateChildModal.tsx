@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm, useWatch, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import {
@@ -11,8 +11,8 @@ import {
   MenuItem,
   TextField,
 } from '@mui/material'
-import type { User } from '../../../entities/user'
-import { genderLabels, type CreateChildDto, type Gender, type Group } from '../../../shared/api'
+import { genderLabels, type CreateChildDto, type Gender, type Group, type UserLookup } from '../../../shared/api'
+import { useInstitutionStore } from '../../../shared/model/institutionStore'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const schema = yup.object({
@@ -30,7 +30,8 @@ type FormValues = yup.InferType<typeof schema>
 interface CreateChildModalProps {
   isOpen: boolean
   isSubmitting: boolean
-  users: User[]
+  parents: UserLookup[]
+  onCreateParent?: () => void
   groups: Group[]
   presetGroupId?: string | null
   onSubmit: (dto: CreateChildDto) => Promise<unknown>
@@ -40,14 +41,24 @@ interface CreateChildModalProps {
 export const CreateChildModal = ({
   isOpen,
   isSubmitting,
-  users,
+  parents: parentLookup,
+  onCreateParent,
   groups,
   presetGroupId,
   onSubmit: submit,
   onClose,
 }: CreateChildModalProps) => {
   const isPhone = useIsPhone()
-  const parents = users.filter((u) => u.role === 'parent')
+  const institutions = useInstitutionStore((s) => s.institutions)
+  const groupLabel = (g: Group) => `${g.name} · ${g.institution.name}`
+  const parentLabel = (p: UserLookup) =>
+    `${[p.lastName, p.firstName, p.middleName].filter(Boolean).join(' ')}${p.phone ? ` · ${p.phone}` : ''}`
+  const parentOptions = (selected: string[]) => parentLookup.filter((p) => p.isActive || selected.includes(p.id))
+
+  const groupOptions = (current: string) =>
+    groups.filter(
+      (g) => g.id === current || institutions.find((i) => i.id === g.institution.id)?.isActive !== false,
+    )
 
   const { control, handleSubmit, reset, setValue } = useForm<FormValues>({
     mode: 'all',
@@ -55,9 +66,14 @@ export const CreateChildModal = ({
     resolver: yupResolver(schema),
   })
 
+  const groupId = useWatch({ control, name: 'groupId' })
+  const onlyGroupId = groupOptions('').length === 1 ? groupOptions('')[0].id : ''
+
   useEffect(() => {
-    if (isOpen && presetGroupId) setValue('groupId', presetGroupId)
-  }, [isOpen, presetGroupId, setValue])
+    if (!isOpen) return
+    if (presetGroupId) setValue('groupId', presetGroupId)
+    else if (onlyGroupId && !groupId) setValue('groupId', onlyGroupId)
+  }, [isOpen, presetGroupId, onlyGroupId, groupId, setValue])
 
   const handleClose = () => {
     reset()
@@ -163,8 +179,8 @@ export const CreateChildModal = ({
           control={control}
           render={({ field, fieldState: { error } }) => (
             <Autocomplete
-              options={groups}
-              getOptionLabel={(option) => option.name}
+              options={groupOptions(field.value)}
+              getOptionLabel={groupLabel}
               value={groups.find((g) => g.id === field.value) ?? null}
               onChange={(_, selected) => field.onChange(selected?.id ?? '')}
               renderInput={(params) => (
@@ -186,14 +202,20 @@ export const CreateChildModal = ({
             <Autocomplete
               multiple
               disableCloseOnSelect
-              options={parents}
-              getOptionLabel={(option) => `${option.lastName} ${option.firstName}`}
-              value={parents.filter((p) => field.value?.includes(p.id))}
+              options={parentOptions(field.value ?? [])}
+              getOptionLabel={parentLabel}
+              value={parentLookup.filter((p) => field.value?.includes(p.id))}
               onChange={(_, selected) => field.onChange(selected.map((p) => p.id))}
               renderInput={(params) => <TextField {...params} label="Батьки" />}
             />
           )}
         />
+
+        {onCreateParent && (
+          <Button size="small" onClick={onCreateParent} sx={{ alignSelf: 'flex-start', mt: '-12px' }}>
+            Новий батько
+          </Button>
+        )}
 
         <Box sx={{ display: 'flex', gap: '10px' }}>
           <Button onClick={handleClose} color="inherit" sx={{ width: '100%' }}>

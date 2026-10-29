@@ -103,14 +103,15 @@ export const EditUserModal = () => {
   }
 
   const position = useWatch({ control: methods.control, name: 'position' })
-  const scopeEditable = !!user && position !== 'parent' && canChangeAccess(profile, user)
+  const isStaffUser = !!user && user.role !== 'parent'
+  const scopeEditable = !!user && !isStaffUser && position !== 'parent' && canChangeAccess(profile, user)
 
   const onSubmit = async (values: FormValues) => {
     if (!user) return
     const dto: UpdateUserDto = {
       firstName: values.firstName,
       lastName: values.lastName,
-      ...(values.position === 'parent' ? { role: 'parent' as const } : { positionId: values.position as string }),
+      ...(isStaffUser ? {} : values.position === 'parent' ? { role: 'parent' as const } : { positionId: values.position as string }),
       login: values.login,
       middleName: values.middleName.trim() || null,
       phone: values.phone ? normalizePhone(values.phone) : null,
@@ -150,7 +151,13 @@ export const EditUserModal = () => {
             fullWidth
           />
 
-          <Controller
+          {isStaffUser && (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: '-10px' }}>
+              Посада: {user?.position?.name ?? '—'}. Посада й заклади змінюються кнопкою «Доступ» у списку.
+            </Typography>
+          )}
+
+          {!isStaffUser && <Controller
             name="position"
             control={methods.control}
             render={({ field, fieldState: { error } }) => (
@@ -170,7 +177,7 @@ export const EditUserModal = () => {
                 <MenuItem value="parent">Батьки</MenuItem>
               </TextField>
             )}
-          />
+          />}
 
           {scopeEditable && <InstitutionScopeFields control={methods.control} assignedIds={user?.institutionIds ?? []} />}
 

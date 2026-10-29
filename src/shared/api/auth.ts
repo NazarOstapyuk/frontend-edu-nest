@@ -7,7 +7,7 @@ interface LoginCredentials {
 }
 
 export interface ContactsDto {
-  phone?: string;
+  phone?: string | null;
   email?: string | null;
 }
 

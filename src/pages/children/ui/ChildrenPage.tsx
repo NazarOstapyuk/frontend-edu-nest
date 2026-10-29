@@ -25,7 +25,9 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { useChildrenStore } from '../model/childrenStore'
 import { useUsersStore } from '../../users/model/usersStore'
 import { useGroupsStore } from '../../groups/model/groupsStore'
-import { genderLabels } from '../../../shared/api'
+import { genderLabels, type Child } from '../../../shared/api'
+import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog'
+import { CreateUserModal } from '../../users/ui/CreateUserModal'
 import { useCan } from '../../../entities/user'
 import { CreateChildModal, EditChildModal } from '../../../widgets/childForms'
 import { HistoryButton } from '../../../widgets/auditHistory'
@@ -46,8 +48,12 @@ export const ChildrenPage = () => {
   const isUpdating = useChildrenStore((s) => s.isUpdating)
   const navigate = useNavigate()
   const isPhone = useIsPhone()
-  const users = useUsersStore((s) => s.users)
-  const fetchUsers = useUsersStore((s) => s.fetchUsers)
+  const parents = useUsersStore((s) => s.parents)
+  const fetchParents = useUsersStore((s) => s.fetchParents)
+  const userModalOpen = useUsersStore((s) => s.createUserModal.isOpen)
+  const setCreateUserModal = useUsersStore((s) => s.setCreateUserModal)
+  const canCreateUsers = useCan('users', 'edit')
+  const [deletingChild, setDeletingChild] = useState<Child | null>(null)
   const groups = useGroupsStore((s) => s.groups)
   const fetchGroups = useGroupsStore((s) => s.fetchGroups)
   const canEdit = useCan('children', 'edit')
@@ -103,7 +109,7 @@ export const ChildrenPage = () => {
       )}
       {canEdit && (
         <Tooltip title="Видалити">
-          <IconButton size="small" color="error" onClick={() => deleteChild(child.id)}>
+          <IconButton size="small" color="error" onClick={() => setDeletingChild(child)}>
             <DeleteOutlineIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -113,9 +119,12 @@ export const ChildrenPage = () => {
 
   useEffect(() => {
     fetchChildren()
-    fetchUsers()
     fetchGroups()
-  }, [fetchChildren, fetchUsers, fetchGroups])
+  }, [fetchChildren, fetchGroups])
+
+  useEffect(() => {
+    if (!userModalOpen) fetchParents().catch(() => undefined)
+  }, [userModalOpen, fetchParents])
 
   return (
     <Box>
@@ -274,7 +283,7 @@ export const ChildrenPage = () => {
                     )}
                     {canEdit && (
                       <Tooltip title="Видалити">
-                        <IconButton size="small" color="error" onClick={() => deleteChild(child.id)}>
+                        <IconButton size="small" color="error" onClick={() => setDeletingChild(child)}>
                           <DeleteOutlineIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
@@ -305,10 +314,20 @@ export const ChildrenPage = () => {
       </TableContainer>
       )}
 
+      <ConfirmDialog
+        open={deletingChild !== null}
+        title="Видалити учня?"
+        text={deletingChild ? `${childName(deletingChild)} буде видалено без можливості відновлення.` : undefined}
+        onConfirm={() => deletingChild && deleteChild(deletingChild.id)}
+        onClose={() => setDeletingChild(null)}
+      />
+      {canCreateUsers && <CreateUserModal />}
       <CreateChildModal
         isOpen={createChildModal.isOpen}
         isSubmitting={isCreating}
-        users={users}
+        parents={parents}
+        onCreateParent={canCreateUsers ? () => setCreateUserModal({ isOpen: true }) : undefined}
+        presetGroupId={groupId || null}
         groups={groups}
         onSubmit={createChild}
         onClose={() => setCreateChildModal({ isOpen: false })}
@@ -317,7 +336,8 @@ export const ChildrenPage = () => {
         isOpen={editChildModal.isOpen}
         child={editChildModal.child}
         isSubmitting={isUpdating}
-        users={users}
+        parents={parents}
+        onCreateParent={canCreateUsers ? () => setCreateUserModal({ isOpen: true }) : undefined}
         groups={groups}
         onSubmit={updateChild}
         onClose={() => setEditChildModal({ isOpen: false, child: null })}

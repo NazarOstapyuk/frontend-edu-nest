@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
-  Alert, Box, Button, Checkbox, Chip, FormControlLabel, IconButton, MenuItem, Paper, TextField, Typography,
+  Alert, Box, Button, Chip, IconButton, MenuItem, Paper, TextField, Typography,
 } from '@mui/material'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
@@ -8,7 +8,7 @@ import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { useChildMealsStore } from '../model/childMealsStore'
 import { addDaysIso, formatDay, isoWeekdayLabels, type ParentMenu, type ParentMenuDay } from '../../../shared/api'
 
-type Selection = { include: boolean; complexId: string; picks: Record<string, string> }
+type Selection = { complexId: string; picks: Record<string, string> }
 
 const timeOf = (iso: string) =>
   new Date(iso).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Kyiv' })
@@ -32,17 +32,39 @@ const Week = ({ childId, data }: { childId: string; data: ParentMenu }) => {
   const order = useChildMealsStore((s) => s.order)
   const cancel = useChildMealsStore((s) => s.cancel)
   const [selection, setSelection] = useState<Record<string, Selection>>({})
-  const update = (date: string, patch: Partial<Selection>) =>
-    setSelection((prev) => ({ ...prev, [date]: { ...(prev[date] ?? { include: false, complexId: '', picks: {} }), ...patch } }))
+  const selectionOf = (day: ParentMenuDay): Selection =>
+    selection[day.date] ?? { complexId: day.complexes.length === 1 ? day.complexes[0].id : '', picks: {} }
+  const update = (day: ParentMenuDay, patch: Partial<Selection>) =>
+    setSelection((prev) => ({ ...prev, [day.date]: { ...selectionOf(day), ...patch } }))
 
-  const chosen = data.days.filter((d) => d.canOrder && selection[d.date]?.include && isComplete(d, selection[d.date]))
-  const total = chosen.reduce((sum, d) => sum + Number(d.complexes.find((c) => c.id === selection[d.date].complexId)?.price ?? 0), 0)
+  const orderable = data.days.filter((d) => d.canOrder)
+  const chosen = orderable.filter((d) => selectionOf(d).complexId && isComplete(d, selectionOf(d)))
+  const total = chosen.reduce((sum, d) => sum + Number(d.complexes.find((c) => c.id === selectionOf(d).complexId)?.price ?? 0), 0)
+  const first = orderable.find((d) => selectionOf(d).complexId)
+
+  const copyFirst = () => {
+    if (!first) return
+    const source = selectionOf(first)
+    setSelection((prev) => {
+      const next = { ...prev }
+      for (const day of orderable) {
+        if (day.date === first.date || !day.complexes.some((c) => c.id === source.complexId)) continue
+        const picks: Record<string, string> = {}
+        for (const course of choiceCourses(day, source.complexId)) {
+          const pick = source.picks[course.id]
+          if (pick && course.options.some((o) => o.id === pick)) picks[course.id] = pick
+        }
+        next[day.date] = { complexId: source.complexId, picks }
+      }
+      return next
+    })
+  }
 
   const submit = () =>
     order(
       childId,
       chosen.map((d) => {
-        const s = selection[d.date]
+        const s = selectionOf(d)
         return { date: d.date, complexId: s.complexId, dishIds: choiceCourses(d, s.complexId).map((c) => s.picks[c.id]) }
       }),
     )
@@ -57,9 +79,16 @@ const Week = ({ childId, data }: { childId: string; data: ParentMenu }) => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       {issue}
-      <Typography variant="body2" color="text.secondary">Замовити або скасувати можна до {data.deadline} у день харчування.</Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+        <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>Замовити або скасувати можна до {data.deadline} у день харчування.</Typography>
+        {orderable.length > 1 && (
+          <Button size="small" disabled={!first} sx={{ minHeight: isPhone ? 40 : undefined }} onClick={copyFirst}>
+            Як у першому дні
+          </Button>
+        )}
+      </Box>
       {data.days.map((day) => {
-        const s = selection[day.date]
+        const s = selectionOf(day)
         const placed = day.order
         return (
           <Paper key={day.date} elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: 1.5 }}>
@@ -88,21 +117,18 @@ const Week = ({ childId, data }: { childId: string; data: ParentMenu }) => {
             )}
             {day.canOrder && (
               <Box sx={{ mt: 1, display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
-                <FormControlLabel
-                  control={<Checkbox checked={!!s?.include} onChange={(e) => update(day.date, { include: e.target.checked })} />}
-                  label="Замовити"
-                />
-                <TextField select size="small" label="Комплекс" value={s?.complexId ?? ''} onChange={(e) => update(day.date, { complexId: e.target.value, picks: {}, include: true })} sx={{ minWidth: { xs: '100%', sm: 220 } }}>
+                <TextField select size="small" label="Комплекс" value={s.complexId} onChange={(e) => update(day, { complexId: e.target.value, picks: {} })} sx={{ minWidth: { xs: '100%', sm: 220 } }}>
+                  <MenuItem value="">Не замовляти</MenuItem>
                   {day.complexes.map((c) => <MenuItem key={c.id} value={c.id}>{c.name} — {c.price} грн</MenuItem>)}
                 </TextField>
-                {s?.complexId && choiceCourses(day, s.complexId).map((course) => (
+                {s.complexId && choiceCourses(day, s.complexId).map((course) => (
                   <TextField
                     key={course.id}
                     select
                     size="small"
                     label={course.name}
                     value={s.picks[course.id] ?? ''}
-                    onChange={(e) => update(day.date, { picks: { ...s.picks, [course.id]: e.target.value } })}
+                    onChange={(e) => update(day, { picks: { ...s.picks, [course.id]: e.target.value } })}
                     sx={{ minWidth: { xs: '100%', sm: 180 } }}
                   >
                     {course.options.map((o) => <MenuItem key={o.id} value={o.id}>{o.name}</MenuItem>)}

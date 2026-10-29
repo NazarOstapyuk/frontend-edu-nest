@@ -7,6 +7,8 @@ import { unitWording } from '../model/wording'
 import type { Child, Group } from '../../../shared/api'
 import { useAuthStore, useCan } from '../../../entities/user'
 import { useInstitutionStore } from '../../../shared/model/institutionStore'
+import { useUsersStore } from '../../users/model/usersStore'
+import { CreateUserModal } from '../../users/ui/CreateUserModal'
 import { CreateGroupModal, EditGroupModal } from '../../../widgets/groupForms'
 import { CreateChildModal, EditChildModal } from '../../../widgets/childForms'
 import { CreateInstitutionModal } from './CreateInstitutionModal'
@@ -21,7 +23,8 @@ export const InstitutionsPage = () => {
 
   const groups = useStructureStore((s) => s.groups)
   const children = useStructureStore((s) => s.children)
-  const users = useStructureStore((s) => s.users)
+  const teachers = useStructureStore((s) => s.teachers)
+  const parents = useStructureStore((s) => s.parents)
   const bellSchedules = useStructureStore((s) => s.bellSchedules)
   const mealCategories = useStructureStore((s) => s.mealCategories)
   const fetchStructure = useStructureStore((s) => s.fetchStructure)
@@ -46,6 +49,9 @@ export const InstitutionsPage = () => {
   const canEdit = canEditSettings && isFullScope
   const canViewGroups = useCan('children', 'view')
   const canEditGroups = useCan('children', 'edit')
+  const canCreateUsers = useCan('users', 'edit')
+  const userModalOpen = useUsersStore((s) => s.createUserModal.isOpen)
+  const setCreateUserModal = useUsersStore((s) => s.setCreateUserModal)
 
   useEffect(() => {
     fetchInstitutions()
@@ -54,8 +60,11 @@ export const InstitutionsPage = () => {
   useEffect(() => {
     if (!canViewGroups) return
     fetchStructure(canEditGroups).catch(() => undefined)
-    if (canEditGroups) fetchLookups().catch(() => undefined)
-  }, [canViewGroups, canEditGroups, fetchStructure, fetchLookups])
+  }, [canViewGroups, canEditGroups, fetchStructure])
+
+  useEffect(() => {
+    if (!userModalOpen && canEditGroups) fetchLookups().catch(() => undefined)
+  }, [userModalOpen, canEditGroups, fetchLookups])
 
   const visible = selectedId ? institutions.filter((i) => i.id === selectedId) : institutions
 
@@ -121,10 +130,11 @@ export const InstitutionsPage = () => {
 
       {canEditGroups && (
         <>
+          {canCreateUsers && <CreateUserModal />}
           <CreateGroupModal
             isOpen={createGroupModal.isOpen}
             isSubmitting={isCreating}
-            users={users}
+            teachers={teachers}
             bellSchedules={bellSchedules}
             mealCategories={mealCategories}
             lockedInstitutionId={createGroupModal.institutionId}
@@ -136,7 +146,7 @@ export const InstitutionsPage = () => {
             isOpen={editGroupModal.isOpen}
             group={editGroupModal.group}
             isSubmitting={isUpdating}
-            users={users}
+            teachers={teachers}
             bellSchedules={bellSchedules}
             mealCategories={mealCategories}
             title={editedGroupType ? unitWording[editedGroupType].edit : undefined}
@@ -146,7 +156,8 @@ export const InstitutionsPage = () => {
           <CreateChildModal
             isOpen={createChildModal.isOpen}
             isSubmitting={isCreating}
-            users={users}
+            parents={parents}
+            onCreateParent={canCreateUsers ? () => setCreateUserModal({ isOpen: true }) : undefined}
             groups={groups}
             presetGroupId={createChildModal.groupId}
             onSubmit={createChild}
@@ -156,7 +167,8 @@ export const InstitutionsPage = () => {
             isOpen={editChildModal.isOpen}
             child={editChildModal.child}
             isSubmitting={isUpdating}
-            users={users}
+            parents={parents}
+            onCreateParent={canCreateUsers ? () => setCreateUserModal({ isOpen: true }) : undefined}
             groups={groups}
             onSubmit={updateChild}
             onClose={() => setEditChildModal({ isOpen: false, child: null })}

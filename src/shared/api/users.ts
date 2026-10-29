@@ -1,5 +1,5 @@
 import type { User } from '../../entities/user';
-import type { UpdateAccessDto } from './access';
+import type { AccessScope, UpdateAccessDto } from './access';
 import { axiosInstance } from './axiosInstance';
 
 export interface CreateUserDto {
@@ -12,6 +12,8 @@ export interface CreateUserDto {
   middleName?: string;
   phone?: string;
   email?: string;
+  accessScope?: AccessScope;
+  institutionIds?: string[];
 }
 
 export interface UpdateUserDto {

@@ -154,6 +154,7 @@ export const errorMessages: Record<string, string> = {
   'Bell schedule already exists': 'Такий розклад дзвінків уже існує',
   'Bell schedule is inactive': 'Розклад дзвінків неактивний',
   'Teacher is inactive': 'Вчитель неактивний',
+  'Parent is inactive': 'Користувач-батько неактивний',
   'Not a school class': 'Це не шкільний клас',
   'Class has no bell schedule': 'Спочатку оберіть класу розклад дзвінків',
   'User is not a teacher': 'Обраний користувач не вчитель',

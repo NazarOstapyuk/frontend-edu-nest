@@ -6,11 +6,6 @@ import {
   Box,
   Button,
   Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   IconButton,
   Paper,
   Table,
@@ -29,6 +24,7 @@ import { useCan } from '../../../entities/user'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardList } from '../../../shared/ui/CardList'
 import { ReasonDialog } from '../../../shared/ui/ReasonDialog'
+import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog'
 import {
   attendanceStatusLabels,
   attendanceStatuses,
@@ -245,26 +241,16 @@ export const MarkLessonPage = () => {
         </Button>
       </Box>
 
-      <Dialog open={unmarkedOpen} onClose={() => setUnmarkedOpen(false)} fullWidth maxWidth="xs">
-        <DialogTitle sx={{ fontWeight: 700 }}>Є діти без відмітки</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Без відмітки: {unmarkedCount}. Для них не буде створено запис відвідування і не спишеться заняття.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button color="inherit" onClick={() => setUnmarkedOpen(false)}>Повернутися</Button>
-          <Button
-            variant="contained"
-            onClick={() => {
-              setUnmarkedOpen(false)
-              handleSave(true)
-            }}
-          >
-            Зберегти так
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <ConfirmDialog
+        open={unmarkedOpen}
+        title="Є діти без відмітки"
+        text={`Без відмітки: ${unmarkedCount}. Для них не буде створено запис відвідування і не спишеться заняття.`}
+        confirmLabel="Зберегти так"
+        cancelLabel="Повернутися"
+        color="primary"
+        onConfirm={() => handleSave(true)}
+        onClose={() => setUnmarkedOpen(false)}
+      />
 
       <ReasonDialog
         open={reasonOpen}

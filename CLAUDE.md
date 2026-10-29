@@ -36,7 +36,7 @@ src/
   entities/user/       # User, UserRole, roleLabels, useAuthStore
   widgets/             # header, sidebar (sidebar/model/nav-items.ts is the menu)
   shared/api/          # axiosInstance + API modules, all re-exported from index.ts
-  shared/ui/           # EmptyPage, RHFTextField
+  shared/ui/           # EmptyPage, RHFTextField, ConfirmDialog, ReasonDialog, CardList
   shared/model/        # institutionStore (selected institution), notifyStore, pendingNoticesStore
 docs/superpowers/      # specs/ and plans/
 ```
@@ -68,6 +68,8 @@ Audit log: `pages/audit` (tabs «Дії» with event details and field changes, 
 Reports: `pages/reports` (one page with a tab per report: payments, charges, debts, attendance, lessons, meals, payroll; period presets, kind/group/child/teacher filters, table with totals, extra sheets as tabs, «Завантажити Excel»). API in `shared/api/reports.ts`; `reportDefinitions` lists the reports with their permission areas and filters (the menu item is shown to anyone with one of those areas). Cells arrive typed (money = 2-decimal string, date = `YYYY-MM-DD`, percent = fraction); `formatCell` only formats them, never recompute totals. The Excel file name is built on the client because `Content-Disposition` is not exposed cross-origin.
 
 Online payments: API in `shared/api/onlinePayments.ts`. Cabinet finance tab shows «Оплатити» per category when `config().enabled` (`pages/familyChild/ui/PayDialog.tsx` redirects to the provider `pageUrl`); the return URL `/family/:childId?invoice=<id>` opens the finance tab and `PaymentReturnBanner` polls `invoiceStatus` (3 s, 20 times). Public pages without app shell outside `RequireAuth`: `pages/pay` (`/pay/:token` payment link with a sessionStorage flag for polling after the bank, `/pay/test/:invoiceId` test bank, whose id is the provider invoice id; after a result it goes to the `?return=` URL when it has the same origin). The cabinet shows «Оплатити» on every category (prepayment allowed); «Посилання на оплату» and the public pay button are hidden when `config().enabled` is false. Staff: «Посилання на оплату» and tab «Онлайн-оплати» on `ChildFinancePage` (`PaymentLinkModal`, `OnlinePaymentsTab`). Statuses and amounts come from the backend.
+
+Deletes and lookups: every immediate delete (user, child, group, institution, subscription, price, menu draft...) goes through `shared/ui/ConfirmDialog` (`open`, `title`, `text`, `onConfirm`, `onClose`; closes after `onConfirm` settles, errors come from the interceptor); never call a delete from a button directly. Teacher and parent pickers (groups, children, institutions, classes, timetable, payroll, reports) use `usersApi.lookup(role, includeInactive?)` (`UserLookup`, no `users: view` needed), not `GET /users`; filter inactive options but keep the record's stored value. `POST /users` takes `accessScope` + `institutionIds` for staff in one call. Position and institutions of staff change only in `AccessDialog`; `EditUserModal` edits them only to promote a parent.
 
 Imports go top-down: `app → pages → widgets → entities → shared`. From outside a module, import through its `index.ts`.
 

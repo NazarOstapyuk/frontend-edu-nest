@@ -55,6 +55,9 @@ export const LoginPage = () => {
                 }}
             >
                 <Box
+                    component="form"
+                    noValidate
+                    onSubmit={methods.handleSubmit(onSubmit)}
                     sx={{
                         bgcolor: 'background.paper',
                         borderRadius: 3,
@@ -125,7 +128,7 @@ export const LoginPage = () => {
                         size="large"
                         disabled={isLoading}
                         sx={{mt: 1}}
-                        onClick={methods.handleSubmit(onSubmit)}
+                        type="submit"
                     >
                         Увійти
                     </Button>

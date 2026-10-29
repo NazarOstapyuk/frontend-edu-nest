@@ -1,4 +1,5 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog'
 import {
   Box,
   Button,
@@ -23,6 +24,7 @@ import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardList, CardField } from '../../../shared/ui/CardList'
 
 export const SubscriptionTypesPage = () => {
+  const [deleting, setDeleting] = useState<{ id: string; name: string } | null>(null)
   const subscriptionTypes = useSubscriptionTypesStore((s) => s.subscriptionTypes)
   const fetchSubscriptionTypes = useSubscriptionTypesStore((s) => s.fetchSubscriptionTypes)
   const setCreateModal = useSubscriptionTypesStore((s) => s.setCreateModal)
@@ -77,7 +79,7 @@ export const SubscriptionTypesPage = () => {
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Видалити">
-                  <IconButton size="small" color="error" onClick={() => deleteSubscriptionType(item.id)}>
+                  <IconButton size="small" color="error" onClick={() => setDeleting({ id: item.id, name: item.name })}>
                     <DeleteOutlineIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
@@ -134,7 +136,7 @@ export const SubscriptionTypesPage = () => {
                       <IconButton
                         size="small"
                         color="error"
-                        onClick={() => deleteSubscriptionType(item.id)}
+                        onClick={() => setDeleting({ id: item.id, name: item.name })}
                       >
                         <DeleteOutlineIcon fontSize="small" />
                       </IconButton>
@@ -148,6 +150,13 @@ export const SubscriptionTypesPage = () => {
       </TableContainer>
       )}
 
+      <ConfirmDialog
+        open={deleting !== null}
+        title="Видалити тип абонемента?"
+        text={deleting ? `«${deleting.name}» буде видалено без можливості відновлення.` : undefined}
+        onConfirm={() => deleting && deleteSubscriptionType(deleting.id)}
+        onClose={() => setDeleting(null)}
+      />
       <CreateSubscriptionTypeModal />
       <EditSubscriptionTypeModal />
     </Box>

@@ -42,11 +42,16 @@ export const PasswordFields = ({ submitLabel, onSubmit }: PasswordFieldsProps) =
   )
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <Box
+      component="form"
+      noValidate
+      onSubmit={handleSubmit((v) => submit(v).catch(() => undefined))}
+      sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+    >
       {field('currentPassword', 'Поточний пароль', 'current-password')}
       {field('newPassword', 'Новий пароль', 'new-password')}
       {field('repeatPassword', 'Повторіть новий пароль', 'new-password')}
-      <Button variant="contained" disabled={formState.isSubmitting} onClick={handleSubmit((v) => submit(v).catch(() => undefined))}>
+      <Button type="submit" variant="contained" disabled={formState.isSubmitting}>
         {submitLabel}
       </Button>
     </Box>

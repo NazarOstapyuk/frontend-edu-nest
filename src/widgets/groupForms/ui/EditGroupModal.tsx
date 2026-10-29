@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm, useWatch, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import {
@@ -12,7 +12,7 @@ import {
   TextField,
 } from '@mui/material'
 import type { BellSchedule, Group, MealPriceCategory, UpdateGroupDto } from '../../../shared/api'
-import type { User } from '../../../entities/user'
+import type { UserLookup } from '../../../shared/api'
 import { useEffectiveInstitutions, useInstitutionStore } from '../../../shared/model/institutionStore'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
@@ -30,7 +30,7 @@ interface EditGroupModalProps {
   isOpen: boolean
   group: Group | null
   isSubmitting: boolean
-  users: User[]
+  teachers: UserLookup[]
   bellSchedules: BellSchedule[]
   mealCategories: MealPriceCategory[]
   title?: string
@@ -42,7 +42,7 @@ export const EditGroupModal = ({
   isOpen,
   group,
   isSubmitting,
-  users,
+  teachers: teacherLookup,
   bellSchedules,
   mealCategories,
   title = 'Редагувати групу',
@@ -60,7 +60,6 @@ export const EditGroupModal = ({
     if (isOpen && allInstitutions.length === 0) loadInstitutions().catch(() => undefined)
   }, [isOpen, allInstitutions.length, loadInstitutions])
 
-  const teachers = users.filter((u) => u.role === 'teacher')
 
   const options = institutions.filter(
     (i) => i.type === group?.institution.type && (i.isActive || i.id === group?.institution.id),
@@ -72,6 +71,13 @@ export const EditGroupModal = ({
     resolver: yupResolver(schema),
   })
   const kind = group?.kind
+  const institutionId = useWatch({ control, name: 'institutionId' })
+  const teacherOptions = (selected: string[]) =>
+    teacherLookup.filter(
+      (t) =>
+        selected.includes(t.id) ||
+        (t.isActive && (t.institutionIds.length === 0 || t.institutionIds.includes(institutionId))),
+    )
 
   useEffect(() => {
     if (group) {
@@ -136,9 +142,9 @@ export const EditGroupModal = ({
             <Autocomplete
               multiple
               disableCloseOnSelect
-              options={teachers}
-              getOptionLabel={(option) => `${option.lastName} ${option.firstName}`}
-              value={teachers.filter((t) => field.value?.includes(t.id))}
+              options={teacherOptions(field.value ?? [])}
+              getOptionLabel={(option) => [option.lastName, option.firstName, option.middleName].filter(Boolean).join(' ')}
+              value={teacherLookup.filter((t) => field.value?.includes(t.id))}
               onChange={(_, selected) => field.onChange(selected.map((t) => t.id))}
               renderInput={(params) => <TextField {...params} label="Вчителі" />}
             />
@@ -152,7 +158,9 @@ export const EditGroupModal = ({
             render={({ field }) => (
               <TextField {...field} select label="Розклад дзвінків" fullWidth>
                 <MenuItem value="">Не обрано</MenuItem>
-                {bellSchedules.map((b) => <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>)}
+                {bellSchedules
+                  .filter((b) => b.active || b.id === field.value)
+                  .map((b) => <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>)}
               </TextField>
             )}
           />

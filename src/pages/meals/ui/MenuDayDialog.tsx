@@ -7,6 +7,7 @@ import { InstitutionMultiSelect } from './InstitutionMultiSelect'
 import { formatDay, mealsApi, menuStatusLabels, type MenuDayView } from '../../../shared/api'
 import { useEffectiveInstitutions } from '../../../shared/model/institutionStore'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog'
 
 export const MenuDayDialog = ({ day, onClose }: { day: MenuDayView; onClose: () => void }) => {
   const isPhone = useIsPhone()
@@ -14,6 +15,7 @@ export const MenuDayDialog = ({ day, onClose }: { day: MenuDayView; onClose: () 
   const current = useMealsStore((s) => s.menuInstitutionId)
   const saveMenuDay = useMealsStore((s) => s.saveMenuDay)
   const deleteMenuDay = useMealsStore((s) => s.deleteMenuDay)
+  const [confirmRemove, setConfirmRemove] = useState(false)
   const [selected, setSelected] = useState<string[]>(day.menu?.dishes.map((d) => d.id) ?? [])
 
   const [institutionIds, setInstitutionIds] = useState<string[]>([current])
@@ -65,12 +67,18 @@ export const MenuDayDialog = ({ day, onClose }: { day: MenuDayView; onClose: () 
         )}
         <Box sx={{ display: 'flex', flexWrap: { xs: 'wrap', sm: 'nowrap' }, gap: '10px' }}>
           {day.menu?.status === 'draft' && (
-            <Button color="error" onClick={remove} disabled={isSaving} sx={{ width: '100%' }}>Видалити чернетку</Button>
+            <Button color="error" onClick={() => setConfirmRemove(true)} disabled={isSaving} sx={{ width: '100%' }}>Видалити чернетку</Button>
           )}
           <Button onClick={onClose} color="inherit" sx={{ width: '100%' }}>Скасувати</Button>
           <Button onClick={save} variant="contained" disabled={isSaving} sx={{ width: '100%' }}>Зберегти</Button>
         </Box>
       </Box>
+      <ConfirmDialog
+        open={confirmRemove}
+        title="Видалити чернетку меню?"
+        onConfirm={remove}
+        onClose={() => setConfirmRemove(false)}
+      />
     </Dialog>
   )
 }

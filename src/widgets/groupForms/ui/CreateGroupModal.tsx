@@ -12,7 +12,7 @@ import {
   TextField,
 } from '@mui/material'
 import type { BellSchedule, CreateGroupDto, MealPriceCategory } from '../../../shared/api'
-import type { User } from '../../../entities/user'
+import type { UserLookup } from '../../../shared/api'
 import { useEffectiveInstitutions, useInstitutionStore } from '../../../shared/model/institutionStore'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
@@ -29,7 +29,7 @@ type FormValues = yup.InferType<typeof schema>
 interface CreateGroupModalProps {
   isOpen: boolean
   isSubmitting: boolean
-  users: User[]
+  teachers: UserLookup[]
   bellSchedules: BellSchedule[]
   mealCategories: MealPriceCategory[]
   lockedInstitutionId?: string | null
@@ -41,7 +41,7 @@ interface CreateGroupModalProps {
 export const CreateGroupModal = ({
   isOpen,
   isSubmitting,
-  users,
+  teachers: teacherLookup,
   bellSchedules,
   mealCategories,
   lockedInstitutionId,
@@ -59,7 +59,6 @@ export const CreateGroupModal = ({
     if (isOpen && allInstitutions.length === 0) loadInstitutions().catch(() => undefined)
   }, [isOpen, allInstitutions.length, loadInstitutions])
 
-  const teachers = users.filter((u) => u.role === 'teacher')
 
   const options = lockedInstitutionId
     ? allInstitutions.filter((i) => i.id === lockedInstitutionId)
@@ -72,6 +71,13 @@ export const CreateGroupModal = ({
   })
   const institutionId = useWatch({ control, name: 'institutionId' })
   const kind = allInstitutions.find((i) => i.id === institutionId)?.type
+  const teacherOptions = (selected: string[]) =>
+    teacherLookup.filter(
+      (t) =>
+        selected.includes(t.id) ||
+        (t.isActive && (t.institutionIds.length === 0 || t.institutionIds.includes(institutionId))),
+    )
+  const activeSchedules = bellSchedules.filter((b) => b.active)
 
   useEffect(() => {
     if (!isOpen) return
@@ -81,6 +87,14 @@ export const CreateGroupModal = ({
       setValue('institutionId', selectedId)
     }
   }, [isOpen, lockedInstitutionId, selectedId, institutions, setValue])
+
+  const bellScheduleId = useWatch({ control, name: 'bellScheduleId' })
+
+  useEffect(() => {
+    if (isOpen && kind === 'school_class' && !bellScheduleId && activeSchedules.length === 1) {
+      setValue('bellScheduleId', activeSchedules[0].id)
+    }
+  }, [isOpen, kind, bellScheduleId, activeSchedules, setValue])
 
   const handleClose = () => {
     reset()
@@ -140,9 +154,9 @@ export const CreateGroupModal = ({
             <Autocomplete
               multiple
               disableCloseOnSelect
-              options={teachers}
-              getOptionLabel={(option) => `${option.lastName} ${option.firstName}`}
-              value={teachers.filter((t) => field.value?.includes(t.id))}
+              options={teacherOptions(field.value ?? [])}
+              getOptionLabel={(option) => [option.lastName, option.firstName, option.middleName].filter(Boolean).join(' ')}
+              value={teacherLookup.filter((t) => field.value?.includes(t.id))}
               onChange={(_, selected) => field.onChange(selected.map((t) => t.id))}
               renderInput={(params) => <TextField {...params} label="Вчителі" />}
             />
@@ -156,7 +170,9 @@ export const CreateGroupModal = ({
             render={({ field }) => (
               <TextField {...field} select label="Розклад дзвінків" fullWidth>
                 <MenuItem value="">Не обрано</MenuItem>
-                {bellSchedules.map((b) => <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>)}
+                {bellSchedules
+                  .filter((b) => b.active || b.id === field.value)
+                  .map((b) => <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>)}
               </TextField>
             )}
           />

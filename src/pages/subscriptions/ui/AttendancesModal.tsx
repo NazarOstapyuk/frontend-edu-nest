@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog'
 import {
   Box,
   Button,
@@ -34,6 +35,7 @@ export const AttendancesModal = () => {
 
   const [date, setDate] = useState('')
   const [note, setNote] = useState('')
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const handleMark = async () => {
     if (!subscription) return
@@ -160,7 +162,7 @@ export const AttendancesModal = () => {
                   size="small"
                   color="error"
                   disabled={isDeleting}
-                  onClick={() => subscription && deleteAttendance(subscription.id, attendance.id)}
+                  onClick={() => setDeletingId(attendance.id)}
                 >
                   <DeleteOutlineIcon fontSize="small" />
                 </IconButton>
@@ -174,6 +176,15 @@ export const AttendancesModal = () => {
       <Box sx={{ px: 3, py: 1.5, display: 'flex', justifyContent: 'flex-end' }}>
         <Button onClick={close} color="inherit">Закрити</Button>
       </Box>
+      <ConfirmDialog
+        open={deletingId !== null}
+        title="Скасувати відвідування?"
+        text="Заняття повернеться до абонемента."
+        confirmLabel="Скасувати відвідування"
+        cancelLabel="Назад"
+        onConfirm={() => subscription && deletingId && deleteAttendance(subscription.id, deletingId)}
+        onClose={() => setDeletingId(null)}
+      />
     </Dialog>
   )
 }

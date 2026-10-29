@@ -3,6 +3,8 @@ import {
   Alert,
   Box,
   Button,
+  Card,
+  CardContent,
   Chip,
   IconButton,
   Paper,
@@ -97,12 +99,14 @@ export const SheetTab = () => {
               )}
             />
             {list && rows.length > 0 && (
-              <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 2 }}>
-                <Typography sx={{ fontWeight: 600 }}>Разом</Typography>
-                <CardField label="Нараховано">{formatMoney(list.totals.accrued)}</CardField>
-                <CardField label="Виплачено">{formatMoney(list.totals.paid)}</CardField>
-                <CardField label="Залишок">{formatMoney(list.totals.balance)}</CardField>
-              </Box>
+              <Card variant="outlined">
+                <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                  <Typography sx={{ fontWeight: 600 }}>Разом</Typography>
+                  <CardField label="Нараховано">{formatMoney(list.totals.accrued)}</CardField>
+                  <CardField label="Виплачено">{formatMoney(list.totals.paid)}</CardField>
+                  <CardField label="Залишок">{formatMoney(list.totals.balance)}</CardField>
+                </CardContent>
+              </Card>
             )}
           </Box>
         )

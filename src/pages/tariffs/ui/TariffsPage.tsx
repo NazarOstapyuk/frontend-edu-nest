@@ -142,7 +142,7 @@ export const TariffsPage = () => {
                 {tariffUnitLabels[t.unit]}
                 {t.packageSize ? ` (${t.packageSize})` : ''}
               </CardField>
-              <CardField label="Режим">{billingModeLabels[t.billingMode]}</CardField>
+              <CardField label="Режим">{t.unit === 'month' ? billingModeLabels[t.billingMode] : '—'}</CardField>
               <CardField label="Поточна ціна">{t.currentPrice ? formatMoney(t.currentPrice) : '—'}</CardField>
               <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5, mt: 1 }}>
                 <HistoryButton entityType="tariffs" entityId={t.id} title={t.name} />
@@ -193,7 +193,7 @@ export const TariffsPage = () => {
                     {tariffUnitLabels[t.unit]}
                     {t.packageSize ? ` (${t.packageSize})` : ''}
                   </TableCell>
-                  <TableCell>{billingModeLabels[t.billingMode]}</TableCell>
+                  <TableCell>{t.unit === 'month' ? billingModeLabels[t.billingMode] : '—'}</TableCell>
                   <TableCell align="right">{t.currentPrice ? formatMoney(t.currentPrice) : '—'}</TableCell>
                   <TableCell>
                     <Chip

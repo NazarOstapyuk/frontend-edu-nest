@@ -11,6 +11,11 @@ const schema = yup.object({
 
 type FormValues = yup.InferType<typeof schema>
 
+const localToday = () => {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+}
+
 export const EndEnrollmentModal = () => {
   const isPhone = useIsPhone()
   const { isOpen, enrollment } = useEnrollmentsStore((s) => s.endEnrollmentModal)
@@ -20,12 +25,12 @@ export const EndEnrollmentModal = () => {
 
   const { control, handleSubmit, reset } = useForm<FormValues>({
     mode: 'all',
-    defaultValues: { endDate: '' },
+    defaultValues: { endDate: localToday() },
     resolver: yupResolver(schema),
   })
 
   const handleClose = () => {
-    reset()
+    reset({ endDate: localToday() })
     setEndEnrollmentModal({ isOpen: false, enrollment: null })
   }
 

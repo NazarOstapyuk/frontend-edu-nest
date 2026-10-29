@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import {
   subscriptionsApi,
-  type CreateSubscriptionDto,
   type Subscription,
   type SubscriptionFilters,
 } from '../../../shared/api';
@@ -10,17 +9,13 @@ interface SubscriptionsState {
   subscriptions: Subscription[];
   filters: SubscriptionFilters;
   isLoading: boolean;
-  isCreating: boolean;
   isCancelling: boolean;
   isDeleting: boolean;
   isUpdating: boolean;
-  createModal: { isOpen: boolean };
   editModal: { isOpen: boolean; subscription: Subscription | null };
-  setCreateModal: (value: Partial<{ isOpen: boolean }>) => void;
   setEditModal: (value: Partial<{ isOpen: boolean; subscription: Subscription | null }>) => void;
   setFilters: (filters: SubscriptionFilters) => void;
   fetchSubscriptions: () => Promise<void>;
-  createSubscription: (dto: CreateSubscriptionDto) => Promise<void>;
   updateSubscription: (id: string, totalSessions: number) => Promise<void>;
   updateSubscriptionInList: (updated: Subscription) => void;
   cancelSubscription: (id: string) => Promise<void>;
@@ -31,15 +26,10 @@ export const useSubscriptionsStore = create<SubscriptionsState>((set, get) => ({
   subscriptions: [],
   filters: {},
   isLoading: false,
-  isCreating: false,
   isCancelling: false,
   isDeleting: false,
   isUpdating: false,
-  createModal: { isOpen: false },
   editModal: { isOpen: false, subscription: null },
-
-  setCreateModal: (value) =>
-    set((state) => ({ createModal: { ...state.createModal, ...value } })),
 
   setEditModal: (value) =>
     set((state) => ({ editModal: { ...state.editModal, ...value } })),
@@ -53,16 +43,6 @@ export const useSubscriptionsStore = create<SubscriptionsState>((set, get) => ({
       set({ subscriptions: data });
     } finally {
       set({ isLoading: false });
-    }
-  },
-
-  createSubscription: async (dto) => {
-    set({ isCreating: true });
-    try {
-      const { data } = await subscriptionsApi.create(dto);
-      set((state) => ({ subscriptions: [...data, ...state.subscriptions] }));
-    } finally {
-      set({ isCreating: false });
     }
   },
 

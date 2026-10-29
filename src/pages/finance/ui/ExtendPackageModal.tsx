@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
@@ -20,11 +21,15 @@ export const ExtendPackageModal = () => {
   const extend = usePackagesStore((s) => s.extend)
   const isSaving = usePackagesStore((s) => s.isSaving)
 
-  const { control, handleSubmit, reset } = useForm<FormValues>({
+  const { control, handleSubmit, reset, setValue } = useForm<FormValues>({
     mode: 'all',
     defaultValues: { newExpiresAt: '', reason: '' },
     resolver: yupResolver(schema),
   })
+
+  useEffect(() => {
+    if (target?.expiresAt) setValue('newExpiresAt', target.expiresAt.slice(0, 10))
+  }, [target, setValue])
 
   const handleClose = () => {
     reset({ newExpiresAt: '', reason: '' })

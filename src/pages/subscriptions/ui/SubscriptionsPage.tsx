@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import {
   Autocomplete,
   Box,
-  Button,
   Chip,
   IconButton,
   MenuItem,
@@ -17,7 +16,6 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import AddIcon from '@mui/icons-material/Add'
 import BlockIcon from '@mui/icons-material/Block'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
@@ -27,7 +25,6 @@ import { useAttendancesStore } from '../model/attendancesStore'
 import { useChildrenStore } from '../../children/model/childrenStore'
 import { useSubscriptionTypesStore } from '../../subscriptionTypes/model/subscriptionTypesStore'
 import { subscriptionStatusLabels, type SubscriptionStatus } from '../../../shared/api'
-import { CreateSubscriptionModal } from './CreateSubscriptionModal'
 import { EditSubscriptionModal } from './EditSubscriptionModal'
 import { AttendancesModal } from './AttendancesModal'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
@@ -46,7 +43,6 @@ export const SubscriptionsPage = () => {
   const filters = useSubscriptionsStore((s) => s.filters)
   const fetchSubscriptions = useSubscriptionsStore((s) => s.fetchSubscriptions)
   const setFilters = useSubscriptionsStore((s) => s.setFilters)
-  const setCreateModal = useSubscriptionsStore((s) => s.setCreateModal)
   const setEditModal = useSubscriptionsStore((s) => s.setEditModal)
   const openAttendances = useAttendancesStore((s) => s.open)
   const cancelSubscription = useSubscriptionsStore((s) => s.cancelSubscription)
@@ -138,14 +134,6 @@ export const SubscriptionsPage = () => {
             ))}
           </TextField>
         </Box>
-
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setCreateModal({ isOpen: true })}
-        >
-          Створити абонемент
-        </Button>
       </Box>
 
       {isPhone ? (
@@ -154,7 +142,7 @@ export const SubscriptionsPage = () => {
           getKey={(s) => s.id}
           empty={
             <Typography color="text.secondary" align="center" sx={{ py: 6 }}>
-              Абонементів ще немає. Натисніть «Створити абонемент».
+              Абонементів немає.
             </Typography>
           }
           renderCard={(sub) => (
@@ -204,7 +192,7 @@ export const SubscriptionsPage = () => {
             {subscriptions.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} align="center" sx={{ py: 6, color: 'text.secondary' }}>
-                  Абонементів ще немає. Натисніть «Створити абонемент».
+                  Абонементів немає.
                 </TableCell>
               </TableRow>
             ) : (
@@ -277,7 +265,6 @@ export const SubscriptionsPage = () => {
       </TableContainer>
       )}
 
-      <CreateSubscriptionModal />
       <EditSubscriptionModal />
       <AttendancesModal />
     </Box>

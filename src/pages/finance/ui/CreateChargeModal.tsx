@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
@@ -20,6 +21,10 @@ const schema = yup.object({
   periodEnd: yup
     .string()
     .default('')
+    .test('both', 'Вкажіть обидві дати періоду', function (value) {
+      const { periodStart } = this.parent as { periodStart: string }
+      return !!value === !!periodStart
+    })
     .test('after-start', 'Кінець періоду раніше за початок', function (value) {
       const { periodStart } = this.parent as { periodStart: string }
       return !value || !periodStart || value >= periodStart
@@ -27,6 +32,24 @@ const schema = yup.object({
 })
 
 type FormValues = yup.InferType<typeof schema>
+
+const iso = (date: Date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+
+const currentMonth = () => {
+  const now = new Date()
+  return {
+    periodStart: iso(new Date(now.getFullYear(), now.getMonth(), 1)),
+    periodEnd: iso(new Date(now.getFullYear(), now.getMonth() + 1, 0)),
+  }
+}
+
+const makeDefaults = (): FormValues => ({
+  category: 'tuition',
+  amount: '',
+  description: '',
+  ...currentMonth(),
+})
 
 export const CreateChargeModal = () => {
   const isPhone = useIsPhone()
@@ -36,14 +59,23 @@ export const CreateChargeModal = () => {
   const createCharge = useChildFinanceStore((s) => s.createCharge)
   const isSaving = useChildFinanceStore((s) => s.isSaving)
 
-  const { control, handleSubmit, reset } = useForm<FormValues>({
+  const { control, handleSubmit, reset, setValue } = useForm<FormValues>({
     mode: 'all',
-    defaultValues: { category: 'tuition', amount: '', description: '', periodStart: '', periodEnd: '' },
+    defaultValues: makeDefaults(),
     resolver: yupResolver(schema),
   })
 
+  useEffect(() => {
+    if (!isOpen || !finance) return
+    const largest = finance.categories.reduce<(typeof finance.categories)[number] | null>(
+      (best, c) => (Number(c.debt) > Number(best?.debt ?? 0) ? c : best),
+      null,
+    )
+    setValue('category', largest?.category ?? 'tuition')
+  }, [isOpen, finance, setValue])
+
   const handleClose = () => {
-    reset()
+    reset(makeDefaults())
     setCreateChargeModal({ isOpen: false })
   }
 

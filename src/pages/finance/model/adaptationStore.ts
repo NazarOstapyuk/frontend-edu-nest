@@ -7,11 +7,13 @@ import {
   type Tariff,
 } from '../../../shared/api';
 import { useChildFinanceStore } from './childFinanceStore';
+import { fetchChildInstitutionId } from './childInstitution';
 
 interface AdaptationState {
   childId: string | null;
   visits: AdaptationVisit[];
   tariffOptions: Tariff[];
+  childInstitutionId: string | null;
   isLoading: boolean;
   isSaving: boolean;
   createVisitModal: { isOpen: boolean };
@@ -42,6 +44,7 @@ export const useAdaptationStore = create<AdaptationState>((set, get) => {
     childId: null,
     visits: [],
     tariffOptions: [],
+    childInstitutionId: null,
     isLoading: false,
     isSaving: false,
     createVisitModal: { isOpen: false },
@@ -55,11 +58,12 @@ export const useAdaptationStore = create<AdaptationState>((set, get) => {
     fetchVisits: async (childId) => {
       set({ isLoading: true, childId, visits: [] });
       try {
-        const [{ data: visits }, { data: tariffs }] = await Promise.all([
+        const [{ data: visits }, { data: tariffs }, institutionId] = await Promise.all([
           adaptationApi.getByChild(childId),
           tariffsApi.getList(),
+          fetchChildInstitutionId(childId),
         ]);
-        if (get().childId === childId) set({ visits, tariffOptions: tariffs });
+        if (get().childId === childId) set({ visits, tariffOptions: tariffs, childInstitutionId: institutionId });
       } finally {
         set({ isLoading: false });
       }

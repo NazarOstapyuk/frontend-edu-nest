@@ -5,6 +5,7 @@ import { Box, Button, Dialog, DialogTitle, MenuItem, TextField } from '@mui/mate
 import { useEnrollmentsStore } from '../model/enrollmentsStore'
 import {
   adjustmentTypeLabels,
+  formatMoney,
   adjustmentTypes,
   normalizeAmount,
   toKopecks,
@@ -40,7 +41,25 @@ const schema = yup.object({
 
 type FormValues = yup.InferType<typeof schema>
 
-const defaults: FormValues = { type: 'discount_percent', value: '', startDate: '', endDate: '', reason: '' }
+const localToday = () => {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+}
+
+const makeDefaults = (): FormValues => ({
+  type: 'discount_percent',
+  value: '',
+  startDate: localToday(),
+  endDate: '',
+  reason: '',
+})
+
+const valueLabels: Record<AdjustmentType, string> = {
+  custom_price: 'Нова ціна, грн',
+  discount_percent: 'Відсоток',
+  discount_amount: 'Знижка, грн',
+  pause: '',
+}
 
 export const AdjustmentModal = () => {
   const isPhone = useIsPhone()
@@ -48,16 +67,19 @@ export const AdjustmentModal = () => {
   const setAdjustmentModal = useEnrollmentsStore((s) => s.setAdjustmentModal)
   const addAdjustment = useEnrollmentsStore((s) => s.addAdjustment)
   const isSaving = useEnrollmentsStore((s) => s.isSaving)
+  const tariffOptions = useEnrollmentsStore((s) => s.tariffOptions)
 
   const { control, handleSubmit, reset, watch } = useForm<FormValues>({
     mode: 'all',
-    defaultValues: defaults,
+    defaultValues: makeDefaults(),
     resolver: yupResolver(schema),
   })
   const type = watch('type')
+  const currentPrice = tariffOptions.find((t) => t.id === enrollment?.tariff.id)?.currentPrice ?? null
+  const priceHint = currentPrice ? `Поточна ціна тарифу: ${formatMoney(currentPrice)}` : undefined
 
   const handleClose = () => {
-    reset(defaults)
+    reset(makeDefaults())
     setAdjustmentModal({ isOpen: false, enrollment: null })
   }
 
@@ -95,10 +117,10 @@ export const AdjustmentModal = () => {
             render={({ field, fieldState: { error } }) => (
               <TextField
                 {...field}
-                label={type === 'discount_percent' ? 'Відсоток' : 'Сума, грн'}
+                label={valueLabels[type]}
                 fullWidth
                 error={!!error}
-                helperText={error?.message}
+                helperText={error?.message ?? (type === 'discount_percent' ? undefined : priceHint)}
               />
             )}
           />

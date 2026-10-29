@@ -19,6 +19,12 @@ interface PaymentLinkModalProps {
   onCreated: () => void
 }
 
+const largestDebtCategory = (categories: CategorySummary[]) =>
+  categories.reduce<CategorySummary | null>(
+    (best, c) => (Number(c.debt) > Number(best?.debt ?? 0) ? c : best),
+    null,
+  )?.category ?? financeCategories[0]
+
 const debtOf = (categories: CategorySummary[], category: FinanceCategory) => {
   const debt = categories.find((c) => c.category === category)?.debt ?? '0'
   return Number(debt) > 0 ? debt : ''
@@ -26,8 +32,8 @@ const debtOf = (categories: CategorySummary[], category: FinanceCategory) => {
 
 export const PaymentLinkModal = ({ childId, categories, onClose, onCreated }: PaymentLinkModalProps) => {
   const isPhone = useIsPhone()
-  const [category, setCategory] = useState<FinanceCategory>(financeCategories[0])
-  const [amount, setAmount] = useState(() => debtOf(categories, financeCategories[0]))
+  const [category, setCategory] = useState<FinanceCategory>(() => largestDebtCategory(categories))
+  const [amount, setAmount] = useState(() => debtOf(categories, largestDebtCategory(categories)))
   const [comment, setComment] = useState('')
   const [touched, setTouched] = useState(false)
   const [isSending, setIsSending] = useState(false)

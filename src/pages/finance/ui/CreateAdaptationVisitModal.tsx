@@ -1,8 +1,10 @@
+import { useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, MenuItem, TextField, Typography } from '@mui/material'
 import { useAdaptationStore } from '../model/adaptationStore'
+import { tariffsForInstitution } from '../model/childInstitution'
 import { formatMoney, normalizeAmount, toKopecks } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
@@ -43,9 +45,13 @@ export const CreateAdaptationVisitModal = () => {
   const tariffOptions = useAdaptationStore((s) => s.tariffOptions)
   const createVisit = useAdaptationStore((s) => s.createVisit)
   const isSaving = useAdaptationStore((s) => s.isSaving)
-  const hourTariffs = tariffOptions.filter((t) => t.unit === 'hour' && t.isActive)
+  const childInstitutionId = useAdaptationStore((s) => s.childInstitutionId)
+  const hourTariffs = tariffsForInstitution(
+    tariffOptions.filter((t) => t.unit === 'hour' && t.isActive),
+    childInstitutionId,
+  )
 
-  const { control, handleSubmit, reset, watch } = useForm<FormValues>({
+  const { control, handleSubmit, reset, watch, getValues, setValue } = useForm<FormValues>({
     mode: 'all',
     defaultValues: { tariffId: '', date: localToday(), hours: '', ratePerHour: '', note: '' },
     resolver: yupResolver(schema),
@@ -55,6 +61,10 @@ export const CreateAdaptationVisitModal = () => {
   const rate = watch('ratePerHour')
   const selected = hourTariffs.find((t) => t.id === tariffId)
   const effectiveRate = rate || selected?.currentPrice || ''
+  useEffect(() => {
+    if (isOpen && hourTariffs.length === 1 && !getValues('tariffId')) setValue('tariffId', hourTariffs[0].id)
+  }, [isOpen, hourTariffs, getValues, setValue])
+
   const total = (toKopecks(hours) * toKopecks(effectiveRate)) / 10000
 
   const handleClose = () => {

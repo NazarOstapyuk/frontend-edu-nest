@@ -1,8 +1,10 @@
-import { useForm, Controller } from 'react-hook-form'
+import { useEffect } from 'react'
+import { useForm, useWatch, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, MenuItem, TextField } from '@mui/material'
 import { useEnrollmentsStore } from '../model/enrollmentsStore'
+import { tariffsForInstitution } from '../model/childInstitution'
 import { billingModeLabels, billingModes, formatMoney, type BillingMode } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
@@ -22,7 +24,12 @@ const schema = yup.object({
 
 type FormValues = yup.InferType<typeof schema>
 
-const defaults: FormValues = { tariffId: '', startDate: '', endDate: '', billingMode: '', note: '' }
+const localToday = () => {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+}
+
+const makeDefaults = (): FormValues => ({ tariffId: '', startDate: localToday(), endDate: '', billingMode: '', note: '' })
 
 export const CreateEnrollmentModal = () => {
   const isPhone = useIsPhone()
@@ -31,16 +38,26 @@ export const CreateEnrollmentModal = () => {
   const tariffOptions = useEnrollmentsStore((s) => s.tariffOptions)
   const createEnrollment = useEnrollmentsStore((s) => s.createEnrollment)
   const isSaving = useEnrollmentsStore((s) => s.isSaving)
-  const monthlyTariffs = tariffOptions.filter((t) => t.unit === 'month' && t.isActive)
+  const childInstitutionId = useEnrollmentsStore((s) => s.childInstitutionId)
+  const monthlyTariffs = tariffsForInstitution(
+    tariffOptions.filter((t) => t.unit === 'month' && t.isActive),
+    childInstitutionId,
+  )
 
-  const { control, handleSubmit, reset } = useForm<FormValues>({
+  const { control, handleSubmit, reset, getValues, setValue } = useForm<FormValues>({
     mode: 'all',
-    defaultValues: defaults,
+    defaultValues: makeDefaults(),
     resolver: yupResolver(schema),
   })
+  const tariffId = useWatch({ control, name: 'tariffId' })
+  const selectedTariff = monthlyTariffs.find((t) => t.id === tariffId)
+
+  useEffect(() => {
+    if (isOpen && monthlyTariffs.length === 1 && !getValues('tariffId')) setValue('tariffId', monthlyTariffs[0].id)
+  }, [isOpen, monthlyTariffs, getValues, setValue])
 
   const handleClose = () => {
-    reset(defaults)
+    reset(makeDefaults())
     setCreateEnrollmentModal({ isOpen: false })
   }
 
@@ -110,7 +127,9 @@ export const CreateEnrollmentModal = () => {
           control={control}
           render={({ field, fieldState: { error } }) => (
             <TextField {...field} select label="Режим періоду" fullWidth error={!!error} helperText={error?.message}>
-              <MenuItem value="">Як у тарифі</MenuItem>
+              <MenuItem value="">
+                Як у тарифі{selectedTariff ? ` (${billingModeLabels[selectedTariff.billingMode]})` : ''}
+              </MenuItem>
               {billingModes.map((key) => (
                 <MenuItem key={key} value={key}>{billingModeLabels[key]}</MenuItem>
               ))}

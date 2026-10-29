@@ -51,7 +51,19 @@ const schema = yup.object({
 
 type FormValues = yup.InferType<typeof schema>
 
-const defaults: FormValues = {
+const localToday = () => {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+}
+
+const allowedCategories: Record<TariffUnit, FinanceCategory[]> = {
+  month: financeCategories,
+  hour: ['adaptation', 'extra_classes', 'tuition'],
+  session: ['extra_classes', 'tuition'],
+  package: ['extra_classes', 'tuition'],
+}
+
+const makeDefaults = (): FormValues => ({
   institutionId: '',
   name: '',
   category: 'tuition',
@@ -60,8 +72,8 @@ const defaults: FormValues = {
   validityDays: '',
   billingMode: 'calendar_full',
   price: '',
-  effectiveFrom: '',
-}
+  effectiveFrom: localToday(),
+})
 
 export const CreateTariffModal = () => {
   const isPhone = useIsPhone()
@@ -82,22 +94,27 @@ export const CreateTariffModal = () => {
       ? ''
       : (activeInstitutions[0]?.id ?? '')
 
-  const { control, handleSubmit, reset, watch } = useForm<FormValues>({
+  const { control, handleSubmit, reset, watch, getValues, setValue } = useForm<FormValues>({
     mode: 'all',
-    defaultValues: defaults,
+    defaultValues: makeDefaults(),
     resolver: yupResolver(schema),
   })
   const unit = watch('unit')
+  const categoryOptions = allowedCategories[unit]
+
+  useEffect(() => {
+    if (!allowedCategories[unit].includes(getValues('category'))) setValue('category', allowedCategories[unit][0])
+  }, [unit, getValues, setValue])
 
   useEffect(() => {
     if (!isOpen) return
     if (allInstitutions.length === 0) loadInstitutions().catch(() => undefined)
-    reset({ ...defaults, institutionId: defaultInstitutionId })
+    reset({ ...makeDefaults(), institutionId: defaultInstitutionId })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen])
 
   const handleClose = () => {
-    reset(defaults)
+    reset(makeDefaults())
     setCreateTariffModal({ isOpen: false })
   }
 
@@ -109,7 +126,7 @@ export const CreateTariffModal = () => {
       unit: values.unit,
       packageSize: values.unit === 'package' ? Number(values.packageSize) : undefined,
       validityDays: values.unit === 'package' && values.validityDays ? Number(values.validityDays) : undefined,
-      billingMode: values.billingMode,
+      billingMode: values.unit === 'month' ? values.billingMode : 'calendar_full',
       price: normalizeAmount(values.price),
       effectiveFrom: values.effectiveFrom,
     })
@@ -144,7 +161,7 @@ export const CreateTariffModal = () => {
           control={control}
           render={({ field, fieldState: { error } }) => (
             <TextField {...field} select label="Категорія" fullWidth error={!!error} helperText={error?.message}>
-              {financeCategories.map((key) => (
+              {categoryOptions.map((key) => (
                 <MenuItem key={key} value={key}>{financeCategoryLabels[key]}</MenuItem>
               ))}
             </TextField>
@@ -181,24 +198,26 @@ export const CreateTariffModal = () => {
             )}
           />
         )}
-        <Controller
-          name="billingMode"
-          control={control}
-          render={({ field, fieldState: { error } }) => (
-            <TextField
-              {...field}
-              select
-              label="Режим періоду за замовчуванням"
-              fullWidth
-              error={!!error}
-              helperText={error?.message}
-            >
-              {billingModes.map((key) => (
-                <MenuItem key={key} value={key}>{billingModeLabels[key]}</MenuItem>
-              ))}
-            </TextField>
-          )}
-        />
+        {unit === 'month' && (
+          <Controller
+            name="billingMode"
+            control={control}
+            render={({ field, fieldState: { error } }) => (
+              <TextField
+                {...field}
+                select
+                label="Режим періоду за замовчуванням"
+                fullWidth
+                error={!!error}
+                helperText={error?.message}
+              >
+                {billingModes.map((key) => (
+                  <MenuItem key={key} value={key}>{billingModeLabels[key]}</MenuItem>
+                ))}
+              </TextField>
+            )}
+          />
+        )}
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
           <Controller
             name="price"

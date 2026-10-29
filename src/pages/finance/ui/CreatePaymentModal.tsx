@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
@@ -22,24 +22,27 @@ import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const manualMethods: ManualPaymentMethod[] = ['cash', 'bank_transfer', 'card']
 
-const schema = yup.object({
-  amount: amountSchema,
-  method: yup.mixed<ManualPaymentMethod>().oneOf(manualMethods).required("Обов'язкове поле"),
-  reference: yup.string().trim().default('').max(255, 'Максимум 255 символів'),
-  receivedAt: yup.string().required("Обов'язкове поле"),
-  category: yup.string().default(''),
-  note: yup.string().default('').max(1000, 'Максимум 1000 символів'),
-  allocations: yup.array().of(allocationItemSchema).default([]),
-})
-
-type FormValues = yup.InferType<typeof schema>
-
 const today = () => {
   const now = new Date()
   const month = String(now.getMonth() + 1).padStart(2, '0')
   const day = String(now.getDate()).padStart(2, '0')
   return `${now.getFullYear()}-${month}-${day}`
 }
+
+const schema = yup.object({
+  amount: amountSchema,
+  method: yup.mixed<ManualPaymentMethod>().oneOf(manualMethods).required("Обов'язкове поле"),
+  reference: yup.string().trim().default('').max(255, 'Максимум 255 символів'),
+  receivedAt: yup
+    .string()
+    .required("Обов'язкове поле")
+    .test('not-future', 'Дата не може бути в майбутньому', (value) => !value || value <= today()),
+  category: yup.string().default(''),
+  note: yup.string().default('').max(1000, 'Максимум 1000 символів'),
+  allocations: yup.array().of(allocationItemSchema).default([]),
+})
+
+type FormValues = yup.InferType<typeof schema>
 
 export const CreatePaymentModal = () => {
   const isPhone = useIsPhone()
@@ -50,6 +53,7 @@ export const CreatePaymentModal = () => {
   const suggestAllocation = useChildFinanceStore((s) => s.suggestAllocation)
   const isSaving = useChildFinanceStore((s) => s.isSaving)
   const [lines, setLines] = useState<SuggestionLine[]>([])
+  const cleared = useRef(false)
 
   const { control, handleSubmit, reset, setValue, getValues, trigger, watch } = useForm<FormValues>({
     mode: 'all',
@@ -68,13 +72,48 @@ export const CreatePaymentModal = () => {
   const total = toKopecks(watch('amount'))
   const distributed = watch('allocations').reduce((acc, item) => acc + toKopecks(item.amount), 0)
   const category = watch('category')
+  const amountValue = watch('amount')
 
   const clearAllocation = () => {
     setLines([])
     setValue('allocations', [])
   }
 
+  useEffect(() => {
+    if (!isOpen || !finance) return
+    const withDebt = finance.categories.filter((c) => Number(c.debt) > 0)
+    setValue('category', withDebt.length === 1 ? withDebt[0].category : '')
+  }, [isOpen, finance, setValue])
+
+  useEffect(() => {
+    cleared.current = false
+    setLines([])
+    setValue('allocations', [])
+    if (!isOpen || !finance || !amountSchema.isValidSync(amountValue)) return
+    let active = true
+    const timer = setTimeout(async () => {
+      const data = await suggestAllocation(finance.child.id, {
+        amount: normalizeAmount(amountValue),
+        category: category ? (category as FinanceCategory) : undefined,
+      }).catch(() => null)
+      if (!active || !data) return
+      setLines(data.lines)
+      setValue(
+        'allocations',
+        data.lines.map((line) => ({
+          chargeId: line.chargeId,
+          amount: Number(line.suggestedAmount) > 0 ? line.suggestedAmount : '',
+        })),
+      )
+    }, 500)
+    return () => {
+      active = false
+      clearTimeout(timer)
+    }
+  }, [isOpen, finance, amountValue, category, suggestAllocation, setValue])
+
   const handleClose = () => {
+    cleared.current = false
     reset({ amount: '', method: 'cash', reference: '', receivedAt: today(), category: '', note: '', allocations: [] })
     setLines([])
     setCreatePaymentModal({ isOpen: false })
@@ -99,14 +138,28 @@ export const CreatePaymentModal = () => {
 
   const onSubmit = async (values: FormValues) => {
     if (!finance) return
+    const categoryValue = values.category ? (values.category as FinanceCategory) : undefined
+    let allocations = toAllocationItems(values.allocations)
+    if (!allocations.length && !cleared.current) {
+      const data = await suggestAllocation(finance.child.id, {
+        amount: normalizeAmount(values.amount),
+        category: categoryValue,
+      })
+      allocations = toAllocationItems(
+        data.lines.map((line) => ({
+          chargeId: line.chargeId,
+          amount: Number(line.suggestedAmount) > 0 ? line.suggestedAmount : '',
+        })),
+      )
+    }
     await createPayment(finance.child.id, {
       amount: normalizeAmount(values.amount),
       method: values.method,
       reference: values.reference.trim() || undefined,
       receivedAt: values.receivedAt,
-      category: values.category ? (values.category as FinanceCategory) : undefined,
+      category: categoryValue,
       note: values.note.trim() || undefined,
-      allocations: toAllocationItems(values.allocations),
+      allocations,
     })
     handleClose()
   }
@@ -127,10 +180,6 @@ export const CreatePaymentModal = () => {
             render={({ field, fieldState: { error } }) => (
               <TextField
                 {...field}
-                onChange={(e) => {
-                  field.onChange(e)
-                  clearAllocation()
-                }}
                 label="Сума, грн"
                 fullWidth
                 error={!!error}
@@ -173,7 +222,7 @@ export const CreatePaymentModal = () => {
                 label="Дата надходження"
                 type="date"
                 fullWidth
-                slotProps={{ inputLabel: { shrink: true } }}
+                slotProps={{ inputLabel: { shrink: true }, htmlInput: { max: today() } }}
                 error={!!error}
                 helperText={error?.message}
               />
@@ -186,10 +235,6 @@ export const CreatePaymentModal = () => {
           render={({ field, fieldState: { error } }) => (
             <TextField
               {...field}
-              onChange={(e) => {
-                field.onChange(e)
-                clearAllocation()
-              }}
               select
               label="Призначення"
               fullWidth
@@ -212,9 +257,22 @@ export const CreatePaymentModal = () => {
         />
 
         <Box>
-          <Button variant="outlined" onClick={handleSuggest} sx={{ mb: 2 }}>
-            Запропонувати розподіл
-          </Button>
+          <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+            <Button variant="outlined" onClick={handleSuggest}>
+              Запропонувати розподіл
+            </Button>
+            {lines.length > 0 && (
+              <Button
+                color="inherit"
+                onClick={() => {
+                  cleared.current = true
+                  clearAllocation()
+                }}
+              >
+                Очистити розподіл
+              </Button>
+            )}
+          </Box>
           {lines.length > 0 && (
             <AllocationTable
               lines={lines}

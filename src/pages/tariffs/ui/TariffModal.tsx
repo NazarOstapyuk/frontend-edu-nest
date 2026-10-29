@@ -33,6 +33,11 @@ import {
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardList, CardField } from '../../../shared/ui/CardList'
 
+const localToday = () => {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+}
+
 const amountPattern = /^\d{1,8}([.,]\d{1,2})?$/
 
 const priceSchema = yup.object({
@@ -69,19 +74,19 @@ export const TariffModal = () => {
 
   const { control, handleSubmit, reset } = useForm<PriceValues>({
     mode: 'all',
-    defaultValues: { price: '', effectiveFrom: '' },
+    defaultValues: { price: '', effectiveFrom: localToday() },
     resolver: yupResolver(priceSchema),
   })
 
   const handleClose = () => {
-    reset()
+    reset({ price: '', effectiveFrom: localToday() })
     setTariffModal({ isOpen: false, tariffId: null })
   }
 
   const onAddPrice = async (values: PriceValues) => {
     if (!tariff) return
     await addPrice(tariff.id, { price: normalizeAmount(values.price), effectiveFrom: values.effectiveFrom })
-    reset()
+    reset({ price: '', effectiveFrom: localToday() })
   }
 
   return (
@@ -91,7 +96,8 @@ export const TariffModal = () => {
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
           <Typography variant="body2" color="text.secondary">
             {financeCategoryLabels[tariff.category]} · {tariffUnitLabels[tariff.unit]}
-            {tariff.packageSize ? ` (${tariff.packageSize})` : ''} · {billingModeLabels[tariff.billingMode]}
+            {tariff.packageSize ? ` (${tariff.packageSize})` : ''}
+            {tariff.unit === 'month' && ` · ${billingModeLabels[tariff.billingMode]}`}
           </Typography>
           {tariff.unit === 'package' && (
             <Typography variant="body2" color="text.secondary">

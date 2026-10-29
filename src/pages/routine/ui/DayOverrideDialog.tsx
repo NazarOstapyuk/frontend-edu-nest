@@ -4,6 +4,7 @@ import { formatDay, type RoutineDay, type RoutineItem } from '../../../shared/ap
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { useRoutineStore } from '../model/routineStore'
 import { RoutineItemsEditor } from './RoutineItemsEditor'
+import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog'
 
 const validate = (items: RoutineItem[]): string | null => {
   if (items.length > 60) return 'Забагато пунктів'
@@ -21,6 +22,7 @@ const DayOverrideForm = ({ day, onClose }: { day: RoutineDay; onClose: () => voi
   const [items, setItems] = useState<RoutineItem[]>(() => day.items.map((i) => ({ ...i })))
   const [note, setNote] = useState(day.source === 'override' ? (day.note ?? '') : '')
   const [error, setError] = useState<string | null>(null)
+  const [confirmReset, setConfirmReset] = useState(false)
 
   const onSave = async () => {
     const problem = validate(items)
@@ -64,13 +66,21 @@ const DayOverrideForm = ({ day, onClose }: { day: RoutineDay; onClose: () => voi
       </DialogContent>
       <DialogActions sx={{ flexWrap: 'wrap' }}>
         {day.source === 'override' && (
-          <Button color="inherit" disabled={isSaving} onClick={onReset} sx={{ mr: 'auto' }}>
+          <Button color="inherit" disabled={isSaving} onClick={() => setConfirmReset(true)} sx={{ mr: 'auto' }}>
             Скинути до шаблону
           </Button>
         )}
         <Button onClick={onClose}>Скасувати</Button>
         <Button variant="contained" disabled={isSaving} onClick={onSave}>Зберегти</Button>
       </DialogActions>
+      <ConfirmDialog
+        open={confirmReset}
+        title="Скинути день до шаблону?"
+        text="Зміни цього дня буде втрачено."
+        confirmLabel="Скинути"
+        onConfirm={onReset}
+        onClose={() => setConfirmReset(false)}
+      />
     </>
   )
 }

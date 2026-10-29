@@ -21,7 +21,7 @@ import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { useInstitutionStore } from '../../../shared/model/institutionStore'
 import { useAuthStore, type User } from '../../../entities/user'
 import { canAssignPosition, usePositionsStore } from '../../../entities/position'
-import { canChangeAccess, scopeAllowed as scopeAllowedFor } from '../model/accessRules'
+import { canChangeAccess, scopeAllowed as scopeAllowedFor } from '../../../entities/user'
 
 interface Props {
   user: User

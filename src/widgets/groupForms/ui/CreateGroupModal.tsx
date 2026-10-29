@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useForm, useWatch, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
@@ -88,13 +88,18 @@ export const CreateGroupModal = ({
     }
   }, [isOpen, lockedInstitutionId, selectedId, institutions, setValue])
 
-  const bellScheduleId = useWatch({ control, name: 'bellScheduleId' })
+  const onlyScheduleId = activeSchedules.length === 1 ? activeSchedules[0].id : ''
+  const scheduleDone = useRef(false)
 
   useEffect(() => {
-    if (isOpen && kind === 'school_class' && !bellScheduleId && activeSchedules.length === 1) {
-      setValue('bellScheduleId', activeSchedules[0].id)
+    if (!isOpen) {
+      scheduleDone.current = false
+      return
     }
-  }, [isOpen, kind, bellScheduleId, activeSchedules, setValue])
+    if (scheduleDone.current || kind !== 'school_class' || !onlyScheduleId) return
+    setValue('bellScheduleId', onlyScheduleId)
+    scheduleDone.current = true
+  }, [isOpen, kind, onlyScheduleId, setValue])
 
   const handleClose = () => {
     reset()

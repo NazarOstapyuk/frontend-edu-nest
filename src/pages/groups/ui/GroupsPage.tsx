@@ -15,9 +15,8 @@ import AddIcon from '@mui/icons-material/Add'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { useGroupsStore } from '../model/groupsStore'
-import { useUsersStore } from '../../users/model/usersStore'
 import { groupKindLabels, type Group } from '../../../shared/api'
-import { useCan } from '../../../entities/user'
+import { useCan, useUserLookupStore } from '../../../entities/user'
 import { CreateGroupModal, EditGroupModal } from '../../../widgets/groupForms'
 import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog'
 
@@ -37,8 +36,8 @@ export const GroupsPage = () => {
   const isUpdating = useGroupsStore((s) => s.isUpdating)
   const bellSchedules = useGroupsStore((s) => s.bellSchedules)
   const mealCategories = useGroupsStore((s) => s.mealCategories)
-  const teachers = useUsersStore((s) => s.teachers)
-  const fetchTeachers = useUsersStore((s) => s.fetchTeachers)
+  const teachers = useUserLookupStore((s) => s.teachers)
+  const fetchTeachers = useUserLookupStore((s) => s.fetchTeachers)
   const [deletingGroup, setDeletingGroup] = useState<Group | null>(null)
   const canEdit = useCan('children', 'edit')
 

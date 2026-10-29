@@ -23,12 +23,11 @@ import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalance
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { useChildrenStore } from '../model/childrenStore'
-import { useUsersStore } from '../../users/model/usersStore'
 import { useGroupsStore } from '../../groups/model/groupsStore'
-import { genderLabels, type Child } from '../../../shared/api'
+import { genderLabels, usersApi, type Child, type CreateUserDto } from '../../../shared/api'
 import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog'
-import { CreateUserModal } from '../../users/ui/CreateUserModal'
-import { useCan } from '../../../entities/user'
+import { CreateUserModal } from '../../../widgets/userForms'
+import { useCan, useUserLookupStore } from '../../../entities/user'
 import { CreateChildModal, EditChildModal } from '../../../widgets/childForms'
 import { HistoryButton } from '../../../widgets/auditHistory'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
@@ -48,10 +47,22 @@ export const ChildrenPage = () => {
   const isUpdating = useChildrenStore((s) => s.isUpdating)
   const navigate = useNavigate()
   const isPhone = useIsPhone()
-  const parents = useUsersStore((s) => s.parents)
-  const fetchParents = useUsersStore((s) => s.fetchParents)
-  const userModalOpen = useUsersStore((s) => s.createUserModal.isOpen)
-  const setCreateUserModal = useUsersStore((s) => s.setCreateUserModal)
+  const parents = useUserLookupStore((s) => s.parents)
+  const fetchParents = useUserLookupStore((s) => s.fetchParents)
+  const [userModalOpen, setUserModalOpen] = useState(false)
+  const [isCreatingUser, setIsCreatingUser] = useState(false)
+  const [newParentId, setNewParentId] = useState<string | null>(null)
+  const createParent = async (dto: CreateUserDto) => {
+    setIsCreatingUser(true)
+    try {
+      const { data } = await usersApi.create(dto)
+      await fetchParents().catch(() => undefined)
+      if (data.role === 'parent') setNewParentId(data.id)
+      return data
+    } finally {
+      setIsCreatingUser(false)
+    }
+  }
   const canCreateUsers = useCan('users', 'edit')
   const [deletingChild, setDeletingChild] = useState<Child | null>(null)
   const groups = useGroupsStore((s) => s.groups)
@@ -120,11 +131,8 @@ export const ChildrenPage = () => {
   useEffect(() => {
     fetchChildren()
     fetchGroups()
-  }, [fetchChildren, fetchGroups])
-
-  useEffect(() => {
-    if (!userModalOpen) fetchParents().catch(() => undefined)
-  }, [userModalOpen, fetchParents])
+    fetchParents().catch(() => undefined)
+  }, [fetchChildren, fetchGroups, fetchParents])
 
   return (
     <Box>
@@ -321,12 +329,21 @@ export const ChildrenPage = () => {
         onConfirm={() => deletingChild && deleteChild(deletingChild.id)}
         onClose={() => setDeletingChild(null)}
       />
-      {canCreateUsers && <CreateUserModal />}
+      {canCreateUsers && (
+        <CreateUserModal
+          isOpen={userModalOpen}
+          isSubmitting={isCreatingUser}
+          presetParent
+          onSubmit={createParent}
+          onClose={() => setUserModalOpen(false)}
+        />
+      )}
       <CreateChildModal
         isOpen={createChildModal.isOpen}
         isSubmitting={isCreating}
         parents={parents}
-        onCreateParent={canCreateUsers ? () => setCreateUserModal({ isOpen: true }) : undefined}
+        onCreateParent={canCreateUsers ? () => setUserModalOpen(true) : undefined}
+        newParentId={newParentId}
         presetGroupId={groupId || null}
         groups={groups}
         onSubmit={createChild}
@@ -337,7 +354,8 @@ export const ChildrenPage = () => {
         child={editChildModal.child}
         isSubmitting={isUpdating}
         parents={parents}
-        onCreateParent={canCreateUsers ? () => setCreateUserModal({ isOpen: true }) : undefined}
+        onCreateParent={canCreateUsers ? () => setUserModalOpen(true) : undefined}
+        newParentId={newParentId}
         groups={groups}
         onSubmit={updateChild}
         onClose={() => setEditChildModal({ isOpen: false, child: null })}

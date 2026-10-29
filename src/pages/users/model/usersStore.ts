@@ -1,12 +1,10 @@
 import { create } from 'zustand';
-import { usersApi, type AccessScope, type CreateUserDto, type UpdateUserDto, type UserLookup } from '../../../shared/api';
-import { sameScope } from './accessRules';
+import { usersApi, type AccessScope, type CreateUserDto, type UpdateUserDto } from '../../../shared/api';
+import { sameScope } from '../../../entities/user';
 import type { User } from '../../../entities/user';
 
 interface UsersState {
   users: User[];
-  teachers: UserLookup[];
-  parents: UserLookup[];
   isLoading: boolean;
   isCreating: boolean;
   isUpdating: boolean;
@@ -16,8 +14,6 @@ interface UsersState {
   setCreateUserModal: (value: Partial<{ isOpen: boolean }>) => void;
   setEditUserModal: (value: Partial<{ isOpen: boolean; user: User | null }>) => void;
   fetchUsers: () => Promise<void>;
-  fetchTeachers: () => Promise<void>;
-  fetchParents: () => Promise<void>;
   createUser: (dto: CreateUserDto) => Promise<User>;
   updateUser: (id: string, dto: UpdateUserDto) => Promise<User>;
   applyScope: (user: User, accessScope: AccessScope, institutionIds: string[]) => Promise<void>;
@@ -27,8 +23,6 @@ interface UsersState {
 
 export const useUsersStore = create<UsersState>((set) => ({
   users: [],
-  teachers: [],
-  parents: [],
   isLoading: false,
   isCreating: false,
   isUpdating: false,
@@ -46,16 +40,6 @@ export const useUsersStore = create<UsersState>((set) => ({
     } finally {
       set({ isLoading: false });
     }
-  },
-
-  fetchTeachers: async () => {
-    const { data } = await usersApi.lookup('teacher', true);
-    set({ teachers: data });
-  },
-
-  fetchParents: async () => {
-    const { data } = await usersApi.lookup('parent', true);
-    set({ parents: data });
   },
 
   createUser: async (dto) => {

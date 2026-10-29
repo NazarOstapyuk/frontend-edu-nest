@@ -1,5 +1,5 @@
 import { ALL_AREAS, levelSatisfies, type AccessScope, type PermissionMap } from '../../../shared/api';
-import type { SessionProfile, SessionRole, User } from '../../../entities/user';
+import type { SessionProfile, SessionRole, User } from './types';
 
 export const permissionMap = (user: User): PermissionMap =>
   Object.fromEntries((user.permissions ?? []).map((p) => [p.area, p.level]));

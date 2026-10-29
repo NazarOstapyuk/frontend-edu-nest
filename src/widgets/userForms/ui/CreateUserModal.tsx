@@ -17,12 +17,10 @@ import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import {useIsPhone} from "../../../shared/lib/useIsPhone.ts";
 import {RHFTextField} from "../../../shared/ui/RHFTextField.tsx";
-import {useAuthStore} from "../../../entities/user";
+import {useAuthStore, defaultScope, type User} from "../../../entities/user";
 import {canAssignPosition, usePositionsStore} from "../../../entities/position";
-import type {AccessScope} from "../../../shared/api";
-import {defaultScope} from "../model/accessRules.ts";
+import type {AccessScope, CreateUserDto} from "../../../shared/api";
 import {InstitutionScopeFields} from "./InstitutionScopeFields.tsx";
-import {useUsersStore} from "../model/usersStore.ts";
 import {isValidPhone, normalizePhone} from "../../../shared/lib/phone.ts";
 
 const schema = yup.object({
@@ -44,13 +42,17 @@ const schema = yup.object({
     }),
 })
 
-export const CreateUserModal = () => {
+interface CreateUserModalProps {
+    isOpen: boolean
+    isSubmitting: boolean
+    presetParent?: boolean
+    onSubmit: (dto: CreateUserDto) => Promise<User>
+    onClose: () => void
+}
+
+export const CreateUserModal = ({isOpen, isSubmitting, presetParent, onSubmit: createUser, onClose}: CreateUserModalProps) => {
     const isPhone = useIsPhone()
-    const createUser = useUsersStore((s) => s.createUser)
     const profile = useAuthStore((s) => s.profile)
-    const isCreating = useUsersStore((s) => s.isCreating)
-    const {isOpen} = useUsersStore((s) => s.createUserModal)
-    const setCreateUserModal = useUsersStore((s) => s.setCreateUserModal)
 
     const [showPassword, setShowPassword] = useState(false)
     const positions = usePositionsStore((s) => s.positions)
@@ -76,6 +78,10 @@ export const CreateUserModal = () => {
         resolver: yupResolver(schema),
     });
 
+    useEffect(() => {
+        if (isOpen && presetParent) methods.setValue('position', 'parent', {shouldValidate: true})
+    }, [isOpen, presetParent, methods])
+
     const position = useWatch({control: methods.control, name: 'position'})
     const phone = useWatch({control: methods.control, name: 'phone'})
     const loginDirty = !!methods.formState.dirtyFields.login
@@ -98,7 +104,7 @@ export const CreateUserModal = () => {
 
     const handleClose = () => {
         methods.reset()
-        setCreateUserModal({ isOpen: false })
+        onClose()
     }
 
     const onSubmit = async (values: yup.InferType<typeof schema>) => {
@@ -247,7 +253,7 @@ export const CreateUserModal = () => {
                             <Button
                                 onClick={methods.handleSubmit(onSubmit)}
                                 variant="contained"
-                                disabled={isCreating}
+                                disabled={isSubmitting}
                                 sx={{width: '100%'}}
                             >
                                 Зберегти

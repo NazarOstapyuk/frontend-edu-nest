@@ -33,6 +33,7 @@ interface EditChildModalProps {
   isSubmitting: boolean
   parents: UserLookup[]
   onCreateParent?: () => void
+  newParentId?: string | null
   groups: Group[]
   onSubmit: (id: string, dto: UpdateChildDto) => Promise<unknown>
   onClose: () => void
@@ -44,6 +45,7 @@ export const EditChildModal = ({
   isSubmitting,
   parents: parentLookup,
   onCreateParent,
+  newParentId,
   groups,
   onSubmit: submit,
   onClose,
@@ -62,7 +64,7 @@ export const EditChildModal = ({
       (g) => g.id === current || institutions.find((i) => i.id === g.institution.id)?.isActive !== false,
     )
 
-  const { control, handleSubmit, reset } = useForm<FormValues>({
+  const { control, handleSubmit, reset, setValue, getValues } = useForm<FormValues>({
     mode: 'all',
     defaultValues: { firstName: '', lastName: '', middleName: '', birthDate: '', gender: 'male', groupId: '', parentIds: [] },
     resolver: yupResolver(schema),
@@ -81,6 +83,12 @@ export const EditChildModal = ({
       })
     }
   }, [child, reset])
+
+  useEffect(() => {
+    if (!newParentId) return
+    const current = getValues('parentIds') ?? []
+    if (!current.includes(newParentId)) setValue('parentIds', [...current, newParentId])
+  }, [newParentId, getValues, setValue])
 
   const handleClose = () => {
     reset()

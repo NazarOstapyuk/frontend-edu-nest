@@ -2,8 +2,7 @@ import { Controller, useWatch, type Control, type FieldValues, type Path } from 
 import { Autocomplete, MenuItem, TextField } from '@mui/material'
 import { scopeLabels, type AccessScope } from '../../../shared/api'
 import { useInstitutionStore } from '../../../shared/model/institutionStore'
-import { useAuthStore } from '../../../entities/user'
-import { scopeAllowed } from '../model/accessRules'
+import { useAuthStore, scopeAllowed } from '../../../entities/user'
 
 const scopes = Object.keys(scopeLabels) as AccessScope[]
 

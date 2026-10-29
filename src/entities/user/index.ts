@@ -2,3 +2,5 @@ export type { User, UserRole, SessionRole, SessionProfile, PositionRef } from '.
 export { roleLabels, homePath } from './model/types'
 export { useAuthStore } from './model/authStore'
 export { canAccess, useCan, useCanManageShared } from './model/access'
+export { useUserLookupStore } from './model/lookupStore'
+export * from './model/accessRules'

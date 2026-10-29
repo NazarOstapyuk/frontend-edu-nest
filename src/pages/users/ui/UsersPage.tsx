@@ -21,7 +21,7 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
 import { scopeLabels } from '../../../shared/api'
 import { roleLabels, useCan, type User } from '../../../entities/user'
 import { useUsersStore } from '../model/usersStore'
-import { CreateUserModal } from './CreateUserModal.tsx'
+import { CreateUserModal } from '../../../widgets/userForms'
 import { EditUserModal } from './EditUserModal.tsx'
 import { AccessDialog } from './AccessDialog.tsx'
 import { useInstitutionStore } from '../../../shared/model/institutionStore'
@@ -40,6 +40,9 @@ export const UsersPage = () => {
   const users = useUsersStore((s) => s.users)
   const fetchUsers = useUsersStore((s) => s.fetchUsers)
   const setCreateUserModal = useUsersStore((s) => s.setCreateUserModal)
+  const createUserModal = useUsersStore((s) => s.createUserModal)
+  const createUser = useUsersStore((s) => s.createUser)
+  const isCreating = useUsersStore((s) => s.isCreating)
   const setEditUserModal = useUsersStore((s) => s.setEditUserModal)
   const deleteUser = useUsersStore((s) => s.deleteUser)
   const replaceUser = useUsersStore((s) => s.replaceUser)
@@ -256,7 +259,12 @@ export const UsersPage = () => {
         onConfirm={() => deletingUser && deleteUser(deletingUser.id)}
         onClose={() => setDeletingUser(null)}
       />
-      <CreateUserModal />
+      <CreateUserModal
+        isOpen={createUserModal.isOpen}
+        isSubmitting={isCreating}
+        onSubmit={createUser}
+        onClose={() => setCreateUserModal({ isOpen: false })}
+      />
       <EditUserModal />
       {accessUser && (
         <AccessDialog

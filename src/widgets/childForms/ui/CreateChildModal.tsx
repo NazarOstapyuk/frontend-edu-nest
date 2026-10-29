@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
-import { useForm, useWatch, Controller } from 'react-hook-form'
+import { useEffect, useRef } from 'react'
+import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import {
@@ -32,6 +32,7 @@ interface CreateChildModalProps {
   isSubmitting: boolean
   parents: UserLookup[]
   onCreateParent?: () => void
+  newParentId?: string | null
   groups: Group[]
   presetGroupId?: string | null
   onSubmit: (dto: CreateChildDto) => Promise<unknown>
@@ -43,6 +44,7 @@ export const CreateChildModal = ({
   isSubmitting,
   parents: parentLookup,
   onCreateParent,
+  newParentId,
   groups,
   presetGroupId,
   onSubmit: submit,
@@ -60,20 +62,32 @@ export const CreateChildModal = ({
       (g) => g.id === current || institutions.find((i) => i.id === g.institution.id)?.isActive !== false,
     )
 
-  const { control, handleSubmit, reset, setValue } = useForm<FormValues>({
+  const { control, handleSubmit, reset, setValue, getValues } = useForm<FormValues>({
     mode: 'all',
     defaultValues: { firstName: '', lastName: '', middleName: '', birthDate: '', gender: 'male', groupId: '', parentIds: [] },
     resolver: yupResolver(schema),
   })
 
-  const groupId = useWatch({ control, name: 'groupId' })
   const onlyGroupId = groupOptions('').length === 1 ? groupOptions('')[0].id : ''
+  const presetDone = useRef(false)
 
   useEffect(() => {
-    if (!isOpen) return
-    if (presetGroupId) setValue('groupId', presetGroupId)
-    else if (onlyGroupId && !groupId) setValue('groupId', onlyGroupId)
-  }, [isOpen, presetGroupId, onlyGroupId, groupId, setValue])
+    if (!isOpen) {
+      presetDone.current = false
+      return
+    }
+    if (presetDone.current) return
+    const initial = presetGroupId || onlyGroupId
+    if (!initial) return
+    setValue('groupId', initial)
+    presetDone.current = true
+  }, [isOpen, presetGroupId, onlyGroupId, setValue])
+
+  useEffect(() => {
+    if (!newParentId) return
+    const current = getValues('parentIds') ?? []
+    if (!current.includes(newParentId)) setValue('parentIds', [...current, newParentId])
+  }, [newParentId, getValues, setValue])
 
   const handleClose = () => {
     reset()

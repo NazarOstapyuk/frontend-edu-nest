@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Box, Button, IconButton, Tab, Tabs, Typography } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useFamilyChildStore } from '../model/familyChildStore'
+import { parentCabinetApi } from '../../../shared/api'
 import { ChildCardTab } from './ChildCardTab'
 import { ScheduleTab } from './ScheduleTab'
 import { RoutineTab } from './RoutineTab'
@@ -10,6 +11,8 @@ import { AttendanceTab } from './AttendanceTab'
 import { MealsTab } from './MealsTab'
 import { ChildFinanceTab } from './ChildFinanceTab'
 import { PaymentReturnBanner } from './PaymentReturnBanner'
+
+const tabValues = ['card', 'routine', 'schedule', 'attendance', 'meals', 'finance']
 
 export const FamilyChildPage = () => {
   const { childId } = useParams<{ childId: string }>()
@@ -22,8 +25,19 @@ export const FamilyChildPage = () => {
   const reloadFinance = useFamilyChildStore((s) => s.reloadFinance)
   const [searchParams] = useSearchParams()
   const [returnInvoice] = useState(() => searchParams.get('invoice'))
-  const [requestedTab] = useState(() => searchParams.get('tab'))
+  const [requestedTab] = useState(() => {
+    const value = searchParams.get('tab')
+    return value && tabValues.includes(value) ? value : null
+  })
+  const [familySize, setFamilySize] = useState<number | null>(null)
   const [pickedTab, setTab] = useState<string | null>(null)
+
+  useEffect(() => {
+    parentCabinetApi
+      .getFamily()
+      .then(({ data }) => setFamilySize(data.children.length))
+      .catch(() => undefined)
+  }, [])
 
   useEffect(() => {
     if (childId) fetchChild(childId).catch(() => undefined)
@@ -52,9 +66,11 @@ export const FamilyChildPage = () => {
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-        <IconButton onClick={() => navigate('/family')}>
-          <ArrowBackIcon />
-        </IconButton>
+        {familySize !== 1 && (
+          <IconButton onClick={() => navigate('/family')}>
+            <ArrowBackIcon />
+          </IconButton>
+        )}
         <Typography variant="h6" sx={{ fontWeight: 700, minWidth: 0, overflowWrap: 'anywhere' }}>
           {[card.lastName, card.firstName, card.middleName].filter(Boolean).join(' ')}
         </Typography>

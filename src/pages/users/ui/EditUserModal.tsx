@@ -20,10 +20,9 @@ import { RHFTextField } from '../../../shared/ui/RHFTextField.tsx'
 import { useUsersStore } from '../model/usersStore.ts'
 import { isValidPhone, normalizePhone } from '../../../shared/lib/phone.ts'
 import type { AccessScope, UpdateUserDto } from '../../../shared/api'
-import { useAuthStore } from '../../../entities/user'
+import { useAuthStore, canChangeAccess } from '../../../entities/user'
 import { canAssignPosition, usePositionsStore } from '../../../entities/position'
-import { canChangeAccess } from '../model/accessRules.ts'
-import { InstitutionScopeFields } from './InstitutionScopeFields.tsx'
+import { InstitutionScopeFields } from '../../../widgets/userForms'
 
 const schema = yup.object({
   firstName: yup.string().min(3, 'Мінімум 3 символи').required("Обов'язкове поле"),
@@ -111,7 +110,7 @@ export const EditUserModal = () => {
     const dto: UpdateUserDto = {
       firstName: values.firstName,
       lastName: values.lastName,
-      ...(isStaffUser ? {} : values.position === 'parent' ? { role: 'parent' as const } : { positionId: values.position as string }),
+      ...(values.position === 'parent' ? { role: 'parent' as const } : isStaffUser ? {} : { positionId: values.position as string }),
       login: values.login,
       middleName: values.middleName.trim() || null,
       phone: values.phone ? normalizePhone(values.phone) : null,
@@ -151,33 +150,32 @@ export const EditUserModal = () => {
             fullWidth
           />
 
-          {isStaffUser && (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: '-10px' }}>
-              Посада: {user?.position?.name ?? '—'}. Посада й заклади змінюються кнопкою «Доступ» у списку.
-            </Typography>
-          )}
-
-          {!isStaffUser && <Controller
+          <Controller
             name="position"
             control={methods.control}
             render={({ field, fieldState: { error } }) => (
               <TextField
                 {...field}
                 select
-                label="Посада"
+                label={isStaffUser ? 'Перевести в батьки' : 'Посада'}
                 fullWidth
                 error={!!error}
-                helperText={error?.message}
+                helperText={error?.message ?? (isStaffUser ? 'Посада й заклади змінюються кнопкою «Доступ» у списку' : undefined)}
               >
-                {positions.map((p) => (
-                  <MenuItem key={p.id} value={p.id} disabled={!canAssignPosition(profile, p)}>
-                    {p.name}
-                  </MenuItem>
-                ))}
+                {isStaffUser && user?.position ? (
+                  <MenuItem value={user.position.id}>{user.position.name} (без змін)</MenuItem>
+                ) : (
+                  !isStaffUser &&
+                  positions.map((p) => (
+                    <MenuItem key={p.id} value={p.id} disabled={!canAssignPosition(profile, p)}>
+                      {p.name}
+                    </MenuItem>
+                  ))
+                )}
                 <MenuItem value="parent">Батьки</MenuItem>
               </TextField>
             )}
-          />}
+          />
 
           {scopeEditable && <InstitutionScopeFields control={methods.control} assignedIds={user?.institutionIds ?? []} />}
 

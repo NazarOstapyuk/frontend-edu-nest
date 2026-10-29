@@ -131,7 +131,7 @@ export const PayLinkPage = () => {
         <Typography>Дитина: {link.payer}</Typography>
         <Typography variant="h5" sx={{ fontWeight: 700 }}>{formatMoney(link.amount)}</Typography>
         {enabled ? (
-          <Button variant="contained" size="large" fullWidth onClick={pay} disabled={isSending}>Оплатити</Button>
+          <Button variant="contained" size="large" sx={{ width: { xs: '100%', sm: 'auto' } }} onClick={pay} disabled={isSending}>Оплатити</Button>
         ) : (
           <Typography color="text.secondary">Онлайн-оплата тимчасово недоступна</Typography>
         )}

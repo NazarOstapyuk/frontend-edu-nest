@@ -54,8 +54,8 @@ export const PayDialog = ({ childId, category, due, onClose }: PayDialogProps) =
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} disabled={isSending}>Скасувати</Button>
-        <Button variant="contained" onClick={submit} disabled={isSending}>
+        <Button onClick={onClose} disabled={isSending} sx={{ minHeight: isPhone ? 44 : undefined }}>Скасувати</Button>
+        <Button variant="contained" onClick={submit} disabled={isSending} sx={{ minHeight: isPhone ? 44 : undefined }}>
           Перейти до оплати
         </Button>
       </DialogActions>

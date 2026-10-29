@@ -89,8 +89,8 @@ export const NoticeDialog = ({ open, onClose }: { open: boolean; onClose: () => 
           )}
         />
         <Box sx={{ display: 'flex', gap: '10px' }}>
-          <Button onClick={handleClose} color="inherit" sx={{ width: '100%' }}>Скасувати</Button>
-          <Button onClick={handleSubmit(onSubmit)} variant="contained" disabled={isSaving} sx={{ width: '100%' }}>Надіслати</Button>
+          <Button onClick={handleClose} color="inherit" sx={{ width: '100%', minHeight: isPhone ? 44 : undefined }}>Скасувати</Button>
+          <Button onClick={handleSubmit(onSubmit)} variant="contained" disabled={isSaving} sx={{ width: '100%', minHeight: isPhone ? 44 : undefined }}>Надіслати</Button>
         </Box>
       </Box>
     </Dialog>

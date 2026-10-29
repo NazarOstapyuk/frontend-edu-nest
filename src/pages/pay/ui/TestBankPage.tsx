@@ -49,8 +49,8 @@ export const TestBankPage = () => {
             <>
               <Typography color="text.secondary">Це імітація сторінки оплати</Typography>
               <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
-                <Button variant="contained" size="large" onClick={() => send('success')} disabled={isSending}>Оплатити</Button>
-                <Button variant="outlined" color="error" size="large" onClick={() => send('failure')} disabled={isSending}>Відхилити</Button>
+                <Button variant="contained" sx={{ minHeight: { xs: 48, sm: 'auto' } }} onClick={() => send('success')} disabled={isSending}>Оплатити</Button>
+                <Button variant="outlined" color="error" sx={{ minHeight: { xs: 48, sm: 'auto' } }} onClick={() => send('failure')} disabled={isSending}>Відхилити</Button>
               </Box>
             </>
           )}

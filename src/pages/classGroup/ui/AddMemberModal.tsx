@@ -2,6 +2,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Autocomplete, Box, Button, Dialog, DialogTitle, TextField } from '@mui/material'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { useClassGroupStore } from '../model/classGroupStore'
 import { localToday } from '../../../shared/api'
 
@@ -18,6 +19,7 @@ export const AddMemberModal = () => {
   const children = useClassGroupStore((s) => s.children)
   const addMember = useClassGroupStore((s) => s.addMember)
   const isSaving = useClassGroupStore((s) => s.isSaving)
+  const isPhone = useIsPhone()
 
   const { control, handleSubmit, reset } = useForm<FormValues>({
     mode: 'all',
@@ -36,7 +38,7 @@ export const AddMemberModal = () => {
   }
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm" fullScreen={isPhone}>
       <DialogTitle sx={{ fontWeight: 700 }}>Додати дитину</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         <Controller

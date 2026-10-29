@@ -3,6 +3,7 @@ import { Controller, useForm, useWatch } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, MenuItem, TextField } from '@mui/material'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { useCalendarStore } from '../model/calendarStore'
 import { useEffectiveInstitutions, useInstitutionStore } from '../../../shared/model/institutionStore'
 import { useCanManageShared } from '../../../entities/user'
@@ -47,6 +48,7 @@ export const CalendarDayModal = () => {
   const createEntry = useCalendarStore((s) => s.createEntry)
   const groups = useCalendarStore((s) => s.groups)
   const isSaving = useCalendarStore((s) => s.isSaving)
+  const isPhone = useIsPhone()
 
   const allInstitutions = useInstitutionStore((s) => s.institutions)
   const institutions = useEffectiveInstitutions()
@@ -92,7 +94,7 @@ export const CalendarDayModal = () => {
   }
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm" fullScreen={isPhone}>
       <DialogTitle sx={{ fontWeight: 700 }}>Новий запис календаря</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: '20px' }}>
         <Controller

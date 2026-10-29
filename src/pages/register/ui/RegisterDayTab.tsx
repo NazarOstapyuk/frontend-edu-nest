@@ -14,6 +14,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useRegisterStore, rowDraft, sameDraft } from '../model/registerStore'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { ReasonDialog } from '../../../shared/ui/ReasonDialog'
 import { dailyStatusLabels, dailyStatuses, formatDay, type DailyStatus } from '../../../shared/api'
 
@@ -27,6 +28,7 @@ export const RegisterDayTab = () => {
   const setDraft = useRegisterStore((s) => s.setDraft)
   const markAllPresent = useRegisterStore((s) => s.markAllPresent)
   const save = useRegisterStore((s) => s.save)
+  const isPhone = useIsPhone()
   const [reasonOpen, setReasonOpen] = useState(false)
 
   if (dayError) {
@@ -64,8 +66,8 @@ export const RegisterDayTab = () => {
       )}
       {day.canEdit && (
         <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-          <Button variant="outlined" onClick={markAllPresent}>Усі присутні</Button>
-          <Button variant="contained" disabled={isSaving || !dirty} onClick={handleSave} sx={{ ml: 'auto' }}>
+          <Button variant="outlined" sx={isPhone ? { minHeight: 40 } : undefined} onClick={markAllPresent}>Усі присутні</Button>
+          <Button variant="contained" disabled={isSaving || !dirty} onClick={handleSave} sx={{ ml: 'auto', ...(isPhone ? { minHeight: 40 } : {}) }}>
             Зберегти
           </Button>
         </Box>
@@ -110,7 +112,7 @@ export const RegisterDayTab = () => {
                 sx={{ flexWrap: 'wrap' }}
               >
                 {dailyStatuses.map((s) => (
-                  <ToggleButton key={s} value={s}>{dailyStatusLabels[s]}</ToggleButton>
+                  <ToggleButton key={s} value={s} sx={isPhone ? { minHeight: 44, flexGrow: 1 } : undefined}>{dailyStatusLabels[s]}</ToggleButton>
                 ))}
               </ToggleButtonGroup>
               {d.status === 'absent' && (
@@ -122,7 +124,7 @@ export const RegisterDayTab = () => {
                     disabled={!day.canEdit}
                     value={d.reasonId ?? ''}
                     onChange={(e) => setDraft(row.child.id, { reasonId: e.target.value || null, documentProvided: false })}
-                    sx={{ minWidth: 200 }}
+                    sx={{ minWidth: { xs: 0, sm: 200 }, width: { xs: '100%', sm: 'auto' } }}
                   >
                     <MenuItem value="">Не вказано</MenuItem>
                     {allReasons

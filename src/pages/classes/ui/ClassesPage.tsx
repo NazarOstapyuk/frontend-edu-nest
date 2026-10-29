@@ -19,6 +19,8 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { useClassesStore } from '../model/classesStore'
 import { useCan } from '../../../entities/user'
 import { classFormatLabels, missedRuleLabels } from '../../../shared/api'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardList, CardField } from '../../../shared/ui/CardList'
 import { DirectionModal } from './DirectionModal'
 import { GroupModal } from './GroupModal'
 import { ReconciliationDialog } from './ReconciliationDialog'
@@ -33,6 +35,7 @@ export const ClassesPage = () => {
   const setReconciliationOpen = useClassesStore((s) => s.setReconciliationOpen)
   const migrateLegacy = useClassesStore((s) => s.migrateLegacy)
   const navigate = useNavigate()
+  const isPhone = useIsPhone()
   const canEdit = useCan('classes', 'edit')
 
   useEffect(() => {
@@ -68,7 +71,7 @@ export const ClassesPage = () => {
 
       {directions.map((direction) => (
         <Paper key={direction.id} elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, mb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2, p: 2 }}>
             <Typography sx={{ fontWeight: 700 }}>{direction.name}</Typography>
             <Chip size="small" variant="outlined" label={missedRuleLabels[direction.missedRule]} />
             {!direction.isActive && <Chip size="small" label="Неактивний" />}
@@ -90,55 +93,93 @@ export const ClassesPage = () => {
               </Button>
             )}
           </Box>
-          <Table size="small">
-            <TableHead>
-              <TableRow sx={{ '& th': { fontWeight: 700, bgcolor: 'grey.50' } }}>
-                <TableCell>Група</TableCell>
-                <TableCell>Формат</TableCell>
-                <TableCell>Педагоги</TableCell>
-                <TableCell align="right">Дітей</TableCell>
-                <TableCell>Тарифи</TableCell>
-                <TableCell align="right" />
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {direction.groups.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} sx={{ color: 'text.secondary' }}>Груп ще немає.</TableCell>
-                </TableRow>
-              ) : (
-                direction.groups.map((group) => (
-                  <TableRow key={group.id} hover sx={{ cursor: 'pointer' }} onClick={() => navigate(`/classes/${group.id}`)}>
-                    <TableCell sx={{ fontWeight: 500 }}>
+          {isPhone ? (
+            <Box sx={{ p: 2, pt: 0 }}>
+              <CardList
+                items={direction.groups}
+                getKey={(g) => g.id}
+                empty={<Typography variant="body2" color="text.secondary">Груп ще немає.</Typography>}
+                renderCard={(group) => (
+                  <Box onClick={() => navigate(`/classes/${group.id}`)} sx={{ cursor: 'pointer' }}>
+                    <Typography sx={{ fontWeight: 600, mb: 0.5 }}>
                       {group.name}
                       {!group.isActive && ' (неактивна)'}
-                    </TableCell>
-                    <TableCell>{classFormatLabels[group.format]}</TableCell>
-                    <TableCell>{group.teachers.map((t) => `${t.lastName} ${t.firstName}`).join(', ') || '—'}</TableCell>
-                    <TableCell align="right">{group.activeMembers}</TableCell>
-                    <TableCell>
+                    </Typography>
+                    <CardField label="Формат">{classFormatLabels[group.format]}</CardField>
+                    <CardField label="Педагоги">{group.teachers.map((t) => `${t.lastName} ${t.firstName}`).join(', ') || '—'}</CardField>
+                    <CardField label="Дітей">{group.activeMembers}</CardField>
+                    <CardField label="Тарифи">
                       {[group.singleTariff?.name, group.packageTariff?.name].filter(Boolean).join(' · ') || '—'}
-                    </TableCell>
-                    <TableCell align="right">
-                      {canEdit && (
-                        <Tooltip title="Редагувати групу">
-                          <IconButton
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setGroupModal({ isOpen: true, directionId: direction.id, group })
-                            }}
-                          >
-                            <EditOutlinedIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                    </TableCell>
+                    </CardField>
+                    {canEdit && (
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 0.5 }}>
+                        <IconButton
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setGroupModal({ isOpen: true, directionId: direction.id, group })
+                          }}
+                        >
+                          <EditOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    )}
+                  </Box>
+                )}
+              />
+            </Box>
+          ) : (
+            <Box sx={{ overflowX: 'auto' }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow sx={{ '& th': { fontWeight: 700, bgcolor: 'grey.50' } }}>
+                  <TableCell>Група</TableCell>
+                  <TableCell>Формат</TableCell>
+                  <TableCell>Педагоги</TableCell>
+                  <TableCell align="right">Дітей</TableCell>
+                  <TableCell>Тарифи</TableCell>
+                  <TableCell align="right" />
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {direction.groups.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} sx={{ color: 'text.secondary' }}>Груп ще немає.</TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : (
+                  direction.groups.map((group) => (
+                    <TableRow key={group.id} hover sx={{ cursor: 'pointer' }} onClick={() => navigate(`/classes/${group.id}`)}>
+                      <TableCell sx={{ fontWeight: 500 }}>
+                        {group.name}
+                        {!group.isActive && ' (неактивна)'}
+                      </TableCell>
+                      <TableCell>{classFormatLabels[group.format]}</TableCell>
+                      <TableCell>{group.teachers.map((t) => `${t.lastName} ${t.firstName}`).join(', ') || '—'}</TableCell>
+                      <TableCell align="right">{group.activeMembers}</TableCell>
+                      <TableCell>
+                        {[group.singleTariff?.name, group.packageTariff?.name].filter(Boolean).join(' · ') || '—'}
+                      </TableCell>
+                      <TableCell align="right">
+                        {canEdit && (
+                          <Tooltip title="Редагувати групу">
+                            <IconButton
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setGroupModal({ isOpen: true, directionId: direction.id, group })
+                              }}
+                            >
+                              <EditOutlinedIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+            </Box>
+          )}
         </Paper>
       ))}
 

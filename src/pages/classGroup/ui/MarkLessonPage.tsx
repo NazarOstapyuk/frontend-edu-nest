@@ -20,6 +20,8 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useMarkLessonStore } from '../model/markLessonStore'
 import { useCan } from '../../../entities/user'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardList } from '../../../shared/ui/CardList'
 import { ReasonDialog } from '../../../shared/ui/ReasonDialog'
 import {
   attendanceStatusLabels,
@@ -44,6 +46,7 @@ export const MarkLessonPage = () => {
   const setStatus = useMarkLessonStore((s) => s.setStatus)
   const addGuest = useMarkLessonStore((s) => s.addGuest)
   const save = useMarkLessonStore((s) => s.save)
+  const isPhone = useIsPhone()
   const [reasonOpen, setReasonOpen] = useState(false)
   const [guest, setGuest] = useState<Child | null>(null)
 
@@ -88,12 +91,57 @@ export const MarkLessonPage = () => {
             {roster.conductedBy ? ` · провів ${roster.conductedBy.lastName} ${roster.conductedBy.firstName}` : ''}
           </Typography>
         </Box>
-        <Button variant="contained" disabled={isSaving} onClick={handleSave}>
+        <Button variant="contained" disabled={isSaving} onClick={handleSave} sx={{ minHeight: { xs: 40, sm: 'unset' } }}>
           Зберегти
         </Button>
       </Box>
 
-      <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, mb: 2 }}>
+      {isPhone ? (
+        <Box sx={{ mb: 2 }}>
+          <CardList
+            items={rows}
+            getKey={(r) => r.child.id}
+            empty={<Typography color="text.secondary">У групі немає дітей на цю дату.</Typography>}
+            renderCard={(row) => (
+              <>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                  <Typography sx={{ fontWeight: 600 }}>{row.child.lastName} {row.child.firstName}</Typography>
+                  {!row.isMember && <Chip size="small" label="Разово" />}
+                </Box>
+                <Box sx={{ mb: 1 }}>
+                  {row.packageInfo ? (
+                    <Chip
+                      size="small"
+                      color="success"
+                      variant="outlined"
+                      label={`Пакет: ${row.packageInfo.remaining} з ${row.packageInfo.total}${
+                        row.packageInfo.expiresAt ? `, до ${formatDay(row.packageInfo.expiresAt)}` : ''
+                      }`}
+                    />
+                  ) : (
+                    <Chip size="small" color="warning" variant="outlined" label="Без пакета — разове заняття" />
+                  )}
+                </Box>
+                <ToggleButtonGroup
+                  exclusive
+                  fullWidth
+                  value={draft[row.child.id] ?? null}
+                  onChange={(_, value: AttendanceStatus | null) => {
+                    if (value) setStatus(row.child.id, value)
+                  }}
+                >
+                  {attendanceStatuses.map((s) => (
+                    <ToggleButton key={s} value={s} sx={{ minHeight: 44 }}>
+                      {attendanceStatusLabels[s]}
+                    </ToggleButton>
+                  ))}
+                </ToggleButtonGroup>
+              </>
+            )}
+          />
+        </Box>
+      ) : (
+        <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, mb: 2, overflowX: 'auto' }}>
         <Table>
           <TableHead>
             <TableRow sx={{ '& th': { fontWeight: 700, bgcolor: 'grey.50' } }}>
@@ -150,10 +198,11 @@ export const MarkLessonPage = () => {
           </TableBody>
         </Table>
       </Paper>
+      )}
 
-      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
         <Autocomplete
-          sx={{ minWidth: 320 }}
+          sx={{ minWidth: { xs: 0, sm: 320 }, width: { xs: '100%', sm: 'auto' } }}
           options={allChildren}
           getOptionLabel={(c) => `${c.lastName} ${c.firstName}`}
           value={guest}

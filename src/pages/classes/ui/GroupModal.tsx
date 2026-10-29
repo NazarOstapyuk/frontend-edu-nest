@@ -3,6 +3,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Autocomplete, Box, Button, Dialog, DialogTitle, FormControlLabel, MenuItem, Switch, TextField } from '@mui/material'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { useClassesStore } from '../model/classesStore'
 import { classFormatLabels, classFormats, type ClassFormat } from '../../../shared/api'
 
@@ -26,6 +27,7 @@ export const GroupModal = () => {
   const tariffs = useClassesStore((s) => s.tariffs)
   const teachers = useClassesStore((s) => s.teachers)
   const isSaving = useClassesStore((s) => s.isSaving)
+  const isPhone = useIsPhone()
   const sessionTariffs = tariffs.filter((t) => t.unit === 'session')
   const packageTariffs = tariffs.filter((t) => t.unit === 'package')
 
@@ -74,7 +76,7 @@ export const GroupModal = () => {
   }
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm" fullScreen={isPhone}>
       <DialogTitle sx={{ fontWeight: 700 }}>{group ? 'Редагувати групу' : 'Нова група'}</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         <Controller

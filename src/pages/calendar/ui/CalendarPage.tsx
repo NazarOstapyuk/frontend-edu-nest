@@ -7,6 +7,8 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import { useCalendarStore } from '../model/calendarStore'
 import { useCan } from '../../../entities/user'
 import { CalendarDayModal } from './CalendarDayModal'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardList, CardField } from '../../../shared/ui/CardList'
 import { ReasonDialog } from '../../../shared/ui/ReasonDialog'
 import { calendarDayTypeLabels, calendarScopeLabels, formatDay, type CalendarEntry } from '../../../shared/api'
 
@@ -25,6 +27,7 @@ export const CalendarPage = () => {
   const setModalOpen = useCalendarStore((s) => s.setModalOpen)
   const voidEntry = useCalendarStore((s) => s.voidEntry)
   const saveEditDays = useCalendarStore((s) => s.saveEditDays)
+  const isPhone = useIsPhone()
   const [voiding, setVoiding] = useState<CalendarEntry | null>(null)
   const [draft, setDraft] = useState<string | null>(null)
 
@@ -57,17 +60,39 @@ export const CalendarPage = () => {
         </Paper>
       )}
 
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1, mb: 2 }}>
         <IconButton onClick={() => setYear(year - 1).catch(() => undefined)}><ChevronLeftIcon /></IconButton>
         <Typography variant="h6" sx={{ fontWeight: 700 }}>{year}</Typography>
         <IconButton onClick={() => setYear(year + 1).catch(() => undefined)}><ChevronRightIcon /></IconButton>
         {canEdit && (
-          <Button variant="contained" startIcon={<AddIcon />} sx={{ ml: 'auto' }} onClick={() => setModalOpen(true)}>
+          <Button variant="contained" startIcon={<AddIcon />} sx={{ ml: 'auto', ...(isPhone ? { minHeight: 40 } : {}) }} onClick={() => setModalOpen(true)}>
             Додати
           </Button>
         )}
       </Box>
 
+      {isPhone ? (
+        <CardList
+          items={entries}
+          getKey={(e) => e.id}
+          empty={<Typography color="text.secondary">Записів немає. Будні дні робочі, вихідні неробочі.</Typography>}
+          renderCard={(e) => (
+            <>
+              <Typography sx={{ fontWeight: 600, mb: 0.5 }}>{e.title}</Typography>
+              <CardField label="Період">{period(e)}</CardField>
+              <CardField label="Тип">{calendarDayTypeLabels[e.type]}</CardField>
+              <CardField label="Для кого">{e.scope === 'group' ? e.group?.name : e.scope === 'institution' ? e.institution?.name : calendarScopeLabels[e.scope]}</CardField>
+              {canEdit && (
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 0.5 }}>
+                  <IconButton color="error" onClick={() => setVoiding(e)}>
+                    <DeleteOutlineIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              )}
+            </>
+          )}
+        />
+      ) : (
       <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflowX: 'auto' }}>
         <Table>
           <TableHead>
@@ -106,6 +131,7 @@ export const CalendarPage = () => {
           </TableBody>
         </Table>
       </Paper>
+      )}
 
       <CalendarDayModal />
       <ReasonDialog

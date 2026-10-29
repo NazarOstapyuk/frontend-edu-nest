@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Box, Button, Paper, Tab, Table, TableBody, TableCell, TableHead, TableRow, Tabs, Typography } from '@mui/material'
 import { useAbsenceNoticesStore } from '../model/absenceNoticesStore'
 import { useCan } from '../../../entities/user'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { CardList, CardField } from '../../../shared/ui/CardList'
 import { ReasonDialog } from '../../../shared/ui/ReasonDialog'
 import { formatDay, type AdminNotice, type NoticeStatus } from '../../../shared/api'
 
@@ -23,6 +25,7 @@ export const AbsenceNoticesPage = () => {
   const approve = useAbsenceNoticesStore((s) => s.approve)
   const reject = useAbsenceNoticesStore((s) => s.reject)
   const cancel = useAbsenceNoticesStore((s) => s.cancel)
+  const isPhone = useIsPhone()
   const [dialog, setDialog] = useState<{ notice: AdminNotice; action: 'reject' | 'cancel' } | null>(null)
 
   useEffect(() => {
@@ -31,9 +34,56 @@ export const AbsenceNoticesPage = () => {
 
   return (
     <Box>
-      <Tabs value={status} onChange={(_, v: NoticeStatus) => setStatus(v).catch(() => undefined)} variant="scrollable" sx={{ mb: 2 }}>
+      <Tabs value={status} onChange={(_, v: NoticeStatus) => setStatus(v).catch(() => undefined)} variant="scrollable" allowScrollButtonsMobile sx={{ mb: 2 }}>
         {tabs.map((t) => <Tab key={t.status} value={t.status} label={t.label} />)}
       </Tabs>
+      {isPhone ? (
+        <Box>
+          {notices.length === 0 ? (
+            <Typography color="text.secondary">
+              {isLoading ? (
+                'Завантаження…'
+              ) : loadFailed ? (
+                <>
+                  Не вдалося завантажити дані.
+                  <Button size="small" sx={{ ml: 1 }} onClick={() => setStatus(status).catch(() => undefined)}>Спробувати ще</Button>
+                </>
+              ) : (
+                'Повідомлень немає.'
+              )}
+            </Typography>
+          ) : (
+            <CardList
+              items={notices}
+              getKey={(n) => n.id}
+              renderCard={(n) => (
+                <>
+                  <Typography sx={{ fontWeight: 600, mb: 0.5 }}>{n.child.lastName} {n.child.firstName}</Typography>
+                  <CardField label="Група">{n.child.group?.name ?? '—'}</CardField>
+                  <CardField label="Період">{formatDay(n.startDate)} – {formatDay(n.endDate)}</CardField>
+                  <CardField label="Причина">{n.reason.name}</CardField>
+                  <CardField label="Коментар">{n.comment ?? '—'}</CardField>
+                  {n.decisionReason && <CardField label="Рішення">{n.decisionReason}</CardField>}
+                  <CardField label="Подав">{n.createdBy.lastName} {n.createdBy.firstName}</CardField>
+                  {canEdit && (n.status === 'pending' || n.status === 'approved') && (
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 1 }}>
+                      {n.status === 'pending' && (
+                        <>
+                          <Button sx={{ minHeight: 40 }} disabled={isSaving} onClick={() => approve(n.id).catch(() => undefined)}>Підтвердити</Button>
+                          <Button sx={{ minHeight: 40 }} color="error" disabled={isSaving} onClick={() => setDialog({ notice: n, action: 'reject' })}>Відхилити</Button>
+                        </>
+                      )}
+                      {n.status === 'approved' && (
+                        <Button sx={{ minHeight: 40 }} color="error" disabled={isSaving} onClick={() => setDialog({ notice: n, action: 'cancel' })}>Скасувати</Button>
+                      )}
+                    </Box>
+                  )}
+                </>
+              )}
+            />
+          )}
+        </Box>
+      ) : (
       <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflowX: 'auto' }}>
         <Table>
           <TableHead>
@@ -90,6 +140,7 @@ export const AbsenceNoticesPage = () => {
           </TableBody>
         </Table>
       </Paper>
+      )}
       <ReasonDialog
         open={dialog !== null}
         title={dialog?.action === 'cancel' ? 'Скасувати підтверджене повідомлення' : 'Відхилити повідомлення'}

@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Alert, Box, Button, IconButton, MenuItem, Paper, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useLessonStore, pupilBaseline, sameDraft } from '../model/lessonStore'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { ReasonDialog } from '../../../shared/ui/ReasonDialog'
 import { formatDay, lessonStatusLabels, lessonStatuses, nushLevelLabels, nushLevels, type LessonStatus, type NushLevel } from '../../../shared/api'
 
@@ -25,6 +26,9 @@ export const LessonPage = () => {
   const setHomework = useLessonStore((s) => s.setHomework)
   const markAllPresent = useLessonStore((s) => s.markAllPresent)
   const save = useLessonStore((s) => s.save)
+  const isPhone = useIsPhone()
+  const toggleSx = isPhone ? { minHeight: 44 } : undefined
+  const btnSx = isPhone ? { minHeight: 40 } : undefined
   const [reasonOpen, setReasonOpen] = useState(false)
   const ref = { groupId, date, period: Number(period), subgroupId }
   const expectedKey = `${groupId}/${date}/${period}/${subgroupId ?? 'class'}`
@@ -60,8 +64,8 @@ export const LessonPage = () => {
           <Typography variant="h6" sx={{ fontWeight: 700 }}>{view.slot.subjectName}, {view.group.name}{view.slot.subgroupName ? ` (${view.slot.subgroupName})` : ''}</Typography>
           <Typography variant="body2" color="text.secondary">{formatDay(view.date)}, {view.slot.period}-й урок, {view.slot.startTime}–{view.slot.endTime}</Typography>
         </Box>
-        {view.canEdit && <Button variant="outlined" onClick={markAllPresent}>Усі присутні</Button>}
-        {view.canEdit && <Button variant="contained" disabled={isSaving || !dirty} onClick={handleSave}>Зберегти</Button>}
+        {view.canEdit && <Button variant="outlined" sx={btnSx} onClick={markAllPresent}>Усі присутні</Button>}
+        {view.canEdit && <Button variant="contained" sx={btnSx} disabled={isSaving || !dirty} onClick={handleSave}>Зберегти</Button>}
       </Box>
       {!view.canEdit && <Alert severity="warning" sx={{ mb: 2 }}>Редагування цього уроку закрите.</Alert>}
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 2 }}>
@@ -79,17 +83,17 @@ export const LessonPage = () => {
                 {p.state.source === 'register' && <Typography component="span" variant="caption" color="text.secondary"> · відсутній за журналом</Typography>}
               </Typography>
               <ToggleButtonGroup size="small" exclusive disabled={!view.canEdit} value={d.status} onChange={(_, v: LessonStatus | null) => v && setPupil(p.child.id, { status: v })} sx={{ flexWrap: 'wrap' }}>
-                {lessonStatuses.map((s) => <ToggleButton key={s} value={s}>{lessonStatusLabels[s]}</ToggleButton>)}
+                {lessonStatuses.map((s) => <ToggleButton key={s} value={s} sx={toggleSx}>{lessonStatusLabels[s]}</ToggleButton>)}
               </ToggleButtonGroup>
               {d.status === 'absent' && (
-                <TextField select size="small" label="Причина" disabled={!view.canEdit} value={d.reasonId ?? ''} onChange={(e) => setPupil(p.child.id, { reasonId: e.target.value || null })} sx={{ mt: 1.5, minWidth: 220, display: 'flex' }}>
+                <TextField select size="small" label="Причина" disabled={!view.canEdit} value={d.reasonId ?? ''} onChange={(e) => setPupil(p.child.id, { reasonId: e.target.value || null })} sx={{ mt: 1.5, minWidth: { xs: 0, sm: 220 }, display: 'flex' }}>
                   <MenuItem value="">Не вказано</MenuItem>
                   {reasonOptions(d.reasonId).map((r) => <MenuItem key={r.id} value={r.id}>{r.name}</MenuItem>)}
                 </TextField>
               )}
               {d.status && d.status !== 'absent' && (
                 <ToggleButtonGroup size="small" exclusive disabled={!view.canEdit} value={d.level} onChange={(_, v: NushLevel | null) => setPupil(p.child.id, { level: v })} sx={{ mt: 1.5, flexWrap: 'wrap' }}>
-                  {nushLevels.map((l) => <ToggleButton key={l} value={l} sx={{ textTransform: 'none' }}>{nushLevelLabels[l]}</ToggleButton>)}
+                  {nushLevels.map((l) => <ToggleButton key={l} value={l} sx={{ textTransform: 'none', ...toggleSx }}>{nushLevelLabels[l]}</ToggleButton>)}
                 </ToggleButtonGroup>
               )}
               <TextField size="small" fullWidth label="Коментар (бачать батьки)" disabled={!view.canEdit} value={d.comment} onChange={(e) => setPupil(p.child.id, { comment: e.target.value })} sx={{ mt: 1.5 }} slotProps={{ htmlInput: { maxLength: 500 } }} />

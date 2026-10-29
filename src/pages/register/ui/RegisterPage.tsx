@@ -49,7 +49,7 @@ export const RegisterPage = () => {
   return (
     <Box>
       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', mb: 2 }}>
-        <TextField select size="small" label="Група" value={groupId ?? ''} onChange={(e) => selectGroup(e.target.value)} sx={{ minWidth: 220 }}>
+        <TextField select size="small" label="Група" value={groupId ?? ''} onChange={(e) => selectGroup(e.target.value)} sx={{ minWidth: { xs: 0, sm: 220 }, width: { xs: '100%', sm: 'auto' } }}>
           {groups.map((g) => (
             <MenuItem key={g.id} value={g.id}>{g.name} · {groupKindLabels[g.kind]}</MenuItem>
           ))}

@@ -3,6 +3,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, FormControlLabel, MenuItem, Switch, TextField } from '@mui/material'
+import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { useClassesStore } from '../model/classesStore'
 import { missedRuleLabels, missedRules, type MissedLessonRule } from '../../../shared/api'
 
@@ -21,6 +22,7 @@ export const DirectionModal = () => {
   const setDirectionModal = useClassesStore((s) => s.setDirectionModal)
   const saveDirection = useClassesStore((s) => s.saveDirection)
   const isSaving = useClassesStore((s) => s.isSaving)
+  const isPhone = useIsPhone()
 
   const { control, handleSubmit, reset } = useForm<FormValues>({
     mode: 'all',
@@ -48,7 +50,7 @@ export const DirectionModal = () => {
   }
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm" fullScreen={isPhone}>
       <DialogTitle sx={{ fontWeight: 700 }}>{direction ? 'Редагувати напрям' : 'Новий напрям'}</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         <Controller

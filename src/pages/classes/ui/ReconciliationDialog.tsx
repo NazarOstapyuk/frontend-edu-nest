@@ -62,6 +62,9 @@ export const ReconciliationDialog = () => {
           </Table>
           </Box>
         )}
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+          <Button color="inherit" onClick={() => setOpen(false)}>Закрити</Button>
+        </Box>
       </Box>
     </Dialog>
   )

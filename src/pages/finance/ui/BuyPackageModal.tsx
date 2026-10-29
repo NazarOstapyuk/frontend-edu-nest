@@ -1,4 +1,4 @@
-import { useForm, useWatch, Controller } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, MenuItem, TextField } from '@mui/material'
@@ -7,12 +7,13 @@ import { formatMoney, localToday } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const schema = yup.object({
-  directionId: yup.string().required("Обов'язкове поле"),
-  tariffId: yup.string().required("Обов'язкове поле"),
+  option: yup.string().required("Обов'язкове поле"),
   purchaseDate: yup.string().required("Обов'язкове поле"),
 })
 
 type FormValues = yup.InferType<typeof schema>
+
+const optionKey = (directionId: string, tariffId: string) => `${directionId}:${tariffId}`
 
 export const BuyPackageModal = () => {
   const isPhone = useIsPhone()
@@ -22,38 +23,35 @@ export const BuyPackageModal = () => {
   const tariffs = usePackagesStore((s) => s.tariffs)
   const purchase = usePackagesStore((s) => s.purchase)
   const isSaving = usePackagesStore((s) => s.isSaving)
-  const activeDirections = directions.filter((d) => d.isActive)
 
-  const { control, handleSubmit, reset, setValue } = useForm<FormValues>({
+  const options = directions
+    .filter((d) => d.isActive)
+    .flatMap((d) => {
+      const tariffIds = [
+        ...new Set(d.groups.filter((g) => g.isActive && g.packageTariff).map((g) => g.packageTariff!.id)),
+      ]
+      return tariffIds.flatMap((tariffId) => {
+        const tariff = tariffs.find((t) => t.id === tariffId && t.unit === 'package' && t.isActive)
+        return tariff ? [{ key: optionKey(d.id, tariff.id), directionId: d.id, direction: d.name, tariff }] : []
+      })
+    })
+    .sort((a, b) => a.direction.localeCompare(b.direction, 'uk') || a.tariff.name.localeCompare(b.tariff.name, 'uk'))
+
+  const { control, handleSubmit, reset } = useForm<FormValues>({
     mode: 'all',
-    defaultValues: { directionId: '', tariffId: '', purchaseDate: localToday() },
+    defaultValues: { option: '', purchaseDate: localToday() },
     resolver: yupResolver(schema),
   })
-  const directionId = useWatch({ control, name: 'directionId' })
-  const allPackageTariffs = tariffs.filter((t) => t.unit === 'package' && t.isActive)
-  const tariffsOf = (id: string) => {
-    const linked = new Set(
-      (directions.find((d) => d.id === id)?.groups ?? [])
-        .filter((g) => g.isActive && g.packageTariff)
-        .map((g) => g.packageTariff!.id),
-    )
-    const own = allPackageTariffs.filter((t) => linked.has(t.id))
-    return own.length > 0 ? own : allPackageTariffs
-  }
-  const packageTariffs = directionId ? tariffsOf(directionId) : []
-
-  const selectDirection = (id: string) => {
-    const options = tariffsOf(id)
-    setValue('tariffId', options.length === 1 ? options[0].id : '', { shouldValidate: options.length === 1 })
-  }
 
   const handleClose = () => {
-    reset({ directionId: '', tariffId: '', purchaseDate: localToday() })
+    reset({ option: '', purchaseDate: localToday() })
     setOpen(false)
   }
 
   const onSubmit = async (values: FormValues) => {
-    await purchase(values)
+    const chosen = options.find((o) => o.key === values.option)
+    if (!chosen) return
+    await purchase({ directionId: chosen.directionId, tariffId: chosen.tariff.id, purchaseDate: values.purchaseDate })
     handleClose()
   }
 
@@ -62,45 +60,26 @@ export const BuyPackageModal = () => {
       <DialogTitle sx={{ fontWeight: 700 }}>Купити пакет</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         <Controller
-          name="directionId"
-          control={control}
-          render={({ field, fieldState: { error } }) => (
-            <TextField
-              {...field}
-              onChange={(e) => {
-                field.onChange(e)
-                selectDirection(e.target.value)
-              }}
-              select
-              label="Напрям"
-              fullWidth
-              error={!!error}
-              helperText={error?.message}
-            >
-              {activeDirections.map((d) => (
-                <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>
-              ))}
-            </TextField>
-          )}
-        />
-        <Controller
-          name="tariffId"
+          name="option"
           control={control}
           render={({ field, fieldState: { error } }) => (
             <TextField
               {...field}
               select
-              label="Тариф пакета"
+              label="Пакет"
               fullWidth
-              disabled={!directionId}
+              disabled={options.length === 0}
               error={!!error}
-              helperText={error?.message ?? (directionId ? undefined : 'Спершу оберіть напрям')}
+              helperText={
+                error?.message ??
+                (options.length === 0 ? 'Немає пакетів: вкажіть «Тариф пакета» в групах гуртків' : undefined)
+              }
             >
-              {packageTariffs.map((t) => (
-                <MenuItem key={t.id} value={t.id}>
-                  {t.name}
-                  {t.currentPrice ? ` — ${formatMoney(t.currentPrice)}` : ''}
-                  {t.packageSize ? `, ${t.packageSize} зан.` : ''}
+              {options.map((o) => (
+                <MenuItem key={o.key} value={o.key} sx={{ whiteSpace: 'normal' }}>
+                  {o.direction} — {o.tariff.name}
+                  {o.tariff.packageSize ? `, ${o.tariff.packageSize} зан.` : ''}
+                  {o.tariff.currentPrice ? `, ${formatMoney(o.tariff.currentPrice)}` : ''}
                 </MenuItem>
               ))}
             </TextField>

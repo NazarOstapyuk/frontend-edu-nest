@@ -140,7 +140,7 @@ export const CreatePaymentModal = () => {
     if (!finance) return
     const categoryValue = values.category ? (values.category as FinanceCategory) : undefined
     let allocations = toAllocationItems(values.allocations)
-    if (!allocations.length && !cleared.current) {
+    if (!allocations.length && !cleared.current && lines.length === 0) {
       const data = await suggestAllocation(finance.child.id, {
         amount: normalizeAmount(values.amount),
         category: categoryValue,

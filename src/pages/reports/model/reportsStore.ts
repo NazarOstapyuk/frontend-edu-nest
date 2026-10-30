@@ -88,6 +88,14 @@ export const useReportsStore = create<ReportsState>((set, get) => ({
 
 useInstitutionStore.subscribe((state, prev) => {
   if (state.selectedId !== prev.selectedId) {
-    useReportsStore.setState({ query: { ...useReportsStore.getState().query, groupId: undefined, childId: undefined, teacherId: undefined } });
+    useReportsStore.setState({
+      query: {
+        ...useReportsStore.getState().query,
+        groupId: undefined,
+        childId: undefined,
+        teacherId: undefined,
+        ...(state.selectedId ? { kind: undefined } : {}),
+      },
+    });
   }
 });

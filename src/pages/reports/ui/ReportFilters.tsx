@@ -114,7 +114,7 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
       })
     }
     if (showTeacher) {
-      softList(usersApi.lookup('teacher')).then((list) => {
+      softList(usersApi.lookup('teacher', true)).then((list) => {
         if (!stale) setTeachers(list)
       })
     }
@@ -124,7 +124,7 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
   }, [showGroup, showChild, showTeacher])
 
   useEffect(() => {
-    if (showInstitution) setQuery({ institutionId: selectedInstitutionId ?? undefined })
+    if (showInstitution) setQuery({ institutionId: selectedInstitutionId ?? undefined, ...(selectedInstitutionId ? { kind: undefined } : {}) })
   }, [showInstitution, selectedInstitutionId, setQuery])
 
   const matchesGroup = (g: Group | null, q: ReportQuery) =>
@@ -251,7 +251,7 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
             size="small"
             sx={{ minWidth: { sm: 240 } }}
             options={teachers}
-            getOptionLabel={(u) => `${u.lastName} ${u.firstName}`}
+            getOptionLabel={(u) => `${u.lastName} ${u.firstName}${u.isActive ? '' : ' (неактивний)'}`}
             value={teachers.find((u) => u.id === query.teacherId) ?? null}
             onChange={(_, teacher) => update({ teacherId: teacher?.id })}
             renderInput={(params) => <TextField {...params} label="Вчитель" />}

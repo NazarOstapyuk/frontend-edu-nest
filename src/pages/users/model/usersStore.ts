@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-import { usersApi, type AccessScope, type CreateUserDto, type UpdateUserDto } from '../../../shared/api';
-import { sameScope } from '../../../entities/user';
+import { usersApi, type CreateUserDto, type UpdateUserDto } from '../../../shared/api';
 import type { User } from '../../../entities/user';
 
 interface UsersState {
@@ -16,7 +15,6 @@ interface UsersState {
   fetchUsers: () => Promise<void>;
   createUser: (dto: CreateUserDto) => Promise<User>;
   updateUser: (id: string, dto: UpdateUserDto) => Promise<User>;
-  applyScope: (user: User, accessScope: AccessScope, institutionIds: string[]) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
   replaceUser: (user: User) => void;
 }
@@ -59,21 +57,6 @@ export const useUsersStore = create<UsersState>((set) => ({
       const { data } = await usersApi.update(id, dto);
       set((state) => ({ users: state.users.map((u) => (u.id === id ? data : u)) }));
       return data;
-    } finally {
-      set({ isUpdating: false });
-    }
-  },
-
-  applyScope: async (user, accessScope, institutionIds) => {
-    if (!user.position || sameScope(user, accessScope, institutionIds)) return;
-    set({ isUpdating: true });
-    try {
-      const { data } = await usersApi.setAccess(user.id, {
-        positionId: user.position.id,
-        accessScope,
-        ...(accessScope === 'institutions' ? { institutionIds } : {}),
-      });
-      set((state) => ({ users: state.users.map((u) => (u.id === data.id ? data : u)) }));
     } finally {
       set({ isUpdating: false });
     }

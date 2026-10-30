@@ -76,7 +76,7 @@ export const EditGroupModal = ({
     teacherLookup.filter(
       (t) =>
         selected.includes(t.id) ||
-        (t.isActive && (t.institutionIds.length === 0 || t.institutionIds.includes(institutionId))),
+        (t.isActive && (t.accessScope === 'all' || t.institutionIds.includes(institutionId))),
     )
 
   useEffect(() => {

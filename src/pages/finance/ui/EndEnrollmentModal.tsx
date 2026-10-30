@@ -3,6 +3,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, TextField, Typography } from '@mui/material'
 import { useEnrollmentsStore } from '../model/enrollmentsStore'
+import { localToday } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const schema = yup.object({
@@ -10,11 +11,6 @@ const schema = yup.object({
 })
 
 type FormValues = yup.InferType<typeof schema>
-
-const localToday = () => {
-  const now = new Date()
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-}
 
 export const EndEnrollmentModal = () => {
   const isPhone = useIsPhone()

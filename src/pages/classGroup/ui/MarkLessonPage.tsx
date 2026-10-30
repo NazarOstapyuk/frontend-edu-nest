@@ -74,8 +74,14 @@ export const MarkLessonPage = () => {
     })),
   ]
 
-  const isBlocked = (row: (typeof rows)[number]) =>
-    row.isMember && !row.packageInfo && !roster.hasSingleTariff && !row.attendance
+  const isBlocked = (row: (typeof rows)[number]) => !row.packageInfo && !roster.hasSingleTariff && !row.attendance
+  const missedRule = roster.group.direction.missedRule
+  const statusDisabled = (row: (typeof rows)[number], status: AttendanceStatus) => {
+    if (!isBlocked(row)) return false
+    if (status === 'present') return true
+    if (missedRule === 'always') return true
+    return missedRule === 'unexcused_only' && status === 'absent_unexcused'
+  }
   const blockedCount = rows.filter(isBlocked).length
   const unmarkedCount = rows.filter((r) => !draft[r.child.id] && !isBlocked(r)).length
   const availableGuests = allChildren.filter(
@@ -136,7 +142,7 @@ export const MarkLessonPage = () => {
 
       {blockedCount > 0 && (
         <Alert severity="warning" sx={{ mb: 2 }}>
-          Для цієї групи не задано тариф разового заняття, тому дітей без пакета відмітити не можна. Задайте тариф у налаштуваннях групи або продайте пакет.
+          Для цієї групи не задано тариф разового заняття, тому дітей без пакета не можна відмітити присутніми (а пропуск, що списує заняття, залежить від правила напрямку). Задайте тариф у налаштуваннях групи або продайте пакет.
         </Alert>
       )}
 
@@ -156,7 +162,6 @@ export const MarkLessonPage = () => {
                 <ToggleButtonGroup
                   exclusive
                   fullWidth
-                  disabled={isBlocked(row)}
                   orientation="vertical"
                   value={draft[row.child.id] ?? null}
                   onChange={(_, value: AttendanceStatus | null) => {
@@ -164,7 +169,7 @@ export const MarkLessonPage = () => {
                   }}
                 >
                   {attendanceStatuses.map((s) => (
-                    <ToggleButton key={s} value={s} sx={{ minHeight: 44 }}>
+                    <ToggleButton key={s} value={s} disabled={statusDisabled(row, s)} sx={{ minHeight: 44 }}>
                       {attendanceStatusLabels[s]}
                     </ToggleButton>
                   ))}
@@ -200,14 +205,13 @@ export const MarkLessonPage = () => {
                     <ToggleButtonGroup
                       size="small"
                       exclusive
-                      disabled={isBlocked(row)}
                       value={draft[row.child.id] ?? null}
                       onChange={(_, value: AttendanceStatus | null) => {
                         if (value) setStatus(row.child.id, value)
                       }}
                     >
                       {attendanceStatuses.map((s) => (
-                        <ToggleButton key={s} value={s}>
+                        <ToggleButton key={s} value={s} disabled={statusDisabled(row, s)}>
                           {attendanceStatusLabels[s]}
                         </ToggleButton>
                       ))}

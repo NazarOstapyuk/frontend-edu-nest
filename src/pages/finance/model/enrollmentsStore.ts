@@ -8,7 +8,6 @@ import {
   type Tariff,
 } from '../../../shared/api';
 import { useChildFinanceStore } from './childFinanceStore';
-import { fetchChildInstitutionId } from './childInstitution';
 
 export type EnrollmentReasonTarget =
   | { kind: 'adjustment'; id: string; title: string }
@@ -18,7 +17,6 @@ interface EnrollmentsState {
   childId: string | null;
   enrollments: Enrollment[];
   tariffOptions: Tariff[];
-  childInstitutionId: string | null;
   isLoading: boolean;
   isSaving: boolean;
   createEnrollmentModal: { isOpen: boolean };
@@ -62,7 +60,6 @@ export const useEnrollmentsStore = create<EnrollmentsState>((set, get) => {
     childId: null,
     enrollments: [],
     tariffOptions: [],
-    childInstitutionId: null,
     isLoading: false,
     isSaving: false,
     createEnrollmentModal: { isOpen: false },
@@ -84,12 +81,11 @@ export const useEnrollmentsStore = create<EnrollmentsState>((set, get) => {
     fetchEnrollments: async (childId) => {
       set({ isLoading: true, childId, enrollments: [] });
       try {
-        const [{ data: enrollments }, { data: tariffs }, institutionId] = await Promise.all([
+        const [{ data: enrollments }, { data: tariffs }] = await Promise.all([
           enrollmentsApi.getByChild(childId),
           tariffsApi.getList(),
-          fetchChildInstitutionId(childId),
         ]);
-        if (get().childId === childId) set({ enrollments, tariffOptions: tariffs, childInstitutionId: institutionId });
+        if (get().childId === childId) set({ enrollments, tariffOptions: tariffs });
       } finally {
         set({ isLoading: false });
       }

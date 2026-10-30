@@ -13,6 +13,7 @@ import {
   financeCategoryLabels,
   normalizeAmount,
   toKopecks,
+  localToday,
   tariffUnitLabels,
   tariffUnits,
   type BillingMode,
@@ -50,11 +51,6 @@ const schema = yup.object({
 })
 
 type FormValues = yup.InferType<typeof schema>
-
-const localToday = () => {
-  const now = new Date()
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-}
 
 const allowedCategories: Record<TariffUnit, FinanceCategory[]> = {
   month: financeCategories,

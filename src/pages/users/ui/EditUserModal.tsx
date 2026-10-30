@@ -48,7 +48,6 @@ type FormValues = yup.InferType<typeof schema>
 export const EditUserModal = () => {
   const isPhone = useIsPhone()
   const updateUser = useUsersStore((s) => s.updateUser)
-  const applyScope = useUsersStore((s) => s.applyScope)
   const profile = useAuthStore((s) => s.profile)
   const isUpdating = useUsersStore((s) => s.isUpdating)
   const { isOpen, user } = useUsersStore((s) => s.editUserModal)
@@ -111,14 +110,19 @@ export const EditUserModal = () => {
       firstName: values.firstName,
       lastName: values.lastName,
       ...(values.position === 'parent' ? { role: 'parent' as const } : isStaffUser ? {} : { positionId: values.position as string }),
+      ...(scopeEditable
+        ? {
+            accessScope: values.accessScope,
+            ...(values.accessScope === 'institutions' ? { institutionIds: values.institutionIds } : {}),
+          }
+        : {}),
       login: values.login,
       middleName: values.middleName.trim() || null,
       phone: values.phone ? normalizePhone(values.phone) : null,
       email: values.email.trim() || null,
     }
     if (values.password) dto.password = values.password
-    const updated = await updateUser(user.id, dto)
-    if (scopeEditable) await applyScope(updated, values.accessScope, values.institutionIds)
+    await updateUser(user.id, dto)
     handleClose()
   }
 

@@ -23,6 +23,8 @@ export interface UpdateUserDto {
   password?: string;
   role?: 'parent';
   positionId?: string;
+  accessScope?: 'all' | 'institutions';
+  institutionIds?: string[];
   middleName?: string | null;
   phone?: string | null;
   email?: string | null;
@@ -35,6 +37,7 @@ export interface UserLookup {
   middleName: string | null;
   phone: string | null;
   isActive: boolean;
+  accessScope: 'all' | 'institutions';
   institutionIds: string[];
 }
 

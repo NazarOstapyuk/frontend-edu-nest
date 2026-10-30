@@ -4,8 +4,9 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, MenuItem, TextField } from '@mui/material'
 import { useEnrollmentsStore } from '../model/enrollmentsStore'
-import { tariffsForInstitution } from '../model/childInstitution'
-import { billingModeLabels, billingModes, formatMoney, type BillingMode } from '../../../shared/api'
+import { tariffsForInstitution } from '../model/institutionTariffs'
+import { useChildFinanceStore } from '../model/childFinanceStore'
+import { billingModeLabels, billingModes, formatMoney, localToday, type BillingMode } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const schema = yup.object({
@@ -24,11 +25,6 @@ const schema = yup.object({
 
 type FormValues = yup.InferType<typeof schema>
 
-const localToday = () => {
-  const now = new Date()
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-}
-
 const makeDefaults = (): FormValues => ({ tariffId: '', startDate: localToday(), endDate: '', billingMode: '', note: '' })
 
 export const CreateEnrollmentModal = () => {
@@ -38,7 +34,7 @@ export const CreateEnrollmentModal = () => {
   const tariffOptions = useEnrollmentsStore((s) => s.tariffOptions)
   const createEnrollment = useEnrollmentsStore((s) => s.createEnrollment)
   const isSaving = useEnrollmentsStore((s) => s.isSaving)
-  const childInstitutionId = useEnrollmentsStore((s) => s.childInstitutionId)
+  const childInstitutionId = useChildFinanceStore((s) => s.finance?.child.institutionId ?? null)
   const monthlyTariffs = tariffsForInstitution(
     tariffOptions.filter((t) => t.unit === 'month' && t.isActive),
     childInstitutionId,

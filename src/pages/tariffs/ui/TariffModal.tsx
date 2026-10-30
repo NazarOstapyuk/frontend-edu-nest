@@ -26,17 +26,13 @@ import {
   billingModeLabels,
   financeCategoryLabels,
   formatMoney,
+  localToday,
   normalizeAmount,
   tariffUnitLabels,
   toKopecks,
 } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardList, CardField } from '../../../shared/ui/CardList'
-
-const localToday = () => {
-  const now = new Date()
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-}
 
 const amountPattern = /^\d{1,8}([.,]\d{1,2})?$/
 

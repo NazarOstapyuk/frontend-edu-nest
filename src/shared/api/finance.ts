@@ -107,7 +107,7 @@ export interface CategorySummary {
 }
 
 export interface ChildFinance {
-  child: PersonRef;
+  child: PersonRef & { institutionId: string | null };
   parents: {
     id: string;
     firstName: string;

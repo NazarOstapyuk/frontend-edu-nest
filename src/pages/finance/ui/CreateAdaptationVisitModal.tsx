@@ -4,17 +4,13 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, MenuItem, TextField, Typography } from '@mui/material'
 import { useAdaptationStore } from '../model/adaptationStore'
-import { tariffsForInstitution } from '../model/childInstitution'
-import { formatMoney, normalizeAmount, toKopecks } from '../../../shared/api'
+import { tariffsForInstitution } from '../model/institutionTariffs'
+import { useChildFinanceStore } from '../model/childFinanceStore'
+import { formatMoney, localToday, normalizeAmount, toKopecks } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const amountPattern = /^\d{1,8}([.,]\d{1,2})?$/
 const hoursPattern = /^\d{1,2}([.,]\d{1,2})?$/
-
-const localToday = () => {
-  const now = new Date()
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-}
 
 const schema = yup.object({
   tariffId: yup.string().required("Обов'язкове поле"),
@@ -45,7 +41,7 @@ export const CreateAdaptationVisitModal = () => {
   const tariffOptions = useAdaptationStore((s) => s.tariffOptions)
   const createVisit = useAdaptationStore((s) => s.createVisit)
   const isSaving = useAdaptationStore((s) => s.isSaving)
-  const childInstitutionId = useAdaptationStore((s) => s.childInstitutionId)
+  const childInstitutionId = useChildFinanceStore((s) => s.finance?.child.institutionId ?? null)
   const hourTariffs = tariffsForInstitution(
     tariffOptions.filter((t) => t.unit === 'hour' && t.isActive),
     childInstitutionId,

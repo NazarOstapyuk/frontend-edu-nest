@@ -74,7 +74,8 @@ export const MarkLessonPage = () => {
     })),
   ]
 
-  const isBlocked = (row: (typeof rows)[number]) => !row.packageInfo && !roster.hasSingleTariff && !row.attendance
+  const isBlocked = (row: (typeof rows)[number]) =>
+    row.isMember && !row.packageInfo && !roster.hasSingleTariff && !row.attendance
   const missedRule = roster.group.direction.missedRule
   const statusDisabled = (row: (typeof rows)[number], status: AttendanceStatus) => {
     if (!isBlocked(row)) return false
@@ -82,6 +83,8 @@ export const MarkLessonPage = () => {
     if (missedRule === 'always') return true
     return missedRule === 'unexcused_only' && status === 'absent_unexcused'
   }
+  const guestWarning = (row: (typeof rows)[number]) =>
+    !row.isMember && !roster.hasSingleTariff ? 'Якщо в гостя немає пакета, збереження не пройде' : null
   const blockedCount = rows.filter(isBlocked).length
   const unmarkedCount = rows.filter((r) => !draft[r.child.id] && !isBlocked(r)).length
   const availableGuests = allChildren.filter(
@@ -158,6 +161,11 @@ export const MarkLessonPage = () => {
                   <Typography sx={{ fontWeight: 600 }}>{row.child.lastName} {row.child.firstName}</Typography>
                   {!row.isMember && <Chip size="small" label="Разово" />}
                 </Box>
+                {guestWarning(row) && (
+                  <Typography variant="caption" color="warning.main" sx={{ display: 'block', mb: 1 }}>
+                    {guestWarning(row)}
+                  </Typography>
+                )}
                 {packageChip(row) && <Box sx={{ mb: 1 }}>{packageChip(row)}</Box>}
                 <ToggleButtonGroup
                   exclusive
@@ -200,7 +208,14 @@ export const MarkLessonPage = () => {
                     {row.child.lastName} {row.child.firstName}
                     {!row.isMember && <Chip size="small" label="Разово" sx={{ ml: 1 }} />}
                   </TableCell>
-                  <TableCell>{packageChip(row)}</TableCell>
+                  <TableCell>
+                    {packageChip(row)}
+                    {guestWarning(row) && (
+                      <Typography variant="caption" color="warning.main" sx={{ display: 'block' }}>
+                        {guestWarning(row)}
+                      </Typography>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <ToggleButtonGroup
                       size="small"

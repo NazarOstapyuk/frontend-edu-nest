@@ -135,6 +135,8 @@ const Hero = ({ date, firstName, count, first }: HeroProps) => (
       borderRadius: '28px',
       pl: { xs: 3, sm: 5 },
       pr: { xs: 3, sm: 5, md: '290px' },
+      minHeight: { md: 290 },
+      boxSizing: 'border-box',
       py: { xs: 3, sm: 4.5 },
       mb: 4,
     }}

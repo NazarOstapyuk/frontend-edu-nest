@@ -19,10 +19,11 @@ import {
 import {
   addDaysIso,
   kyivNow,
-  staffTaskRoleLabels,
+  staffTaskRoleLabel,
   type AssignableUser,
   type GivenTask,
   type StaffTaskRole,
+  type TaskPersonRole,
   type UpdateStaffTaskDto,
 } from '../../../shared/api'
 import { useAuthStore } from '../../../entities/user'
@@ -103,7 +104,7 @@ export const TaskDialog = () => {
     loadAssignable().catch(() => undefined)
   }, [isOpen, task, reset, loadAssignable])
 
-  const options = useMemo<AssignableUser[]>(() => {
+  const options = useMemo<(Omit<AssignableUser, 'role'> & { role: TaskPersonRole })[]>(() => {
     const extra = (task?.assignees ?? [])
       .filter((a) => !assignable.some((u) => u.id === a.id))
       .map(({ id, firstName, lastName, middleName, role }) => ({ id, firstName, lastName, middleName, role }))
@@ -284,7 +285,7 @@ export const TaskDialog = () => {
                       <Box sx={{ minWidth: 0 }}>
                         <Typography variant="body2">{personName(option)}</Typography>
                         {isRoot && (
-                          <Typography variant="caption" color="text.secondary">{staffTaskRoleLabels[option.role]}</Typography>
+                          <Typography variant="caption" color="text.secondary">{staffTaskRoleLabel(option.role)}</Typography>
                         )}
                       </Box>
                     </li>

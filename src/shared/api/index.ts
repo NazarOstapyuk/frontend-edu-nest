@@ -371,12 +371,15 @@ export {
   staffTasksApi,
   myTaskStatusLabels,
   staffTaskRoleLabels,
+  staffTaskRoleLabel,
+  isStaffTaskRole,
   formatTaskMoment,
   isGivenTaskClosed,
   isMyTaskClosed,
 } from './staffTasks';
 export type {
   StaffTaskRole,
+  TaskPersonRole,
   MyTaskStatus,
   AssignableUser,
   TaskAuthor,

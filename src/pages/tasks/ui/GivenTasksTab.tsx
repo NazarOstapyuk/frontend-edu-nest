@@ -25,7 +25,7 @@ import BlockIcon from '@mui/icons-material/Block'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 import { useAuthStore } from '../../../entities/user'
-import { formatTaskMoment, isGivenTaskClosed, type GivenTask } from '../../../shared/api'
+import { formatTaskMoment, isGivenTaskClosed, isStaffTaskRole, type GivenTask, type GivenTaskAssignee } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardList } from '../../../shared/ui/CardList'
 import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog'
@@ -37,6 +37,13 @@ const StateChip = ({ task }: { task: GivenTask }) => {
   if (isGivenTaskClosed(task)) return <Chip size="small" color="success" variant="outlined" label="Виконано" />
   if (task.overdue) return <Chip size="small" color="warning" label="Прострочено" />
   return null
+}
+
+const isCountedAssignee = (a: GivenTaskAssignee) => a.isActive && isStaffTaskRole(a.role)
+
+const assigneeNote = (a: GivenTaskAssignee) => {
+  if (!isStaffTaskRole(a.role)) return ' (не працівник)'
+  return a.isActive ? '' : ' (неактивний)'
 }
 
 const AssigneeList = ({ task }: { task: GivenTask }) => (
@@ -51,20 +58,20 @@ const AssigneeList = ({ task }: { task: GivenTask }) => (
           py: 0.75,
           borderTop: 1,
           borderColor: 'divider',
-          color: a.isActive ? 'text.primary' : 'text.disabled',
+          color: isCountedAssignee(a) ? 'text.primary' : 'text.disabled',
         }}
       >
         <Typography variant="body2" sx={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere', color: 'inherit' }}>
           {a.lastName} {a.firstName}
-          {!a.isActive && ' (неактивний)'}
+          {assigneeNote(a)}
         </Typography>
         {a.doneAt ? (
-          <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: a.isActive ? 'success.main' : 'inherit', flexShrink: 0 }}>
+          <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: isCountedAssignee(a) ? 'success.main' : 'inherit', flexShrink: 0 }}>
             <CheckIcon fontSize="small" />
             {formatTaskMoment(a.doneAt)}
           </Typography>
         ) : (
-          <Typography variant="body2" sx={{ color: a.isActive ? 'text.secondary' : 'inherit', flexShrink: 0 }}>
+          <Typography variant="body2" sx={{ color: isCountedAssignee(a) ? 'text.secondary' : 'inherit', flexShrink: 0 }}>
             не виконав
           </Typography>
         )}

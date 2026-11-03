@@ -2,6 +2,8 @@ import { axiosInstance } from './axiosInstance';
 
 export type StaffTaskRole = 'admin' | 'teacher';
 
+export type TaskPersonRole = StaffTaskRole | 'parent' | 'root';
+
 export type MyTaskStatus = 'open' | 'overdue' | 'done' | 'cancelled';
 
 export const myTaskStatusLabels: Record<MyTaskStatus, string> = {
@@ -15,6 +17,12 @@ export const staffTaskRoleLabels: Record<StaffTaskRole, string> = {
   admin: 'Адміністратор',
   teacher: 'Педагог',
 };
+
+export const isStaffTaskRole = (role: TaskPersonRole): role is StaffTaskRole =>
+  role === 'admin' || role === 'teacher';
+
+export const staffTaskRoleLabel = (role: TaskPersonRole) =>
+  isStaffTaskRole(role) ? staffTaskRoleLabels[role] : 'не працівник';
 
 export interface AssignableUser {
   id: string;
@@ -35,7 +43,7 @@ export interface GivenTaskAssignee {
   firstName: string;
   lastName: string;
   middleName: string | null;
-  role: StaffTaskRole;
+  role: TaskPersonRole;
   isActive: boolean;
   doneAt: string | null;
 }
@@ -95,6 +103,7 @@ export interface UpdateStaffTaskDto {
 
 const kyivDateTime = new Intl.DateTimeFormat('uk-UA', {
   timeZone: 'Europe/Kyiv',
+  year: 'numeric',
   day: '2-digit',
   month: '2-digit',
   hour: '2-digit',
@@ -102,9 +111,13 @@ const kyivDateTime = new Intl.DateTimeFormat('uk-UA', {
   hourCycle: 'h23',
 });
 
+const kyivParts = (date: Date) =>
+  Object.fromEntries(kyivDateTime.formatToParts(date).map((p) => [p.type, p.value]));
+
 export const formatTaskMoment = (iso: string) => {
-  const parts = Object.fromEntries(kyivDateTime.formatToParts(new Date(iso)).map((p) => [p.type, p.value]));
-  return `${parts.day}.${parts.month} ${parts.hour}:${parts.minute}`;
+  const parts = kyivParts(new Date(iso));
+  const year = parts.year === kyivParts(new Date()).year ? '' : `.${parts.year}`;
+  return `${parts.day}.${parts.month}${year} ${parts.hour}:${parts.minute}`;
 };
 
 export const isGivenTaskClosed = (task: GivenTask) =>

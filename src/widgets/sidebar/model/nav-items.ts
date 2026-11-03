@@ -14,6 +14,7 @@ import EventAvailableIcon from '@mui/icons-material/EventAvailable'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
 import FactCheckIcon from '@mui/icons-material/FactCheck'
+import EditNoteIcon from '@mui/icons-material/EditNote'
 import PaymentsIcon from '@mui/icons-material/Payments'
 import MarkEmailUnreadIcon from '@mui/icons-material/MarkEmailUnread'
 import ScheduleIcon from '@mui/icons-material/Schedule'
@@ -43,13 +44,14 @@ export interface NavItem {
   roles?: SessionRole[]
   area?: PermissionArea
   areas?: PermissionArea[]
-  badge?: 'pendingNotices'
+  badge?: 'pendingNotices' | 'pendingNotes'
   section?: NavSection
 }
 
 export const navItems: NavItem[] = [
   { path: '/',                    label: 'Сьогодні',           icon: DashboardIcon },
   { path: '/register',            label: 'Журнал',            icon: FactCheckIcon,      roles: ['teacher'], area: 'register' },
+  { path: '/notes',               label: 'Нотатки',           icon: EditNoteIcon,       roles: ['teacher'], area: 'register', badge: 'pendingNotes' },
   { path: '/absence-notices',     label: 'Повідомлення',      icon: MarkEmailUnreadIcon, area: 'register', badge: 'pendingNotices' },
   { path: '/routine',            label: 'Розпорядок дня',    icon: ScheduleIcon,       roles: ['teacher'], area: 'timetable' },
   { path: '/schedule',           label: 'Розклад',           icon: ViewWeekIcon,       area: 'timetable' },

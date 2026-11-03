@@ -10,6 +10,7 @@ import { BRAND_NAME, brandColors } from '../../../shared/assets/brand'
 const pageTitles: Record<string, string> = {
   '/':          'Сьогодні',
   '/register':  'Журнал',
+  '/notes':     'Нотатки',
   '/users':     'Користувачі',
   '/groups':    'Групи',
   '/students':  'Учні',

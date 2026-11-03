@@ -17,12 +17,15 @@ import type { NavItem, NavSection } from '../model/nav-items'
 import { canAccess, useAuthStore } from '../../../entities/user'
 import type { SessionRole } from '../../../entities/user'
 import { usePendingNoticesStore } from '../../../shared/model/pendingNoticesStore'
+import { usePendingNotesStore } from '../../../shared/model/pendingNotesStore'
 import { BRAND_NAME, brandColors, logoUrl, mascotHeadUrl } from '../../../shared/assets/brand'
 
 export const SIDEBAR_WIDTH = 240
 
 const NavButton = ({ item }: { item: NavItem }) => {
-  const pending = usePendingNoticesStore((s) => s.count)
+  const pendingNotices = usePendingNoticesStore((s) => s.count)
+  const pendingNotes = usePendingNotesStore((s) => s.count)
+  const pending = item.badge === 'pendingNotices' ? pendingNotices : item.badge === 'pendingNotes' ? pendingNotes : 0
   return (
   <NavLink to={item.path} end={item.path === '/'} style={{ textDecoration: 'none' }}>
     {({ isActive }) => (
@@ -45,7 +48,7 @@ const NavButton = ({ item }: { item: NavItem }) => {
         }}
       >
         <ListItemIcon sx={{ minWidth: 36, color: isActive ? brandColors.navIcon : 'inherit' }}>
-          {item.badge === 'pendingNotices' && pending > 0 ? (
+          {pending > 0 ? (
             <Badge badgeContent={pending} color="primary" sx={{ '& .MuiBadge-badge': { fontWeight: 800 } }}><item.icon fontSize="small" /></Badge>
           ) : (
             <item.icon fontSize="small" />
@@ -96,6 +99,11 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps) => {
   useEffect(() => {
     if (canSeeRegister) refreshPending().catch(() => undefined)
   }, [canSeeRegister, refreshPending])
+  const canSeeNotes = canSeeRegister || role === 'teacher'
+  const refreshPendingNotes = usePendingNotesStore((s) => s.refresh)
+  useEffect(() => {
+    if (canSeeNotes) refreshPendingNotes().catch(() => undefined)
+  }, [canSeeNotes, refreshPendingNotes])
   useEffect(() => {
     if (!isNarrow) onClose()
   }, [isNarrow, onClose])

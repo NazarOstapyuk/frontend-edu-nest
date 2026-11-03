@@ -345,3 +345,22 @@ export type {
   RoutineTemplateDto,
   RoutineDayDto,
 } from './routine';
+export { noteSetsApi, dailyNotesApi, noteQuestionTypeLabels, noteQuestionTypes } from './dailyNotes';
+export type {
+  NoteQuestionType,
+  NoteSetQuestion,
+  NoteSet,
+  NoteQuestionDto,
+  CreateNoteSetDto,
+  UpdateNoteSetDto,
+  NotesGroup,
+  NotesDayQuestion,
+  NotesDaySet,
+  NoteValue,
+  NoteAnswer,
+  NotesChildRow,
+  NotesDay,
+  SaveNotesAnswerDto,
+  SaveNotesDto,
+  PendingNotes,
+} from './dailyNotes';

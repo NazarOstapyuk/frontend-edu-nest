@@ -64,6 +64,7 @@ interface NotesState {
   groupsError: boolean;
   groupId: string | null;
   date: string;
+  dateToday: string;
   day: NotesDay | null;
   dayKey: string | null;
   dayError: boolean;
@@ -86,6 +87,8 @@ interface NotesState {
   setAnswer: (childId: string, questionId: string, value: DraftValue) => void;
   setReason: (reason: string) => void;
   changedAnswers: () => SaveNotesAnswerDto[];
+  hasUnsaved: () => boolean;
+  followToday: () => void;
   hasInvalid: () => boolean;
   save: () => Promise<void>;
   loadSets: () => Promise<void>;
@@ -106,6 +109,7 @@ export const useNotesStore = create<NotesState>((set, get) => ({
   groupsError: false,
   groupId: null,
   date: localToday(),
+  dateToday: localToday(),
   day: null,
   dayKey: null,
   dayError: false,
@@ -137,12 +141,17 @@ export const useNotesStore = create<NotesState>((set, get) => ({
     }
   },
   selectGroup: (groupId) => set({ groupId }),
-  setDate: (date) => set({ date }),
+  setDate: (date) => set({ date, dateToday: localToday() }),
+  followToday: () => {
+    const { date, dateToday, hasUnsaved } = get();
+    const today = localToday();
+    if (date === dateToday && today !== dateToday && !hasUnsaved()) set({ date: today, dateToday: today });
+  },
   loadDay: async () => {
-    const { groupId, date } = get();
+    const { groupId, date, dayKey } = get();
     if (!groupId) return;
     const key = `${groupId}/${date}`;
-    set({ dayKey: key, day: null, draft: {}, reason: '', dayError: false });
+    set(key === dayKey ? { day: null, dayError: false } : { dayKey: key, day: null, draft: {}, reason: '', dayError: false });
     try {
       const { data } = await dailyNotesApi.getDay(groupId, date);
       if (get().dayKey === key) set({ day: data });
@@ -163,6 +172,7 @@ export const useNotesStore = create<NotesState>((set, get) => ({
       return [{ childId: row.child.id, questionId: question.id, value: toValue(question, draft[key]) }];
     });
   },
+  hasUnsaved: () => get().changedAnswers().length > 0,
   hasInvalid: () => {
     const { day, draft } = get();
     if (!day) return false;
@@ -172,7 +182,7 @@ export const useNotesStore = create<NotesState>((set, get) => ({
     });
   },
   save: async () => {
-    const { groupId, day, dayKey, reason } = get();
+    const { groupId, day, dayKey, reason, draft: sent } = get();
     if (!groupId || !day) return;
     const answers = get().changedAnswers();
     if (answers.length === 0) return;
@@ -182,7 +192,12 @@ export const useNotesStore = create<NotesState>((set, get) => ({
         reason: day.needsReason ? reason.trim() : undefined,
         answers,
       });
-      if (get().dayKey === dayKey) set({ day: data, draft: {}, reason: '' });
+      if (get().dayKey === dayKey) {
+        const draft = Object.fromEntries(
+          Object.entries(get().draft).filter(([key, value]) => !(key in sent) || sent[key] !== value),
+        );
+        set({ day: data, draft, reason: '' });
+      }
       usePendingNotesStore.getState().refresh().catch(() => undefined);
     } finally {
       set({ isSaving: false });

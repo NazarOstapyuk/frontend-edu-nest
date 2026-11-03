@@ -18,6 +18,18 @@ export const NotesPage = () => {
     if (requestedGroup) useNotesStore.getState().selectGroup(requestedGroup)
   }, [requestedGroup])
 
+  useEffect(() => {
+    const follow = () => {
+      if (document.visibilityState === 'visible') useNotesStore.getState().followToday()
+    }
+    document.addEventListener('visibilitychange', follow)
+    window.addEventListener('focus', follow)
+    return () => {
+      document.removeEventListener('visibilitychange', follow)
+      window.removeEventListener('focus', follow)
+    }
+  }, [])
+
   return (
     <Box>
       {canManage && (

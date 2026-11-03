@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Alert,
   Box,
@@ -15,6 +15,7 @@ import {
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { formatDay, localToday, type NotesDayQuestion } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog'
 import { draftKey, initialDraft, isChanged, numberError, useNotesStore, type DraftValue } from '../model/notesStore'
 
 interface QuestionControlProps {
@@ -121,6 +122,12 @@ export const FillTab = () => {
   const changedAnswers = useNotesStore((s) => s.changedAnswers)
   const hasInvalid = useNotesStore((s) => s.hasInvalid)
   const save = useNotesStore((s) => s.save)
+  const hasUnsaved = useNotesStore((s) => s.hasUnsaved)
+  const [pendingSwitch, setPendingSwitch] = useState<(() => void) | null>(null)
+  const guarded = (apply: () => void) => {
+    if (hasUnsaved()) setPendingSwitch(() => apply)
+    else apply()
+  }
   const manyInstitutions = new Set(groups.map((g) => g.institution.id)).size > 1
 
   useEffect(() => {
@@ -152,7 +159,10 @@ export const FillTab = () => {
   return (
     <Box>
       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', mb: 2 }}>
-        <TextField select size="small" label="Група" value={groupId ?? ''} onChange={(e) => selectGroup(e.target.value)} sx={{ minWidth: { xs: 0, sm: 220 }, width: { xs: '100%', sm: 'auto' } }}>
+        <TextField select size="small" label="Група" value={groupId ?? ''} onChange={(e) => {
+          const next = e.target.value
+          if (next !== groupId) guarded(() => selectGroup(next))
+        }} sx={{ minWidth: { xs: 0, sm: 220 }, width: { xs: '100%', sm: 'auto' } }}>
           {groups.map((g) => (
             <MenuItem key={g.id} value={g.id}>{manyInstitutions ? `${g.name} · ${g.institution.name}` : g.name}</MenuItem>
           ))}
@@ -162,7 +172,10 @@ export const FillTab = () => {
           type="date"
           label="Дата"
           value={date}
-          onChange={(e) => e.target.value && setDate(e.target.value)}
+          onChange={(e) => {
+            const next = e.target.value
+            if (next && next !== date) guarded(() => setDate(next))
+          }}
           slotProps={{ inputLabel: { shrink: true }, htmlInput: { max: localToday() } }}
         />
       </Box>
@@ -289,6 +302,15 @@ export const FillTab = () => {
           )}
         </>
       )}
+      <ConfirmDialog
+        open={pendingSwitch !== null}
+        title="Є незбережені відповіді. Перейти без збереження?"
+        confirmLabel="Перейти"
+        cancelLabel="Залишитися"
+        color="primary"
+        onConfirm={() => pendingSwitch?.()}
+        onClose={() => setPendingSwitch(null)}
+      />
     </Box>
   )
 }

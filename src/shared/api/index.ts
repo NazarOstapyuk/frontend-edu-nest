@@ -367,3 +367,24 @@ export type {
   SaveNotesDto,
   PendingNotes,
 } from './dailyNotes';
+export {
+  staffTasksApi,
+  myTaskStatusLabels,
+  staffTaskRoleLabels,
+  formatTaskMoment,
+  isGivenTaskClosed,
+  isMyTaskClosed,
+} from './staffTasks';
+export type {
+  StaffTaskRole,
+  MyTaskStatus,
+  AssignableUser,
+  TaskAuthor,
+  GivenTaskAssignee,
+  GivenTask,
+  MyTask,
+  TaskPage,
+  TaskSummary,
+  CreateStaffTaskDto,
+  UpdateStaffTaskDto,
+} from './staffTasks';

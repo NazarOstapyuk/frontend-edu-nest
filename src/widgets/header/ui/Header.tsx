@@ -11,6 +11,7 @@ const pageTitles: Record<string, string> = {
   '/':          'Сьогодні',
   '/register':  'Журнал',
   '/notes':     'Нотатки',
+  '/tasks':     'Завдання',
   '/users':     'Користувачі',
   '/groups':    'Групи',
   '/students':  'Учні',

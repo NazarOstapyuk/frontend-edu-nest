@@ -27,6 +27,7 @@ import { AuditPage } from '../../pages/audit'
 import { ReportsPage } from '../../pages/reports'
 import { RegisterPage } from '../../pages/register'
 import { NotesPage } from '../../pages/notes'
+import { TasksPage } from '../../pages/tasks'
 import { AbsenceNoticesPage } from '../../pages/absenceNotices'
 import { MyLessonsPage } from '../../pages/myLessons'
 import { MyPayrollPage } from '../../pages/myPayroll'
@@ -87,6 +88,7 @@ export const router = createBrowserRouter([
                   { index: true,       element: <DashboardPage /> },
                   { path: 'register',  element: <RegisterPage /> },
                   { path: 'notes',     element: <NotesPage /> },
+                  { path: 'tasks',     element: <TasksPage /> },
                   { path: 'absence-notices', element: <AbsenceNoticesPage /> },
                   { path: 'users',     element: <UsersPage /> },
                   { path: 'positions', element: <PositionsPage /> },

@@ -24,6 +24,7 @@ import MenuBookIcon from '@mui/icons-material/MenuBook'
 import TuneIcon from '@mui/icons-material/Tune'
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote'
 import AssessmentIcon from '@mui/icons-material/Assessment'
+import TaskAltIcon from '@mui/icons-material/TaskAlt'
 import type { SvgIconComponent } from '@mui/icons-material'
 import type { SessionRole } from '../../../entities/user'
 import type { PermissionArea } from '../../../shared/api'
@@ -44,12 +45,13 @@ export interface NavItem {
   roles?: SessionRole[]
   area?: PermissionArea
   areas?: PermissionArea[]
-  badge?: 'pendingNotices' | 'pendingNotes'
+  badge?: 'pendingNotices' | 'pendingNotes' | 'pendingTasks'
   section?: NavSection
 }
 
 export const navItems: NavItem[] = [
   { path: '/',                    label: 'Сьогодні',           icon: DashboardIcon },
+  { path: '/tasks',               label: 'Завдання',          icon: TaskAltIcon,        roles: ['root', 'admin', 'teacher'], badge: 'pendingTasks' },
   { path: '/register',            label: 'Журнал',            icon: FactCheckIcon,      roles: ['teacher'], area: 'register' },
   { path: '/notes',               label: 'Нотатки',           icon: EditNoteIcon,       roles: ['teacher'], area: 'register', badge: 'pendingNotes' },
   { path: '/absence-notices',     label: 'Повідомлення',      icon: MarkEmailUnreadIcon, area: 'register', badge: 'pendingNotices' },

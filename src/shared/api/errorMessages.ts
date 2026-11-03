@@ -269,6 +269,15 @@ export const errorMessages: Record<string, string> = {
   'Duplicate answer': 'Відповідь повторюється',
   'Question is not in this group': 'Питання не стосується цієї групи',
   'Invalid answer': 'Неправильна відповідь',
+  'Task not found': 'Завдання не знайдено',
+  'Not your task': 'Це завдання поставив інший користувач',
+  'Task is cancelled': 'Завдання скасовано, його не можна змінити',
+  'Deadline is in the past': 'Термін виконання вже минув. Вкажіть пізніший час',
+  'Invalid title': 'Назва має містити від 1 до 200 символів',
+  'Invalid description': 'Опис має містити до 2000 символів',
+  'Duplicate assignee': 'Виконавець повторюється',
+  'Invalid cursor': 'Не вдалося завантажити попередні завдання. Оновіть сторінку',
+  'Cannot assign this user': 'Цьому користувачу не можна поставити завдання',
 };
 
 export const translateError = (error: unknown): string => {

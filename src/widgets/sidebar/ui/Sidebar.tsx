@@ -18,6 +18,7 @@ import { canAccess, useAuthStore } from '../../../entities/user'
 import type { SessionRole } from '../../../entities/user'
 import { usePendingNoticesStore } from '../../../shared/model/pendingNoticesStore'
 import { usePendingNotesStore } from '../../../shared/model/pendingNotesStore'
+import { usePendingTasksStore } from '../../../shared/model/pendingTasksStore'
 import { BRAND_NAME, brandColors, logoUrl, mascotHeadUrl } from '../../../shared/assets/brand'
 
 export const SIDEBAR_WIDTH = 240
@@ -25,7 +26,17 @@ export const SIDEBAR_WIDTH = 240
 const NavButton = ({ item }: { item: NavItem }) => {
   const pendingNotices = usePendingNoticesStore((s) => s.count)
   const pendingNotes = usePendingNotesStore((s) => s.count)
-  const pending = item.badge === 'pendingNotices' ? pendingNotices : item.badge === 'pendingNotes' ? pendingNotes : 0
+  const openTasks = usePendingTasksStore((s) => s.open)
+  const overdueTasks = usePendingTasksStore((s) => s.overdue)
+  const pending =
+    item.badge === 'pendingNotices'
+      ? pendingNotices
+      : item.badge === 'pendingNotes'
+        ? pendingNotes
+        : item.badge === 'pendingTasks'
+          ? openTasks
+          : 0
+  const badgeColor = item.badge === 'pendingTasks' && overdueTasks > 0 ? 'warning' : 'primary'
   return (
   <NavLink to={item.path} end={item.path === '/'} style={{ textDecoration: 'none' }}>
     {({ isActive }) => (
@@ -49,7 +60,7 @@ const NavButton = ({ item }: { item: NavItem }) => {
       >
         <ListItemIcon sx={{ minWidth: 36, color: isActive ? brandColors.navIcon : 'inherit' }}>
           {pending > 0 ? (
-            <Badge badgeContent={pending} color="primary" sx={{ '& .MuiBadge-badge': { fontWeight: 800 } }}><item.icon fontSize="small" /></Badge>
+            <Badge badgeContent={pending} color={badgeColor} sx={{ '& .MuiBadge-badge': { fontWeight: 800 } }}><item.icon fontSize="small" /></Badge>
           ) : (
             <item.icon fontSize="small" />
           )}
@@ -104,6 +115,11 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps) => {
   useEffect(() => {
     if (canSeeNotes) refreshPendingNotes().catch(() => undefined)
   }, [canSeeNotes, refreshPendingNotes])
+  const canSeeTasks = role === 'root' || role === 'admin' || role === 'teacher'
+  const refreshPendingTasks = usePendingTasksStore((s) => s.refresh)
+  useEffect(() => {
+    if (canSeeTasks) refreshPendingTasks().catch(() => undefined)
+  }, [canSeeTasks, refreshPendingTasks])
   useEffect(() => {
     if (!isNarrow) onClose()
   }, [isNarrow, onClose])

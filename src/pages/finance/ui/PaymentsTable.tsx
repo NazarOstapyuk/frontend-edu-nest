@@ -50,7 +50,7 @@ const PaymentRow = ({ payment }: { payment: FinancePayment }) => {
         <TableCell>{paymentMethodLabels[payment.method]}</TableCell>
         <TableCell>
           {voided ? (
-            <Tooltip title={`Причина сторно: ${payment.voidReason ?? ''}`}>
+            <Tooltip title={`Причина скасування: ${payment.voidReason ?? ''}`}>
               <Typography variant="body2" component="span">{payment.reference || '—'}</Typography>
             </Tooltip>
           ) : (
@@ -76,7 +76,7 @@ const PaymentRow = ({ payment }: { payment: FinancePayment }) => {
             </Tooltip>
           )}
           {canEdit && !voided && (
-            <Tooltip title="Сторнувати">
+            <Tooltip title="Скасувати (запис залишиться в історії)">
               <IconButton
                 size="small"
                 color="error"
@@ -189,7 +189,7 @@ const PaymentCard = ({ payment }: { payment: FinancePayment }) => {
       <CardField label="Вніс">
         {payment.createdBy ? `${payment.createdBy.lastName} ${payment.createdBy.firstName}` : '—'}
       </CardField>
-      {voided && <CardField label="Причина сторно">{payment.voidReason ?? '—'}</CardField>}
+      {voided && <CardField label="Причина скасування">{payment.voidReason ?? '—'}</CardField>}
       <Collapse in={open} unmountOnExit>
         <Box sx={{ pt: 1 }}>
           {payment.note && (
@@ -258,7 +258,7 @@ const PaymentCard = ({ payment }: { payment: FinancePayment }) => {
           </Tooltip>
         )}
         {canEdit && !voided && (
-          <Tooltip title="Сторнувати">
+          <Tooltip title="Скасувати (запис залишиться в історії)">
             <IconButton
               size="small"
               color="error"

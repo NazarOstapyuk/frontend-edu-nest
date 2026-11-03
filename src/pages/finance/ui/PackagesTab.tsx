@@ -79,7 +79,7 @@ const PackageRow = ({ pkg }: { pkg: ChildPackage }) => {
           )}
           {canEdit && !voided && pkg.used === 0 && !pkg.needsReconciliation && (
             <Button size="small" color="error" onClick={() => setVoidTarget(pkg)}>
-              Сторнувати
+              Скасувати
             </Button>
           )}
         </TableCell>
@@ -88,7 +88,7 @@ const PackageRow = ({ pkg }: { pkg: ChildPackage }) => {
         <TableCell colSpan={9} sx={{ py: 0, borderBottom: open ? undefined : 0 }}>
           <Collapse in={open} unmountOnExit>
             <Box sx={{ py: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-              {pkg.voidReason && <Typography variant="body2">Причина сторно: {pkg.voidReason}</Typography>}
+              {pkg.voidReason && <Typography variant="body2">Причина скасування: {pkg.voidReason}</Typography>}
               {pkg.reconciliationNote && <Typography variant="body2">Звірка: {pkg.reconciliationNote}</Typography>}
               {pkg.extensions.map((e) => (
                 <Typography key={e.id} variant="body2" color="text.secondary">
@@ -155,7 +155,7 @@ const PackageCard = ({ pkg }: { pkg: ChildPackage }) => {
       <CardField label="Залишок">{pkg.remaining}</CardField>
       <CardField label="Куплено">{formatDay(pkg.purchaseDate)}</CardField>
       <CardField label="Діє до">{pkg.expiresAt ? formatDay(pkg.expiresAt) : '—'}</CardField>
-      {pkg.voidReason && <CardField label="Причина сторно">{pkg.voidReason}</CardField>}
+      {pkg.voidReason && <CardField label="Причина скасування">{pkg.voidReason}</CardField>}
       {pkg.reconciliationNote && <CardField label="Звірка">{pkg.reconciliationNote}</CardField>}
       <Collapse in={open} unmountOnExit>
         <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
@@ -204,7 +204,7 @@ const PackageCard = ({ pkg }: { pkg: ChildPackage }) => {
         )}
         {canEdit && !voided && pkg.used === 0 && !pkg.needsReconciliation && (
           <Button size="small" color="error" onClick={() => setVoidTarget(pkg)}>
-            Сторнувати
+            Скасувати
           </Button>
         )}
       </Box>
@@ -294,8 +294,8 @@ export const PackagesTab = ({ childId }: PackagesTabProps) => {
       <ReconcileModal />
       <ReasonDialog
         open={voidTarget !== null}
-        title="Сторнувати пакет"
-        subtitle="Пакет і його нарахування буде сторновано."
+        title="Скасувати пакет"
+        subtitle="Пакет і його нарахування буде скасовано."
         isSaving={isSaving}
         onClose={() => setVoidTarget(null)}
         onSubmit={voidPackage}

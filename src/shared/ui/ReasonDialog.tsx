@@ -72,7 +72,7 @@ export const ReasonDialog = ({
         />
         <Box sx={{ display: 'flex', gap: '10px' }}>
           <Button onClick={handleClose} color="inherit" sx={{ width: '100%' }}>
-            Скасувати
+            Закрити
           </Button>
           <Button
             onClick={handleSubmit(submit)}

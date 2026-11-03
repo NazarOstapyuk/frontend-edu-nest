@@ -76,10 +76,10 @@ export const AdaptationTab = ({ childId }: AdaptationTabProps) => {
               <CardField label="Сума">{formatMoney(v.amount)}</CardField>
               <CardField label="Оплата">{v.chargeState ? chargeStateLabels[v.chargeState] : '—'}</CardField>
               <CardField label="Примітка">{v.note ?? '—'}</CardField>
-              {v.voidedAt && <CardField label="Причина сторно">{v.voidReason ?? '—'}</CardField>}
+              {v.voidedAt && <CardField label="Причина скасування">{v.voidReason ?? '—'}</CardField>}
               {canEdit && !v.voidedAt && (
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5, mt: 1 }}>
-                  <Tooltip title="Сторнувати">
+                  <Tooltip title="Скасувати (запис залишиться в історії)">
                     <IconButton size="small" color="error" onClick={() => setVoidTarget(v)}>
                       <BlockIcon fontSize="small" />
                     </IconButton>
@@ -126,7 +126,7 @@ export const AdaptationTab = ({ childId }: AdaptationTabProps) => {
                   <TableCell>{v.chargeState ? chargeStateLabels[v.chargeState] : '—'}</TableCell>
                   <TableCell>
                     {v.voidedAt ? (
-                      <Tooltip title={`Причина сторно: ${v.voidReason ?? ''}`}>
+                      <Tooltip title={`Причина скасування: ${v.voidReason ?? ''}`}>
                         <Typography variant="body2" component="span">{v.note ?? '—'}</Typography>
                       </Tooltip>
                     ) : (
@@ -135,7 +135,7 @@ export const AdaptationTab = ({ childId }: AdaptationTabProps) => {
                   </TableCell>
                   <TableCell align="right">
                     {canEdit && !v.voidedAt && (
-                      <Tooltip title="Сторнувати">
+                      <Tooltip title="Скасувати (запис залишиться в історії)">
                         <IconButton size="small" color="error" onClick={() => setVoidTarget(v)}>
                           <BlockIcon fontSize="small" />
                         </IconButton>
@@ -153,10 +153,10 @@ export const AdaptationTab = ({ childId }: AdaptationTabProps) => {
       <CreateAdaptationVisitModal />
       <ReasonDialog
         open={voidTarget !== null}
-        title="Сторнувати відвідування"
+        title="Скасувати відвідування"
         subtitle={
           voidTarget
-            ? `${formatDate(voidTarget.date)}, ${Number(voidTarget.hours)} год. Нарахування теж буде сторновано.`
+            ? `${formatDate(voidTarget.date)}, ${Number(voidTarget.hours)} год. Нарахування теж буде скасовано.`
             : undefined
         }
         isSaving={isSaving}

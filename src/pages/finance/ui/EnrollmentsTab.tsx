@@ -94,7 +94,7 @@ const EnrollmentRow = ({ enrollment }: { enrollment: Enrollment }) => {
                   variant="outlined"
                   label={adjustmentLabel(a)}
                   onDelete={() =>
-                    setReasonTarget({ kind: 'adjustment', id: a.id, title: `Сторнувати умову: ${adjustmentLabel(a)}` })
+                    setReasonTarget({ kind: 'adjustment', id: a.id, title: `Скасувати умову: ${adjustmentLabel(a)}` })
                   }
                 />
               ))}
@@ -148,7 +148,7 @@ const EnrollmentRow = ({ enrollment }: { enrollment: Enrollment }) => {
                             : p.note === 'pause'
                               ? 'Пауза'
                               : p.chargeVoided
-                                ? 'Нарахування сторновано'
+                                ? 'Нарахування скасовано'
                                 : p.chargeState
                                   ? chargeStateLabels[p.chargeState]
                                   : '—'}
@@ -189,7 +189,7 @@ const periodStateLabel = (p: Enrollment['billedPeriods'][number]) =>
     : p.note === 'pause'
       ? 'Пауза'
       : p.chargeVoided
-        ? 'Нарахування сторновано'
+        ? 'Нарахування скасовано'
         : p.chargeState
           ? chargeStateLabels[p.chargeState]
           : '—'
@@ -247,7 +247,7 @@ const EnrollmentCard = ({ enrollment }: { enrollment: Enrollment }) => {
               variant="outlined"
               label={adjustmentLabel(a)}
               onDelete={() =>
-                setReasonTarget({ kind: 'adjustment', id: a.id, title: `Сторнувати умову: ${adjustmentLabel(a)}` })
+                setReasonTarget({ kind: 'adjustment', id: a.id, title: `Скасувати умову: ${adjustmentLabel(a)}` })
               }
             />
           ))}
@@ -397,7 +397,7 @@ export const EnrollmentsTab = ({ childId }: EnrollmentsTabProps) => {
         title={reasonTarget?.title ?? ''}
         subtitle={
           reasonTarget?.kind === 'recalculate'
-            ? 'Поточне нарахування буде сторновано і створено нове за актуальними умовами. Оплати, розподілені на старе нарахування, повернуться в передоплату — їх треба розподілити знову.'
+            ? 'Поточне нарахування буде скасовано і створено нове за актуальними умовами. Оплати, розподілені на старе нарахування, повернуться в передоплату — їх треба розподілити знову.'
             : 'Умова перестане діяти для ще не нарахованих періодів.'
         }
         isSaving={isSaving}

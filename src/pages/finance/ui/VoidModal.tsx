@@ -6,8 +6,8 @@ import { useChildFinanceStore, type VoidTarget } from '../model/childFinanceStor
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const titles: Record<VoidTarget['kind'], string> = {
-  charge: 'Сторнувати нарахування',
-  payment: 'Сторнувати оплату',
+  charge: 'Скасувати нарахування',
+  payment: 'Скасувати оплату',
   allocation: 'Зняти розподіл',
 }
 
@@ -65,7 +65,7 @@ export const VoidModal = () => {
         />
         <Box sx={{ display: 'flex', gap: '10px' }}>
           <Button onClick={handleClose} color="inherit" sx={{ width: '100%' }}>
-            Скасувати
+            Закрити
           </Button>
           <Button
             onClick={handleSubmit(onSubmit)}

@@ -50,7 +50,7 @@ export const ChargesTable = ({ charges }: ChargesTableProps) => {
   const isPhone = useIsPhone()
 
   const voidButton = (charge: FinanceCharge) => (
-    <Tooltip title="Сторнувати">
+    <Tooltip title="Скасувати (запис залишиться в історії)">
       <IconButton
         size="small"
         color="error"
@@ -68,7 +68,7 @@ export const ChargesTable = ({ charges }: ChargesTableProps) => {
 
   const stateChip = (charge: FinanceCharge) =>
     charge.voidedAt ? (
-      <Chip label="Сторновано" size="small" />
+      <Chip label="Скасовано" size="small" />
     ) : (
       <Chip
         label={chargeStateLabels[charge.state]}
@@ -100,7 +100,7 @@ export const ChargesTable = ({ charges }: ChargesTableProps) => {
               <CardField label="Категорія">{financeCategoryLabels[charge.category]}</CardField>
               <CardField label="Сума">{formatMoney(charge.amount)}</CardField>
               <CardField label="Сплачено">{formatMoney(charge.paid)}</CardField>
-              {voided && <CardField label="Причина сторно">{charge.voidReason ?? '—'}</CardField>}
+              {voided && <CardField label="Причина скасування">{charge.voidReason ?? '—'}</CardField>}
               {canEdit && !voided && (
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5, mt: 1 }}>{voidButton(charge)}</Box>
               )}
@@ -151,7 +151,7 @@ export const ChargesTable = ({ charges }: ChargesTableProps) => {
                   <TableCell>{financeCategoryLabels[charge.category]}</TableCell>
                   <TableCell>
                     {voided ? (
-                      <Tooltip title={`Причина сторно: ${charge.voidReason ?? ''}`}>
+                      <Tooltip title={`Причина скасування: ${charge.voidReason ?? ''}`}>
                         <Typography variant="body2" component="span">{charge.description}</Typography>
                       </Tooltip>
                     ) : (
@@ -162,7 +162,7 @@ export const ChargesTable = ({ charges }: ChargesTableProps) => {
                   <TableCell align="right">{formatMoney(charge.paid)}</TableCell>
                   <TableCell>
                     {voided ? (
-                      <Chip label="Сторновано" size="small" />
+                      <Chip label="Скасовано" size="small" />
                     ) : (
                       <Chip
                         label={chargeStateLabels[charge.state]}
@@ -174,7 +174,7 @@ export const ChargesTable = ({ charges }: ChargesTableProps) => {
                   </TableCell>
                   <TableCell align="right">
                     {canEdit && !voided && (
-                      <Tooltip title="Сторнувати">
+                      <Tooltip title="Скасувати (запис залишиться в історії)">
                         <IconButton
                           size="small"
                           color="error"

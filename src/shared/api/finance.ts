@@ -37,9 +37,9 @@ export const chargeStateLabels: Record<ChargeState, string> = {
 
 export const financeEventLabels: Record<FinanceEventType, string> = {
   charge_created: 'Нарахування',
-  charge_voided: 'Сторно нарахування',
+  charge_voided: 'Скасування нарахування',
   payment_recorded: 'Оплата',
-  payment_voided: 'Сторно оплати',
+  payment_voided: 'Скасування оплати',
   allocation_created: 'Розподіл',
   allocation_voided: 'Знято розподіл',
 };

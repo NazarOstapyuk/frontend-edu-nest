@@ -28,7 +28,7 @@ export const packageStateLabels: Record<PackageState, string> = {
   active: 'Активний',
   exhausted: 'Вичерпаний',
   expired: 'Прострочений',
-  voided: 'Сторнований',
+  voided: 'Скасований',
   needs_reconciliation: 'Потребує звірки',
 };
 

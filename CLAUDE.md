@@ -153,7 +153,7 @@ The intent is to close the gap before implementing new modules, so the stub modu
 1. Replace the "API errors" / "401 / session" section above with how to do it now, linking to the reference code.
 2. Update `pages/children` to use it, so it is a complete reference again.
 3. Move the "New module" checklist into a `new-module` skill.
-4. Implement the stubs one by one: `teachers`, `classes`, `schedule`, `grades`, `reports`, `settings`.
+4. Implement the stubs one by one: `teachers`, `classes`, `schedule`, `grades`, `reports`.
 
 ## New module checklist
 

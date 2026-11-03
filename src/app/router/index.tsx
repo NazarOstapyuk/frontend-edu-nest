@@ -117,7 +117,6 @@ export const router = createBrowserRouter([
                   { path: 'audit', element: <AuditPage /> },
                   { path: 'grades',    element: <EmptyPage title="Оцінки" /> },
                   { path: 'reports',   element: <ReportsPage /> },
-                  { path: 'settings',  element: <EmptyPage title="Налаштування" /> },
                   { path: '*',         element: <Navigate to="/" replace /> },
                 ],
               },

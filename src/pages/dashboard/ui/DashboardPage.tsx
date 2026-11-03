@@ -11,6 +11,7 @@ import PaymentsIcon from '@mui/icons-material/Payments'
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty'
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote'
 import BackupIcon from '@mui/icons-material/Backup'
+import EditNoteIcon from '@mui/icons-material/EditNote'
 import { dashboardApi, formatMoney } from '../../../shared/api'
 import type { DashboardPaymentMethod, TodayDashboard } from '../../../shared/api'
 import { useAuthStore, useCan } from '../../../entities/user'
@@ -25,6 +26,14 @@ const methodLabels: Record<DashboardPaymentMethod, string> = {
 }
 
 const methodOrder: DashboardPaymentMethod[] = ['cash', 'bank_transfer', 'card', 'online']
+
+const childrenCount = (count: number) => {
+  const mod10 = count % 10
+  const mod100 = count % 100
+  if (mod10 === 1 && mod100 !== 11) return `${count} дитина`
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return `${count} дитини`
+  return `${count} дітей`
+}
 
 const namesLine = (names: string[], more: number) =>
   names.join(', ') + (more > 0 ? ` і ще ${more}` : '')
@@ -70,7 +79,7 @@ const tasksLine = (count: number) => {
 }
 
 const buildRows = (data: TodayDashboard): AttentionRow[] => {
-  const { register, notices, debts, onlinePending, payroll, backups } = data
+  const { register, notices, debts, onlinePending, payroll, backups, notes } = data
   const rows: AttentionRow[] = []
   if (register) {
     rows.push(
@@ -78,6 +87,20 @@ const buildRows = (data: TodayDashboard): AttentionRow[] => {
         ? { key: 'register', to: '/register', title: `Журнал не відмічено: ${register.count}`, meta: namesLine(register.names, register.more), action: 'Відмітити', cta: 'Відкрити журнал', icon: FactCheckIcon, alert: true }
         : { key: 'register', to: '/register', title: 'Журнал', meta: 'Усі групи відмічено', action: 'Відкрити', cta: 'Відкрити журнал', icon: FactCheckIcon, alert: false },
     )
+  }
+  if (notes) {
+    notes.groups.forEach((group) => {
+      rows.push({
+        key: `notes-${group.id}`,
+        to: `/notes?groupId=${group.id}`,
+        title: `Нотатки не заповнено: ${group.name}, ${childrenCount(group.pending)}`,
+        meta: group.overdue ? 'прострочено' : 'Очікують заповнення',
+        action: 'Заповнити',
+        cta: 'Заповнити нотатки',
+        icon: EditNoteIcon,
+        alert: true,
+      })
+    })
   }
   if (notices) {
     rows.push(

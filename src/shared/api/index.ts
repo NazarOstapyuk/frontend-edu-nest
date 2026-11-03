@@ -172,6 +172,9 @@ export type {
   CabinetCharge,
   CabinetPayment,
   CabinetFinance,
+  ParentNoteAnswer,
+  ParentNotesDay,
+  ParentNotes,
 } from './parentCabinet';
 export {
   timetableApi,

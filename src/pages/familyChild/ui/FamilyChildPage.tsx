@@ -9,11 +9,12 @@ import { ScheduleTab } from './ScheduleTab'
 import { RoutineTab } from './RoutineTab'
 import { AttendanceTab } from './AttendanceTab'
 import { MealsTab } from './MealsTab'
+import { NotesTab } from './NotesTab'
 import { ChildFinanceTab } from './ChildFinanceTab'
 import { PaymentReturnBanner } from './PaymentReturnBanner'
 import { brandColors, mascotUrl } from '../../../shared/assets/brand'
 
-const tabValues = ['card', 'routine', 'schedule', 'attendance', 'meals', 'finance']
+const tabValues = ['card', 'routine', 'schedule', 'attendance', 'meals', 'notes', 'finance']
 
 export const FamilyChildPage = () => {
   const { childId } = useParams<{ childId: string }>()
@@ -116,6 +117,7 @@ export const FamilyChildPage = () => {
         {kindergarten ? <Tab value="routine" label="Розпорядок" /> : <Tab value="schedule" label="Розклад" />}
         <Tab value="attendance" label="Відвідування" />
         <Tab value="meals" label="Харчування" />
+        <Tab value="notes" label="Нотатки" />
         <Tab value="finance" label="Фінанси" />
       </Tabs>
       {tab === 'card' && <ChildCardTab card={card} />}
@@ -123,6 +125,7 @@ export const FamilyChildPage = () => {
       {tab === 'schedule' && !kindergarten && <ScheduleTab childId={card.id} />}
       {tab === 'attendance' && <AttendanceTab childId={card.id} visits={card.visits} />}
       {tab === 'meals' && <MealsTab childId={card.id} />}
+      {tab === 'notes' && <NotesTab childId={card.id} />}
       {tab === 'finance' && <ChildFinanceTab childId={card.id} finance={finance} />}
     </Box>
   )

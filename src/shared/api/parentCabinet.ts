@@ -94,6 +94,24 @@ export const parentCabinetApi = {
     axiosInstance.post<ParentNotice>(`/me/children/${id}/absence-notices/${noticeId}/cancel`),
   getSchedule: (id: string, from: string, to: string) =>
     axiosInstance.get<ParentSchedule>(`/me/children/${id}/schedule`, { params: { from, to } }),
+  getNotes: (id: string, from: string, to: string) =>
+    axiosInstance.get<ParentNotes>(`/me/children/${id}/notes`, { params: { from, to } }),
   getLessons: (id: string, month: string) =>
     axiosInstance.get<ParentLessons>(`/me/children/${id}/lessons`, { params: { month } }),
 };
+
+export interface ParentNoteAnswer {
+  question: string;
+  type: 'choice' | 'yes_no' | 'number' | 'text';
+  value: string | number | boolean | null;
+  unit: string | null;
+}
+
+export interface ParentNotesDay {
+  date: string;
+  sets: { name: string; answers: ParentNoteAnswer[] }[];
+}
+
+export interface ParentNotes {
+  days: ParentNotesDay[];
+}

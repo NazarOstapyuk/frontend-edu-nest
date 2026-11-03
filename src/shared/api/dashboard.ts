@@ -16,6 +16,7 @@ export interface TodayDashboard {
   onlinePending?: { count: number };
   payroll?: { month: string; count: number; names: string[]; more: number };
   backups?: { configured: boolean; stale: boolean };
+  notes?: { groups: { id: string; name: string; pending: number; overdue: boolean }[] };
 }
 
 export const dashboardApi = {

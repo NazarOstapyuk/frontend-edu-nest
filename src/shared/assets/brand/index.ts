@@ -9,7 +9,6 @@ export const brandColors = {
   olive: '#9FA07D',
   oliveLight: '#B4B595',
   oliveTint: '#ECEDE2',
-  oliveDeep: '#4A4C36',
   ink: '#22231C',
   inkOnOrange: '#2B1A0E',
   inkOnOlive: '#1C1D15',

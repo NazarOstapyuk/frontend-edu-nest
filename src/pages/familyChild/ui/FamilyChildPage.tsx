@@ -11,6 +11,7 @@ import { AttendanceTab } from './AttendanceTab'
 import { MealsTab } from './MealsTab'
 import { ChildFinanceTab } from './ChildFinanceTab'
 import { PaymentReturnBanner } from './PaymentReturnBanner'
+import { brandColors, mascotUrl } from '../../../shared/assets/brand'
 
 const tabValues = ['card', 'routine', 'schedule', 'attendance', 'meals', 'finance']
 
@@ -65,15 +66,47 @@ export const FamilyChildPage = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-        {familySize !== 1 && (
-          <IconButton onClick={() => navigate('/family')}>
-            <ArrowBackIcon />
-          </IconButton>
+      <Box
+        sx={{
+          position: 'relative',
+          overflow: 'hidden',
+          bgcolor: brandColors.olive,
+          color: brandColors.inkOnOlive,
+          borderRadius: '24px',
+          pl: { xs: 2, sm: 3 },
+          pr: { xs: '110px', sm: '170px' },
+          py: { xs: 2.5, sm: 3 },
+          mb: 2,
+          minHeight: { xs: 124, sm: 164 },
+          boxSizing: 'border-box',
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {familySize !== 1 && (
+            <IconButton onClick={() => navigate('/family')} aria-label="Назад" sx={{ color: 'inherit', ml: -1 }}>
+              <ArrowBackIcon />
+            </IconButton>
+          )}
+          <Typography component="h1" sx={{ fontSize: { xs: 22, sm: 28 }, fontWeight: 900, lineHeight: 1.2, minWidth: 0, overflowWrap: 'anywhere' }}>
+            {[card.lastName, card.firstName, card.middleName].filter(Boolean).join(' ')}
+          </Typography>
+        </Box>
+        {(card.group || card.institution) && (
+          <Typography sx={{ mt: 0.5, fontWeight: 700, color: brandColors.inkOnOliveSoft }}>
+            {[
+              card.group ? `${card.group.kind === 'kindergarten' ? 'Група' : 'Клас'} ${card.group.name}` : null,
+              card.institution?.name,
+            ]
+              .filter(Boolean)
+              .join(' · ')}
+          </Typography>
         )}
-        <Typography variant="h6" sx={{ fontWeight: 700, minWidth: 0, overflowWrap: 'anywhere' }}>
-          {[card.lastName, card.firstName, card.middleName].filter(Boolean).join(' ')}
-        </Typography>
+        <Box
+          component="img"
+          src={mascotUrl}
+          alt=""
+          sx={{ position: 'absolute', right: { xs: 8, sm: 24 }, bottom: 0, width: { xs: 96, sm: 130 } }}
+        />
       </Box>
       {returnInvoice && (
         <PaymentReturnBanner invoiceId={returnInvoice} onSuccess={() => reloadFinance(card.id).catch(() => undefined)} />

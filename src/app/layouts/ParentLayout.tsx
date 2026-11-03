@@ -21,7 +21,7 @@ export const ParentLayout = () => {
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-      <AppBar position="sticky" elevation={0} sx={{ bgcolor: '#fff', color: 'text.primary', borderBottom: '1px solid', borderColor: 'divider' }}>
+      <AppBar position="sticky" elevation={0} sx={{ bgcolor: 'background.default', color: 'text.primary' }}>
         <Toolbar sx={{ gap: 1, flexWrap: 'wrap' }}>
           <Box
             component={NavLink}
@@ -29,7 +29,7 @@ export const ParentLayout = () => {
             sx={{ display: 'flex', alignItems: 'center', gap: 1, mr: 'auto', py: 0.5 }}
           >
             <Box component="img" src={mascotHeadUrl} alt="" sx={{ width: 40, height: 40 }} />
-            <Box component="img" src={logoUrl} alt={BRAND_NAME} sx={{ height: { xs: 30, sm: 36 }, display: 'block' }} />
+            <Box component="img" src={logoUrl} alt={BRAND_NAME} sx={{ width: 120, display: 'block' }} />
           </Box>
           {isPhone ? (
             <>

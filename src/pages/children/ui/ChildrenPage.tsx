@@ -32,6 +32,8 @@ import { CreateChildModal, EditChildModal } from '../../../widgets/childForms'
 import { HistoryButton } from '../../../widgets/auditHistory'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardList, CardField } from '../../../shared/ui/CardList'
+import { SearchField } from '../../../shared/ui/SearchField'
+import { matchesSearch } from '../../../shared/lib/search'
 
 export const ChildrenPage = () => {
   const children = useChildrenStore((s) => s.children)
@@ -71,14 +73,20 @@ export const ChildrenPage = () => {
   const canViewFinance = useCan('finance', 'view')
   const [selectedGroupId, setGroupId] = useState('')
   const groupId = groups.some((g) => g.id === selectedGroupId) ? selectedGroupId : ''
+  const [search, setSearch] = useState('')
 
   const sortedGroups = useMemo(
     () => [...groups].sort((a, b) => a.name.localeCompare(b.name, 'uk')),
     [groups],
   )
   const visibleChildren = useMemo(
-    () => (groupId ? children.filter((c) => c.group?.id === groupId) : children),
-    [children, groupId],
+    () =>
+      children.filter(
+        (c) =>
+          (!groupId || c.group?.id === groupId) &&
+          matchesSearch(search, c.lastName, c.firstName, c.middleName),
+      ),
+    [children, groupId, search],
   )
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -138,6 +146,13 @@ export const ChildrenPage = () => {
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+          <SearchField
+            value={search}
+            onChange={(value) => {
+              setSearch(value)
+              setPage(0)
+            }}
+          />
           <TextField
             select
             size="small"
@@ -157,7 +172,7 @@ export const ChildrenPage = () => {
             ))}
           </TextField>
           <Typography variant="body2" color="text.secondary">
-            {groupId ? `Учнів у групі: ${visibleChildren.length} із ${children.length}` : `Всього учнів: ${children.length}`}
+            {search ? `Знайдено: ${visibleChildren.length} із ${children.length}` : groupId ? `Учнів у групі: ${visibleChildren.length} із ${children.length}` : `Всього учнів: ${children.length}`}
           </Typography>
         </Box>
         {canEdit && (
@@ -178,7 +193,7 @@ export const ChildrenPage = () => {
             getKey={(c) => c.id}
             empty={
               <Typography color="text.secondary" align="center" sx={{ py: 6 }}>
-                {groupId ? 'У цій групі учнів немає.' : 'Учнів ще немає. Натисніть «Створити учня».'}
+                {search ? 'Нікого не знайдено.' : groupId ? 'У цій групі учнів немає.' : 'Учнів ще немає. Натисніть «Створити учня».'}
               </Typography>
             }
             renderCard={(child) => (
@@ -227,7 +242,7 @@ export const ChildrenPage = () => {
             {visibleChildren.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} align="center" sx={{ py: 6, color: 'text.secondary' }}>
-                  {groupId ? 'У цій групі учнів немає.' : 'Учнів ще немає. Натисніть «Створити учня».'}
+                  {search ? 'Нікого не знайдено.' : groupId ? 'У цій групі учнів немає.' : 'Учнів ще немає. Натисніть «Створити учня».'}
                 </TableCell>
               </TableRow>
             ) : (

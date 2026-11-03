@@ -18,6 +18,8 @@ import {
 } from '@mui/material'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardList, CardField } from '../../../shared/ui/CardList'
+import { SearchField } from '../../../shared/ui/SearchField'
+import { matchesSearch } from '../../../shared/lib/search'
 import { useFinanceBalancesStore } from '../model/financeBalancesStore'
 import { useGroupsStore } from '../../groups/model/groupsStore'
 import {
@@ -42,11 +44,16 @@ export const FinanceBalancesPage = () => {
     [groups],
   )
   const groupId = groups.some((g) => g.id === filters.groupId) ? filters.groupId : undefined
+  const [search, setSearch] = useState('')
+  const visibleBalances = useMemo(
+    () => balances.filter((r) => matchesSearch(search, r.lastName, r.firstName)),
+    [balances, search],
+  )
   const [paging, setPaging] = useState({ page: 0, filters })
   const [rowsPerPage, setRowsPerPage] = useState(10)
-  const lastPage = Math.max(0, Math.ceil(balances.length / rowsPerPage) - 1)
+  const lastPage = Math.max(0, Math.ceil(visibleBalances.length / rowsPerPage) - 1)
   const currentPage = Math.min(paging.filters === filters ? paging.page : 0, lastPage)
-  const pagedBalances = balances.slice(currentPage * rowsPerPage, (currentPage + 1) * rowsPerPage)
+  const pagedBalances = visibleBalances.slice(currentPage * rowsPerPage, (currentPage + 1) * rowsPerPage)
 
   useEffect(() => {
     if (useFinanceBalancesStore.getState().filters.groupId) setFilters({ groupId: undefined })
@@ -61,8 +68,15 @@ export const FinanceBalancesPage = () => {
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2, mb: 3 }}>
         <Typography variant="body2" color="text.secondary" sx={{ mr: 'auto' }}>
-          Всього учнів: {balances.length}
+          {search ? `Знайдено: ${visibleBalances.length} із ${balances.length}` : `Всього учнів: ${balances.length}`}
         </Typography>
+        <SearchField
+          value={search}
+          onChange={(value) => {
+            setSearch(value)
+            setPaging({ page: 0, filters })
+          }}
+        />
         <TextField
           select
           size="small"
@@ -148,10 +162,10 @@ export const FinanceBalancesPage = () => {
               </Box>
             )}
           />
-          {balances.length > 0 && (
+          {visibleBalances.length > 0 && (
             <TablePagination
               component="div"
-              count={balances.length}
+              count={visibleBalances.length}
               page={currentPage}
               rowsPerPage={rowsPerPage}
               rowsPerPageOptions={[]}
@@ -186,7 +200,7 @@ export const FinanceBalancesPage = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {balances.length === 0 ? (
+            {visibleBalances.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} align="center" sx={{ py: 6, color: 'text.secondary' }}>
                   Немає учнів за цими фільтрами.
@@ -224,10 +238,10 @@ export const FinanceBalancesPage = () => {
             )}
           </TableBody>
         </Table>
-        {balances.length > 0 && (
+        {visibleBalances.length > 0 && (
           <TablePagination
             component="div"
-            count={balances.length}
+            count={visibleBalances.length}
             page={currentPage}
             rowsPerPage={rowsPerPage}
             rowsPerPageOptions={[10, 25, 50, 100]}

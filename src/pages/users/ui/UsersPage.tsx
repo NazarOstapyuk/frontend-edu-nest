@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Box,
   Button,
@@ -29,6 +29,8 @@ import { HistoryButton } from '../../../widgets/auditHistory'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardList, CardField } from '../../../shared/ui/CardList'
 import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog'
+import { SearchField } from '../../../shared/ui/SearchField'
+import { matchesSearch } from '../../../shared/lib/search'
 
 const roleColors: Record<string, 'primary' | 'secondary' | 'default'> = {
   admin: 'default',
@@ -51,6 +53,11 @@ export const UsersPage = () => {
   const [accessUser, setAccessUser] = useState<User | null>(null)
   const [deletingUser, setDeletingUser] = useState<User | null>(null)
   const isPhone = useIsPhone()
+  const [search, setSearch] = useState('')
+  const visibleUsers = useMemo(
+    () => users.filter((u) => matchesSearch(search, u.lastName, u.firstName, u.middleName, u.login, u.phone)),
+    [users, search],
+  )
 
   const fullName = (user: User) => [user.lastName, user.firstName, user.middleName].filter(Boolean).join(' ')
   const scopeText = (user: User) =>
@@ -104,9 +111,12 @@ export const UsersPage = () => {
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, mb: 3 }}>
-        <Typography variant="body2" color="text.secondary">
-          Всього користувачів: {users.length}
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+          <SearchField value={search} onChange={setSearch} placeholder="Пошук за ПІБ, логіном, телефоном" />
+          <Typography variant="body2" color="text.secondary">
+            {search ? `Знайдено: ${visibleUsers.length} із ${users.length}` : `Всього користувачів: ${users.length}`}
+          </Typography>
+        </Box>
         {canEditUsers && (
           <Button
             variant="contained"
@@ -120,11 +130,11 @@ export const UsersPage = () => {
 
       {isPhone ? (
         <CardList
-          items={users}
+          items={visibleUsers}
           getKey={(u) => u.id}
           empty={
             <Typography color="text.secondary" align="center" sx={{ py: 6 }}>
-              Користувачів ще немає. Натисніть «Створити користувача».
+              {search ? 'Нікого не знайдено.' : 'Користувачів ще немає. Натисніть «Створити користувача».'}
             </Typography>
           }
           renderCard={(user) => (
@@ -169,14 +179,14 @@ export const UsersPage = () => {
           </TableHead>
 
           <TableBody>
-            {users.length === 0 ? (
+            {visibleUsers.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} align="center" sx={{ py: 6, color: 'text.secondary' }}>
-                  Користувачів ще немає. Натисніть «Створити користувача».
+                  {search ? 'Нікого не знайдено.' : 'Користувачів ще немає. Натисніть «Створити користувача».'}
                 </TableCell>
               </TableRow>
             ) : (
-              users.map((user, index) => (
+              visibleUsers.map((user, index) => (
                 <TableRow
                   key={user.id}
                   hover

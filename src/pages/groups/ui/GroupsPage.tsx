@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Box,
   Button,
@@ -19,6 +19,8 @@ import { groupKindLabels, type Group } from '../../../shared/api'
 import { useCan, useUserLookupStore } from '../../../entities/user'
 import { CreateGroupModal, EditGroupModal } from '../../../widgets/groupForms'
 import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog'
+import { SearchField } from '../../../shared/ui/SearchField'
+import { matchesSearch } from '../../../shared/lib/search'
 
 export const GroupsPage = () => {
   const groups = useGroupsStore((s) => s.groups)
@@ -40,6 +42,14 @@ export const GroupsPage = () => {
   const fetchTeachers = useUserLookupStore((s) => s.fetchTeachers)
   const [deletingGroup, setDeletingGroup] = useState<Group | null>(null)
   const canEdit = useCan('children', 'edit')
+  const [search, setSearch] = useState('')
+  const visibleGroups = useMemo(
+    () =>
+      groups.filter((g) =>
+        matchesSearch(search, g.name, g.institution.name, ...g.teachers.flatMap((t) => [t.lastName, t.firstName])),
+      ),
+    [groups, search],
+  )
 
   useEffect(() => {
     fetchGroups()
@@ -51,9 +61,12 @@ export const GroupsPage = () => {
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, mb: 3 }}>
-        <Typography variant="body2" color="text.secondary">
-          Всього груп: {groups.length}
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+          <SearchField value={search} onChange={setSearch} placeholder="Пошук за назвою або ПІБ вчителя" />
+          <Typography variant="body2" color="text.secondary">
+            {search ? `Знайдено: ${visibleGroups.length} із ${groups.length}` : `Всього груп: ${groups.length}`}
+          </Typography>
+        </Box>
         {canEdit && (
           <Button
             variant="contained"
@@ -65,13 +78,13 @@ export const GroupsPage = () => {
         )}
       </Box>
 
-      {groups.length === 0 ? (
+      {visibleGroups.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 10, color: 'text.secondary' }}>
-          Груп ще немає. Натисніть «Створити групу».
+          {search ? 'Нічого не знайдено.' : 'Груп ще немає. Натисніть «Створити групу».'}
         </Box>
       ) : (
         <Grid container spacing={2}>
-          {groups.map((group) => (
+          {visibleGroups.map((group) => (
             <Grid key={group.id} size={{ xs: 12, sm: 6, md: 4 }}>
               <Card
                 elevation={0}

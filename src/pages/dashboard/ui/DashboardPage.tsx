@@ -12,6 +12,7 @@ import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty'
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote'
 import BackupIcon from '@mui/icons-material/Backup'
 import EditNoteIcon from '@mui/icons-material/EditNote'
+import AssignmentIcon from '@mui/icons-material/Assignment'
 import { dashboardApi, formatMoney } from '../../../shared/api'
 import type { DashboardPaymentMethod, TodayDashboard } from '../../../shared/api'
 import { useAuthStore, useCan } from '../../../entities/user'
@@ -79,7 +80,7 @@ const tasksLine = (count: number) => {
 }
 
 const buildRows = (data: TodayDashboard): AttentionRow[] => {
-  const { register, notices, debts, onlinePending, payroll, backups, notes } = data
+  const { register, notices, debts, onlinePending, payroll, backups, notes, tasks } = data
   const rows: AttentionRow[] = []
   if (register) {
     rows.push(
@@ -98,6 +99,34 @@ const buildRows = (data: TodayDashboard): AttentionRow[] => {
         action: 'Заповнити',
         cta: 'Заповнити нотатки',
         icon: EditNoteIcon,
+        alert: true,
+      })
+    })
+  }
+  if (tasks) {
+    tasks.mine.forEach((task) => {
+      rows.push({
+        key: `task-mine-${task.id}`,
+        to: '/tasks?tab=mine',
+        title: task.overdue ? `Прострочено: ${task.title}` : `Сьогодні до ${task.dueTime}: ${task.title}`,
+        meta: task.overdue ? 'прострочено' : 'Очікує виконання',
+        action: 'Відкрити',
+        cta: 'Відкрити завдання',
+        icon: AssignmentIcon,
+        alert: true,
+      })
+    })
+    tasks.given.forEach((task) => {
+      const names = task.notDone.slice(0, 3).map((user) => `${user.firstName} ${user.lastName}`).join(', ')
+      const more = task.notDone.length - 3
+      rows.push({
+        key: `task-given-${task.id}`,
+        to: '/tasks?tab=given',
+        title: `Не виконали: ${task.title}, ${task.total - task.done} з ${task.total}`,
+        meta: more > 0 ? `${names} ще ${more}` : names,
+        action: 'Переглянути',
+        cta: 'Відкрити завдання',
+        icon: AssignmentIcon,
         alert: true,
       })
     })

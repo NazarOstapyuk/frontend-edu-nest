@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Box, Tab, Tabs } from '@mui/material'
 import { useAuthStore } from '../../../entities/user'
 import { MyTasksTab } from './MyTasksTab'
@@ -10,7 +11,8 @@ export const TasksPage = () => {
   const role = useAuthStore((s) => s.profile?.role)
   const canGive = role === 'root' || role === 'admin'
   const hasMine = role !== 'root'
-  const [tab, setTab] = useState<TasksTab>(hasMine ? 'mine' : 'given')
+  const [searchParams] = useSearchParams()
+  const [tab, setTab] = useState<TasksTab>(searchParams.get('tab') === 'given' && canGive ? 'given' : hasMine ? 'mine' : 'given')
   const current: TasksTab = !canGive ? 'mine' : !hasMine ? 'given' : tab
 
   return (

@@ -16,6 +16,18 @@ export interface TodayDashboard {
   onlinePending?: { count: number };
   payroll?: { month: string; count: number; names: string[]; more: number };
   backups?: { configured: boolean; stale: boolean };
+  tasks?: {
+    mine: { id: string; title: string; dueAt: string; dueTime: string; overdue: boolean }[];
+    given: {
+      id: string;
+      title: string;
+      dueAt: string;
+      dueTime: string;
+      done: number;
+      total: number;
+      notDone: { id: string; firstName: string; lastName: string }[];
+    }[];
+  };
   notes?: { groups: { id: string; name: string; pending: number; overdue: boolean }[] };
 }
 

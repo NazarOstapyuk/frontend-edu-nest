@@ -8,12 +8,12 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Divider,
+  Typography,
   useMediaQuery,
   useTheme,
 } from '@mui/material'
-import { navItems, bottomNavItems } from '../model/nav-items'
-import type { NavItem } from '../model/nav-items'
+import { navItems, bottomNavItems, navSectionLabels } from '../model/nav-items'
+import type { NavItem, NavSection } from '../model/nav-items'
 import { canAccess, useAuthStore } from '../../../entities/user'
 import type { SessionRole } from '../../../entities/user'
 import { usePendingNoticesStore } from '../../../shared/model/pendingNoticesStore'
@@ -29,28 +29,55 @@ const NavButton = ({ item }: { item: NavItem }) => {
       <ListItemButton
         selected={isActive}
         sx={{
-          color: isActive ? brandColors.inkOnOrange : 'rgba(255,255,255,0.78)',
-          backgroundColor: isActive ? `${brandColors.orange} !important` : 'transparent',
+          minHeight: 42,
+          py: 0,
+          my: 0.25,
+          color: isActive ? brandColors.ink : brandColors.navInk,
+          backgroundColor: isActive ? `${brandColors.surface} !important` : 'transparent',
+          boxShadow: isActive ? '0 1px 2px rgba(34,35,28,.06), 0 0 0 1px rgba(34,35,28,.05)' : 'none',
           '&:hover': {
-            backgroundColor: isActive ? brandColors.orange : 'rgba(255,255,255,0.08)',
-            color: isActive ? brandColors.inkOnOrange : '#fff',
+            backgroundColor: isActive ? brandColors.surface : brandColors.navHover,
+          },
+          '&.Mui-focusVisible': {
+            outline: `2px solid ${brandColors.orange}`,
+            outlineOffset: 1,
           },
         }}
       >
-        <ListItemIcon sx={{ minWidth: 38, color: 'inherit' }}>
+        <ListItemIcon sx={{ minWidth: 36, color: isActive ? brandColors.navIcon : 'inherit' }}>
           {item.badge === 'pendingNotices' && pending > 0 ? (
-            <Badge badgeContent={pending} color="error"><item.icon fontSize="small" /></Badge>
+            <Badge badgeContent={pending} color="primary" sx={{ '& .MuiBadge-badge': { fontWeight: 800 } }}><item.icon fontSize="small" /></Badge>
           ) : (
             <item.icon fontSize="small" />
           )}
         </ListItemIcon>
         <ListItemText
           primary={item.label}
-          slotProps={{ primary: { sx: { fontSize: 14, fontWeight: isActive ? 800 : 500 } } }}
+          slotProps={{ primary: { sx: { fontSize: 14, fontWeight: isActive ? 800 : 600 } } }}
         />
       </ListItemButton>
     )}
   </NavLink>
+  )
+}
+
+const sectionOrder: (NavSection | undefined)[] = [undefined, 'people', 'classes', 'money']
+
+const NavGroup = ({ title, items }: { title?: string; items: NavItem[] }) => {
+  if (items.length === 0) return null
+  return (
+    <Box sx={{ mb: 1 }}>
+      {title && (
+        <Typography sx={{ fontSize: 12, fontWeight: 700, color: brandColors.label, px: 2.5, pt: 1.5, pb: 0.5 }}>
+          {title}
+        </Typography>
+      )}
+      <List disablePadding>
+        {items.map(item => (
+          <NavButton key={item.path} item={item} />
+        ))}
+      </List>
+    </Box>
   )
 }
 
@@ -78,6 +105,8 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps) => {
     (!!item.area && canAccess(profile, item.area, 'view')) ||
     !!item.areas?.some((a) => canAccess(profile, a, 'view'))
 
+  const visibleItems = navItems.filter(visible)
+
   return (
     <Drawer
       variant={isNarrow ? 'temporary' : 'permanent'}
@@ -90,43 +119,32 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps) => {
         '& .MuiDrawer-paper': {
           width: SIDEBAR_WIDTH,
           boxSizing: 'border-box',
-          backgroundColor: brandColors.oliveDeep,
-          color: '#fff',
+          backgroundColor: brandColors.ground,
+          color: brandColors.ink,
           border: 'none',
+          boxShadow: 'none',
+          overflowY: 'auto',
         },
       }}
     >
-      <Box sx={{ p: 1.5 }}>
-        <Box
-          sx={{
-            bgcolor: '#fff',
-            borderRadius: '18px',
-            pl: 1,
-            pr: 1.5,
-            py: 1,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-          }}
-        >
-          <Box component="img" src={mascotHeadUrl} alt="" sx={{ width: 48, height: 48, flexShrink: 0 }} />
-          <Box component="img" src={logoUrl} alt={BRAND_NAME} sx={{ flex: 1, minWidth: 0, display: 'block' }} />
-        </Box>
+      <Box sx={{ px: 2, pt: 2, pb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box component="img" src={mascotHeadUrl} alt="" sx={{ width: 44, height: 44, flexShrink: 0 }} />
+        <Box component="img" src={logoUrl} alt={BRAND_NAME} sx={{ width: 140, minWidth: 0, display: 'block' }} />
       </Box>
 
-      <List sx={{ flex: 1, pt: 0.5 }}>
-        {navItems.filter(visible).map(item => (
-          <NavButton key={item.path} item={item} />
+      <Box sx={{ flex: 1 }}>
+        {sectionOrder.map(section => (
+          <NavGroup
+            key={section ?? 'main'}
+            title={section ? navSectionLabels[section] : undefined}
+            items={visibleItems.filter(item => item.section === section)}
+          />
         ))}
-      </List>
+      </Box>
 
-      <Divider sx={{ borderColor: 'rgba(255,255,255,0.12)', mx: 2 }} />
-
-      <List sx={{ pb: 1 }}>
-        {bottomNavItems.filter(visible).map(item => (
-          <NavButton key={item.path} item={item} />
-        ))}
-      </List>
+      <Box sx={{ pb: 1 }}>
+        <NavGroup title={navSectionLabels.settings} items={bottomNavItems.filter(visible)} />
+      </Box>
     </Drawer>
   )
 }

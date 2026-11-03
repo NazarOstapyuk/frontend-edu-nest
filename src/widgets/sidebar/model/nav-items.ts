@@ -27,6 +27,15 @@ import type { SvgIconComponent } from '@mui/icons-material'
 import type { SessionRole } from '../../../entities/user'
 import type { PermissionArea } from '../../../shared/api'
 
+export type NavSection = 'people' | 'classes' | 'money' | 'settings'
+
+export const navSectionLabels: Record<NavSection, string> = {
+  people: 'Люди',
+  classes: 'Заняття',
+  money: 'Гроші',
+  settings: 'Налаштування',
+}
+
 export interface NavItem {
   label: string
   icon: SvgIconComponent
@@ -35,35 +44,36 @@ export interface NavItem {
   area?: PermissionArea
   areas?: PermissionArea[]
   badge?: 'pendingNotices'
+  section?: NavSection
 }
 
 export const navItems: NavItem[] = [
   { path: '/',                    label: 'Сьогодні',           icon: DashboardIcon },
   { path: '/register',            label: 'Журнал',            icon: FactCheckIcon,      roles: ['teacher'], area: 'register' },
+  { path: '/absence-notices',     label: 'Повідомлення',      icon: MarkEmailUnreadIcon, area: 'register', badge: 'pendingNotices' },
   { path: '/routine',            label: 'Розпорядок дня',    icon: ScheduleIcon,       roles: ['teacher'], area: 'timetable' },
   { path: '/schedule',           label: 'Розклад',           icon: ViewWeekIcon,       area: 'timetable' },
   { path: '/meals',              label: 'Харчування',        icon: RestaurantIcon,     area: 'meals' },
-  { path: '/payroll',            label: 'Зарплати',          icon: PaymentsIcon,       area: 'payroll' },
-  { path: '/absence-notices',     label: 'Повідомлення',      icon: MarkEmailUnreadIcon, area: 'register', badge: 'pendingNotices' },
-  { path: '/users',               label: 'Користувачі',       icon: ManageAccountsIcon, area: 'users' },
-  { path: '/positions',           label: 'Посади',            icon: BadgeIcon,          area: 'users' },
-  { path: '/groups',              label: 'Групи',             icon: GroupsIcon,         area: 'children' },
-  { path: '/students',            label: 'Учні',              icon: PeopleIcon,         area: 'children' },
-  { path: '/finance',             label: 'Фінанси',           icon: AccountBalanceWalletIcon, area: 'finance' },
-  { path: '/tariffs',             label: 'Тарифи',            icon: PriceChangeIcon,    area: 'tariffs' },
-  { path: '/classes',             label: 'Гуртки',            icon: CastleIcon,         area: 'classes' },
-  { path: '/my-classes',          label: 'Мої заняття',       icon: EventAvailableIcon, roles: ['teacher'] },
-  { path: '/my-lessons',         label: 'Мої уроки',         icon: MenuBookIcon,       roles: ['teacher'] },
-  { path: '/my-payroll',         label: 'Моя зарплата',      icon: RequestQuoteIcon,   roles: ['teacher'] },
-  { path: '/reports',           label: 'Звіти',             icon: AssessmentIcon,     areas: ['finance', 'register', 'timetable', 'classes', 'meals', 'payroll'] },
   { path: '/calendar',            label: 'Календар',          icon: CalendarMonthIcon,  area: 'register' },
-  { path: '/schedule-setup',     label: 'Довідники розкладу', icon: TuneIcon,          area: 'timetable' },
-  { path: '/absence-reasons',     label: 'Причини відсутності', icon: PlaylistAddCheckIcon, area: 'register' },
+  { path: '/students',            label: 'Учні',              icon: PeopleIcon,         area: 'children', section: 'people' },
+  { path: '/groups',              label: 'Групи',             icon: GroupsIcon,         area: 'children', section: 'people' },
+  { path: '/users',               label: 'Користувачі',       icon: ManageAccountsIcon, area: 'users', section: 'people' },
+  { path: '/positions',           label: 'Посади',            icon: BadgeIcon,          area: 'users', section: 'people' },
+  { path: '/classes',             label: 'Гуртки',            icon: CastleIcon,         area: 'classes', section: 'classes' },
+  { path: '/my-classes',          label: 'Мої заняття',       icon: EventAvailableIcon, roles: ['teacher'], section: 'classes' },
+  { path: '/my-lessons',         label: 'Мої уроки',         icon: MenuBookIcon,       roles: ['teacher'], section: 'classes' },
+  { path: '/finance',             label: 'Фінанси',           icon: AccountBalanceWalletIcon, area: 'finance', section: 'money' },
+  { path: '/tariffs',             label: 'Тарифи',            icon: PriceChangeIcon,    area: 'tariffs', section: 'money' },
+  { path: '/payroll',            label: 'Зарплати',          icon: PaymentsIcon,       area: 'payroll', section: 'money' },
+  { path: '/my-payroll',         label: 'Моя зарплата',      icon: RequestQuoteIcon,   roles: ['teacher'], section: 'money' },
+  { path: '/reports',           label: 'Звіти',             icon: AssessmentIcon,     areas: ['finance', 'register', 'timetable', 'classes', 'meals', 'payroll'], section: 'money' },
 ]
 
 export const bottomNavItems: NavItem[] = [
-  { path: '/audit', label: 'Історія змін', icon: HistoryIcon, area: 'audit' },
-  { path: '/backups', label: 'Резервні копії', icon: BackupIcon, area: 'backups' },
-  { path: '/institutions', label: 'Заклади', icon: ApartmentIcon, areas: ['settings', 'children'] },
-  { path: '/settings', label: 'Налаштування', icon: SettingsIcon, area: 'settings' },
+  { path: '/schedule-setup', label: 'Довідники розкладу', icon: TuneIcon, area: 'timetable', section: 'settings' },
+  { path: '/absence-reasons', label: 'Причини відсутності', icon: PlaylistAddCheckIcon, area: 'register', section: 'settings' },
+  { path: '/audit', label: 'Історія змін', icon: HistoryIcon, area: 'audit', section: 'settings' },
+  { path: '/backups', label: 'Резервні копії', icon: BackupIcon, area: 'backups', section: 'settings' },
+  { path: '/institutions', label: 'Заклади', icon: ApartmentIcon, areas: ['settings', 'children'], section: 'settings' },
+  { path: '/settings', label: 'Налаштування', icon: SettingsIcon, area: 'settings', section: 'settings' },
 ]

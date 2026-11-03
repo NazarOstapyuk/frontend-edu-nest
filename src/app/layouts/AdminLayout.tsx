@@ -28,7 +28,7 @@ export const AdminLayout = () => {
       <Header onMenuClick={() => setMobileOpen(true)} />
       <Toolbar />
 
-      <Box sx={{ flex: 1, p: { xs: 1.5, sm: 3 } }}>
+      <Box sx={{ flex: 1, p: { xs: 1.5, sm: 3 }, width: '100%', maxWidth: 1200, mx: 'auto', boxSizing: 'border-box' }}>
         <Outlet key={institutionId ?? 'all'} />
       </Box>
     </Box>

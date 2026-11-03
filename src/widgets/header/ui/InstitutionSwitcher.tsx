@@ -23,7 +23,7 @@ export const InstitutionSwitcher = () => {
       size="small"
       value={selectedId ?? ALL}
       onChange={(e) => select(e.target.value === ALL ? null : e.target.value)}
-      sx={{ minWidth: { xs: 0, sm: 200 }, maxWidth: { xs: 140, sm: 'none' } }}
+      sx={{ minWidth: { xs: 0, sm: 200 }, maxWidth: { xs: 140, sm: 'none' }, borderRadius: 999, bgcolor: 'background.paper', fontWeight: 700, '& .MuiSelect-select': { pl: 2 } }}
     >
       <MenuItem value={ALL}>Усі заклади</MenuItem>
       {institutions.map((institution) => (

@@ -89,7 +89,7 @@ export const RoutineWeek = ({ days, today, onEditDay, onResetDay }: RoutineWeekP
                   bgcolor: current ? 'action.selected' : undefined,
                 }}
               >
-                <Typography sx={{ width: 110, flexShrink: 0, fontWeight: 600, color: current ? 'primary.main' : 'text.secondary' }}>
+                <Typography sx={{ width: 110, flexShrink: 0, fontWeight: 600, color: current ? 'primary.dark' : 'text.secondary' }}>
                   {item.startTime}–{item.endTime}
                 </Typography>
                 <Typography sx={{ fontWeight: current ? 600 : 400 }}>

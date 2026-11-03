@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Box, Button, Paper, Typography } from '@mui/material'
 import { financeCategoryLabels, formatMoney, onlinePaymentsApi, type PublicLink } from '../../../shared/api'
+import { BRAND_NAME } from '../../../shared/assets/brand'
 
 const POLL_MS = 3000
 const POLL_LIMIT = 20
@@ -143,7 +144,7 @@ export const PayLinkPage = () => {
     <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2, bgcolor: 'grey.50' }}>
       <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: { xs: 2.5, sm: 4 }, width: '100%', maxWidth: 420 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>{link?.institution ?? 'EduNest'}</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>{link?.institution ?? BRAND_NAME}</Typography>
           {body}
         </Box>
       </Paper>

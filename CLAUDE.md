@@ -98,6 +98,7 @@ UI:
 - Form fields: only `Controller` + an MUI component (`TextField`, `TextField select`, `Autocomplete`) with `error={!!error}` and `helperText={error?.message}`, as in `CreateChildModal`. Don't use `RHFTextField` in new forms (it remains in users/login).
 - All UI text and validation messages are in **Ukrainian**.
 - Styling via `sx` and theme tokens (`text.secondary`, `divider`, `grey.50`).
+- Brand (Toddler): `shared/assets/brand` holds the logo, mascot images, `brandColors` (orange `#F2803F` = `primary`, olive `#9FA07D` = `secondary`, deep olive sidebar) and `BRAND_NAME`. Orange is light: buttons on it use dark `primary.contrastText`, and orange text on white uses `primary.dark` (the theme already does this for text/outlined buttons, primary icon buttons and outlined chips). Font Nunito (Google Fonts in `index.html`), buttons in sentence case.
 - Components: named exports, arrow functions.
 
 ### API errors

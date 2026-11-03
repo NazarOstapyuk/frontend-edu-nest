@@ -5,6 +5,7 @@ import MenuIcon from '@mui/icons-material/Menu'
 import { useAuthStore } from '../../../entities/user'
 import { SIDEBAR_WIDTH } from '../../sidebar/ui/Sidebar'
 import { InstitutionSwitcher } from './InstitutionSwitcher'
+import { BRAND_NAME } from '../../../shared/assets/brand'
 
 const pageTitles: Record<string, string> = {
   '/':          'Сьогодні',
@@ -71,7 +72,7 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
           <MenuIcon />
         </IconButton>
         <Typography variant="h6" noWrap sx={{ flex: 1, minWidth: 0, fontWeight: 600, color: 'text.primary' }}>
-          {pageTitles[pathname] ?? 'EduNest'}
+          {pageTitles[pathname] ?? BRAND_NAME}
         </Typography>
 
         {profile && profile.role !== 'parent' && <InstitutionSwitcher />}
@@ -81,7 +82,7 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
             sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }}
             onClick={(e) => setAnchor(e.currentTarget)}
           >
-            <Avatar sx={{ width: 34, height: 34, bgcolor: 'primary.main', fontSize: 14 }}>
+            <Avatar sx={{ width: 34, height: 34, bgcolor: 'primary.main', color: 'primary.contrastText', fontSize: 14, fontWeight: 800 }}>
               {`${profile.firstName[0] ?? ''}${profile.lastName[0] ?? ''}`}
             </Avatar>
             <Box sx={{ display: { xs: 'none', sm: 'block' } }}>

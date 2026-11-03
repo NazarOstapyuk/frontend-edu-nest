@@ -4,12 +4,12 @@ import {yupResolver} from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import {useNavigate} from 'react-router-dom'
 import {Box, Button, IconButton, InputAdornment, Typography} from '@mui/material'
-import SchoolIcon from '@mui/icons-material/School'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import {homePath, useAuthStore} from '../../../entities/user'
 import {translateError} from '../../../shared/api'
 import {RHFTextField} from '../../../shared/ui/RHFTextField'
+import {BRAND_NAME, brandColors, logoUrl, mascotHeadUrl, mascotUrl} from '../../../shared/assets/brand'
 
 const schema = yup.object({
     login: yup.string().required('Введіть логін'),
@@ -44,53 +44,74 @@ export const LoginPage = () => {
 
     return (
         <FormProvider {...methods}>
-            <Box
-                sx={{
-                    minHeight: '100vh',
-                    bgcolor: 'background.default',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    p: 2,
-                }}
-            >
+            <Box sx={{minHeight: '100vh', display: 'flex', bgcolor: 'background.paper'}}>
+                <Box
+                    sx={{
+                        display: {xs: 'none', md: 'flex'},
+                        flex: '0 0 44%',
+                        bgcolor: brandColors.oliveDeep,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        position: 'relative',
+                        overflow: 'hidden',
+                    }}
+                >
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            width: 460,
+                            height: 460,
+                            borderRadius: '50%',
+                            bgcolor: brandColors.olive,
+                            opacity: 0.35,
+                        }}
+                    />
+                    <Box
+                        component="img"
+                        src={mascotUrl}
+                        alt=""
+                        sx={{position: 'relative', width: 300, maxWidth: '70%', display: 'block'}}
+                    />
+                </Box>
+
+                <Box
+                    sx={{
+                        flex: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        p: 2,
+                    }}
+                >
                 <Box
                     component="form"
                     noValidate
                     onSubmit={methods.handleSubmit(onSubmit)}
                     sx={{
-                        bgcolor: 'background.paper',
-                        borderRadius: 3,
-                        boxShadow: '0 4px 24px rgba(0,0,0,0.10)',
-                        p: { xs: 3, sm: '40px 36px' },
+                        p: {xs: 1, sm: 2},
                         width: '100%',
-                        maxWidth: 400,
+                        maxWidth: 380,
                         boxSizing: 'border-box',
                         display: 'flex',
                         flexDirection: 'column',
-                        alignItems: 'center',
+                        alignItems: 'stretch',
                         gap: 2,
                     }}
                 >
                     <Box
-                        sx={{
-                            width: 56,
-                            height: 56,
-                            bgcolor: 'primary.main',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            mb: 0.5,
-                        }}
-                    >
-                        <SchoolIcon sx={{color: '#fff', fontSize: 28}}/>
-                    </Box>
+                        component="img"
+                        src={mascotHeadUrl}
+                        alt=""
+                        sx={{display: {xs: 'block', md: 'none'}, width: 88, height: 88, alignSelf: 'center'}}
+                    />
+                    <Box
+                        component="img"
+                        src={logoUrl}
+                        alt={BRAND_NAME}
+                        sx={{width: '100%', maxWidth: 300, alignSelf: 'center', display: 'block', mb: 2}}
+                    />
 
-                    <Typography variant="h6" sx={{fontWeight: 700, color: 'primary.main', lineHeight: 1}}>
-                        EduNest
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{mt: -1}}>
+                    <Typography variant="h5" component="h1">
                         Вхід до системи
                     </Typography>
 
@@ -132,6 +153,7 @@ export const LoginPage = () => {
                     >
                         Увійти
                     </Button>
+                </Box>
                 </Box>
             </Box>
         </FormProvider>

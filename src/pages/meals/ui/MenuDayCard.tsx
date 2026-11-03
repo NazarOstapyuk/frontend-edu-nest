@@ -106,7 +106,7 @@ export const MenuDayCard = ({ day, weekdayIndex, isToday, compact, canEdit, comp
           <Typography sx={{ fontWeight: 700, fontSize: compact ? 14 : 15, lineHeight: 1.2 }}>
             {compact ? weekdayNames[weekdayIndex].slice(0, 2) : weekdayNames[weekdayIndex]}
           </Typography>
-          <Typography variant="caption" color={isToday ? 'primary.main' : 'text.secondary'} sx={{ fontWeight: isToday ? 600 : 400 }}>
+          <Typography variant="caption" color={isToday ? 'primary.dark' : 'text.secondary'} sx={{ fontWeight: isToday ? 600 : 400 }}>
             {isToday ? `Сьогодні, ${longDate(day.date)}` : longDate(day.date)}
           </Typography>
         </Box>

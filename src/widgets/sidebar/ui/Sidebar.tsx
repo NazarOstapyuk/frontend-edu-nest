@@ -8,17 +8,16 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Typography,
   Divider,
   useMediaQuery,
   useTheme,
 } from '@mui/material'
-import SchoolIcon from '@mui/icons-material/School'
 import { navItems, bottomNavItems } from '../model/nav-items'
 import type { NavItem } from '../model/nav-items'
 import { canAccess, useAuthStore } from '../../../entities/user'
 import type { SessionRole } from '../../../entities/user'
 import { usePendingNoticesStore } from '../../../shared/model/pendingNoticesStore'
+import { BRAND_NAME, brandColors, logoUrl, mascotHeadUrl } from '../../../shared/assets/brand'
 
 export const SIDEBAR_WIDTH = 240
 
@@ -30,11 +29,11 @@ const NavButton = ({ item }: { item: NavItem }) => {
       <ListItemButton
         selected={isActive}
         sx={{
-          color: isActive ? '#fff' : 'rgba(255,255,255,0.65)',
-          backgroundColor: isActive ? 'rgba(255,255,255,0.15) !important' : 'transparent',
+          color: isActive ? brandColors.inkOnOrange : 'rgba(255,255,255,0.78)',
+          backgroundColor: isActive ? `${brandColors.orange} !important` : 'transparent',
           '&:hover': {
-            backgroundColor: 'rgba(255,255,255,0.08)',
-            color: '#fff',
+            backgroundColor: isActive ? brandColors.orange : 'rgba(255,255,255,0.08)',
+            color: isActive ? brandColors.inkOnOrange : '#fff',
           },
         }}
       >
@@ -47,7 +46,7 @@ const NavButton = ({ item }: { item: NavItem }) => {
         </ListItemIcon>
         <ListItemText
           primary={item.label}
-          slotProps={{ primary: { sx: { fontSize: 14, fontWeight: isActive ? 600 : 400 } } }}
+          slotProps={{ primary: { sx: { fontSize: 14, fontWeight: isActive ? 800 : 500 } } }}
         />
       </ListItemButton>
     )}
@@ -91,22 +90,31 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps) => {
         '& .MuiDrawer-paper': {
           width: SIDEBAR_WIDTH,
           boxSizing: 'border-box',
-          background: 'linear-gradient(180deg, #1a237e 0%, #283593 100%)',
+          backgroundColor: brandColors.oliveDeep,
           color: '#fff',
           border: 'none',
         },
       }}
     >
-      <Box sx={{ px: 3, py: 2.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        <SchoolIcon sx={{ fontSize: 28, color: '#90caf9' }} />
-        <Typography variant="h6" sx={{ color: '#fff', fontWeight: 700, fontSize: 18 }}>
-          EduNest
-        </Typography>
+      <Box sx={{ p: 1.5 }}>
+        <Box
+          sx={{
+            bgcolor: '#fff',
+            borderRadius: '18px',
+            pl: 1,
+            pr: 1.5,
+            py: 1,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+          }}
+        >
+          <Box component="img" src={mascotHeadUrl} alt="" sx={{ width: 48, height: 48, flexShrink: 0 }} />
+          <Box component="img" src={logoUrl} alt={BRAND_NAME} sx={{ flex: 1, minWidth: 0, display: 'block' }} />
+        </Box>
       </Box>
 
-      <Divider sx={{ borderColor: 'rgba(255,255,255,0.12)', mx: 2 }} />
-
-      <List sx={{ flex: 1, pt: 1.5 }}>
+      <List sx={{ flex: 1, pt: 0.5 }}>
         {navItems.filter(visible).map(item => (
           <NavButton key={item.path} item={item} />
         ))}

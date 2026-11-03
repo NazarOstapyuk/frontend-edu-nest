@@ -2,58 +2,53 @@ import type { ReactNode } from 'react'
 import { Box, Paper, Typography } from '@mui/material'
 import type { SvgIconComponent } from '@mui/icons-material'
 import { Link as RouterLink } from 'react-router-dom'
+import { brandColors } from '../../../shared/assets/brand'
 
 interface DashboardCardProps {
   to: string
   title: string
   icon: SvgIconComponent
-  alert: boolean
+  value: string
   children?: ReactNode
 }
 
-export const DashboardCard = ({ to, title, icon: Icon, alert, children }: DashboardCardProps) => {
-  const tone = alert ? { color: '#e65100', bg: '#fff3e0' } : { color: '#2e7d32', bg: '#e8f5e9' }
-  return (
-    <Paper
-      component={RouterLink}
-      to={to}
-      elevation={0}
-      sx={{
-        p: 2.5,
-        height: '100%',
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: 2,
-        border: '1px solid',
-        borderColor: 'divider',
-        borderRadius: 2,
-        textDecoration: 'none',
-        color: 'inherit',
-        transition: 'box-shadow .2s',
-        '&:hover': { boxShadow: 3 },
-      }}
-    >
+export const DashboardCard = ({ to, title, icon: Icon, value, children }: DashboardCardProps) => (
+  <Paper
+    component={RouterLink}
+    to={to}
+    elevation={0}
+    sx={{
+      p: 3,
+      height: '100%',
+      display: 'block',
+      borderRadius: '20px',
+      boxShadow: brandColors.outline,
+      textDecoration: 'none',
+      color: 'inherit',
+      transition: 'background-color .2s',
+      '&:hover': { bgcolor: brandColors.hoverRow },
+      '&:focus-visible': { outline: `2px solid ${brandColors.orange}`, outlineOffset: 2 },
+    }}
+  >
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
       <Box
         sx={{
-          width: 48,
-          height: 48,
-          borderRadius: 2,
-          bgcolor: tone.bg,
-          color: tone.color,
+          width: 40,
+          height: 40,
+          borderRadius: '12px',
+          bgcolor: brandColors.oliveTint,
+          color: brandColors.inkOnOliveSoft,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           flexShrink: 0,
         }}
       >
-        <Icon sx={{ fontSize: 24 }} />
+        <Icon sx={{ fontSize: 22 }} />
       </Box>
-      <Box sx={{ minWidth: 0 }}>
-        <Typography variant="body2" color="text.secondary">
-          {title}
-        </Typography>
-        {children}
-      </Box>
-    </Paper>
-  )
-}
+      <Typography sx={{ fontWeight: 800 }}>{title}</Typography>
+    </Box>
+    <Typography sx={{ fontSize: 34, fontWeight: 900, lineHeight: 1.15, mb: 1 }}>{value}</Typography>
+    {children}
+  </Paper>
+)

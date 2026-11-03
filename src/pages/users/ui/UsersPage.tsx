@@ -28,6 +28,7 @@ import { useInstitutionStore } from '../../../shared/model/institutionStore'
 import { HistoryButton } from '../../../widgets/auditHistory'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardList, CardField } from '../../../shared/ui/CardList'
+import { InitialsAvatar } from '../../../shared/ui/InitialsAvatar'
 import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog'
 import { SearchField } from '../../../shared/ui/SearchField'
 import { matchesSearch } from '../../../shared/lib/search'
@@ -139,7 +140,10 @@ export const UsersPage = () => {
           }
           renderCard={(user) => (
             <>
-              <Typography sx={{ fontWeight: 600, mb: 0.5 }}>{fullName(user)}</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+                <InitialsAvatar id={user.id} firstName={user.firstName} lastName={user.lastName} />
+                <Typography sx={{ fontWeight: 700 }}>{fullName(user)}</Typography>
+              </Box>
               <Box sx={{ mb: 0.5 }}>{roleChip(user)}</Box>
               <CardField label="Телефон">
                 {user.phone ?? '—'}
@@ -195,8 +199,11 @@ export const UsersPage = () => {
                   <TableCell sx={{ color: 'text.secondary', width: 40 }}>
                     {index + 1}
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 500 }}>
-                    {[user.lastName, user.firstName, user.middleName].filter(Boolean).join(' ')}
+                  <TableCell sx={{ fontWeight: 700 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <InitialsAvatar id={user.id} firstName={user.firstName} lastName={user.lastName} />
+                      {[user.lastName, user.firstName, user.middleName].filter(Boolean).join(' ')}
+                    </Box>
                   </TableCell>
                   <TableCell>
                     <Chip

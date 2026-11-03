@@ -32,6 +32,7 @@ import { CreateChildModal, EditChildModal } from '../../../widgets/childForms'
 import { HistoryButton } from '../../../widgets/auditHistory'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardList, CardField } from '../../../shared/ui/CardList'
+import { InitialsAvatar } from '../../../shared/ui/InitialsAvatar'
 import { SearchField } from '../../../shared/ui/SearchField'
 import { matchesSearch } from '../../../shared/lib/search'
 
@@ -198,7 +199,10 @@ export const ChildrenPage = () => {
             }
             renderCard={(child) => (
               <>
-                <Typography sx={{ fontWeight: 600, mb: 0.5 }}>{childName(child)}</Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+                  <InitialsAvatar id={child.id} firstName={child.firstName} lastName={child.lastName} />
+                  <Typography sx={{ fontWeight: 700 }}>{childName(child)}</Typography>
+                </Box>
                 <CardField label="Дата народження">{new Date(child.birthDate).toLocaleDateString('uk-UA')}</CardField>
                 <CardField label="Стать">{genderLabels[child.gender]}</CardField>
                 <CardField label="Група">{groupLabel(child) ?? '—'}</CardField>
@@ -249,8 +253,11 @@ export const ChildrenPage = () => {
               pagedChildren.map((child, index) => (
                 <TableRow key={child.id} hover sx={{ '&:last-child td': { borderBottom: 0 } }}>
                   <TableCell sx={{ color: 'text.secondary', width: 40 }}>{currentPage * rowsPerPage + index + 1}</TableCell>
-                  <TableCell sx={{ fontWeight: 500 }}>
-                    {[child.lastName, child.firstName, child.middleName].filter(Boolean).join(' ')}
+                  <TableCell sx={{ fontWeight: 700 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <InitialsAvatar id={child.id} firstName={child.firstName} lastName={child.lastName} />
+                      {[child.lastName, child.firstName, child.middleName].filter(Boolean).join(' ')}
+                    </Box>
                   </TableCell>
                   <TableCell sx={{ color: 'text.secondary' }}>
                     {new Date(child.birthDate).toLocaleDateString('uk-UA')}

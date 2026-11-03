@@ -16,7 +16,6 @@ import {
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import {
-  chargeStateLabels,
   financeCategoryLabels,
   formatDay,
   formatMoney,
@@ -29,8 +28,8 @@ import {
 import { PayDialog } from './PayDialog'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardField, CardList } from '../../../shared/ui/CardList'
-
-const stateColor = { paid: 'success', partial: 'warning', unpaid: 'error' } as const
+import { ChargeStateChip } from '../../../shared/ui/ChargeStateChip'
+import { brandColors } from '../../../shared/assets/brand'
 
 const period = (start: string | null, end: string | null) => {
   if (!start) return '—'
@@ -115,7 +114,7 @@ export const ChildFinanceTab = ({ childId, finance }: { childId: string; finance
         {active.map((s) => (
           <Paper key={s.category} elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: 2 }}>
             <Typography sx={{ fontWeight: 700 }}>{financeCategoryLabels[s.category]}</Typography>
-            <Typography color={Number(s.due) > 0 ? 'error.main' : 'text.primary'}>До оплати: {formatMoney(s.due)}</Typography>
+            <Typography sx={{ color: Number(s.due) > 0 ? brandColors.debt : 'text.primary', fontWeight: Number(s.due) > 0 ? 800 : 400 }}>До оплати: {formatMoney(s.due)}</Typography>
             {Number(s.overdue) > 0 && <Typography variant="body2" color="error.main">Прострочено: {formatMoney(s.overdue)}</Typography>}
             {Number(s.prepayment) > 0 && <Typography variant="body2" color="text.secondary">Передоплата: {formatMoney(s.prepayment)}</Typography>}
             {enabled && (
@@ -148,7 +147,7 @@ export const ChildFinanceTab = ({ childId, finance }: { childId: string; finance
                 <CardField label="Сплачено">{formatMoney(c.paid)}</CardField>
                 <CardField label="Залишок">{formatMoney(c.remaining)}</CardField>
                 <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
-                  <Chip size="small" color={stateColor[c.state]} variant="outlined" label={chargeStateLabels[c.state]} />
+                  <ChargeStateChip state={c.state} />
                   {c.overdue && <Chip size="small" color="error" label="Прострочено" />}
                 </Box>
               </>
@@ -182,7 +181,7 @@ export const ChildFinanceTab = ({ childId, finance }: { childId: string; finance
                   <TableCell align="right">{formatMoney(c.remaining)}</TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                      <Chip size="small" color={stateColor[c.state]} variant="outlined" label={chargeStateLabels[c.state]} />
+                      <ChargeStateChip state={c.state} />
                       {c.overdue && <Chip size="small" color="error" label="Прострочено" />}
                     </Box>
                   </TableCell>

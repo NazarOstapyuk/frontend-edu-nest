@@ -17,19 +17,12 @@ import { useChildFinanceStore } from '../model/childFinanceStore'
 import { useCan } from '../../../entities/user'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardList, CardField } from '../../../shared/ui/CardList'
+import { ChargeStateChip } from '../../../shared/ui/ChargeStateChip'
 import {
-  chargeStateLabels,
   financeCategoryLabels,
   formatMoney,
-  type ChargeState,
   type FinanceCharge,
 } from '../../../shared/api'
-
-const stateColors: Record<ChargeState, 'error' | 'warning' | 'success'> = {
-  unpaid: 'error',
-  partial: 'warning',
-  paid: 'success',
-}
 
 const formatDate = (value: string) => new Date(value).toLocaleDateString('uk-UA')
 
@@ -70,12 +63,7 @@ export const ChargesTable = ({ charges }: ChargesTableProps) => {
     charge.voidedAt ? (
       <Chip label="Скасовано" size="small" />
     ) : (
-      <Chip
-        label={chargeStateLabels[charge.state]}
-        size="small"
-        color={stateColors[charge.state]}
-        variant="outlined"
-      />
+      <ChargeStateChip state={charge.state} />
     )
 
   if (isPhone) {
@@ -164,12 +152,7 @@ export const ChargesTable = ({ charges }: ChargesTableProps) => {
                     {voided ? (
                       <Chip label="Скасовано" size="small" />
                     ) : (
-                      <Chip
-                        label={chargeStateLabels[charge.state]}
-                        size="small"
-                        color={stateColors[charge.state]}
-                        variant="outlined"
-                      />
+                      <ChargeStateChip state={charge.state} />
                     )}
                   </TableCell>
                   <TableCell align="right">

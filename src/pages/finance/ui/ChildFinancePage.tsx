@@ -4,7 +4,7 @@ import { Box, Button, IconButton, Tab, Tabs, Typography } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useChildFinanceStore } from '../model/childFinanceStore'
-import { formatMoney, onlinePaymentsApi } from '../../../shared/api'
+import { onlinePaymentsApi } from '../../../shared/api'
 import { useCan } from '../../../entities/user'
 import { CategoryTiles } from './CategoryTiles'
 import { ChargesTable } from './ChargesTable'
@@ -52,7 +52,6 @@ export const ChildFinancePage = () => {
     return <Typography color="text.secondary">Завантаження…</Typography>
   }
 
-  const totalDue = Number(finance.totals.totalDue)
   const tabs = [
     { key: 'charges', label: `Нарахування (${finance.charges.length})` },
     { key: 'payments', label: `Оплати (${finance.payments.length})` },
@@ -88,18 +87,7 @@ export const ChildFinancePage = () => {
           entityId={finance.child.id}
           title={`${finance.child.lastName} ${finance.child.firstName}`}
         />
-        <Box sx={{ ml: { xs: 0, sm: 'auto' }, textAlign: { xs: 'left', sm: 'right' }, width: { xs: '100%', sm: 'auto' } }}>
-          <Typography sx={{ fontWeight: 700, color: totalDue > 0 ? 'error.main' : 'success.main' }}>
-            {totalDue >= 0
-              ? `Разом до сплати: ${formatMoney(totalDue)}`
-              : `Передоплата: ${formatMoney(-totalDue)}`}
-          </Typography>
-          {Number(finance.totals.unallocated) > 0 && (
-            <Typography variant="body2" color="text.secondary">
-              Нерозподілено: {formatMoney(finance.totals.unallocated)}
-            </Typography>
-          )}
-        </Box>
+        <Box sx={{ flex: 1, display: { xs: 'none', sm: 'block' } }} />
         {canEdit && (
           <Button
             variant="outlined"
@@ -127,7 +115,11 @@ export const ChildFinancePage = () => {
         )}
       </Box>
 
-      <CategoryTiles categories={finance.categories} />
+      <CategoryTiles
+        categories={finance.categories}
+        totalDue={finance.totals.totalDue}
+        unallocated={finance.totals.unallocated}
+      />
 
       <Tabs
         value={tab}

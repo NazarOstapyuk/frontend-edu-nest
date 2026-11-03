@@ -22,6 +22,7 @@ import { SearchField } from '../../../shared/ui/SearchField'
 import { matchesSearch } from '../../../shared/lib/search'
 import { useFinanceBalancesStore } from '../model/financeBalancesStore'
 import { useGroupsStore } from '../../groups/model/groupsStore'
+import { brandColors } from '../../../shared/assets/brand'
 import {
   financeCategories,
   financeCategoryLabels,
@@ -151,12 +152,12 @@ export const FinanceBalancesPage = () => {
                 <CardField label="Разом до сплати">
                   <Box
                     component="span"
-                    sx={{ fontWeight: 600, color: Number(row.totalDue) > 0 ? 'error.main' : 'text.primary' }}
+                    sx={{ fontWeight: Number(row.totalDue) > 0 ? 800 : 600, color: Number(row.totalDue) > 0 ? brandColors.debt : 'text.primary' }}
                   >
                     {formatMoney(row.totalDue)}
                   </Box>
                 </CardField>
-                <CardField label="Борг">{formatMoney(row.debt)}</CardField>
+                <CardField label="Борг"><Box component="span" sx={Number(row.debt) > 0 ? { color: brandColors.debt, fontWeight: 800 } : undefined}>{formatMoney(row.debt)}</Box></CardField>
                 <CardField label="Передоплата">{formatMoney(row.prepayment)}</CardField>
                 <CardField label="Нерозподілено">{formatMoney(row.unallocated)}</CardField>
               </Box>
@@ -226,11 +227,11 @@ export const FinanceBalancesPage = () => {
                   <TableCell sx={{ color: 'text.secondary' }}>{row.group?.name ?? '—'}</TableCell>
                   <TableCell
                     align="right"
-                    sx={{ fontWeight: 600, color: Number(row.totalDue) > 0 ? 'error.main' : 'text.primary' }}
+                    sx={{ fontWeight: Number(row.totalDue) > 0 ? 800 : 600, color: Number(row.totalDue) > 0 ? brandColors.debt : 'text.primary' }}
                   >
                     {formatMoney(row.totalDue)}
                   </TableCell>
-                  <TableCell align="right">{formatMoney(row.debt)}</TableCell>
+                  <TableCell align="right" sx={Number(row.debt) > 0 ? { color: brandColors.debt, fontWeight: 800 } : undefined}>{formatMoney(row.debt)}</TableCell>
                   <TableCell align="right">{formatMoney(row.prepayment)}</TableCell>
                   <TableCell align="right">{formatMoney(row.unallocated)}</TableCell>
                 </TableRow>

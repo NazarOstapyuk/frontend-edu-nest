@@ -21,9 +21,9 @@ const schema = yup.object({
   periodEnd: yup
     .string()
     .default('')
-    .test('both', 'Вкажіть обидві дати періоду', function (value) {
+    .test('start-first', 'Спершу вкажіть початок періоду', function (value) {
       const { periodStart } = this.parent as { periodStart: string }
-      return !!value === !!periodStart
+      return !value || !!periodStart
     })
     .test('after-start', 'Кінець періоду раніше за початок', function (value) {
       const { periodStart } = this.parent as { periodStart: string }

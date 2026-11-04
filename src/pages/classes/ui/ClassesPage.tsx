@@ -249,7 +249,15 @@ export const ClassesPage = () => {
             <Chip size="small" variant="outlined" label={missedRuleLabels[direction.missedRule]} />
             {!direction.isActive && <Chip size="small" label="Вимкнено" />}
             {canEdit && (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, ml: 'auto' }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 1,
+                  ml: 'auto',
+                  '& .MuiButton-root': { minHeight: { xs: 40, sm: 'unset' } },
+                }}
+              >
                 <Button
                   size="small"
                   startIcon={<EditOutlinedIcon />}
@@ -291,6 +299,7 @@ export const ClassesPage = () => {
                   <Button
                     size="small"
                     color="inherit"
+                    sx={{ minHeight: { xs: 40, sm: 'unset' } }}
                     onClick={() =>
                       setGroupModal({ isOpen: true, directionId: direction.id, group: null, defaultName: direction.name })
                     }

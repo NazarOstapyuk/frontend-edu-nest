@@ -7,7 +7,6 @@ import {
   tariffsApi,
   usersApi,
   type ClassGroupDto,
-  type DirectionGroupDto,
   type ClassGroupSummary,
   type Direction,
   type DirectionDto,
@@ -34,7 +33,7 @@ interface ClassesState {
   fetchAll: () => Promise<void>;
   saveDirection: (dto: DirectionDto, id?: string) => Promise<void>;
   saveGroup: (dto: ClassGroupDto, id?: string) => Promise<void>;
-  saveCircle: (direction: Direction, dto: DirectionDto, group?: Partial<DirectionGroupDto>) => Promise<void>;
+  saveCircle: (direction: Direction, dto: DirectionDto, group?: Partial<ClassGroupDto>) => Promise<void>;
   setDirectionActive: (id: string, isActive: boolean) => Promise<void>;
   deleteDirection: (id: string) => Promise<void>;
   deleteGroup: (id: string) => Promise<void>;
@@ -106,7 +105,11 @@ export const useClassesStore = create<ClassesState>((set, get) => {
           const { data } = await directionsApi.update(direction.id, dto);
           set({ directions: data });
         } catch (error) {
-          if (single && group) await refreshDirections().catch(() => undefined);
+          if (single && group) {
+            if (group.name !== undefined && group.name !== single.name)
+              await classGroupsApi.update(single.id, { name: single.name }).catch(() => undefined);
+            await refreshDirections().catch(() => undefined);
+          }
           throw error;
         }
       } finally {

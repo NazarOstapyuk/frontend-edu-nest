@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { Box, Button, Dialog, DialogTitle, MenuItem, TextField } from '@mui/material'
+import { Box, Button, Dialog, DialogTitle, FormControlLabel, MenuItem, Switch, TextField } from '@mui/material'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { useClassesStore } from '../model/classesStore'
 import {
@@ -22,6 +22,7 @@ const schema = yup.object({
   teacherIds: yup.array().of(yup.string().required()).default([]),
   singleTariffId: yup.string().default(''),
   packageTariffId: yup.string().default(''),
+  groupActive: yup.boolean().default(true),
 })
 
 type FormValues = yup.InferType<typeof schema>
@@ -33,6 +34,7 @@ const defaults: FormValues = {
   teacherIds: [],
   singleTariffId: '',
   packageTariffId: '',
+  groupActive: true,
 }
 
 export const DirectionModal = () => {
@@ -40,12 +42,13 @@ export const DirectionModal = () => {
   const setDirectionModal = useClassesStore((s) => s.setDirectionModal)
   const saveDirection = useClassesStore((s) => s.saveDirection)
   const saveCircle = useClassesStore((s) => s.saveCircle)
+  const directions = useClassesStore((s) => s.directions)
   const isSaving = useClassesStore((s) => s.isSaving)
   const isPhone = useIsPhone()
   const group = direction?.groups.length === 1 ? direction.groups[0] : null
   const withGroup = !direction || !!group
 
-  const { control, handleSubmit, reset } = useForm<FormValues>({
+  const { control, handleSubmit, reset, setError } = useForm<FormValues>({
     mode: 'all',
     defaultValues: defaults,
     resolver: yupResolver(schema),
@@ -62,6 +65,7 @@ export const DirectionModal = () => {
             teacherIds: group?.teachers.map((t) => t.id) ?? [],
             singleTariffId: group?.singleTariff?.id ?? '',
             packageTariffId: group?.packageTariff?.id ?? '',
+            groupActive: group?.isActive ?? true,
           }
         : defaults,
     )
@@ -74,6 +78,10 @@ export const DirectionModal = () => {
 
   const onSubmit = async (values: FormValues) => {
     const name = values.name.trim()
+    if (directions.some((d) => d.name === name && d.id !== direction?.id)) {
+      setError('name', { message: 'Гурток з такою назвою вже існує' })
+      return
+    }
     const groupDto: DirectionGroupDto = {
       format: values.format,
       teacherIds: values.teacherIds,
@@ -87,7 +95,7 @@ export const DirectionModal = () => {
       await saveCircle(
         direction,
         { name, missedRule: values.missedRule },
-        group ? { ...groupDto, ...(renameGroup ? { name } : {}) } : undefined,
+        group ? { ...groupDto, isActive: values.groupActive, ...(renameGroup ? { name } : {}) } : undefined,
       )
     }
     handleClose()
@@ -116,6 +124,18 @@ export const DirectionModal = () => {
           )}
         />
         {withGroup && <GroupFields control={control} group={group} />}
+        {group && (
+          <Controller
+            name="groupActive"
+            control={control}
+            render={({ field }) => (
+              <FormControlLabel
+                control={<Switch checked={field.value} onChange={(e) => field.onChange(e.target.checked)} />}
+                label="Активна"
+              />
+            )}
+          />
+        )}
         <Box sx={{ display: 'flex', gap: '10px' }}>
           <Button onClick={handleClose} color="inherit" sx={{ width: '100%' }}>
             Скасувати

@@ -2,27 +2,48 @@ import { useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { Box, Button, Dialog, DialogTitle, FormControlLabel, MenuItem, Switch, TextField } from '@mui/material'
+import { Box, Button, Dialog, DialogTitle, MenuItem, TextField } from '@mui/material'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { useClassesStore } from '../model/classesStore'
-import { missedRuleLabels, missedRules, type MissedLessonRule } from '../../../shared/api'
+import {
+  classFormats,
+  missedRuleLabels,
+  missedRules,
+  type ClassFormat,
+  type DirectionGroupDto,
+  type MissedLessonRule,
+} from '../../../shared/api'
+import { GroupFields } from './GroupFields'
 
 const schema = yup.object({
   name: yup.string().trim().required("Обов'язкове поле").min(2, 'Мінімум 2 символи').max(100, 'Максимум 100 символів'),
   missedRule: yup.mixed<MissedLessonRule>().oneOf(missedRules).required("Обов'язкове поле"),
-  isActive: yup.boolean().default(true),
+  format: yup.mixed<ClassFormat>().oneOf(classFormats).required("Обов'язкове поле"),
+  teacherIds: yup.array().of(yup.string().required()).default([]),
+  singleTariffId: yup.string().default(''),
+  packageTariffId: yup.string().default(''),
 })
 
 type FormValues = yup.InferType<typeof schema>
 
-const defaults: FormValues = { name: '', missedRule: 'no_charge', isActive: true }
+const defaults: FormValues = {
+  name: '',
+  missedRule: 'no_charge',
+  format: 'group',
+  teacherIds: [],
+  singleTariffId: '',
+  packageTariffId: '',
+}
 
 export const DirectionModal = () => {
   const { isOpen, direction } = useClassesStore((s) => s.directionModal)
   const setDirectionModal = useClassesStore((s) => s.setDirectionModal)
   const saveDirection = useClassesStore((s) => s.saveDirection)
+  const saveCircle = useClassesStore((s) => s.saveCircle)
   const isSaving = useClassesStore((s) => s.isSaving)
   const isPhone = useIsPhone()
+  const group = direction?.groups.length === 1 ? direction.groups[0] : null
+  const withGroup = !direction || !!group
 
   const { control, handleSubmit, reset } = useForm<FormValues>({
     mode: 'all',
@@ -31,10 +52,20 @@ export const DirectionModal = () => {
   })
 
   useEffect(() => {
-    if (isOpen) {
-      reset(direction ? { name: direction.name, missedRule: direction.missedRule, isActive: direction.isActive } : defaults)
-    }
-  }, [isOpen, direction, reset])
+    if (!isOpen) return
+    reset(
+      direction
+        ? {
+            name: direction.name,
+            missedRule: direction.missedRule,
+            format: group?.format ?? 'group',
+            teacherIds: group?.teachers.map((t) => t.id) ?? [],
+            singleTariffId: group?.singleTariff?.id ?? '',
+            packageTariffId: group?.packageTariff?.id ?? '',
+          }
+        : defaults,
+    )
+  }, [isOpen, direction, group, reset])
 
   const handleClose = () => {
     reset(defaults)
@@ -42,16 +73,29 @@ export const DirectionModal = () => {
   }
 
   const onSubmit = async (values: FormValues) => {
-    await saveDirection(
-      { name: values.name.trim(), missedRule: values.missedRule, isActive: values.isActive },
-      direction?.id,
-    )
+    const name = values.name.trim()
+    const groupDto: DirectionGroupDto = {
+      format: values.format,
+      teacherIds: values.teacherIds,
+      singleTariffId: values.singleTariffId || null,
+      packageTariffId: values.packageTariffId || null,
+    }
+    if (!direction) {
+      await saveDirection({ name, missedRule: values.missedRule, group: groupDto })
+    } else {
+      const renameGroup = !!group && group.name === direction.name && name !== direction.name
+      await saveCircle(
+        direction,
+        { name, missedRule: values.missedRule },
+        group ? { ...groupDto, ...(renameGroup ? { name } : {}) } : undefined,
+      )
+    }
     handleClose()
   }
 
   return (
     <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="sm" fullScreen={isPhone}>
-      <DialogTitle sx={{ fontWeight: 700 }}>{direction ? 'Редагувати напрям' : 'Новий напрям'}</DialogTitle>
+      <DialogTitle sx={{ fontWeight: 700 }}>{direction ? 'Редагувати гурток' : 'Новий гурток'}</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '20px' }}>
         <Controller
           name="name"
@@ -71,18 +115,7 @@ export const DirectionModal = () => {
             </TextField>
           )}
         />
-        {direction && (
-          <Controller
-            name="isActive"
-            control={control}
-            render={({ field }) => (
-              <FormControlLabel
-                control={<Switch checked={field.value} onChange={(e) => field.onChange(e.target.checked)} />}
-                label="Активний"
-              />
-            )}
-          />
-        )}
+        {withGroup && <GroupFields control={control} group={group} />}
         <Box sx={{ display: 'flex', gap: '10px' }}>
           <Button onClick={handleClose} color="inherit" sx={{ width: '100%' }}>
             Скасувати

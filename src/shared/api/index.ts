@@ -118,6 +118,7 @@ export type {
   ChildPackage,
   ReconciliationItem,
   DirectionDto,
+  DirectionGroupDto,
   ClassGroupDto,
   MarkLessonDto,
   PurchasePackageDto,

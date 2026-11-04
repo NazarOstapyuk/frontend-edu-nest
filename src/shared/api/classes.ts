@@ -137,10 +137,19 @@ export interface ReconciliationItem {
   totalPrice: string;
 }
 
+export interface DirectionGroupDto {
+  name?: string;
+  format: ClassFormat;
+  teacherIds: string[];
+  singleTariffId: string | null;
+  packageTariffId: string | null;
+}
+
 export interface DirectionDto {
   name: string;
   missedRule: MissedLessonRule;
   isActive?: boolean;
+  group?: DirectionGroupDto;
 }
 
 export interface ClassGroupDto {

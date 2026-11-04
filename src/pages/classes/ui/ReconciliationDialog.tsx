@@ -23,7 +23,7 @@ export const ReconciliationDialog = () => {
             renderCard={(item) => (
               <>
                 <Typography sx={{ fontWeight: 600, mb: 0.5 }}>{item.child.lastName} {item.child.firstName}</Typography>
-                <CardField label="Напрям">{item.directionName}</CardField>
+                <CardField label="Гурток">{item.directionName}</CardField>
                 <CardField label="Залишок">{item.remaining} з {item.sessionsTotal}</CardField>
                 <CardField label="Повна ціна">{formatMoney(item.totalPrice)}</CardField>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 0.5 }}>
@@ -38,7 +38,7 @@ export const ReconciliationDialog = () => {
             <TableHead>
               <TableRow>
                 <TableCell>Учень</TableCell>
-                <TableCell>Напрям</TableCell>
+                <TableCell>Гурток</TableCell>
                 <TableCell align="right">Залишок</TableCell>
                 <TableCell align="right">Повна ціна</TableCell>
                 <TableCell />

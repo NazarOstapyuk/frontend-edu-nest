@@ -264,7 +264,7 @@ export const PackagesTab = ({ childId }: PackagesTabProps) => {
           <TableHead>
             <TableRow sx={{ '& th': { fontWeight: 700, bgcolor: 'grey.50' } }}>
               <TableCell />
-              <TableCell>Напрям</TableCell>
+              <TableCell>Гурток</TableCell>
               <TableCell>Тариф</TableCell>
               <TableCell align="right">Використано</TableCell>
               <TableCell align="right">Залишок</TableCell>

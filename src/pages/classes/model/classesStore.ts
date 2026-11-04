@@ -7,6 +7,7 @@ import {
   tariffsApi,
   usersApi,
   type ClassGroupDto,
+  type DirectionGroupDto,
   type ClassGroupSummary,
   type Direction,
   type DirectionDto,
@@ -23,14 +24,19 @@ interface ClassesState {
   isLoading: boolean;
   isSaving: boolean;
   directionModal: { isOpen: boolean; direction: Direction | null };
-  groupModal: { isOpen: boolean; directionId: string | null; group: ClassGroupSummary | null };
+  groupModal: { isOpen: boolean; directionId: string | null; group: ClassGroupSummary | null; defaultName: string };
   reconciliationOpen: boolean;
   setDirectionModal: (value: Partial<{ isOpen: boolean; direction: Direction | null }>) => void;
-  setGroupModal: (value: Partial<{ isOpen: boolean; directionId: string | null; group: ClassGroupSummary | null }>) => void;
+  setGroupModal: (
+    value: Partial<{ isOpen: boolean; directionId: string | null; group: ClassGroupSummary | null; defaultName: string }>,
+  ) => void;
   setReconciliationOpen: (open: boolean) => void;
   fetchAll: () => Promise<void>;
   saveDirection: (dto: DirectionDto, id?: string) => Promise<void>;
   saveGroup: (dto: ClassGroupDto, id?: string) => Promise<void>;
+  saveCircle: (direction: Direction, dto: DirectionDto, group?: Partial<DirectionGroupDto>) => Promise<void>;
+  setDirectionActive: (id: string, isActive: boolean) => Promise<void>;
+  deleteDirection: (id: string) => Promise<void>;
   migrateLegacy: () => Promise<void>;
 }
 
@@ -51,7 +57,7 @@ export const useClassesStore = create<ClassesState>((set, get) => {
     isLoading: false,
     isSaving: false,
     directionModal: { isOpen: false, direction: null },
-    groupModal: { isOpen: false, directionId: null, group: null },
+    groupModal: { isOpen: false, directionId: null, group: null, defaultName: '' },
     reconciliationOpen: false,
 
     setDirectionModal: (value) => set((state) => ({ directionModal: { ...state.directionModal, ...value } })),
@@ -84,6 +90,43 @@ export const useClassesStore = create<ClassesState>((set, get) => {
       try {
         if (id) await classGroupsApi.update(id, dto);
         else await classGroupsApi.create(dto);
+        await refreshDirections().catch(() => undefined);
+      } finally {
+        set({ isSaving: false });
+      }
+    },
+
+    saveCircle: async (direction, dto, group) => {
+      set({ isSaving: true });
+      try {
+        const single = direction.groups.length === 1 ? direction.groups[0] : null;
+        if (single && group) await classGroupsApi.update(single.id, group);
+        try {
+          const { data } = await directionsApi.update(direction.id, dto);
+          set({ directions: data });
+        } catch (error) {
+          if (single && group) await refreshDirections().catch(() => undefined);
+          throw error;
+        }
+      } finally {
+        set({ isSaving: false });
+      }
+    },
+
+    setDirectionActive: async (id, isActive) => {
+      set({ isSaving: true });
+      try {
+        const { data } = await directionsApi.update(id, { isActive });
+        set({ directions: data });
+      } finally {
+        set({ isSaving: false });
+      }
+    },
+
+    deleteDirection: async (id) => {
+      set({ isSaving: true });
+      try {
+        await directionsApi.delete(id);
         await refreshDirections().catch(() => undefined);
       } finally {
         set({ isSaving: false });

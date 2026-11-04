@@ -87,7 +87,7 @@ export const errorMessages: Record<string, string> = {
   'Cannot delete: direction is in use': 'Не можна видалити: гурток уже використовується (є заняття, пакети або ставки). Вимкніть його',
   'Class group not found': 'Групу не знайдено',
   'Class group with this name already exists in the direction': 'Група з такою назвою вже є в цьому гуртку',
-  'Cannot delete: group is in use': 'Не можна видалити: у групи є заняття',
+  'Cannot delete: group is in use': 'Не можна видалити: у групі вже були заняття або є ставки. Вимкніть її',
   'Invalid teachers': 'Обрані користувачі не є педагогами',
   'Member not found': 'Учасника не знайдено',
   'Child is already a member of this group': 'Дитина вже в цій групі',

@@ -71,9 +71,10 @@ interface GroupListProps {
   direction: Direction
   canEdit: boolean
   onEdit: (group: ClassGroupSummary) => void
+  onDelete: (group: ClassGroupSummary) => void
 }
 
-const GroupList = ({ direction, canEdit, onEdit }: GroupListProps) => {
+const GroupList = ({ direction, canEdit, onEdit, onDelete }: GroupListProps) => {
   const navigate = useNavigate()
   const isPhone = useIsPhone()
 
@@ -103,6 +104,16 @@ const GroupList = ({ direction, canEdit, onEdit }: GroupListProps) => {
                     }}
                   >
                     <EditOutlinedIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton
+                    aria-label="Видалити групу гуртка"
+                    color="error"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onDelete(group)
+                    }}
+                  >
+                    <DeleteOutlinedIcon fontSize="small" />
                   </IconButton>
                 </Box>
               )}
@@ -150,6 +161,20 @@ const GroupList = ({ direction, canEdit, onEdit }: GroupListProps) => {
                     </IconButton>
                   </Tooltip>
                 )}
+                {canEdit && (
+                  <Tooltip title="Видалити групу гуртка">
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onDelete(group)
+                      }}
+                    >
+                      <DeleteOutlinedIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                )}
               </TableCell>
             </TableRow>
           ))}
@@ -170,8 +195,10 @@ export const ClassesPage = () => {
   const migrateLegacy = useClassesStore((s) => s.migrateLegacy)
   const setDirectionActive = useClassesStore((s) => s.setDirectionActive)
   const deleteDirection = useClassesStore((s) => s.deleteDirection)
+  const deleteGroup = useClassesStore((s) => s.deleteGroup)
   const canEdit = useCan('classes', 'edit')
   const [deleting, setDeleting] = useState<Direction | null>(null)
+  const [deletingGroup, setDeletingGroup] = useState<ClassGroupSummary | null>(null)
 
   useEffect(() => {
     fetchAll().catch(() => undefined)
@@ -282,6 +309,7 @@ export const ClassesPage = () => {
               direction={direction}
               canEdit={canEdit}
               onEdit={(group) => setGroupModal({ isOpen: true, directionId: direction.id, group, defaultName: '' })}
+              onDelete={setDeletingGroup}
             />
           )}
         </Paper>
@@ -296,6 +324,13 @@ export const ClassesPage = () => {
         text={deleting ? `Видалити гурток «${deleting.name}» разом з його групами? Це можна зробити, лише поки в ньому не було занять і пакетів.` : ''}
         onConfirm={() => deleting && deleteDirection(deleting.id)}
         onClose={() => setDeleting(null)}
+      />
+      <ConfirmDialog
+        open={!!deletingGroup}
+        title="Видалити групу"
+        text={deletingGroup ? `Видалити групу «${deletingGroup.name}»? Це можна, поки в ній не було занять і ставок.` : ''}
+        onConfirm={() => deletingGroup && deleteGroup(deletingGroup.id)}
+        onClose={() => setDeletingGroup(null)}
       />
     </Box>
   )

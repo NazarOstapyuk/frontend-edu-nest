@@ -37,6 +37,7 @@ interface ClassesState {
   saveCircle: (direction: Direction, dto: DirectionDto, group?: Partial<DirectionGroupDto>) => Promise<void>;
   setDirectionActive: (id: string, isActive: boolean) => Promise<void>;
   deleteDirection: (id: string) => Promise<void>;
+  deleteGroup: (id: string) => Promise<void>;
   migrateLegacy: () => Promise<void>;
 }
 
@@ -127,6 +128,16 @@ export const useClassesStore = create<ClassesState>((set, get) => {
       set({ isSaving: true });
       try {
         await directionsApi.delete(id);
+        await refreshDirections().catch(() => undefined);
+      } finally {
+        set({ isSaving: false });
+      }
+    },
+
+    deleteGroup: async (id) => {
+      set({ isSaving: true });
+      try {
+        await classGroupsApi.delete(id);
         await refreshDirections().catch(() => undefined);
       } finally {
         set({ isSaving: false });

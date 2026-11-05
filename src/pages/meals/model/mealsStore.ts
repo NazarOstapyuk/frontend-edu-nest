@@ -110,7 +110,8 @@ export const useMealsStore = create<MealsState>((set, get) => {
       const kind = patch.kind ?? state.ordersKind;
       const groupId = patch.groupId ?? state.ordersGroupId;
       const key = `${date}/${kind}/${groupId}`;
-      set({ ordersDate: date, ordersKind: kind, ordersGroupId: groupId, ordersKey: key, orders: [], summary: null, ordersFailed: false });
+      const fresh = key === state.ordersKey ? {} : { orders: [], summary: null };
+      set({ ordersDate: date, ordersKind: kind, ordersGroupId: groupId, ordersKey: key, ...fresh, ordersFailed: false });
       try {
         const { data } = await mealsApi.getOrders(date, kind || undefined, groupId || undefined);
         if (get().ordersKey === key) set({ orders: data.orders, summary: data.summary });

@@ -51,3 +51,20 @@ export const weekSummary = (days: MenuDayView[]): WeekSummary => {
     states,
   }
 }
+
+export const weekdayShortNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд']
+
+export const plural = (n: number, forms: [string, string, string]) => {
+  const m10 = n % 10
+  const m100 = n % 100
+  if (m10 === 1 && m100 !== 11) return forms[0]
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return forms[1]
+  return forms[2]
+}
+
+export const ordersWord = (n: number) => plural(n, ['замовлення', 'замовлення', 'замовлень'])
+
+export const ordersLabel = (n: number) => `${n} ${ordersWord(n)}`
+
+export const rangeLabel = (from: string, to: string) =>
+  from.slice(0, 7) === to.slice(0, 7) ? `${Number(from.slice(8, 10))} – ${longDate(to)}` : `${longDate(from)} – ${longDate(to)}`

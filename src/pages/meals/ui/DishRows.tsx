@@ -1,31 +1,11 @@
 import { Box, Typography } from '@mui/material'
 import type { DayDishRow } from '../model/dayDishes'
-import { courseColorAt } from '../model/courseColors'
+import { courseColorFor } from '../model/courseColors'
 import { useMealsStore } from '../model/mealsStore'
 
-export const DishRows = ({ rows, compact = false }: { rows: DayDishRow[]; compact?: boolean }) => {
+export const DishRows = ({ rows }: { rows: DayDishRow[] }) => {
   const courses = useMealsStore((st) => st.courses)
-  const order = [...courses].sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, 'uk')).map((c) => c.id)
-  const courseColor = (id: string) => courseColorAt(Math.max(0, order.indexOf(id)))
-
-  if (compact) {
-    return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-        {rows.map((row) => (
-          <Box key={row.key} sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0 }}>
-            <Box sx={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0, bgcolor: courseColor(row.key).dot }} />
-            <Typography
-              variant="body2"
-              title={`${row.title}: ${row.names.join(' або ')}`}
-              sx={{ fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
-            >
-              {row.names.join(' або ')}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
-    )
-  }
+  const courseColor = (id: string) => courseColorFor(courses, id)
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>

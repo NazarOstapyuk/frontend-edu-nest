@@ -1,4 +1,4 @@
-import type { MealComplex, MenuDayView } from '../../../shared/api'
+import { isoWeekdayLabels, type MealComplex, type MenuDayView } from '../../../shared/api'
 
 export type MenuDayState = 'off' | 'empty' | 'draft' | 'published'
 
@@ -52,7 +52,7 @@ export const weekSummary = (days: MenuDayView[]): WeekSummary => {
   }
 }
 
-export const weekdayShortNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд']
+export const weekdayShortNames = isoWeekdayLabels
 
 export const plural = (n: number, forms: [string, string, string]) => {
   const m10 = n % 10
@@ -68,3 +68,6 @@ export const ordersLabel = (n: number) => `${n} ${ordersWord(n)}`
 
 export const rangeLabel = (from: string, to: string) =>
   from.slice(0, 7) === to.slice(0, 7) ? `${Number(from.slice(8, 10))} – ${longDate(to)}` : `${longDate(from)} – ${longDate(to)}`
+
+export const itemsSignature = (items: { week: number; weekday: number; dishId: string }[]) =>
+  items.map((i) => `${i.week}/${i.weekday}/${i.dishId}`).sort().join(',')

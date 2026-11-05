@@ -15,7 +15,7 @@ const weeksLabel = (n: number) => (n === 1 ? '1 тиждень' : n < 5 ? `${n} 
 
 const PREVIEW_LIMIT = 8
 
-export const ApplyTemplateDialog = ({ onClose }: { onClose: () => void }) => {
+export const ApplyTemplateDialog = ({ onClose, templateId: preselectedId }: { onClose: () => void; templateId?: string }) => {
   const isPhone = useIsPhone()
   const templates = useMealsStore((s) => s.templates)
   const current = useMealsStore((s) => s.menuInstitutionId)
@@ -25,12 +25,12 @@ export const ApplyTemplateDialog = ({ onClose }: { onClose: () => void }) => {
   const applyTemplate = useMealsStore((s) => s.applyTemplate)
   const push = useNotifyStore((s) => s.push)
   const active = templates.filter((t) => t.active)
-  const [templateId, setTemplateId] = useState(active[0]?.id ?? '')
+  const [templateId, setTemplateId] = useState(active.find((t) => t.id === preselectedId)?.id ?? active[0]?.id ?? '')
   const [from, setFrom] = useState(menuStart)
   const [to, setTo] = useState(addDaysIso(weekStart(menuStart), menuWeeks * 7 - 3))
   const [startWeek, setStartWeek] = useState(1)
   const [overwrite, setOverwrite] = useState(false)
-  const [institutionIds, setInstitutionIds] = useState<string[]>([current])
+  const [institutionIds, setInstitutionIds] = useState<string[]>(current ? [current] : [])
   const template = active.find((t) => t.id === templateId)
   const periodValid = Boolean(from && to && to >= from)
   const invalid = institutionIds.length === 0 || !template || !periodValid || startWeek > (template?.weeks ?? 0)

@@ -21,6 +21,7 @@ export const brandColors = {
   navIcon: '#E06B28',
   hairline: '#EEEEE6',
   outline: '0 0 0 1px rgba(34,35,28,.08)',
+  floatShadow: '0 12px 32px rgba(34,35,28,.25)',
   hoverRow: '#FBFBF7',
   navHover: '#ECEDE4',
   tableHead: '#FAFAF6',

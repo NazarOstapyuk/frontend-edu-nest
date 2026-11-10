@@ -5,9 +5,11 @@ import {
   childrenApi,
   groupsApi,
   softList,
+  tariffsApi,
   usersApi,
   type Child,
   type Group,
+  type Tariff,
   type UserLookup,
   type ReportDefinition,
   type ReportFilter,
@@ -83,9 +85,11 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
   const [groups, setGroups] = useState<Group[]>([])
   const [children, setChildren] = useState<Child[]>([])
   const [teachers, setTeachers] = useState<UserLookup[]>([])
+  const [tariffs, setTariffs] = useState<Tariff[]>([])
 
   const canListGroups = useCan('children', 'view')
   const canListChildren = useCan('children', 'view')
+  const canListTariffs = useCan('tariffs', 'view')
 
   const available: Record<ReportFilter, boolean> = {
     institution: true,
@@ -93,12 +97,14 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
     group: canListGroups,
     child: canListChildren,
     teacher: true,
+    tariff: canListTariffs,
   }
   const has = (filter: ReportFilter) => definition.filters.includes(filter) && available[filter]
   const showInstitution = has('institution')
   const showGroup = has('group')
   const showChild = has('child')
   const showTeacher = has('teacher')
+  const showTariff = has('tariff')
   const canPickKind = profile?.role === 'root' || profile?.accessScope === 'all'
 
   useEffect(() => {
@@ -118,10 +124,15 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
         if (!stale) setTeachers(list)
       })
     }
+    if (showTariff) {
+      softList(tariffsApi.getList()).then((list) => {
+        if (!stale) setTariffs(list)
+      })
+    }
     return () => {
       stale = true
     }
-  }, [showGroup, showChild, showTeacher])
+  }, [showGroup, showChild, showTeacher, showTariff])
 
   useEffect(() => {
     if (showInstitution) setQuery({ institutionId: selectedInstitutionId ?? undefined, ...(selectedInstitutionId ? { kind: undefined } : {}) })
@@ -132,11 +143,17 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
     (!q.institutionId || g.institution.id === q.institutionId) &&
     (!q.kind || g.kind === q.kind) &&
     (!q.groupId || g.id === q.groupId)
+  const matchesTariff = (t: Tariff, institutionId?: string) =>
+    !institutionId || t.institutionId === null || t.institutionId === institutionId
   const update = (partial: Partial<ReportQuery>) => {
     const next = { ...query, ...partial }
     if (partial.institutionId !== undefined && next.groupId && !groups.some((g) => g.id === next.groupId && matchesGroup(g, { ...next, groupId: undefined }))) {
       next.groupId = undefined
       partial = { ...partial, groupId: undefined }
+    }
+    if (partial.institutionId !== undefined && next.tariffId) {
+      const tariff = tariffs.find((t) => t.id === next.tariffId)
+      if (tariff && !matchesTariff(tariff, next.institutionId)) partial = { ...partial, tariffId: undefined }
     }
     const scopeChanged = 'institutionId' in partial || 'groupId' in partial || 'kind' in partial
     if (scopeChanged && next.childId && !children.some((c) => c.id === next.childId && matchesGroup(c.group, next))) {
@@ -146,6 +163,8 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
   }
   const visibleGroups = groups.filter((g) => matchesGroup(g, { ...query, groupId: undefined }))
   const visibleChildren = children.filter((c) => matchesGroup(c.group, query))
+  const visibleTariffs = tariffs.filter((t) => matchesTariff(t, query.institutionId) && (t.isActive || t.id === query.tariffId))
+  const institutionName = (id: string | null) => (id && !query.institutionId ? institutions.find((i) => i.id === id)?.name : undefined)
   const busy = loading || downloading
 
   return (
@@ -256,6 +275,29 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
             onChange={(_, teacher) => update({ teacherId: teacher?.id })}
             renderInput={(params) => <TextField {...params} label="Вчитель" />}
           />
+        )}
+        {showTariff && (
+          <TextField
+            select
+            label="Тариф"
+            size="small"
+            sx={{ minWidth: { sm: 200 } }}
+            value={visibleTariffs.some((t) => t.id === query.tariffId) ? query.tariffId : ''}
+            onChange={(e) => update({ tariffId: e.target.value || undefined })}
+            slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}
+          >
+            <MenuItem value="">Усі тарифи</MenuItem>
+            {visibleTariffs.map((t) => {
+              const owner = institutionName(t.institutionId)
+              return (
+                <MenuItem key={t.id} value={t.id}>
+                  {t.name}
+                  {owner ? ` (${owner})` : ''}
+                  {t.isActive ? '' : ' (неактивний)'}
+                </MenuItem>
+              )
+            })}
+          </TextField>
         )}
         <Button variant="contained" disabled={busy} onClick={() => load()}>
           Сформувати

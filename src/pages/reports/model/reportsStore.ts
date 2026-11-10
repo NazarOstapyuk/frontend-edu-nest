@@ -52,6 +52,7 @@ export const useReportsStore = create<ReportsState>((set, get) => ({
     if (definition?.filters.includes('group')) next.groupId = query.groupId;
     if (definition?.filters.includes('child')) next.childId = query.childId;
     if (definition?.filters.includes('teacher')) next.teacherId = query.teacherId;
+    if (definition?.filters.includes('tariff')) next.tariffId = query.tariffId;
     set({ selected: key, query: next, report: null, loading: false, failed: false });
   },
   setQuery: (partial) => set({ query: { ...get().query, ...partial } }),
@@ -94,6 +95,7 @@ useInstitutionStore.subscribe((state, prev) => {
         groupId: undefined,
         childId: undefined,
         teacherId: undefined,
+        tariffId: undefined,
         ...(state.selectedId ? { kind: undefined } : {}),
       },
     });

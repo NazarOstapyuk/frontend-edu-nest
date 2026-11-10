@@ -40,9 +40,10 @@ export interface ReportQuery {
   childId?: string;
   teacherId?: string;
   institutionId?: string;
+  tariffId?: string;
 }
 
-export type ReportFilter = 'institution' | 'kind' | 'group' | 'child' | 'teacher';
+export type ReportFilter = 'institution' | 'kind' | 'group' | 'child' | 'teacher' | 'tariff';
 
 export interface ReportDefinition {
   key: ReportKey;
@@ -55,7 +56,7 @@ export interface ReportDefinition {
 
 export const reportDefinitions: ReportDefinition[] = [
   { key: 'payments', fileName: 'оплати', label: 'Оплати', areas: ['finance'], period: true, filters: ['institution', 'kind', 'group', 'child'] },
-  { key: 'charges', fileName: 'нарахування', label: 'Нарахування', areas: ['finance'], period: true, filters: ['institution', 'kind', 'group', 'child'] },
+  { key: 'charges', fileName: 'нарахування', label: 'Нарахування', areas: ['finance'], period: true, filters: ['institution', 'kind', 'group', 'child', 'tariff'] },
   { key: 'debts', fileName: 'борги', label: 'Борги', areas: ['finance'], period: false, filters: ['institution', 'kind', 'group', 'child'] },
   { key: 'attendance', fileName: 'відвідування', label: 'Відвідування', areas: ['register'], period: true, filters: ['institution', 'kind', 'group', 'child'] },
   { key: 'lessons', fileName: 'уроки', label: 'Уроки', areas: ['timetable', 'classes'], period: true, filters: ['institution', 'kind', 'group', 'teacher'] },

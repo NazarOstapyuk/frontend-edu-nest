@@ -29,7 +29,7 @@ const schema = yup.object({
   lastName: yup.string().min(3, 'Мінімум 3 символи').required("Обов'язкове поле"),
   position: yup.string().required('Оберіть посаду'),
   login: yup.string().min(3, 'Мінімум 3 символи').required("Обов'язкове поле"),
-  password: yup.string().transform((v) => v === '' ? undefined : v).min(6, 'Мінімум 6 символів').optional(),
+  password: yup.string().default('').test('min', 'Мінімум 6 символів', (value) => !value || value.length >= 6),
   middleName: yup.string().default('').max(100, 'Максимум 100 символів'),
   phone: yup.string().default('').when('position', {
       is: 'parent',
@@ -61,7 +61,7 @@ export const EditUserModal = () => {
     if (isOpen) loadPositions().catch(() => undefined)
   }, [isOpen, loadPositions])
 
-  const methods = useForm<any>({
+  const methods = useForm({
     mode: 'all',
     defaultValues: {
       firstName: '',

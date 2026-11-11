@@ -280,10 +280,44 @@ export const errorMessages: Record<string, string> = {
   'Cannot assign this user': 'Цьому користувачу не можна поставити завдання',
 };
 
+const usageForms: Record<string, [string, string, string]> = {
+  lessons: ['заняття', 'заняття', 'занять'],
+  packages: ['пакет', 'пакети', 'пакетів'],
+  rates: ['ставка', 'ставки', 'ставок'],
+};
+
+const usageMessages: Record<string, (details: string) => string> = {
+  'Cannot delete: direction is in use': (details) =>
+    `Не можна видалити: гурток уже використовується (${details}). Вимкніть його`,
+  'Cannot delete: group is in use': (details) =>
+    `Не можна видалити: групу вже використовують (${details}). Вимкніть її`,
+};
+
+const pluralForm = (count: number, [one, few, many]: [string, string, string]) => {
+  const tens = count % 100;
+  const units = count % 10;
+  if (tens >= 11 && tens <= 14) return many;
+  if (units === 1) return one;
+  if (units >= 2 && units <= 4) return few;
+  return many;
+};
+
+const describeUsage = (usage: unknown): string | null => {
+  if (typeof usage !== 'object' || usage === null) return null;
+  const parts = Object.entries(usage as Record<string, unknown>).flatMap(([key, count]) =>
+    typeof count === 'number' && count > 0 && usageForms[key]
+      ? [`${count} ${pluralForm(count, usageForms[key])}`]
+      : [],
+  );
+  return parts.length ? parts.join(', ') : null;
+};
+
 export const translateError = (error: unknown): string => {
   if (typeof error === 'object' && error !== null && 'message' in error) {
-    const { message } = error as { message: unknown };
+    const { message, usage } = error as { message: unknown; usage?: unknown };
     if (typeof message === 'string') {
+      const details = usageMessages[message] && describeUsage(usage);
+      if (details) return usageMessages[message](details);
       const dated = /^(\d{4})-(\d{2})-(\d{2}): (.+)$/.exec(message);
       if (dated) {
         const text = errorMessages[dated[4]];

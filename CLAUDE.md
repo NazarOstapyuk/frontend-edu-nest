@@ -107,7 +107,7 @@ UI:
 
 ### API errors
 
-Server errors are shown centrally: the axios response interceptor (`shared/api/axiosInstance.ts`) pushes a snackbar with `translateError(data)` for every non-401 error and still rejects with `error.response.data`. Translations live in `shared/api/errorMessages.ts` (backend English `message` → Ukrainian; unknown messages and `ValidationPipe` arrays → «Сталася помилка. Спробуйте ще раз.»). When the backend adds a message, add its translation there. Stores and components do not show server errors themselves; they only keep modals open on failure.
+Server errors are shown centrally: the axios response interceptor (`shared/api/axiosInstance.ts`) pushes a snackbar with `translateError(data)` for every non-401 error and still rejects with `error.response.data`. Translations live in `shared/api/errorMessages.ts` (backend English `message` → Ukrainian; unknown messages and `ValidationPipe` arrays → «Сталася помилка. Спробуйте ще раз.»). When the backend adds a message, add its translation there. Errors that carry `usage` counts (`Cannot delete: direction is in use`, `Cannot delete: group is in use`) are rendered with those counts through `usageMessages` in the same file. Stores and components do not show server errors themselves; they only keep modals open on failure.
 
 Backend error contract (backend repo `backend-edu-nest`, see its CLAUDE.md):
 - Body is the NestJS default `{ statusCode, message, error }`, which is what the interceptor rejects with.

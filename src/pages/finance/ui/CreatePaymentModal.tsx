@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { Box, Button, Dialog, DialogTitle, MenuItem, TextField, Typography } from '@mui/material'
+import { Box, Button, Dialog, DialogTitle, ListSubheader, MenuItem, TextField, Typography } from '@mui/material'
 import { useChildFinanceStore } from '../model/childFinanceStore'
 import { allocationItemSchema, amountSchema } from '../model/schemas'
 import { AllocationTable } from './AllocationTable'
@@ -14,6 +14,9 @@ import {
   paymentMethodLabels,
   toAllocationItems,
   toKopecks,
+  type AllocationSuggestion,
+  type AllocationSuggestionDto,
+  type ChildFinance,
   type FinanceCategory,
   type ManualPaymentMethod,
   type SuggestionLine,
@@ -21,6 +24,54 @@ import {
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 
 const manualMethods: ManualPaymentMethod[] = ['cash', 'bank_transfer', 'card']
+
+const CHARGE_PREFIX = 'charge:'
+
+const toFormAllocations = (lines: SuggestionLine[]) =>
+  lines.map((line) => ({
+    chargeId: line.chargeId,
+    amount: Number(line.suggestedAmount) > 0 ? line.suggestedAmount : '',
+  }))
+
+const getOpenCharges = (finance: ChildFinance) =>
+  finance.charges.filter((c) => !c.voidedAt && Number(c.remaining) > 0)
+
+const findSelectedCharge = (finance: ChildFinance, category: string) =>
+  category.startsWith(CHARGE_PREFIX)
+    ? getOpenCharges(finance).find((c) => c.id === category.slice(CHARGE_PREFIX.length))
+    : undefined
+
+const getPaymentCategory = (finance: ChildFinance, category: string): FinanceCategory | undefined =>
+  findSelectedCharge(finance, category)?.category ??
+  (category && !category.startsWith(CHARGE_PREFIX) ? (category as FinanceCategory) : undefined)
+
+const loadLines = async (
+  finance: ChildFinance,
+  category: string,
+  amount: string,
+  suggest: (childId: string, dto: AllocationSuggestionDto) => Promise<AllocationSuggestion>,
+): Promise<SuggestionLine[]> => {
+  const charge = findSelectedCharge(finance, category)
+  if (charge) {
+    const take = Math.min(toKopecks(amount), toKopecks(charge.remaining))
+    return [
+      {
+        chargeId: charge.id,
+        category: charge.category,
+        description: charge.description,
+        periodStart: charge.periodStart,
+        createdAt: charge.createdAt,
+        remaining: charge.remaining,
+        suggestedAmount: (take / 100).toFixed(2),
+      },
+    ]
+  }
+  const data = await suggest(finance.child.id, {
+    amount: normalizeAmount(amount),
+    category: getPaymentCategory(finance, category),
+  })
+  return data.lines
+}
 
 const today = () => {
   const now = new Date()
@@ -74,9 +125,17 @@ export const CreatePaymentModal = () => {
   const category = watch('category')
   const amountValue = watch('amount')
 
+  const openCharges = finance ? getOpenCharges(finance) : []
+  const paymentCategory = finance ? getPaymentCategory(finance, category) : undefined
+
   const clearAllocation = () => {
     setLines([])
     setValue('allocations', [])
+  }
+
+  const applyLines = (next: SuggestionLine[]) => {
+    setLines(next)
+    setValue('allocations', toFormAllocations(next))
   }
 
   useEffect(() => {
@@ -92,19 +151,10 @@ export const CreatePaymentModal = () => {
     if (!isOpen || !finance || !amountSchema.isValidSync(amountValue)) return
     let active = true
     const timer = setTimeout(async () => {
-      const data = await suggestAllocation(finance.child.id, {
-        amount: normalizeAmount(amountValue),
-        category: category ? (category as FinanceCategory) : undefined,
-      }).catch(() => null)
-      if (!active || !data) return
-      setLines(data.lines)
-      setValue(
-        'allocations',
-        data.lines.map((line) => ({
-          chargeId: line.chargeId,
-          amount: Number(line.suggestedAmount) > 0 ? line.suggestedAmount : '',
-        })),
-      )
+      const next = await loadLines(finance, category, amountValue, suggestAllocation).catch(() => null)
+      if (!active || !next) return
+      setLines(next)
+      setValue('allocations', toFormAllocations(next))
     }, 500)
     return () => {
       active = false
@@ -121,43 +171,22 @@ export const CreatePaymentModal = () => {
 
   const handleSuggest = async () => {
     if (!finance || !(await trigger('amount'))) return
-    const values = getValues()
-    const data = await suggestAllocation(finance.child.id, {
-      amount: normalizeAmount(values.amount),
-      category: values.category ? (values.category as FinanceCategory) : undefined,
-    })
-    setLines(data.lines)
-    setValue(
-      'allocations',
-      data.lines.map((line) => ({
-        chargeId: line.chargeId,
-        amount: Number(line.suggestedAmount) > 0 ? line.suggestedAmount : '',
-      })),
-    )
+    applyLines(await loadLines(finance, category, getValues('amount'), suggestAllocation))
   }
 
   const onSubmit = async (values: FormValues) => {
     if (!finance) return
-    const categoryValue = values.category ? (values.category as FinanceCategory) : undefined
     let allocations = toAllocationItems(values.allocations)
     if (!allocations.length && !cleared.current && lines.length === 0) {
-      const data = await suggestAllocation(finance.child.id, {
-        amount: normalizeAmount(values.amount),
-        category: categoryValue,
-      })
-      allocations = toAllocationItems(
-        data.lines.map((line) => ({
-          chargeId: line.chargeId,
-          amount: Number(line.suggestedAmount) > 0 ? line.suggestedAmount : '',
-        })),
-      )
+      const next = await loadLines(finance, values.category, values.amount, suggestAllocation)
+      allocations = toAllocationItems(toFormAllocations(next))
     }
     await createPayment(finance.child.id, {
       amount: normalizeAmount(values.amount),
       method: values.method,
       reference: values.reference.trim() || undefined,
       receivedAt: values.receivedAt,
-      category: categoryValue,
+      category: paymentCategory,
       note: values.note.trim() || undefined,
       allocations,
     })
@@ -244,6 +273,12 @@ export const CreatePaymentModal = () => {
               <MenuItem value="">Без категорії</MenuItem>
               {financeCategories.map((key) => (
                 <MenuItem key={key} value={key}>{financeCategoryLabels[key]}</MenuItem>
+              ))}
+              {openCharges.length > 0 && <ListSubheader>Неоплачені нарахування</ListSubheader>}
+              {openCharges.map((charge) => (
+                <MenuItem key={charge.id} value={`${CHARGE_PREFIX}${charge.id}`} sx={{ whiteSpace: 'normal' }}>
+                  {charge.description} — {formatMoney(charge.remaining)}
+                </MenuItem>
               ))}
             </TextField>
           )}

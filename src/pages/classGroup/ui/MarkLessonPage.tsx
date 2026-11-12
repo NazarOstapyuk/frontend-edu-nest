@@ -87,6 +87,8 @@ export const MarkLessonPage = () => {
   const isBlocked = (row: (typeof rows)[number]) =>
     row.isMember && !row.packageInfo && !roster.hasSingleTariff && !row.attendance
   const missedRule = roster.group.direction.missedRule
+  const blockOf = (row: (typeof rows)[number]) =>
+    row.packageBlock ?? (isBlocked(row) ? { reason: 'none' as const, date: null } : null)
   const statusDisabled = (row: (typeof rows)[number], status: AttendanceStatus) => {
     if (!isBlocked(row)) return false
     if (status === 'present') return true
@@ -113,13 +115,13 @@ export const MarkLessonPage = () => {
       />
     ) : row.isMember && roster.hasSingleTariff ? (
       <Chip size="small" color="warning" variant="outlined" label="Без пакета — разове заняття" />
-    ) : row.isMember && row.packageBlock ? (
+    ) : row.isMember && blockOf(row) ? (
       <Box>
-        <Chip size="small" color="error" variant="outlined" label={blockLabel(row.packageBlock)} />
+        <Chip size="small" color="error" variant="outlined" label={blockLabel(blockOf(row)!)} />
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-          {row.packageBlock.reason === 'expired'
+          {blockOf(row)?.reason === 'expired'
             ? 'Можна лише пропуск. Продовжте пакет або купіть новий.'
-            : row.packageBlock.reason === 'starts_later'
+            : blockOf(row)?.reason === 'starts_later'
               ? 'Можна лише пропуск. Змініть дату покупки пакета або купіть пакет на цю дату.'
               : 'Можна лише пропуск. Купіть пакет.'}
           {canFinance && (

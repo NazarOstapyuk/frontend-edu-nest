@@ -59,4 +59,7 @@ export const usersApi = {
 
   delete: (id: string) =>
     axiosInstance.delete(`/users/${id}`),
+
+  revealPassword: (id: string) =>
+    axiosInstance.post<{ password: string | null }>(`/users/${id}/password`),
 };

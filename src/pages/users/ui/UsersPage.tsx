@@ -19,11 +19,12 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
 import { scopeLabels } from '../../../shared/api'
-import { roleLabels, useCan, type User } from '../../../entities/user'
+import { roleLabels, useAuthStore, useCan, type User } from '../../../entities/user'
 import { useUsersStore } from '../model/usersStore'
 import { CreateUserModal } from '../../../widgets/userForms'
 import { EditUserModal } from './EditUserModal.tsx'
 import { AccessDialog } from './AccessDialog.tsx'
+import { PasswordButton } from './PasswordButton'
 import { useInstitutionStore } from '../../../shared/model/institutionStore'
 import { HistoryButton } from '../../../widgets/auditHistory'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
@@ -50,6 +51,7 @@ export const UsersPage = () => {
   const deleteUser = useUsersStore((s) => s.deleteUser)
   const replaceUser = useUsersStore((s) => s.replaceUser)
   const canEditUsers = useCan('users', 'edit')
+  const isRoot = useAuthStore((s) => s.profile?.role === 'root')
   const institutions = useInstitutionStore((s) => s.institutions)
   const [accessUser, setAccessUser] = useState<User | null>(null)
   const [deletingUser, setDeletingUser] = useState<User | null>(null)
@@ -154,6 +156,7 @@ export const UsersPage = () => {
               <CardField label="Заклади">{scopeText(user)}</CardField>
               <CardField label="Логін">
                 <Box component="span" sx={{ fontFamily: 'monospace' }}>{user.login}</Box>
+                {isRoot && <PasswordButton user={user} />}
               </CardField>
               <CardField label="Створено">
                 {new Date(user.createdAt).toLocaleDateString('uk-UA', { timeZone: 'Europe/Kyiv' })}
@@ -229,7 +232,10 @@ export const UsersPage = () => {
                             .join(', ') || '—'
                         : scopeLabels.all}
                   </TableCell>
-                  <TableCell sx={{ fontFamily: 'monospace' }}>{user.login}</TableCell>
+                  <TableCell sx={{ fontFamily: 'monospace', whiteSpace: 'nowrap' }}>
+                    {user.login}
+                    {isRoot && <PasswordButton user={user} />}
+                  </TableCell>
                   <TableCell sx={{ color: 'text.secondary' }}>
                     {new Date(user.createdAt).toLocaleDateString('uk-UA', { timeZone: 'Europe/Kyiv' })}
                   </TableCell>

@@ -135,6 +135,7 @@ const routeLabels: Record<string, string> = {
   'POST /charges/:id/void': 'Анульовано нарахування',
   'POST /payments/:id/void': 'Анульовано оплату',
   'PATCH /users/:id/access': 'Змінено доступ',
+  'POST /users/:id/password': 'Переглянуто пароль',
   'PUT /groups/:id/register': 'Збережено журнал',
   'POST /billing/run': 'Запущено нарахування',
   'POST /backups': 'Створено резервну копію',

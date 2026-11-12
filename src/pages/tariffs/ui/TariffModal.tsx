@@ -17,7 +17,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useTariffsStore } from '../model/tariffsStore'
 import { useEffectiveInstitutions, useInstitutionStore } from '../../../shared/model/institutionStore'
 import { useCanManageShared } from '../../../entities/user'
@@ -49,6 +49,48 @@ const priceSchema = yup.object({
 })
 
 type PriceValues = yup.InferType<typeof priceSchema>
+
+const VALIDITY_HINT =
+  'Скільки календарних днів пакет діє від дати покупки. Це не кількість занять. Порожньо — без терміну: пакет діє, доки не закінчаться заняття. Нове значення діє для нових пакетів.'
+
+const ValidityField = ({
+  value,
+  disabled,
+  onSave,
+}: {
+  value: number | null
+  disabled: boolean
+  onSave: (value: number | null) => Promise<void>
+}) => {
+  const initial = value === null ? '' : String(value)
+  const [text, setText] = useState(initial)
+  const trimmed = text.trim()
+  const invalid = trimmed !== '' && !(/^\d+$/.test(trimmed) && Number(trimmed) >= 1 && Number(trimmed) <= 3650)
+  const changed = trimmed !== initial
+  return (
+    <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start', flexDirection: { xs: 'column', sm: 'row' } }}>
+      <TextField
+        label="Термін дії, днів"
+        fullWidth
+        value={text}
+        disabled={disabled}
+        onChange={(e) => setText(e.target.value)}
+        error={invalid}
+        helperText={invalid ? 'Від 1 до 3650 днів або порожньо' : VALIDITY_HINT}
+      />
+      {changed && !disabled && (
+        <Button
+          variant="contained"
+          disabled={invalid}
+          onClick={() => onSave(trimmed === '' ? null : Number(trimmed)).catch(() => undefined)}
+          sx={{ flexShrink: 0, mt: { sm: 0.5 } }}
+        >
+          Зберегти
+        </Button>
+      )}
+    </Box>
+  )
+}
 
 export const TariffModal = () => {
   const isPhone = useIsPhone()
@@ -98,9 +140,12 @@ export const TariffModal = () => {
             {tariff.unit === 'month' && ` · ${billingModeLabels[tariff.billingMode]}`}
           </Typography>
           {tariff.unit === 'package' && (
-            <Typography variant="body2" color="text.secondary">
-              Термін дії: {tariff.validityDays ? `${tariff.validityDays} дн.` : 'без терміну'}
-            </Typography>
+            <ValidityField
+              key={`${tariff.id}-${tariff.validityDays ?? ''}`}
+              value={tariff.validityDays}
+              disabled={isSaving || !canEdit}
+              onSave={(validityDays) => updateTariff(tariff.id, { validityDays })}
+            />
           )}
           <TextField
             select

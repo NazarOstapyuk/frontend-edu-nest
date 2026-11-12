@@ -191,7 +191,16 @@ export const CreateTariffModal = () => {
             name="validityDays"
             control={control}
             render={({ field, fieldState: { error } }) => (
-              <TextField {...field} label="Діє днів (порожньо — без терміну)" fullWidth error={!!error} helperText={error?.message} />
+              <TextField
+                {...field}
+                label="Термін дії, днів"
+                fullWidth
+                error={!!error}
+                helperText={
+                  error?.message ??
+                  'Скільки календарних днів пакет діє від дати покупки. Це не кількість занять. Порожньо — без терміну: пакет діє, доки не закінчаться заняття.'
+                }
+              />
             )}
           />
         )}

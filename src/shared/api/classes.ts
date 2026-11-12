@@ -90,11 +90,14 @@ export interface MyClassGroup extends ClassGroupSummary {
   direction: { id: string; name: string };
 }
 
+export type PackageBlockReason = 'none' | 'expired' | 'used_up' | 'starts_later';
+
 export interface RosterRow {
   child: PersonRef;
   isMember: boolean;
   attendance: { id: string; status: AttendanceStatus; isGuest: boolean } | null;
   packageInfo: { packageId: string; remaining: number; total: number; expiresAt: string | null } | null;
+  packageBlock: { reason: PackageBlockReason; date: string | null } | null;
 }
 
 export interface LessonRoster {

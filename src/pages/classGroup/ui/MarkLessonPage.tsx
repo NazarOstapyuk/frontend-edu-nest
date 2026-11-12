@@ -31,13 +31,22 @@ import {
   formatDay,
   localToday,
   type AttendanceStatus,
+  type RosterRow,
   type Child,
 } from '../../../shared/api'
+
+const blockLabel = (block: NonNullable<RosterRow['packageBlock']>) => {
+  if (block.reason === 'expired') return `Пакет закінчився ${formatDay(block.date)}`
+  if (block.reason === 'used_up') return 'Заняття в пакеті закінчились'
+  if (block.reason === 'starts_later') return `Пакет діє лише з ${formatDay(block.date)}`
+  return 'Немає пакета'
+}
 
 export const MarkLessonPage = () => {
   const { groupId, date } = useParams<{ groupId: string; date: string }>()
   const navigate = useNavigate()
   const isAdmin = useCan('classes', 'edit')
+  const canFinance = useCan('finance', 'edit')
   const roster = useMarkLessonStore((s) => s.roster)
   const storeKey = useMarkLessonStore((s) => s.key)
   const draft = useMarkLessonStore((s) => s.draft)
@@ -71,6 +80,7 @@ export const MarkLessonPage = () => {
       isMember: false,
       attendance: null,
       packageInfo: null,
+      packageBlock: null,
     })),
   ]
 
@@ -101,8 +111,24 @@ export const MarkLessonPage = () => {
           row.packageInfo.expiresAt ? `, до ${formatDay(row.packageInfo.expiresAt)}` : ''
         }`}
       />
-    ) : row.isMember ? (
+    ) : row.isMember && roster.hasSingleTariff ? (
       <Chip size="small" color="warning" variant="outlined" label="Без пакета — разове заняття" />
+    ) : row.isMember && row.packageBlock ? (
+      <Box>
+        <Chip size="small" color="error" variant="outlined" label={blockLabel(row.packageBlock)} />
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+          {row.packageBlock.reason === 'expired'
+            ? 'Можна лише пропуск. Продовжте пакет або купіть новий.'
+            : row.packageBlock.reason === 'starts_later'
+              ? 'Можна лише пропуск. Змініть дату покупки пакета або купіть пакет на цю дату.'
+              : 'Можна лише пропуск. Купіть пакет.'}
+          {canFinance && (
+            <Button size="small" sx={{ minHeight: 0, p: 0, ml: 0.5, verticalAlign: 'baseline' }} onClick={() => navigate(`/finance/${row.child.id}`)}>
+              Фінанси дитини
+            </Button>
+          )}
+        </Typography>
+      </Box>
     ) : null
 
   const handleSave = (confirmed = false) => {
@@ -145,7 +171,7 @@ export const MarkLessonPage = () => {
 
       {blockedCount > 0 && (
         <Alert severity="warning" sx={{ mb: 2 }}>
-          Для цієї групи не задано тариф разового заняття, тому дітей без пакета не можна відмітити присутніми (а пропуск, що списує заняття, залежить від правила гуртка). Задайте тариф у налаштуваннях групи або продайте пакет.
+          {blockedCount === 1 ? '1 дитину' : `${blockedCount} дітей`} не можна відмітити присутніми: немає дійсного пакета, а тарифу разового заняття в групі немає. Причину видно біля кожної дитини. Купіть або продовжте пакет у фінансах дитини, або задайте тариф разового заняття в налаштуваннях групи.
         </Alert>
       )}
 

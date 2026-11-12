@@ -33,6 +33,8 @@ import { BuyPackageModal } from './BuyPackageModal'
 import { ExtendPackageModal } from './ExtendPackageModal'
 import { ReconcileModal } from './ReconcileModal'
 
+const AUTO_RENEWED_LABEL = 'Продовжено автоматично'
+
 const stateColors: Record<PackageState, 'success' | 'default' | 'warning' | 'error'> = {
   active: 'success',
   exhausted: 'default',
@@ -58,7 +60,14 @@ const PackageRow = ({ pkg }: { pkg: ChildPackage }) => {
           </IconButton>
         </TableCell>
         <TableCell sx={{ fontWeight: 500 }}>{pkg.direction.name}</TableCell>
-        <TableCell>{pkg.tariff?.name ?? 'Перенесений абонемент'}</TableCell>
+        <TableCell>
+          {pkg.tariff?.name ?? 'Перенесений абонемент'}
+          {pkg.autoRenewed && (
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+              {AUTO_RENEWED_LABEL}
+            </Typography>
+          )}
+        </TableCell>
         <TableCell align="right">{pkg.used} / {pkg.sessionsTotal}</TableCell>
         <TableCell align="right">{pkg.remaining}</TableCell>
         <TableCell>{formatDay(pkg.purchaseDate)}</TableCell>
@@ -148,7 +157,10 @@ const PackageCard = ({ pkg }: { pkg: ChildPackage }) => {
       <Box sx={{ mb: 0.5 }}>
         <Chip size="small" variant="outlined" color={stateColors[pkg.state]} label={packageStateLabels[pkg.state]} />
       </Box>
-      <CardField label="Тариф">{pkg.tariff?.name ?? 'Перенесений абонемент'}</CardField>
+      <CardField label="Тариф">
+        {pkg.tariff?.name ?? 'Перенесений абонемент'}
+        {pkg.autoRenewed && ` · ${AUTO_RENEWED_LABEL.toLowerCase()}`}
+      </CardField>
       <CardField label="Використано">
         {pkg.used} / {pkg.sessionsTotal}
       </CardField>

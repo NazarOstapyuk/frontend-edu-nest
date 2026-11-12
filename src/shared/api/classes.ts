@@ -117,6 +117,7 @@ export interface ChildPackage {
   expiresAt: string | null;
   state: PackageState;
   chargeId: string | null;
+  autoRenewed: boolean;
   needsReconciliation: boolean;
   reconciledAt: string | null;
   reconciliationNote: string | null;

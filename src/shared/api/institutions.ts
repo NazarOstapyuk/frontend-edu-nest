@@ -20,6 +20,12 @@ export interface UpdateInstitutionDto {
   isActive?: boolean;
 }
 
+export interface AssessmentLevel {
+  name: string;
+  code: string;
+  minPercent: number;
+}
+
 export const institutionTypeLabels: Record<InstitutionType, string> = {
   kindergarten: 'Садок',
   school_class: 'Школа',
@@ -29,5 +35,8 @@ export const institutionsApi = {
   getList: () => axiosInstance.get<Institution[]>('/institutions'),
   create: (dto: CreateInstitutionDto) => axiosInstance.post<Institution>('/institutions', dto),
   update: (id: string, dto: UpdateInstitutionDto) => axiosInstance.patch<Institution>(`/institutions/${id}`, dto),
+  getLevels: (id: string) => axiosInstance.get<AssessmentLevel[]>(`/institutions/${id}/assessment-levels`),
+  setLevels: (id: string, levels: AssessmentLevel[]) =>
+    axiosInstance.put<AssessmentLevel[]>(`/institutions/${id}/assessment-levels`, { levels }),
   delete: (id: string) => axiosInstance.delete<{ message: string }>(`/institutions/${id}`),
 };

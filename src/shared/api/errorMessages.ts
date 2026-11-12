@@ -281,6 +281,9 @@ export const errorMessages: Record<string, string> = {
   'Duplicate assignee': 'Виконавець повторюється',
   'Invalid cursor': 'Не вдалося завантажити попередні завдання. Оновіть сторінку',
   'Cannot assign this user': 'Цьому користувачу не можна поставити завдання',
+  'Duplicate level bound': 'Межі рівнів не можуть повторюватись',
+  'Invalid level': 'Перевірте назву, код і межу рівня',
+  'Too many levels': 'Не більше 10 рівнів',
 };
 
 const usageForms: Record<string, [string, string, string]> = {

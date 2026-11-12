@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import {
   institutionsApi,
+  type AssessmentLevel,
   type CreateInstitutionDto,
   type Institution,
   type UpdateInstitutionDto,
@@ -20,6 +21,8 @@ interface InstitutionsState {
   fetchInstitutions: () => Promise<void>;
   createInstitution: (dto: CreateInstitutionDto) => Promise<void>;
   updateInstitution: (id: string, dto: UpdateInstitutionDto) => Promise<void>;
+  fetchLevels: (id: string) => Promise<AssessmentLevel[]>;
+  saveLevels: (id: string, levels: AssessmentLevel[]) => Promise<AssessmentLevel[]>;
   deleteInstitution: (id: string) => Promise<void>;
 }
 
@@ -70,6 +73,21 @@ export const useInstitutionsStore = create<InstitutionsState>((set, get) => ({
       const next = get().institutions.map((i) => (i.id === id ? data : i));
       set({ institutions: next });
       syncShared(next);
+    } finally {
+      set({ isUpdating: false });
+    }
+  },
+
+  fetchLevels: async (id) => {
+    const { data } = await institutionsApi.getLevels(id);
+    return data;
+  },
+
+  saveLevels: async (id, levels) => {
+    set({ isUpdating: true });
+    try {
+      const { data } = await institutionsApi.setLevels(id, levels);
+      return data;
     } finally {
       set({ isUpdating: false });
     }

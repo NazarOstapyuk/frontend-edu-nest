@@ -139,6 +139,7 @@ const routeLabels: Record<string, string> = {
   'POST /billing/run': 'Запущено нарахування',
   'POST /backups': 'Створено резервну копію',
   'POST /payroll/:teacherId/:month/approve': 'Затверджено відомість',
+  'PUT /institutions/:id/assessment-levels': 'Змінено шкалу рівнів',
 };
 
 export const actionLabel = (route: string): string => {

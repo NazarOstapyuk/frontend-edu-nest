@@ -5,6 +5,7 @@ import { Box, Button, Dialog, DialogTitle, MenuItem, TextField } from '@mui/mate
 import { usePackagesStore } from '../model/packagesStore'
 import { formatMoney, localToday } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { DateField } from '../../../shared/ui/DateField'
 
 const schema = yup.object({
   option: yup.string().required("Обов'язкове поле"),
@@ -89,12 +90,10 @@ export const BuyPackageModal = () => {
           name="purchaseDate"
           control={control}
           render={({ field, fieldState: { error } }) => (
-            <TextField
+            <DateField
               {...field}
               label="Дата купівлі"
-              type="date"
               fullWidth
-              slotProps={{ inputLabel: { shrink: true } }}
               error={!!error}
               helperText={error?.message}
             />

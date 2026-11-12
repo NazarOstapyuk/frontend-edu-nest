@@ -30,6 +30,7 @@ import { useAuthStore } from '../../../entities/user'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { matchesSearch } from '../../../shared/lib/search'
 import { useTasksStore } from '../model/tasksStore'
+import { DateField } from '../../../shared/ui/DateField'
 
 const schema = yup.object({
   title: yup.string().trim().required("Обов'язкове поле").max(200, 'Максимум 200 символів'),
@@ -205,14 +206,12 @@ export const TaskDialog = () => {
               name="dueDate"
               control={control}
               render={({ field, fieldState: { error } }) => (
-                <TextField
+                <DateField
                   {...field}
-                  type="date"
                   label="Дата"
                   fullWidth
                   error={!!error || !!deadlineError}
                   helperText={error?.message ?? deadlineError}
-                  slotProps={{ inputLabel: { shrink: true } }}
                 />
               )}
             />

@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Alert, Box, Button, Chip, Paper, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, Chip, Paper, Typography } from '@mui/material'
 import { useMyLessonsStore } from '../model/myLessonsStore'
+import { DateField } from '../../../shared/ui/DateField'
 
 export const MyLessonsPage = () => {
   const navigate = useNavigate()
@@ -17,7 +18,7 @@ export const MyLessonsPage = () => {
 
   return (
     <Box>
-      <TextField size="small" type="date" label="Дата" value={date} onChange={(e) => e.target.value && setDate(e.target.value)} slotProps={{ inputLabel: { shrink: true } }} sx={{ mb: 2 }} />
+      <DateField size="small" label="Дата" value={date} onChange={(value) => value && setDate(value)}  sx={{ mb: 2 }} />
       {loadFailed ? (
         <Alert severity="error" action={<Button onClick={() => load().catch(() => undefined)}>Спробувати ще</Button>}>Не вдалося завантажити дані.</Alert>
       ) : !data || data.date !== date ? (

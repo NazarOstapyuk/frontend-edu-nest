@@ -13,6 +13,7 @@ import {
   type CalendarDayType,
   type CalendarScope,
 } from '../../../shared/api'
+import { DateField } from '../../../shared/ui/DateField'
 
 const types = Object.keys(calendarDayTypeLabels) as CalendarDayType[]
 const scopes = Object.keys(calendarScopeLabels) as CalendarScope[]
@@ -102,14 +103,14 @@ export const CalendarDayModal = () => {
           name="startDate"
           control={control}
           render={({ field, fieldState: { error } }) => (
-            <TextField {...field} type="date" label="З дати" slotProps={{ inputLabel: { shrink: true } }} error={!!error} helperText={error?.message} />
+            <DateField {...field} label="З дати"  error={!!error} helperText={error?.message} />
           )}
         />
         <Controller
           name="endDate"
           control={control}
           render={({ field, fieldState: { error } }) => (
-            <TextField {...field} type="date" label="По дату (необов'язково)" slotProps={{ inputLabel: { shrink: true } }} error={!!error} helperText={error?.message} />
+            <DateField {...field} label="По дату (необов'язково)"  error={!!error} helperText={error?.message} />
           )}
         />
         <Controller

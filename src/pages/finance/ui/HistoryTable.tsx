@@ -11,6 +11,7 @@ import {
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardList, CardField } from '../../../shared/ui/CardList'
 import { financeEventLabels, formatMoney, type FinanceEvent } from '../../../shared/api'
+import { formatDateTime } from '../../../shared/lib/date'
 
 interface HistoryTableProps {
   events: FinanceEvent[]
@@ -32,7 +33,7 @@ export const HistoryTable = ({ events }: HistoryTableProps) => {
         renderCard={(event) => (
           <>
             <Typography sx={{ fontWeight: 600, mb: 0.5 }}>{financeEventLabels[event.type]}</Typography>
-            <CardField label="Дата і час">{new Date(event.at).toLocaleString('uk-UA')}</CardField>
+            <CardField label="Дата і час">{formatDateTime(event.at)}</CardField>
             <CardField label="Опис">{event.description}</CardField>
             <CardField label="Сума">{formatMoney(event.amount)}</CardField>
             <CardField label="Хто">{event.by ? `${event.by.lastName} ${event.by.firstName}` : '—'}</CardField>
@@ -70,7 +71,7 @@ export const HistoryTable = ({ events }: HistoryTableProps) => {
         ) : (
           events.map((event, index) => (
             <TableRow key={`${event.type}-${event.at}-${index}`} sx={{ '&:last-child td': { borderBottom: 0 } }}>
-              <TableCell sx={{ whiteSpace: 'nowrap' }}>{new Date(event.at).toLocaleString('uk-UA')}</TableCell>
+              <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatDateTime(event.at)}</TableCell>
               <TableCell>{financeEventLabels[event.type]}</TableCell>
               <TableCell>{event.description}</TableCell>
               <TableCell align="right">{formatMoney(event.amount)}</TableCell>

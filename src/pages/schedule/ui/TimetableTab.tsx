@@ -6,6 +6,7 @@ import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardList } from '../../../shared/ui/CardList'
 import { useCan } from '../../../entities/user'
 import { addDaysIso, conflictText, formatDay, localToday, weekParityLabels, weekdayLabels, type TimetableEntry } from '../../../shared/api'
+import { DateField } from '../../../shared/ui/DateField'
 
 const WEEKDAYS = [1, 2, 3, 4, 5, 6]
 
@@ -58,7 +59,7 @@ export const TimetableTab = () => {
           ))}
           {versionId === 'new' && <MenuItem value="new">Нова з {formatDay(newValidFrom)}</MenuItem>}
         </TextField>
-        {canEdit && <TextField size="small" type="date" label="Нова версія з" value={validFrom} onChange={(e) => setValidFrom(e.target.value)} slotProps={{ inputLabel: { shrink: true } }} />}
+        {canEdit && <DateField size="small" label="Нова версія з" value={validFrom} onChange={(value) => setValidFrom(value)}  />}
         {canEdit && <Button variant="outlined" disabled={!validFrom} onClick={() => startNewVersion(validFrom)}>Нова версія</Button>}
         {editable && (
           <Button variant="contained" disabled={isSaving} onClick={() => saveVersion().catch(() => undefined)} sx={{ ml: 'auto' }}>Зберегти</Button>

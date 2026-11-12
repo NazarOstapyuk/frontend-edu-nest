@@ -17,6 +17,7 @@ import {
 } from '../../../shared/api'
 import { useEffectiveInstitutions, useInstitutionStore } from '../../../shared/model/institutionStore'
 import { useReportsStore } from '../model/reportsStore'
+import { DateField } from '../../../shared/ui/DateField'
 
 const dayString = (date: Date) => date.toISOString().slice(0, 10)
 
@@ -208,21 +209,19 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
       >
         {definition.period && (
           <>
-            <TextField
+            <DateField
               label="Від"
-              type="date"
               size="small"
               value={query.from ?? ''}
-              onChange={(e) => update({ from: e.target.value || undefined })}
-              slotProps={{ inputLabel: { shrink: true }, htmlInput: { max: query.to } }}
+              onChange={(value) => update({ from: value || undefined })}
+              max={query.to}
             />
-            <TextField
+            <DateField
               label="До"
-              type="date"
               size="small"
               value={query.to ?? ''}
-              onChange={(e) => update({ to: e.target.value || undefined })}
-              slotProps={{ inputLabel: { shrink: true }, htmlInput: { min: query.from } }}
+              onChange={(value) => update({ to: value || undefined })}
+              min={query.from}
             />
           </>
         )}

@@ -17,6 +17,7 @@ import { formatDay, localToday, type NotesDayQuestion } from '../../../shared/ap
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog'
 import { draftKey, initialDraft, isChanged, numberError, useNotesStore, type DraftValue } from '../model/notesStore'
+import { DateField } from '../../../shared/ui/DateField'
 
 interface QuestionControlProps {
   question: NotesDayQuestion
@@ -168,16 +169,15 @@ export const FillTab = () => {
             <MenuItem key={g.id} value={g.id}>{manyInstitutions ? `${g.name} · ${g.institution.name}` : g.name}</MenuItem>
           ))}
         </TextField>
-        <TextField
+        <DateField
           size="small"
-          type="date"
           label="Дата"
           value={date}
-          onChange={(e) => {
-            const next = e.target.value
+          onChange={(value) => {
+            const next = value
             if (next && next !== date) guarded(() => setDate(next))
           }}
-          slotProps={{ inputLabel: { shrink: true }, htmlInput: { max: localToday() } }}
+          max={localToday()}
         />
       </Box>
 

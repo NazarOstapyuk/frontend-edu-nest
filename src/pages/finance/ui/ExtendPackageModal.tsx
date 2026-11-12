@@ -6,6 +6,7 @@ import { Box, Button, Dialog, DialogTitle, TextField, Typography } from '@mui/ma
 import { usePackagesStore } from '../model/packagesStore'
 import { formatDay } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { DateField } from '../../../shared/ui/DateField'
 
 const schema = yup.object({
   newExpiresAt: yup.string().required("Обов'язкове поле"),
@@ -53,12 +54,10 @@ export const ExtendPackageModal = () => {
           name="newExpiresAt"
           control={control}
           render={({ field, fieldState: { error } }) => (
-            <TextField
+            <DateField
               {...field}
               label="Новий термін"
-              type="date"
               fullWidth
-              slotProps={{ inputLabel: { shrink: true } }}
               error={!!error}
               helperText={error?.message}
             />

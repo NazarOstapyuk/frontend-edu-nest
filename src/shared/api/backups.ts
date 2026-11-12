@@ -60,8 +60,7 @@ export const formatBytes = (bytes: number) =>
 export const formatTakenAt = (takenAt: string) =>
   `${takenAt.slice(8, 10)}.${takenAt.slice(5, 7)}.${takenAt.slice(0, 4)} ${takenAt.slice(11, 16)}`;
 
-export const formatDateTime = (iso: string) =>
-  new Date(iso).toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
+export { formatDateTime } from '../lib/date';
 
 export const backupsApi = {
   getStatus: () => axiosInstance.get<BackupStatus>('/backups'),

@@ -3,6 +3,7 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Te
 import { kyivNow, routineApi } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { useRoutineStore } from '../model/routineStore'
+import { DateField } from '../../../shared/ui/DateField'
 
 interface CopyRoutineDialogProps {
   open: boolean
@@ -55,14 +56,12 @@ const CopyForm = ({ groupId, onClose, onCopied }: Omit<CopyRoutineDialogProps, '
             <MenuItem key={g.id} value={g.id}>{manyInstitutions ? `${g.name} · ${g.institution.name}` : g.name}</MenuItem>
           ))}
         </TextField>
-        <TextField
+        <DateField
           fullWidth
           size="small"
-          type="date"
           label="Діє з"
           value={validFrom}
-          onChange={(e) => setValidFrom(e.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }}
+          onChange={(value) => setValidFrom(value)}
         />
       </DialogContent>
       <DialogActions>

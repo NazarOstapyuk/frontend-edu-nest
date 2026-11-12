@@ -29,6 +29,7 @@ import { useRoutineStore } from '../model/routineStore'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CopyRoutineDialog } from './CopyRoutineDialog'
 import { RoutineItemsEditor } from './RoutineItemsEditor'
+import { DateField } from '../../../shared/ui/DateField'
 
 const dayLabels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд']
 
@@ -392,14 +393,12 @@ const NewVersionForm = ({ groupId, base, onClose, onCreated }: Omit<NewVersionDi
     <>
       <DialogTitle>Нова версія з дати</DialogTitle>
       <DialogContent>
-        <TextField
+        <DateField
           fullWidth
           size="small"
-          type="date"
           label="Діє з"
           value={validFrom}
-          onChange={(e) => setValidFrom(e.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }}
+          onChange={(value) => setValidFrom(value)}
           sx={{ mt: 1 }}
         />
         {base && (

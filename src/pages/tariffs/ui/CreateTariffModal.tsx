@@ -21,6 +21,7 @@ import {
   type TariffUnit,
 } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { DateField } from '../../../shared/ui/DateField'
 
 const amountPattern = /^\d{1,8}([.,]\d{1,2})?$/
 
@@ -226,12 +227,10 @@ export const CreateTariffModal = () => {
             name="effectiveFrom"
             control={control}
             render={({ field, fieldState: { error } }) => (
-              <TextField
+              <DateField
                 {...field}
                 label="Діє з"
-                type="date"
                 fullWidth
-                slotProps={{ inputLabel: { shrink: true } }}
                 error={!!error}
                 helperText={error?.message}
               />

@@ -24,6 +24,8 @@ import type { User } from '../../../entities/user'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardList, CardField } from '../../../shared/ui/CardList'
 import { useAuditStore } from '../model/auditStore'
+import { DateField } from '../../../shared/ui/DateField'
+import { formatDateTime } from '../../../shared/lib/date'
 
 const PAGE_SIZE = 50
 
@@ -63,21 +65,17 @@ export const EventsTab = () => {
         useFlexGap
         sx={{ flexWrap: 'wrap', alignItems: { xs: 'stretch', sm: 'center' } }}
       >
-        <TextField
+        <DateField
           label="Від"
-          type="date"
           size="small"
           value={query.from ?? ''}
-          onChange={(e) => update({ from: e.target.value || undefined })}
-          slotProps={{ inputLabel: { shrink: true } }}
+          onChange={(value) => update({ from: value || undefined })}
         />
-        <TextField
+        <DateField
           label="До"
-          type="date"
           size="small"
           value={query.to ?? ''}
-          onChange={(e) => update({ to: e.target.value || undefined })}
-          slotProps={{ inputLabel: { shrink: true } }}
+          onChange={(value) => update({ to: value || undefined })}
         />
         <TextField
           select
@@ -136,7 +134,7 @@ export const EventsTab = () => {
                     color={event.statusCode >= 400 ? 'error' : 'success'}
                   />
                 </Box>
-                <CardField label="Час">{new Date(event.at).toLocaleString('uk-UA')}</CardField>
+                <CardField label="Час">{formatDateTime(event.at)}</CardField>
                 <CardField label="Хто">
                   {event.actor ? `${event.actor.lastName} ${event.actor.firstName}` : '—'}
                 </CardField>
@@ -182,7 +180,7 @@ export const EventsTab = () => {
                     sx={{ cursor: 'pointer' }}
                     onClick={() => openEvent(event.id).catch(() => undefined)}
                   >
-                    <TableCell>{new Date(event.at).toLocaleString('uk-UA')}</TableCell>
+                    <TableCell>{formatDateTime(event.at)}</TableCell>
                     <TableCell>
                       {event.actor ? `${event.actor.lastName} ${event.actor.firstName}` : '—'}
                     </TableCell>

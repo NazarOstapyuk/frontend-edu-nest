@@ -14,6 +14,7 @@ import {
 import { genderLabels, type Child, type Gender, type Group, type UpdateChildDto, type UserLookup } from '../../../shared/api'
 import { useInstitutionStore } from '../../../shared/model/institutionStore'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { DateField } from '../../../shared/ui/DateField'
 
 const schema = yup.object({
   firstName: yup.string().min(2, 'Мінімум 2 символи').required("Обов'язкове поле"),
@@ -159,12 +160,10 @@ export const EditChildModal = ({
           name="birthDate"
           control={control}
           render={({ field, fieldState: { error } }) => (
-            <TextField
+            <DateField
               {...field}
               label="Дата народження"
-              type="date"
               fullWidth
-              slotProps={{ inputLabel: { shrink: true } }}
               error={!!error}
               helperText={error?.message}
             />

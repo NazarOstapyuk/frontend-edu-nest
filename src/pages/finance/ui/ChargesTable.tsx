@@ -23,8 +23,8 @@ import {
   formatMoney,
   type FinanceCharge,
 } from '../../../shared/api'
+import { formatDate } from '../../../shared/lib/date'
 
-const formatDate = (value: string) => new Date(value).toLocaleDateString('uk-UA')
 
 const formatPeriod = (charge: FinanceCharge) => {
   if (!charge.periodStart) return formatDate(charge.createdAt)

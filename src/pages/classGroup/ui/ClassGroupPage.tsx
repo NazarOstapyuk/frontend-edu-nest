@@ -11,7 +11,6 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  TextField,
   Typography,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
@@ -23,6 +22,7 @@ import { attendanceStatusLabels, classFormatLabels, formatDay, localToday, misse
 import { AddMemberModal } from './AddMemberModal'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardList, CardField } from '../../../shared/ui/CardList'
+import { DateField } from '../../../shared/ui/DateField'
 
 export const ClassGroupPage = () => {
   const { groupId } = useParams<{ groupId: string }>()
@@ -58,13 +58,12 @@ export const ClassGroupPage = () => {
             {group.direction.name} · {classFormatLabels[group.format]} · {missedRuleLabels[group.direction.missedRule]}
           </Typography>
         </Box>
-        <TextField
+        <DateField
           size="small"
-          type="date"
           label="Дата заняття"
           value={lessonDate}
-          onChange={(e) => setLessonDate(e.target.value)}
-          slotProps={{ inputLabel: { shrink: true }, htmlInput: { max: localToday() } }}
+          onChange={(value) => setLessonDate(value)}
+          max={localToday()}
         />
         <Button
           variant="contained"

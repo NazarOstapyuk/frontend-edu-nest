@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Box, Button, Chip, Stack, Typography } from '@mui/material'
 import { kyivNow, type RoutineDay } from '../../../shared/api'
+import { formatDay } from '../../../shared/lib/date'
 
 interface RoutineWeekProps {
   days: RoutineDay[]
@@ -13,7 +14,7 @@ const dayLabels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд']
 
 const weekdayIndex = (date: string) => (new Date(`${date}T00:00:00Z`).getUTCDay() + 6) % 7
 
-const chipLabel = (date: string) => `${dayLabels[weekdayIndex(date)]} ${date.slice(8, 10)}.${date.slice(5, 7)}`
+const chipLabel = (date: string) => `${dayLabels[weekdayIndex(date)]} ${formatDay(date)}`
 
 const minutes = (time: string) => Number(time.slice(0, 2)) * 60 + Number(time.slice(3, 5))
 

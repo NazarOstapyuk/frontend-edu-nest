@@ -35,6 +35,7 @@ import { CardList, CardField } from '../../../shared/ui/CardList'
 import { InitialsAvatar } from '../../../shared/ui/InitialsAvatar'
 import { SearchField } from '../../../shared/ui/SearchField'
 import { matchesSearch } from '../../../shared/lib/search'
+import { formatDay } from '../../../shared/lib/date'
 
 export const ChildrenPage = () => {
   const children = useChildrenStore((s) => s.children)
@@ -203,7 +204,7 @@ export const ChildrenPage = () => {
                   <InitialsAvatar id={child.id} firstName={child.firstName} lastName={child.lastName} />
                   <Typography sx={{ fontWeight: 700 }}>{childName(child)}</Typography>
                 </Box>
-                <CardField label="Дата народження">{new Date(child.birthDate).toLocaleDateString('uk-UA')}</CardField>
+                <CardField label="Дата народження">{formatDay(child.birthDate)}</CardField>
                 <CardField label="Стать">{genderLabels[child.gender]}</CardField>
                 <CardField label="Група">{groupLabel(child) ?? '—'}</CardField>
                 <CardField label="Батьки">{parentChips(child)}</CardField>
@@ -260,7 +261,7 @@ export const ChildrenPage = () => {
                     </Box>
                   </TableCell>
                   <TableCell sx={{ color: 'text.secondary' }}>
-                    {new Date(child.birthDate).toLocaleDateString('uk-UA')}
+                    {formatDay(child.birthDate)}
                   </TableCell>
                   <TableCell sx={{ color: 'text.secondary' }}>
                     {genderLabels[child.gender]}

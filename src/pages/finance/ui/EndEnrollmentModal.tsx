@@ -1,10 +1,11 @@
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { Box, Button, Dialog, DialogTitle, TextField, Typography } from '@mui/material'
+import { Box, Button, Dialog, DialogTitle, Typography } from '@mui/material'
 import { useEnrollmentsStore } from '../model/enrollmentsStore'
 import { localToday } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { DateField } from '../../../shared/ui/DateField'
 
 const schema = yup.object({
   endDate: yup.string().required("Обов'язкове поле"),
@@ -47,12 +48,10 @@ export const EndEnrollmentModal = () => {
           name="endDate"
           control={control}
           render={({ field, fieldState: { error } }) => (
-            <TextField
+            <DateField
               {...field}
               label="Дата завершення"
-              type="date"
               fullWidth
-              slotProps={{ inputLabel: { shrink: true } }}
               error={!!error}
               helperText={error?.message}
             />

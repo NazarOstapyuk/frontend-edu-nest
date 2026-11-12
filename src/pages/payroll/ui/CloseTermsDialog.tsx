@@ -1,10 +1,11 @@
 import { Controller, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from '@mui/material'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material'
 import { localToday, payrollApi, type SalaryTerms } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { usePayrollStore } from '../model/payrollStore'
+import { DateField } from '../../../shared/ui/DateField'
 
 const schema = yup.object({ validTo: yup.string().required('Вкажіть дату') })
 
@@ -40,13 +41,11 @@ export const CloseTermsDialog = ({ terms, onClose }: Props) => {
           name="validTo"
           control={control}
           render={({ field, fieldState: { error } }) => (
-            <TextField
+            <DateField
               {...field}
-              type="date"
               label="Діють до"
               error={!!error}
               helperText={error?.message}
-              slotProps={{ inputLabel: { shrink: true } }}
               fullWidth
             />
           )}

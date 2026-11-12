@@ -1,4 +1,5 @@
 import { isoWeekdayLabels, type MealComplex, type MenuDayView } from '../../../shared/api'
+import { formatDay } from '../../../shared/lib/date'
 
 export type MenuDayState = 'off' | 'empty' | 'draft' | 'published'
 
@@ -10,11 +11,9 @@ export const dayState = (day: MenuDayView): MenuDayState => {
 
 export const weekdayNames = ['Понеділок', 'Вівторок', 'Середа', 'Четвер', 'Пʼятниця', 'Субота', 'Неділя']
 
-export const longDate = (iso: string) =>
-  new Date(`${iso.slice(0, 10)}T00:00:00Z`).toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', timeZone: 'UTC' })
+export const longDate = (iso: string) => formatDay(iso.slice(0, 10))
 
-export const shortDate = (iso: string) =>
-  new Date(`${iso.slice(0, 10)}T00:00:00Z`).toLocaleDateString('uk-UA', { day: 'numeric', month: 'short', timeZone: 'UTC' })
+export const shortDate = (iso: string) => formatDay(iso.slice(0, 10))
 
 export interface ComplexAvailability {
   id: string
@@ -67,7 +66,7 @@ export const ordersWord = (n: number) => plural(n, ['замовлення', 'з�
 export const ordersLabel = (n: number) => `${n} ${ordersWord(n)}`
 
 export const rangeLabel = (from: string, to: string) =>
-  from.slice(0, 7) === to.slice(0, 7) ? `${Number(from.slice(8, 10))} – ${longDate(to)}` : `${longDate(from)} – ${longDate(to)}`
+  `${longDate(from)} – ${longDate(to)}`
 
 export const itemsSignature = (items: { week: number; weekday: number; dishId: string }[]) =>
   items.map((i) => `${i.week}/${i.weekday}/${i.dishId}`).sort().join(',')

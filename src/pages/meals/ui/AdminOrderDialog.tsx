@@ -4,6 +4,7 @@ import { useMealsStore } from '../model/mealsStore'
 import { mealsApi, type Child, type MealComplex, type MenuDayView } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { categoryPrices } from '../model/prices'
+import { DateField } from '../../../shared/ui/DateField'
 
 export const AdminOrderDialog = ({ onClose }: { onClose: () => void }) => {
   const isPhone = useIsPhone()
@@ -77,7 +78,7 @@ export const AdminOrderDialog = ({ onClose }: { onClose: () => void }) => {
           onChange={(_, value) => choose(value, date)}
           renderInput={(params) => <TextField {...params} label="Дитина" />}
         />
-        <TextField type="date" label="Дата" value={date} onChange={(e) => choose(child, e.target.value)} slotProps={{ inputLabel: { shrink: true } }} />
+        <DateField label="Дата" value={date} onChange={(value) => choose(child, value)}  />
         {child && menu?.key === menuKey && menu.failed && <Alert severity="error">Не вдалося завантажити меню.</Alert>}
         {child && menu?.key === menuKey && !menu.failed && day !== null && !published && (
           <Alert severity="warning">На цю дату меню не опубліковано.</Alert>

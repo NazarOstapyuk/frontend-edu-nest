@@ -18,6 +18,7 @@ import type { DashboardPaymentMethod, TodayDashboard } from '../../../shared/api
 import { useAuthStore, useCan } from '../../../entities/user'
 import { brandColors, mascotUrl } from '../../../shared/assets/brand'
 import { DashboardCard } from './DashboardCard'
+import { formatDay } from '../../../shared/lib/date'
 
 const methodLabels: Record<DashboardPaymentMethod, string> = {
   cash: 'Готівка',
@@ -61,13 +62,8 @@ const greeting = () => {
 }
 
 const dateLine = (date: string) => {
-  const text = new Date(`${date}T00:00:00Z`).toLocaleDateString('uk-UA', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    timeZone: 'UTC',
-  })
-  return text.charAt(0).toUpperCase() + text.slice(1)
+  const weekday = new Date(`${date}T00:00:00Z`).toLocaleDateString('uk-UA', { weekday: 'long', timeZone: 'UTC' })
+  return `${weekday.charAt(0).toUpperCase()}${weekday.slice(1)}, ${formatDay(date)}`
 }
 
 const tasksLine = (count: number) => {

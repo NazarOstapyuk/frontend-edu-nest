@@ -22,8 +22,8 @@ import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardList, CardField } from '../../../shared/ui/CardList'
 import { chargeStateLabels, formatMoney } from '../../../shared/api'
 import { CreateAdaptationVisitModal } from './CreateAdaptationVisitModal'
+import { formatDay as formatDate } from '../../../shared/lib/date'
 
-const formatDate = (value: string) => new Date(value).toLocaleDateString('uk-UA', { timeZone: 'UTC' })
 const voidedSx = { '& td': { color: 'text.disabled', textDecoration: 'line-through' } }
 
 interface AdaptationTabProps {

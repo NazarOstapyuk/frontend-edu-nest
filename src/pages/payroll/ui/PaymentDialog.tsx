@@ -12,6 +12,7 @@ import {
 } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { usePayrollStore } from '../model/payrollStore'
+import { DateField } from '../../../shared/ui/DateField'
 
 const methods = Object.keys(payrollPaymentMethodLabels) as PayrollPaymentMethod[]
 
@@ -65,13 +66,11 @@ export const PaymentDialog = ({ onClose }: { onClose: () => void }) => {
             name="date"
             control={control}
             render={({ field, fieldState: { error } }) => (
-              <TextField
+              <DateField
                 {...field}
-                type="date"
                 label="Дата"
                 error={!!error}
                 helperText={error?.message}
-                slotProps={{ inputLabel: { shrink: true } }}
                 fullWidth
               />
             )}

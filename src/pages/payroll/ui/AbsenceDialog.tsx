@@ -16,6 +16,7 @@ import {
 import { addDaysIso, localToday, payrollApi } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { usePayrollStore } from '../model/payrollStore'
+import { DateField } from '../../../shared/ui/DateField'
 
 const schema = yup.object({
   startDate: yup.string().required('Вкажіть дату початку'),
@@ -71,16 +72,14 @@ export const AbsenceDialog = ({ onClose }: { onClose: () => void }) => {
             name="startDate"
             control={control}
             render={({ field, fieldState: { error } }) => (
-              <TextField
+              <DateField
                 {...field}
-                type="date"
                 label="Початок"
                 error={!!error}
                 helperText={error?.message}
-                slotProps={{ inputLabel: { shrink: true } }}
-                onChange={(event) => {
+                onChange={(value) => {
                   field.onChange(event)
-                  const newStart = event.target.value
+                  const newStart = value
                   const end = getValues('endDate')
                   if (newStart && (!end || end < newStart)) setValue('endDate', newStart)
                   trigger('endDate').catch(() => undefined)
@@ -93,13 +92,11 @@ export const AbsenceDialog = ({ onClose }: { onClose: () => void }) => {
             name="endDate"
             control={control}
             render={({ field, fieldState: { error } }) => (
-              <TextField
+              <DateField
                 {...field}
-                type="date"
                 label="Кінець"
                 error={!!error}
                 helperText={error?.message}
-                slotProps={{ inputLabel: { shrink: true } }}
                 fullWidth
               />
             )}

@@ -8,6 +8,7 @@ import { tariffsForInstitution } from '../model/institutionTariffs'
 import { useChildFinanceStore } from '../model/childFinanceStore'
 import { formatMoney, localToday, normalizeAmount, toKopecks } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { DateField } from '../../../shared/ui/DateField'
 
 const amountPattern = /^\d{1,8}([.,]\d{1,2})?$/
 const hoursPattern = /^\d{1,2}([.,]\d{1,2})?$/
@@ -102,12 +103,10 @@ export const CreateAdaptationVisitModal = () => {
             name="date"
             control={control}
             render={({ field, fieldState: { error } }) => (
-              <TextField
+              <DateField
                 {...field}
                 label="Дата"
-                type="date"
                 fullWidth
-                slotProps={{ inputLabel: { shrink: true } }}
                 error={!!error}
                 helperText={error?.message}
               />

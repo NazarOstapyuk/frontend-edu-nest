@@ -19,6 +19,7 @@ import EventAvailableIcon from '@mui/icons-material/EventAvailable'
 import { useAttendancesStore } from '../model/attendancesStore'
 import { subscriptionStatusLabels, type SubscriptionStatus } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { formatDateTime } from '../../../shared/lib/date'
 
 const statusColors: Record<SubscriptionStatus, 'success' | 'default' | 'warning'> = {
   active: 'success',
@@ -143,13 +144,7 @@ export const AttendancesModal = () => {
             >
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                  {new Date(attendance.date).toLocaleString('uk-UA', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
+                  {formatDateTime(attendance.date)}
                 </Typography>
                 {attendance.note && (
                   <Typography variant="caption" color="text.secondary">

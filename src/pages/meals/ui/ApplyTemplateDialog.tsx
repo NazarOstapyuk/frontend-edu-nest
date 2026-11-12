@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import {
-  Alert, Box, Button, ButtonBase, Chip, Dialog, DialogTitle, FormControlLabel, IconButton, Switch, TextField, ToggleButton,
+  Alert, Box, Button, ButtonBase, Chip, Dialog, DialogTitle, FormControlLabel, IconButton, Switch, ToggleButton,
   ToggleButtonGroup, Typography,
 } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
@@ -10,6 +10,7 @@ import { longDate } from '../model/menuDay'
 import { useNotifyStore } from '../../../shared/model/notifyStore'
 import { addDaysIso, weekStart } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { DateField } from '../../../shared/ui/DateField'
 
 const weeksLabel = (n: number) => (n === 1 ? '1 тиждень' : n < 5 ? `${n} тижні` : `${n} тижнів`)
 
@@ -106,15 +107,13 @@ export const ApplyTemplateDialog = ({ onClose, templateId: preselectedId }: { on
                 ))}
               </Box>
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                <TextField type="date" label="З" value={from} onChange={(e) => setFrom(e.target.value)} slotProps={{ inputLabel: { shrink: true } }} sx={{ flex: 1, minWidth: 180 }} />
-                <TextField
-                  type="date"
+                <DateField label="З" value={from} onChange={(value) => setFrom(value)}  sx={{ flex: 1, minWidth: 180 }} />
+                <DateField
                   label="По"
                   value={to}
-                  onChange={(e) => setTo(e.target.value)}
+                  onChange={(value) => setTo(value)}
                   error={Boolean(from && to && to < from)}
                   helperText={from && to && to < from ? 'Кінець раніше за початок' : ' '}
-                  slotProps={{ inputLabel: { shrink: true } }}
                   sx={{ flex: 1, minWidth: 180 }}
                 />
               </Box>

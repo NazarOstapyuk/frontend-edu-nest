@@ -33,6 +33,7 @@ import { InitialsAvatar } from '../../../shared/ui/InitialsAvatar'
 import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog'
 import { SearchField } from '../../../shared/ui/SearchField'
 import { matchesSearch } from '../../../shared/lib/search'
+import { formatDate } from '../../../shared/lib/date'
 
 const roleColors: Record<string, 'primary' | 'secondary' | 'default'> = {
   admin: 'default',
@@ -159,7 +160,7 @@ export const UsersPage = () => {
                 {isRoot && <PasswordButton user={user} />}
               </CardField>
               <CardField label="Створено">
-                {new Date(user.createdAt).toLocaleDateString('uk-UA', { timeZone: 'Europe/Kyiv' })}
+                {formatDate(user.createdAt)}
               </CardField>
               <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5, mt: 1 }}>{actions(user)}</Box>
             </>
@@ -237,7 +238,7 @@ export const UsersPage = () => {
                     {isRoot && <PasswordButton user={user} />}
                   </TableCell>
                   <TableCell sx={{ color: 'text.secondary' }}>
-                    {new Date(user.createdAt).toLocaleDateString('uk-UA', { timeZone: 'Europe/Kyiv' })}
+                    {formatDate(user.createdAt)}
                   </TableCell>
                   <TableCell align="right">
                     <HistoryButton

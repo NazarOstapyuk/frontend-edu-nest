@@ -13,6 +13,7 @@ import {
   type AdjustmentType,
 } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { DateField } from '../../../shared/ui/DateField'
 
 const amountPattern = /^\d{1,8}([.,]\d{1,2})?$/
 
@@ -126,12 +127,10 @@ export const AdjustmentModal = () => {
             name="startDate"
             control={control}
             render={({ field, fieldState: { error } }) => (
-              <TextField
+              <DateField
                 {...field}
                 label="З"
-                type="date"
                 fullWidth
-                slotProps={{ inputLabel: { shrink: true } }}
                 error={!!error}
                 helperText={error?.message}
               />
@@ -141,12 +140,10 @@ export const AdjustmentModal = () => {
             name="endDate"
             control={control}
             render={({ field, fieldState: { error } }) => (
-              <TextField
+              <DateField
                 {...field}
                 label="По"
-                type="date"
                 fullWidth
-                slotProps={{ inputLabel: { shrink: true } }}
                 error={!!error}
                 helperText={error?.message}
               />

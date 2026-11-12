@@ -8,6 +8,7 @@ import { tariffsForInstitution } from '../model/institutionTariffs'
 import { useChildFinanceStore } from '../model/childFinanceStore'
 import { billingModeLabels, billingModes, formatMoney, localToday, type BillingMode } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { DateField } from '../../../shared/ui/DateField'
 
 const schema = yup.object({
   tariffId: yup.string().required("Обов'язкове поле"),
@@ -91,12 +92,10 @@ export const CreateEnrollmentModal = () => {
             name="startDate"
             control={control}
             render={({ field, fieldState: { error } }) => (
-              <TextField
+              <DateField
                 {...field}
                 label="Дата старту"
-                type="date"
                 fullWidth
-                slotProps={{ inputLabel: { shrink: true } }}
                 error={!!error}
                 helperText={error?.message}
               />
@@ -106,12 +105,10 @@ export const CreateEnrollmentModal = () => {
             name="endDate"
             control={control}
             render={({ field, fieldState: { error } }) => (
-              <TextField
+              <DateField
                 {...field}
                 label="Дата завершення"
-                type="date"
                 fullWidth
-                slotProps={{ inputLabel: { shrink: true } }}
                 error={!!error}
                 helperText={error?.message}
               />

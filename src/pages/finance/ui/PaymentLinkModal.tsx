@@ -11,6 +11,7 @@ import {
 } from '../../../shared/api'
 import { useNotifyStore } from '../../../shared/model/notifyStore'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { formatDateTime } from '../../../shared/lib/date'
 
 interface PaymentLinkModalProps {
   childId: string
@@ -82,7 +83,7 @@ export const PaymentLinkModal = ({ childId, categories, onClose, onCreated }: Pa
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
             <TextField label="Посилання" value={result.url} fullWidth slotProps={{ input: { readOnly: true } }} />
             <Typography variant="body2" color="text.secondary">
-              Діє до: {new Date(result.expiresAt).toLocaleString('uk-UA')}
+              Діє до: {formatDateTime(result.expiresAt)}
             </Typography>
           </Box>
         ) : (

@@ -27,8 +27,8 @@ import {
   paymentMethodLabels,
   type FinancePayment,
 } from '../../../shared/api'
+import { formatDate } from '../../../shared/lib/date'
 
-const formatDate = (value: string) => new Date(value).toLocaleDateString('uk-UA')
 const voidedSx = { '& td': { color: 'text.disabled', textDecoration: 'line-through' } }
 
 const PaymentRow = ({ payment }: { payment: FinancePayment }) => {

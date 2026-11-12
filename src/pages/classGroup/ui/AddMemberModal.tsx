@@ -5,6 +5,7 @@ import { Autocomplete, Box, Button, Dialog, DialogTitle, TextField } from '@mui/
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { useClassGroupStore } from '../model/classGroupStore'
 import { localToday } from '../../../shared/api'
+import { DateField } from '../../../shared/ui/DateField'
 
 const schema = yup.object({
   childId: yup.string().required("Обов'язкове поле"),
@@ -66,12 +67,10 @@ export const AddMemberModal = () => {
           name="startDate"
           control={control}
           render={({ field, fieldState: { error } }) => (
-            <TextField
+            <DateField
               {...field}
               label="Дата входу"
-              type="date"
               fullWidth
-              slotProps={{ inputLabel: { shrink: true } }}
               error={!!error}
               helperText={error?.message}
             />

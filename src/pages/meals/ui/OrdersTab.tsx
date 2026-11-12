@@ -23,6 +23,7 @@ import {
   addDaysIso, formatMoney, groupKindLabels, groupKinds, localToday, toKopecks,
   type AdminMealOrder, type GroupKind, type MealComplex, type MealCourse, type MealSummary,
 } from '../../../shared/api'
+import { formatDate } from '../../../shared/lib/date'
 
 const roleLabel = (role: string) => (role === 'parent' ? 'батьки' : 'адміністратор')
 
@@ -35,7 +36,7 @@ const momentLabel = (iso: string) => {
   const today = localToday()
   if (day === today) return `сьогодні, ${time}`
   if (day === addDaysIso(today, -1)) return `вчора, ${time}`
-  return `${date.toLocaleDateString('uk-UA', { day: 'numeric', month: 'short', timeZone: 'Europe/Kyiv' })}, ${time}`
+  return `${formatDate(date)} ${time}`
 }
 
 const money = (kopecks: number) => formatMoney(kopecks / 100)

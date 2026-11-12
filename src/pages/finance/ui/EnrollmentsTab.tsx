@@ -35,8 +35,8 @@ import { CreateEnrollmentModal } from './CreateEnrollmentModal'
 import { EndEnrollmentModal } from './EndEnrollmentModal'
 import { AdjustmentModal } from './AdjustmentModal'
 import { HistoryButton } from '../../../widgets/auditHistory'
+import { formatDay as formatDate } from '../../../shared/lib/date'
 
-const formatDate = (value: string) => new Date(value).toLocaleDateString('uk-UA', { timeZone: 'UTC' })
 
 const adjustmentLabel = (a: EnrollmentAdjustment) => {
   const value =

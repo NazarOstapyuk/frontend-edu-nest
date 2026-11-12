@@ -33,6 +33,8 @@ import {
 } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardList, CardField } from '../../../shared/ui/CardList'
+import { DateField } from '../../../shared/ui/DateField'
+import { formatDay } from '../../../shared/lib/date'
 
 const amountPattern = /^\d{1,8}([.,]\d{1,2})?$/
 
@@ -130,7 +132,7 @@ export const TariffModal = () => {
               renderCard={(p) => (
                 <>
                   <CardField label="Діє з">
-                    {new Date(p.effectiveFrom).toLocaleDateString('uk-UA', { timeZone: 'UTC' })}
+                    {formatDay(p.effectiveFrom)}
                   </CardField>
                   <CardField label="Ціна">{formatMoney(p.price)}</CardField>
                 </>
@@ -147,7 +149,7 @@ export const TariffModal = () => {
             <TableBody>
               {tariff.prices.map((p) => (
                 <TableRow key={p.id}>
-                  <TableCell>{new Date(p.effectiveFrom).toLocaleDateString('uk-UA', { timeZone: 'UTC' })}</TableCell>
+                  <TableCell>{formatDay(p.effectiveFrom)}</TableCell>
                   <TableCell align="right">{formatMoney(p.price)}</TableCell>
                 </TableRow>
               ))}
@@ -172,12 +174,10 @@ export const TariffModal = () => {
                   name="effectiveFrom"
                   control={control}
                   render={({ field, fieldState: { error } }) => (
-                    <TextField
+                    <DateField
                       {...field}
                       label="Діє з"
-                      type="date"
                       fullWidth
-                      slotProps={{ inputLabel: { shrink: true } }}
                       error={!!error}
                       helperText={error?.message}
                     />

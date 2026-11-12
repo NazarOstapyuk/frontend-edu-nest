@@ -20,6 +20,8 @@ import { authReasonLabels, authTypeLabels, type AuthEventType } from '../../../s
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardList, CardField } from '../../../shared/ui/CardList'
 import { useAuditStore } from '../model/auditStore'
+import { DateField } from '../../../shared/ui/DateField'
+import { formatDateTime } from '../../../shared/lib/date'
 
 const PAGE_SIZE = 50
 const AGENT_LIMIT = 60
@@ -55,21 +57,17 @@ export const LoginsTab = () => {
         useFlexGap
         sx={{ flexWrap: 'wrap', alignItems: { xs: 'stretch', sm: 'center' } }}
       >
-        <TextField
+        <DateField
           label="Від"
-          type="date"
           size="small"
           value={query.from ?? ''}
-          onChange={(e) => update({ from: e.target.value || undefined })}
-          slotProps={{ inputLabel: { shrink: true } }}
+          onChange={(value) => update({ from: value || undefined })}
         />
-        <TextField
+        <DateField
           label="До"
-          type="date"
           size="small"
           value={query.to ?? ''}
-          onChange={(e) => update({ to: e.target.value || undefined })}
-          slotProps={{ inputLabel: { shrink: true } }}
+          onChange={(value) => update({ to: value || undefined })}
         />
         <TextField
           label="Логін"
@@ -112,7 +110,7 @@ export const LoginsTab = () => {
                   {authTypeLabels[item.type]}
                   {item.reason ? `: ${authReasonLabels[item.reason] ?? item.reason}` : ''}
                 </Typography>
-                <CardField label="Час">{new Date(item.at).toLocaleString('uk-UA')}</CardField>
+                <CardField label="Час">{formatDateTime(item.at)}</CardField>
                 <CardField label="Логін">{item.login}</CardField>
                 <CardField label="Користувач">
                   {item.user ? `${item.user.lastName} ${item.user.firstName}` : '—'}
@@ -154,7 +152,7 @@ export const LoginsTab = () => {
               ) : (
                 logins.items.map((item) => (
                   <TableRow key={item.id}>
-                    <TableCell>{new Date(item.at).toLocaleString('uk-UA')}</TableCell>
+                    <TableCell>{formatDateTime(item.at)}</TableCell>
                     <TableCell>{item.login}</TableCell>
                     <TableCell>{item.user ? `${item.user.lastName} ${item.user.firstName}` : '—'}</TableCell>
                     <TableCell>

@@ -7,6 +7,7 @@ import { RegisterDayTab } from './RegisterDayTab'
 import { MealsTodayBlock } from './MealsTodayBlock'
 import { RegisterMonthTab } from './RegisterMonthTab'
 import { groupKindLabels, localToday, monthLabel, shiftMonth } from '../../../shared/api'
+import { DateField } from '../../../shared/ui/DateField'
 
 export const RegisterPage = () => {
   const groups = useRegisterStore((s) => s.groups)
@@ -55,13 +56,12 @@ export const RegisterPage = () => {
           ))}
         </TextField>
         {tab === 0 ? (
-          <TextField
+          <DateField
             size="small"
-            type="date"
             label="Дата"
             value={date}
-            onChange={(e) => e.target.value && setDate(e.target.value)}
-            slotProps={{ inputLabel: { shrink: true }, htmlInput: { max: localToday() } }}
+            onChange={(value) => value && setDate(value)}
+            max={localToday()}
           />
         ) : (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>

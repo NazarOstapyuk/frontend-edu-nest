@@ -27,8 +27,8 @@ import {
 import { useCan } from '../../../entities/user'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardList, CardField } from '../../../shared/ui/CardList'
+import { formatDateTime } from '../../../shared/lib/date'
 
-const formatDateTime = (value: string) => new Date(value).toLocaleString('uk-UA')
 
 const RequestRow = ({ request, onCancel }: { request: PaymentRequestView; onCancel: (id: string) => void }) => {
   const [open, setOpen] = useState(false)

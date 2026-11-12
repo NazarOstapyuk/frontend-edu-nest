@@ -3,6 +3,7 @@ import { actionLabel, changeActionLabels, entityTypeLabels } from '../../../shar
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { ChangesTable } from '../../../widgets/auditHistory'
 import { useAuditStore } from '../model/auditStore'
+import { formatDateTime } from '../../../shared/lib/date'
 
 export const EventDialog = () => {
   const isPhone = useIsPhone()
@@ -22,7 +23,7 @@ export const EventDialog = () => {
         ) : (
           <Stack spacing={2}>
             <Stack spacing={0.5}>
-              <Typography variant="body2">Час: {new Date(detail.at).toLocaleString('uk-UA')}</Typography>
+              <Typography variant="body2">Час: {formatDateTime(detail.at)}</Typography>
               <Typography variant="body2">
                 Хто: {detail.actor ? `${detail.actor.lastName} ${detail.actor.firstName} (${detail.actor.login})` : '—'}
               </Typography>

@@ -30,6 +30,7 @@ import {
 import { CreateTariffModal } from './CreateTariffModal'
 import { TariffModal } from './TariffModal'
 import { HistoryButton } from '../../../widgets/auditHistory'
+import { formatDay } from '../../../shared/lib/date'
 
 export const TariffsPage = () => {
   const tariffs = useTariffsStore((s) => s.tariffs)
@@ -108,7 +109,7 @@ export const TariffsPage = () => {
           <Typography sx={{ fontWeight: 600, mb: 0.5 }}>Проблеми нарахування</Typography>
           {problems.map((p) => (
             <Typography key={`${p.enrollmentId}-${p.periodStart}`} variant="body2">
-              {p.childName} — {p.tariffName}: немає ціни на {new Date(p.periodStart).toLocaleDateString('uk-UA', { timeZone: 'UTC' })}
+              {p.childName} — {p.tariffName}: немає ціни на {formatDay(p.periodStart)}
             </Typography>
           ))}
         </Alert>

@@ -22,6 +22,7 @@ import {
   type SuggestionLine,
 } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { DateField } from '../../../shared/ui/DateField'
 
 const manualMethods: ManualPaymentMethod[] = ['cash', 'bank_transfer', 'card']
 
@@ -246,12 +247,11 @@ export const CreatePaymentModal = () => {
             name="receivedAt"
             control={control}
             render={({ field, fieldState: { error } }) => (
-              <TextField
+              <DateField
                 {...field}
                 label="Дата надходження"
-                type="date"
                 fullWidth
-                slotProps={{ inputLabel: { shrink: true }, htmlInput: { max: today() } }}
+                max={today()}
                 error={!!error}
                 helperText={error?.message}
               />

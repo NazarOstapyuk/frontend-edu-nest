@@ -220,4 +220,4 @@ export const localToday = () => {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 };
 
-export const formatDay = (value: string) => new Date(value).toLocaleDateString('uk-UA', { timeZone: 'UTC' });
+export { formatDay } from '../lib/date';

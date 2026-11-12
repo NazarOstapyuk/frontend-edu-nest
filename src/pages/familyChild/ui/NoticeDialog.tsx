@@ -5,6 +5,7 @@ import { Box, Button, Dialog, DialogTitle, MenuItem, TextField } from '@mui/mate
 import { useChildAttendanceStore } from '../model/childAttendanceStore'
 import { localToday } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { DateField } from '../../../shared/ui/DateField'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 const span = (from: string, to: string) => Math.round((Date.parse(to) - Date.parse(from)) / DAY_MS) + 1
@@ -65,16 +66,15 @@ export const NoticeDialog = ({ open, onClose }: { open: boolean; onClose: () => 
           name="startDate"
           control={control}
           render={({ field, fieldState: { error } }) => (
-            <TextField
+            <DateField
               {...field}
-              type="date"
               label="З дати"
-              slotProps={{ inputLabel: { shrink: true }, htmlInput: { min: localToday() } }}
+              min={localToday()}
               error={!!error}
               helperText={error?.message}
-              onChange={(e) => {
-                field.onChange(e)
-                if (e.target.value && getValues('endDate') < e.target.value) setValue('endDate', e.target.value, { shouldValidate: true })
+              onChange={(value) => {
+                field.onChange(value)
+                if (value && getValues('endDate') < value) setValue('endDate', value, { shouldValidate: true })
               }}
             />
           )}
@@ -83,7 +83,7 @@ export const NoticeDialog = ({ open, onClose }: { open: boolean; onClose: () => 
           name="endDate"
           control={control}
           render={({ field, fieldState: { error } }) => (
-            <TextField {...field} type="date" label="По дату" slotProps={{ inputLabel: { shrink: true }, htmlInput: { min: localToday() } }} error={!!error} helperText={error?.message} />
+            <DateField {...field} label="По дату" min={localToday()} error={!!error} helperText={error?.message} />
           )}
         />
         <Button size="small" disabled={!startDate || endDate === startDate} onClick={() => setValue('endDate', startDate, { shouldValidate: true })} sx={{ alignSelf: 'flex-start', mt: -1, minHeight: isPhone ? 40 : undefined }}>

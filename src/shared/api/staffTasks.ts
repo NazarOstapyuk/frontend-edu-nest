@@ -116,8 +116,7 @@ const kyivParts = (date: Date) =>
 
 export const formatTaskMoment = (iso: string) => {
   const parts = kyivParts(new Date(iso));
-  const year = parts.year === kyivParts(new Date()).year ? '' : `.${parts.year}`;
-  return `${parts.day}.${parts.month}${year} ${parts.hour}:${parts.minute}`;
+  return `${parts.day}.${parts.month}.${parts.year} ${parts.hour}:${parts.minute}`;
 };
 
 export const isGivenTaskClosed = (task: GivenTask) =>

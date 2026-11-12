@@ -3,6 +3,7 @@ import { Box, Table, TableBody, TableCell, TableHead, TableRow, Typography } fro
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardList, CardField } from '../../../shared/ui/CardList'
 import { financeCategoryLabels, formatMoney, type SuggestionLine } from '../../../shared/api'
+import { formatDate } from '../../../shared/lib/date'
 
 interface AllocationTableProps {
   lines: SuggestionLine[]
@@ -29,7 +30,7 @@ export const AllocationTable = ({ lines, renderAmountField }: AllocationTablePro
           <>
             <Typography sx={{ fontWeight: 600 }}>{line.description}</Typography>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-              {new Date(line.periodStart ?? line.createdAt).toLocaleDateString('uk-UA')}
+              {formatDate(line.periodStart ?? line.createdAt)}
             </Typography>
             <CardField label="Категорія">{financeCategoryLabels[line.category]}</CardField>
             <CardField label="Залишок">{formatMoney(line.remaining)}</CardField>
@@ -56,7 +57,7 @@ export const AllocationTable = ({ lines, renderAmountField }: AllocationTablePro
             <TableCell>
               {line.description}
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                {new Date(line.periodStart ?? line.createdAt).toLocaleDateString('uk-UA')}
+                {formatDate(line.periodStart ?? line.createdAt)}
               </Typography>
             </TableCell>
             <TableCell>{financeCategoryLabels[line.category]}</TableCell>

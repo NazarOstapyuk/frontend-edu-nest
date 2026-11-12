@@ -7,6 +7,7 @@ import { useMealsStore } from '../model/mealsStore'
 import { localToday, type MealComplex } from '../../../shared/api'
 import { categoryPrices } from '../model/prices'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { DateField } from '../../../shared/ui/DateField'
 
 const schema = yup.object({
   priceCategoryId: yup.string().required("Обов'язкове поле"),
@@ -86,11 +87,9 @@ export const PriceDialog = ({
           name="validFrom"
           control={control}
           render={({ field, fieldState: { error } }) => (
-            <TextField
+            <DateField
               {...field}
-              type="date"
               label="Діє з"
-              slotProps={{ inputLabel: { shrink: true } }}
               error={!!error}
               helperText={error?.message ?? 'Якщо на цю дату ціна вже є, її буде замінено. Уже зроблені замовлення зберігають свою ціну.'}
             />

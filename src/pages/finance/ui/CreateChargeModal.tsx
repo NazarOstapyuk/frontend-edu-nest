@@ -12,6 +12,7 @@ import {
   type FinanceCategory,
 } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { DateField } from '../../../shared/ui/DateField'
 
 const schema = yup.object({
   category: yup.mixed<FinanceCategory>().oneOf(financeCategories).required("Обов'язкове поле"),
@@ -125,12 +126,10 @@ export const CreateChargeModal = () => {
             name="periodStart"
             control={control}
             render={({ field, fieldState: { error } }) => (
-              <TextField
+              <DateField
                 {...field}
                 label="Початок періоду"
-                type="date"
                 fullWidth
-                slotProps={{ inputLabel: { shrink: true } }}
                 error={!!error}
                 helperText={error?.message}
               />
@@ -140,12 +139,10 @@ export const CreateChargeModal = () => {
             name="periodEnd"
             control={control}
             render={({ field, fieldState: { error } }) => (
-              <TextField
+              <DateField
                 {...field}
                 label="Кінець періоду"
-                type="date"
                 fullWidth
-                slotProps={{ inputLabel: { shrink: true } }}
                 error={!!error}
                 helperText={error?.message}
               />

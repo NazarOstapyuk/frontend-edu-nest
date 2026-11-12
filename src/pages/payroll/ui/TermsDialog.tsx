@@ -32,6 +32,7 @@ import {
 } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { usePayrollStore } from '../model/payrollStore'
+import { DateField } from '../../../shared/ui/DateField'
 
 const calendars = Object.keys(payrollCalendarLabels) as PayrollCalendar[]
 const lessonTypes = Object.keys(payrollLessonTypeLabels) as PayrollLessonType[]
@@ -163,14 +164,12 @@ export const TermsDialog = ({ teacherId, terms, prefill = null, onClose }: Props
               name="validFrom"
               control={control}
               render={({ field, fieldState: { error } }) => (
-                <TextField
+                <DateField
                   {...field}
-                  type="date"
                   label="Діє з"
                   disabled={!!terms}
                   error={!!error}
                   helperText={error?.message ?? (terms ? undefined : 'Попередня версія закриється напередодні')}
-                  slotProps={{ inputLabel: { shrink: true } }}
                   fullWidth
                 />
               )}

@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Box, Button, Checkbox, Dialog, DialogTitle, FormControlLabel, TextField, Typography } from '@mui/material'
+import { Box, Button, Checkbox, Dialog, DialogTitle, FormControlLabel, Typography } from '@mui/material'
 import { useMealsStore } from '../model/mealsStore'
 import { InstitutionMultiSelect } from './InstitutionMultiSelect'
 import { useNotifyStore } from '../../../shared/model/notifyStore'
 import { addDaysIso } from '../../../shared/api'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
+import { DateField } from '../../../shared/ui/DateField'
 
 export const CopyMenuDialog = ({ onClose }: { onClose: () => void }) => {
   const isPhone = useIsPhone()
@@ -34,10 +35,10 @@ export const CopyMenuDialog = ({ onClose }: { onClose: () => void }) => {
       <DialogTitle sx={{ fontWeight: 700 }}>Копіювати меню</DialogTitle>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: '20px' }}>
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
-          <TextField type="date" label="Звідки: з" value={fromStart} onChange={(e) => setFromStart(e.target.value)} slotProps={{ inputLabel: { shrink: true } }} fullWidth />
-          <TextField type="date" label="по" value={fromEnd} onChange={(e) => setFromEnd(e.target.value)} slotProps={{ inputLabel: { shrink: true } }} fullWidth />
+          <DateField label="Звідки: з" value={fromStart} onChange={(value) => setFromStart(value)}  fullWidth />
+          <DateField label="по" value={fromEnd} onChange={(value) => setFromEnd(value)}  fullWidth />
         </Box>
-        <TextField type="date" label="Куди: починаючи з" value={toStart} onChange={(e) => setToStart(e.target.value)} slotProps={{ inputLabel: { shrink: true } }} />
+        <DateField label="Куди: починаючи з" value={toStart} onChange={(value) => setToStart(value)}  />
         <InstitutionMultiSelect label="Для закладів" value={institutionIds} onChange={setInstitutionIds} currentId={current} />
         <FormControlLabel control={<Checkbox checked={overwrite} onChange={(e) => setOverwrite(e.target.checked)} />} label="Перезаписати чернетки" />
         <Typography variant="body2" color="text.secondary">Створюються чернетки. Опубліковані дні й неробочі дні пропускаються.</Typography>

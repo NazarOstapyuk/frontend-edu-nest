@@ -36,7 +36,8 @@ const QuestionControl = ({ question, value, disabled, onChange }: QuestionContro
   const isPhone = useIsPhone()
   const toggleSx = isPhone ? { minHeight: 44, flexGrow: 1 } : undefined
 
-  if (question.type === 'choice') {
+  if (question.type === 'choice' || question.type === 'percent') {
+    const suffix = question.type === 'percent' ? '%' : ''
     return (
       <ToggleButtonGroup
         size="small"
@@ -47,7 +48,7 @@ const QuestionControl = ({ question, value, disabled, onChange }: QuestionContro
         sx={{ flexWrap: 'wrap' }}
       >
         {question.options.map((option) => (
-          <ToggleButton key={option} value={option} sx={toggleSx}>{option}</ToggleButton>
+          <ToggleButton key={option} value={option} sx={toggleSx}>{option}{suffix}</ToggleButton>
         ))}
       </ToggleButtonGroup>
     )

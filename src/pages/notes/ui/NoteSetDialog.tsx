@@ -10,6 +10,7 @@ import {
   DialogTitle,
   FormControlLabel,
   IconButton,
+  InputAdornment,
   MenuItem,
   Paper,
   TextField,
@@ -48,6 +49,8 @@ interface GroupOption {
 }
 
 const BOUND_RE = /^-?\d{1,8}([.,]\d{1,2})?$/
+const PERCENT_RE = /^\d{1,3}$/
+const DEFAULT_PERCENT_OPTIONS = ['20', '50', '100']
 
 let nextKey = 0
 const newKey = () => `new-${++nextKey}`
@@ -106,6 +109,12 @@ const validate = (name: string, institutionId: string, deadline: string, questio
       if (options.some((o) => !o || o.length > 50)) return `${label}варіант має містити від 1 до 50 символів`
       if (new Set(options).size !== options.length) return `${label}варіанти повторюються`
     }
+    if (q.type === 'percent') {
+      const options = q.options.map((o) => o.trim())
+      if (options.length < 2 || options.length > 10) return `${label}потрібно від 2 до 10 варіантів`
+      if (options.some((o) => !PERCENT_RE.test(o) || Number(o) > 100)) return `${label}варіант відсотка: ціле число від 0 до 100`
+      if (new Set(options.map(Number)).size !== options.length) return `${label}варіанти повторюються`
+    }
     if (q.type === 'number') {
       const min = parseBound(q.min)
       const max = parseBound(q.max)
@@ -122,7 +131,12 @@ const toDto = (q: QuestionDraft): NoteQuestionDto => ({
   text: q.text.trim(),
   type: q.type,
   required: q.required,
-  options: q.type === 'choice' ? q.options.map((o) => o.trim()) : [],
+  options:
+    q.type === 'percent'
+      ? q.options.map((o) => String(Number(o.trim())))
+      : q.type === 'choice'
+        ? q.options.map((o) => o.trim())
+        : [],
   min: q.type === 'number' ? (parseBound(q.min) ?? null) : null,
   max: q.type === 'number' ? (parseBound(q.max) ?? null) : null,
   unit: q.type === 'number' ? q.unit.trim() || null : null,
@@ -285,7 +299,13 @@ const NoteSetForm = ({ set, onClose }: { set: NoteSet | null; onClose: () => voi
                   value={q.type}
                   disabled={q.answered}
                   helperText={q.answered ? 'Є відповіді' : undefined}
-                  onChange={(e) => patch(index, { type: e.target.value as NoteQuestionType })}
+                  onChange={(e) => {
+                    const type = e.target.value as NoteQuestionType
+                    patch(index, {
+                      type,
+                      options: type === 'percent' && q.options.length === 0 ? DEFAULT_PERCENT_OPTIONS : q.options,
+                    })
+                  }}
                   sx={{ width: { xs: '100%', sm: 160 } }}
                 >
                   {noteQuestionTypes.map((t) => (
@@ -307,6 +327,46 @@ const NoteSetForm = ({ set, onClose }: { set: NoteSet | null; onClose: () => voi
                   )}
                   sx={{ mb: 1 }}
                 />
+              )}
+              {q.type === 'percent' && (
+                <Box sx={{ mb: 1 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    Варіанти відсотка (від 2 до 10, цілі числа від 0 до 100)
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' }}>
+                    {q.options.map((option, optionIndex) => (
+                      <Box key={optionIndex} sx={{ display: 'flex', alignItems: 'center' }}>
+                        <TextField
+                          size="small"
+                          value={option}
+                          onChange={(e) =>
+                            patch(index, {
+                              options: q.options.map((o, i) => (i === optionIndex ? e.target.value.replace(/\D/g, '') : o)),
+                            })
+                          }
+                          slotProps={{
+                            htmlInput: { inputMode: 'numeric', maxLength: 3, 'aria-label': `Варіант ${optionIndex + 1}` },
+                            input: { endAdornment: <InputAdornment position="end">%</InputAdornment> },
+                          }}
+                          sx={{ width: 110 }}
+                        />
+                        <IconButton
+                          aria-label="Видалити варіант"
+                          onClick={() => patch(index, { options: q.options.filter((_, i) => i !== optionIndex) })}
+                        >
+                          <DeleteOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    ))}
+                    <Button
+                      size="small"
+                      disabled={q.options.length >= 10}
+                      onClick={() => patch(index, { options: [...q.options, ''] })}
+                    >
+                      + Варіант
+                    </Button>
+                  </Box>
+                </Box>
               )}
               {q.type === 'number' && (
                 <Box sx={{ display: 'flex', gap: 1.5, flexDirection: { xs: 'column', sm: 'row' }, mb: 1 }}>

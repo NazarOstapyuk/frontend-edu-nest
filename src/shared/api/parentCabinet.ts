@@ -102,7 +102,7 @@ export const parentCabinetApi = {
 
 export interface ParentNoteAnswer {
   question: string;
-  type: 'choice' | 'yes_no' | 'number' | 'text';
+  type: 'choice' | 'yes_no' | 'number' | 'percent' | 'text';
   value: string | number | boolean | null;
   unit: string | null;
 }

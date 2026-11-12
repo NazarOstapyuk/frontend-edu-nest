@@ -1,12 +1,13 @@
 import { axiosInstance } from './axiosInstance';
 import type { GroupKind } from './register';
 
-export type NoteQuestionType = 'choice' | 'text' | 'yes_no' | 'number';
+export type NoteQuestionType = 'choice' | 'text' | 'yes_no' | 'number' | 'percent';
 
 export const noteQuestionTypeLabels: Record<NoteQuestionType, string> = {
   choice: 'Вибір',
   yes_no: 'Так / ні',
   number: 'Число',
+  percent: 'Відсоток',
   text: 'Текст',
 };
 

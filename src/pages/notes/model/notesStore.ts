@@ -30,6 +30,7 @@ export const initialDraft = (question: NotesDayQuestion, row: NotesChildRow): Dr
   const value = row.answers.find((a) => a.questionId === question.id)?.value ?? null;
   if (question.type === 'yes_no') return typeof value === 'boolean' ? value : null;
   if (question.type === 'choice') return typeof value === 'string' ? value : null;
+  if (question.type === 'percent') return typeof value === 'number' ? String(value) : null;
   return value === null ? '' : String(value);
 };
 
@@ -45,6 +46,7 @@ export const numberError = (question: NotesDayQuestion, value: DraftValue): stri
 
 const toValue = (question: NotesDayQuestion, value: DraftValue): NoteValue => {
   if (question.type === 'yes_no' || question.type === 'choice') return value;
+  if (question.type === 'percent') return typeof value === 'string' && value !== '' ? Number(value) : null;
   const text = typeof value === 'string' ? value.trim() : '';
   if (text === '') return null;
   return question.type === 'number' ? Number(text.replace(',', '.')) : text;

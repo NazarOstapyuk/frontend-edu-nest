@@ -15,6 +15,7 @@ const PAGE_DAYS = 7
 const answerText = (answer: ParentNoteAnswer) => {
   if (answer.value === null) return '—'
   if (typeof answer.value === 'boolean') return answer.value ? 'Так' : 'Ні'
+  if (typeof answer.value === 'number' && answer.type === 'percent') return `${answer.value}%`
   if (typeof answer.value === 'number') return answer.unit ? `${answer.value} ${answer.unit}` : String(answer.value)
   return answer.value
 }

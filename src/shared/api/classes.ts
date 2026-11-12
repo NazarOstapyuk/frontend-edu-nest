@@ -97,7 +97,7 @@ export interface RosterRow {
   isMember: boolean;
   attendance: { id: string; status: AttendanceStatus; isGuest: boolean } | null;
   packageInfo: { packageId: string; remaining: number; total: number; expiresAt: string | null } | null;
-  packageBlock: { reason: PackageBlockReason; date: string | null } | null;
+  packageBlock: { reason: PackageBlockReason; date: string | null; packageId?: string | null } | null;
 }
 
 export interface LessonRoster {
@@ -105,6 +105,7 @@ export interface LessonRoster {
   date: string;
   lessonId: string | null;
   conductedBy: PersonRef | null;
+  packageTariff?: { id: string; name: string; packageSize: number; validityDays: number | null; price: string | null } | null;
   hasSingleTariff: boolean;
   rows: RosterRow[];
 }

@@ -6,6 +6,7 @@ export type ReportKey =
   | 'charges'
   | 'debts'
   | 'attendance'
+  | 'assessment'
   | 'lessons'
   | 'meals'
   | 'payroll';
@@ -59,6 +60,7 @@ export const reportDefinitions: ReportDefinition[] = [
   { key: 'charges', fileName: 'нарахування', label: 'Нарахування', areas: ['finance'], period: true, filters: ['institution', 'kind', 'group', 'child', 'tariff'] },
   { key: 'debts', fileName: 'борги', label: 'Борги', areas: ['finance'], period: false, filters: ['institution', 'kind', 'group', 'child'] },
   { key: 'attendance', fileName: 'відвідування', label: 'Відвідування', areas: ['register'], period: true, filters: ['institution', 'kind', 'group', 'child'] },
+  { key: 'assessment', fileName: 'оцінювання', label: 'Оцінювання', areas: ['register'], period: true, filters: ['institution', 'kind', 'group', 'child'] },
   { key: 'lessons', fileName: 'уроки', label: 'Уроки', areas: ['timetable', 'classes'], period: true, filters: ['institution', 'kind', 'group', 'teacher'] },
   { key: 'meals', fileName: 'харчування', label: 'Харчування', areas: ['meals'], period: true, filters: ['institution', 'kind', 'group'] },
   { key: 'payroll', fileName: 'зарплати', label: 'Зарплати', areas: ['payroll'], period: true, filters: ['teacher'] },

@@ -59,6 +59,28 @@ const presets: { label: string; range: () => { from: string; to: string } }[] = 
     },
   },
   {
+    label: 'I семестр',
+    range: () => {
+      const today = parseDay(kyivToday())
+      const y = today.getUTCMonth() >= 8 ? today.getUTCFullYear() : today.getUTCFullYear() - 1
+      return {
+        from: dayString(new Date(Date.UTC(y, 8, 1))),
+        to: dayString(new Date(Date.UTC(y, 11, 31))),
+      }
+    },
+  },
+  {
+    label: 'II семестр',
+    range: () => {
+      const today = parseDay(kyivToday())
+      const y = today.getUTCMonth() >= 8 ? today.getUTCFullYear() : today.getUTCFullYear() - 1
+      return {
+        from: dayString(new Date(Date.UTC(y + 1, 0, 1))),
+        to: dayString(new Date(Date.UTC(y + 1, 4, 31))),
+      }
+    },
+  },
+  {
     label: 'Минулий місяць',
     range: () => {
       const today = parseDay(kyivToday())

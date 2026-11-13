@@ -22,6 +22,7 @@ type DateFieldProps = {
   size?: 'small' | 'medium'
   disabled?: boolean
   required?: boolean
+  clearable?: boolean
   sx?: SxProps<Theme>
 }
 
@@ -40,6 +41,7 @@ export const DateField = ({
   size,
   disabled,
   required,
+  clearable,
   sx,
 }: DateFieldProps) => {
   const current = value ?? ''
@@ -63,6 +65,7 @@ export const DateField = ({
       disabled={disabled}
       sx={sx}
       slotProps={{
+        field: { clearable },
         textField: { name, onBlur, inputRef: ref, error, helperText: helperText ?? undefined, fullWidth, size, required },
       }}
     />

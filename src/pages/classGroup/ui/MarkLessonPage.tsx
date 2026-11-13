@@ -509,8 +509,8 @@ export const MarkLessonPage = () => {
           lessonDate={lessonDate}
           isSaving={isFixing}
           onClose={() => setSell(null)}
-          onSubmit={async (childIds, purchaseDate) => {
-            await sellPackages(childIds, purchaseDate)
+          onSubmit={async (childIds, purchaseDate, expiresAt) => {
+            await sellPackages(childIds, purchaseDate, expiresAt)
             if (sell?.focusId && childIds.includes(sell.focusId) && purchaseDate <= lessonDate) {
               setStatus(sell.focusId, 'present')
             }

@@ -101,7 +101,7 @@ const PackageRow = ({ pkg }: { pkg: ChildPackage }) => {
               {pkg.reconciliationNote && <Typography variant="body2">Звірка: {pkg.reconciliationNote}</Typography>}
               {pkg.extensions.map((e) => (
                 <Typography key={e.id} variant="body2" color="text.secondary">
-                  Продовжено до {formatDay(e.newExpiresAt)}: {e.reason}
+                  {e.newExpiresAt ? `Продовжено до ${formatDay(e.newExpiresAt)}` : 'Термін дії знято'}: {e.reason}
                 </Typography>
               ))}
               {pkg.usages.length === 0 && pkg.legacyAttendances.length === 0 ? (
@@ -173,7 +173,7 @@ const PackageCard = ({ pkg }: { pkg: ChildPackage }) => {
         <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
           {pkg.extensions.map((e) => (
             <Typography key={e.id} variant="body2" color="text.secondary">
-              Продовжено до {formatDay(e.newExpiresAt)}: {e.reason}
+              {e.newExpiresAt ? `Продовжено до ${formatDay(e.newExpiresAt)}` : 'Термін дії знято'}: {e.reason}
             </Typography>
           ))}
           {pkg.usages.length === 0 && pkg.legacyAttendances.length === 0 ? (

@@ -98,6 +98,7 @@ export {
   classFormats,
   attendanceStatuses,
   localToday,
+  packageExpiryFor,
   formatDay,
 } from './classes';
 export type {

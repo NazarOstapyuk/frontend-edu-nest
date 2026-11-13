@@ -128,7 +128,7 @@ export interface ChildPackage {
   legacyTotalPrice: string | null;
   voidedAt: string | null;
   voidReason: string | null;
-  extensions: { id: string; previousExpiresAt: string | null; newExpiresAt: string; reason: string; createdAt: string }[];
+  extensions: { id: string; previousExpiresAt: string | null; newExpiresAt: string | null; reason: string; createdAt: string }[];
   usages: { id: string; date: string; groupName: string; status: AttendanceStatus; voidedAt: string | null }[];
   legacyAttendances: { id: string; date: string; note: string | null }[];
 }
@@ -176,6 +176,7 @@ export interface PurchasePackageDto {
   directionId: string;
   tariffId: string;
   purchaseDate: string;
+  expiresAt?: string | null;
 }
 
 export interface ReconcileDto {
@@ -214,9 +215,20 @@ export const packagesApi = {
     axiosInstance.post<ChildPackage[]>(`/packages/${id}/extend`, dto),
   void: (id: string, reason: string) => axiosInstance.post<ChildPackage[]>(`/packages/${id}/void`, { reason }),
   reconcile: (id: string, dto: ReconcileDto) => axiosInstance.post<ChildPackage[]>(`/packages/${id}/reconcile`, dto),
+  countWithExpiry: (tariffId: string) =>
+    axiosInstance.get<{ count: number }>('/packages/with-expiry', { params: { tariffId } }),
+  clearExpiry: (tariffId: string, reason: string) =>
+    axiosInstance.post<{ updated: number }>('/packages/clear-expiry', { tariffId, reason }),
   getReconciliation: () => axiosInstance.get<ReconciliationItem[]>('/packages/reconciliation'),
   migrateLegacy: () =>
     axiosInstance.post<{ directions: number; packages: number; skipped: number }>('/legacy/subscriptions/migrate'),
+};
+
+export const packageExpiryFor = (purchaseDate: string, validityDays: number | null) => {
+  if (!purchaseDate || !validityDays) return '';
+  const date = new Date(`${purchaseDate.slice(0, 10)}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + validityDays - 1);
+  return date.toISOString().slice(0, 10);
 };
 
 export const localToday = () => {

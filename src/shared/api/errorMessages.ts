@@ -267,6 +267,7 @@ export const errorMessages: Record<string, string> = {
   'Invalid percent option': 'Варіант відсотка: ціле число від 0 до 100',
   'Root password cannot be viewed': 'Пароль root не показується',
   'Password view is not configured': 'Перегляд паролів не налаштовано на сервері (PASSWORD_VIEW_KEY)',
+  'Expiry must not be before the purchase date': 'Дата закінчення не може бути раніше дати покупки',
   'Unit and range are not allowed for percent': 'Для відсотка не можна задавати одиницю чи межі',
   'Invalid range': 'Неправильний діапазон чисел',
   'Invalid unit': 'Одиниця виміру має містити до 20 символів',

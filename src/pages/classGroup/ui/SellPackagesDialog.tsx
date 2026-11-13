@@ -10,7 +10,7 @@ import {
   FormControlLabel,
   Typography,
 } from '@mui/material'
-import { formatMoney, type LessonRoster } from '../../../shared/api'
+import { formatMoney, packageExpiryFor, type LessonRoster } from '../../../shared/api'
 import { formatDay } from '../../../shared/lib/date'
 import { DateField } from '../../../shared/ui/DateField'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
@@ -54,10 +54,12 @@ const SellPackagesForm = ({
   lessonDate: string
   isSaving: boolean
   onClose: () => void
-  onSubmit: (childIds: string[], purchaseDate: string) => Promise<void>
+  onSubmit: (childIds: string[], purchaseDate: string, expiresAt: string | null) => Promise<void>
 }) => {
   const [selected, setSelected] = useState<string[]>(candidates.filter((c) => c.preselected).map((c) => c.id))
   const [purchaseDate, setPurchaseDate] = useState(lessonDate)
+  const [expiresAt, setExpiresAt] = useState(packageExpiryFor(lessonDate, tariff.validityDays))
+  const expiryTooEarly = expiresAt !== '' && expiresAt < lessonDate
   const allSelected = selected.length === candidates.length
   const toggle = (id: string) =>
     setSelected((current) => (current.includes(id) ? current.filter((x) => x !== id) : [...current, id]))
@@ -67,6 +69,7 @@ const SellPackagesForm = ({
     onSubmit(
       candidates.filter((c) => selected.includes(c.id)).map((c) => c.id),
       purchaseDate,
+      expiresAt || null,
     )
       .then(onClose)
       .catch(() => undefined)
@@ -80,20 +83,40 @@ const SellPackagesForm = ({
           <Typography variant="body2" color="text.secondary">
             {tariff.packageSize} {sessionsWord(tariff.packageSize)}
             {tariff.price ? `, ${formatMoney(tariff.price)}` : ', ціни на цю дату немає'}
-            {tariff.validityDays ? `, діє ${tariff.validityDays} дн. від покупки` : ', без терміну дії'}
+            {tariff.validityDays ? `, за тарифом діє ${tariff.validityDays} дн.` : ', за тарифом без терміну'}
           </Typography>
         </Box>
 
         <DateField
           label="Дата покупки"
           value={purchaseDate}
-          onChange={setPurchaseDate}
+          onChange={(value) => {
+            setPurchaseDate(value)
+            setExpiresAt(packageExpiryFor(value, tariff.validityDays))
+          }}
           fullWidth
           error={dateTooLate}
           helperText={
             dateTooLate
               ? `Пакет почне діяти пізніше заняття ${formatDay(lessonDate)}, і дітей усе одно не можна буде відмітити`
               : 'Пакет діє з цієї дати. Щоб відмітити це заняття, дата має бути не пізніше дня заняття.'
+          }
+        />
+
+        <DateField
+          label="Діє до"
+          value={expiresAt}
+          onChange={setExpiresAt}
+          min={purchaseDate}
+          clearable
+          fullWidth
+          error={expiryTooEarly}
+          helperText={
+            expiryTooEarly
+              ? `Пакет закінчиться до заняття ${formatDay(lessonDate)}, і дітей не можна буде відмітити`
+              : expiresAt
+                ? 'Очистіть поле, щоб пакет діяв без терміну, доки не закінчаться заняття'
+                : 'Без терміну: пакет діє, доки не закінчаться заняття'
           }
         />
 
@@ -143,7 +166,7 @@ const SellPackagesForm = ({
         <Button onClick={onClose} disabled={isSaving}>
           Скасувати
         </Button>
-        <Button variant="contained" onClick={submit} disabled={isSaving || selected.length === 0 || dateTooLate}>
+        <Button variant="contained" onClick={submit} disabled={isSaving || selected.length === 0 || dateTooLate || expiryTooEarly}>
           {selected.length === 0
             ? 'Виберіть дітей'
             : `Продати ${selected.length} ${packagesWord(selected.length)}`}
@@ -168,7 +191,7 @@ export const SellPackagesDialog = ({
   lessonDate: string
   isSaving: boolean
   onClose: () => void
-  onSubmit: (childIds: string[], purchaseDate: string) => Promise<void>
+  onSubmit: (childIds: string[], purchaseDate: string, expiresAt: string | null) => Promise<void>
 }) => {
   const isPhone = useIsPhone()
   return (

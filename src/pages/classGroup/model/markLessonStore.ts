@@ -22,7 +22,7 @@ interface MarkLessonState {
   markPresent: (childIds: string[]) => void;
   addGuest: (child: Child) => void;
   save: (reason?: string) => Promise<void>;
-  sellPackages: (childIds: string[], purchaseDate: string) => Promise<void>;
+  sellPackages: (childIds: string[], purchaseDate: string, expiresAt: string | null) => Promise<void>;
   extendPackage: (packageId: string, newExpiresAt: string, reason: string) => Promise<void>;
 }
 
@@ -101,7 +101,7 @@ export const useMarkLessonStore = create<MarkLessonState>((set, get) => {
       }
     },
 
-    sellPackages: async (childIds, purchaseDate) => {
+    sellPackages: async (childIds, purchaseDate, expiresAt) => {
       const { roster, key } = get();
       const tariff = roster?.packageTariff;
       if (!roster || !key || !tariff) return;
@@ -112,6 +112,7 @@ export const useMarkLessonStore = create<MarkLessonState>((set, get) => {
             directionId: roster.group.direction.id,
             tariffId: tariff.id,
             purchaseDate,
+            expiresAt,
           });
         }
       } finally {

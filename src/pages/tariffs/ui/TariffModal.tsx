@@ -35,6 +35,7 @@ import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardList, CardField } from '../../../shared/ui/CardList'
 import { DateField } from '../../../shared/ui/DateField'
 import { formatDay } from '../../../shared/lib/date'
+import { ExpiringPackagesBlock } from './ExpiringPackagesBlock'
 
 const amountPattern = /^\d{1,8}([.,]\d{1,2})?$/
 
@@ -101,6 +102,7 @@ export const TariffModal = () => {
   const updateTariff = useTariffsStore((s) => s.updateTariff)
   const isSaving = useTariffsStore((s) => s.isSaving)
   const canEdit = useCan('tariffs', 'edit')
+  const canClearExpiry = useCan('classes', 'edit')
   const tariff = tariffs.find((t) => t.id === tariffId) ?? null
   const allInstitutions = useInstitutionStore((s) => s.institutions)
   const institutions = useEffectiveInstitutions()
@@ -147,6 +149,7 @@ export const TariffModal = () => {
               onSave={(validityDays) => updateTariff(tariff.id, { validityDays })}
             />
           )}
+          {tariff.unit === 'package' && canClearExpiry && <ExpiringPackagesBlock tariffId={tariff.id} />}
           <TextField
             select
             label="Заклад"

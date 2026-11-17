@@ -71,7 +71,7 @@ export const navItems: NavItem[] = [
   { path: '/tariffs',             label: 'Тарифи',            icon: PriceChangeIcon,    area: 'tariffs', section: 'money' },
   { path: '/payroll',            label: 'Зарплати',          icon: PaymentsIcon,       area: 'payroll', section: 'money' },
   { path: '/my-payroll',         label: 'Моя зарплата',      icon: RequestQuoteIcon,   roles: ['teacher'], section: 'money' },
-  { path: '/reports',           label: 'Звіти',             icon: AssessmentIcon,     areas: ['finance', 'register', 'timetable', 'classes', 'meals', 'payroll'], section: 'money' },
+  { path: '/reports',           label: 'Звіти',             icon: AssessmentIcon,     areas: ['finance', 'register', 'timetable', 'classes', 'meals', 'payroll', 'cash_control'], section: 'money' },
 ]
 
 export const bottomNavItems: NavItem[] = [

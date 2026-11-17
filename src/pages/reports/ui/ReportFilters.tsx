@@ -2,12 +2,21 @@ import { useEffect, useState } from 'react'
 import { Autocomplete, Button, MenuItem, Stack, TextField } from '@mui/material'
 import { useAuthStore, useCan } from '../../../entities/user'
 import {
+  cashApi,
+  cashDirectionLabels,
+  cashEntryKindLabels,
   childrenApi,
+  financeCategoryLabels,
   groupsApi,
   softList,
   tariffsApi,
   usersApi,
+  type CashDeskState,
+  type CashDirection,
+  type CashEntryKind,
   type Child,
+  type FinanceCategory,
+  type Person,
   type Group,
   type Tariff,
   type UserLookup,
@@ -109,6 +118,8 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
   const [children, setChildren] = useState<Child[]>([])
   const [teachers, setTeachers] = useState<UserLookup[]>([])
   const [tariffs, setTariffs] = useState<Tariff[]>([])
+  const [desks, setDesks] = useState<CashDeskState[]>([])
+  const [employees, setEmployees] = useState<Person[]>([])
 
   const canListGroups = useCan('children', 'view')
   const canListChildren = useCan('children', 'view')
@@ -121,11 +132,11 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
     child: canListChildren,
     teacher: true,
     tariff: canListTariffs,
-    desk: false,
-    employee: false,
-    direction: false,
-    entryKind: false,
-    category: false,
+    desk: true,
+    employee: true,
+    direction: true,
+    entryKind: true,
+    category: true,
   }
   const has = (filter: ReportFilter) => definition.filters.includes(filter) && available[filter]
   const showInstitution = has('institution')
@@ -133,6 +144,8 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
   const showChild = has('child')
   const showTeacher = has('teacher')
   const showTariff = has('tariff')
+  const showDesk = has('desk')
+  const showEmployee = has('employee')
   const canPickKind = profile?.role === 'root' || profile?.accessScope === 'all'
 
   useEffect(() => {
@@ -157,10 +170,20 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
         if (!stale) setTariffs(list)
       })
     }
+    if (showDesk) {
+      cashApi.getDesks(true).catch(() => []).then((list) => {
+        if (!stale) setDesks(list)
+      })
+    }
+    if (showEmployee) {
+      cashApi.getRecipients(true).catch(() => []).then((list) => {
+        if (!stale) setEmployees(list)
+      })
+    }
     return () => {
       stale = true
     }
-  }, [showGroup, showChild, showTeacher, showTariff])
+  }, [showGroup, showChild, showTeacher, showTariff, showDesk, showEmployee])
 
   useEffect(() => {
     if (showInstitution) setQuery({ institutionId: selectedInstitutionId ?? undefined, ...(selectedInstitutionId ? { kind: undefined } : {}) })
@@ -323,6 +346,96 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
                 </MenuItem>
               )
             })}
+          </TextField>
+        )}
+        {showDesk && (
+          <TextField
+            select
+            label="Каса"
+            size="small"
+            sx={{ minWidth: { sm: 180 } }}
+            value={query.deskId ?? ''}
+            onChange={(e) => update({ deskId: e.target.value || undefined })}
+            slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}
+          >
+            <MenuItem value="">Усі</MenuItem>
+            {desks.map((o) => (
+              <MenuItem key={o.id} value={o.id}>
+                {o.name}
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
+        {showEmployee && (
+          <TextField
+            select
+            label="Співробітник"
+            size="small"
+            sx={{ minWidth: { sm: 180 } }}
+            value={query.employeeId ?? ''}
+            onChange={(e) => update({ employeeId: e.target.value || undefined })}
+            slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}
+          >
+            <MenuItem value="">Усі</MenuItem>
+            {employees.map((o) => (
+              <MenuItem key={o.id} value={o.id}>
+                {o.name}
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
+        {has('direction') && (
+          <TextField
+            select
+            label="Напрям"
+            size="small"
+            sx={{ minWidth: { sm: 180 } }}
+            value={query.direction ?? ''}
+            onChange={(e) => update({ direction: (e.target.value || undefined) as CashDirection | undefined })}
+            slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}
+          >
+            <MenuItem value="">Усі</MenuItem>
+            {(Object.keys(cashDirectionLabels) as CashDirection[]).map((k) => (
+              <MenuItem key={k} value={k}>
+                {cashDirectionLabels[k]}
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
+        {has('entryKind') && (
+          <TextField
+            select
+            label="Тип операції"
+            size="small"
+            sx={{ minWidth: { sm: 180 } }}
+            value={query.entryKind ?? ''}
+            onChange={(e) => update({ entryKind: (e.target.value || undefined) as CashEntryKind | undefined })}
+            slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}
+          >
+            <MenuItem value="">Усі</MenuItem>
+            {(Object.keys(cashEntryKindLabels) as CashEntryKind[]).map((k) => (
+              <MenuItem key={k} value={k}>
+                {cashEntryKindLabels[k]}
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
+        {has('category') && (
+          <TextField
+            select
+            label="Категорія"
+            size="small"
+            sx={{ minWidth: { sm: 180 } }}
+            value={query.category ?? ''}
+            onChange={(e) => update({ category: (e.target.value || undefined) as FinanceCategory | undefined })}
+            slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}
+          >
+            <MenuItem value="">Усі</MenuItem>
+            {(Object.keys(financeCategoryLabels) as FinanceCategory[]).map((k) => (
+              <MenuItem key={k} value={k}>
+                {financeCategoryLabels[k]}
+              </MenuItem>
+            ))}
           </TextField>
         )}
         <Button variant="contained" disabled={busy} onClick={() => load()}>

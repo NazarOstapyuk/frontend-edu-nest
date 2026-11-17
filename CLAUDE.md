@@ -37,7 +37,7 @@ src/
   widgets/             # header, sidebar (sidebar/model/nav-items.ts is the menu)
   shared/api/          # axiosInstance + API modules, all re-exported from index.ts
   shared/ui/           # EmptyPage, RHFTextField, ConfirmDialog, ReasonDialog, CardList
-  shared/model/        # institutionStore (selected institution), notifyStore, pendingNoticesStore
+  shared/model/        # institutionStore (selected institution), notifyStore, pendingNoticesStore, pendingCashStore
 docs/superpowers/      # specs/ and plans/
 ```
 
@@ -62,6 +62,8 @@ Daily notes: `pages/notes` (menu «Нотатки», area `register`; tabs «З�
 Staff tasks: `pages/tasks` (menu «Завдання», roles root/admin/teacher, no permission area; tabs «Мої» for admin/teacher and «Поставлені» for root/admin, `/tasks?tab=mine|given` picks the tab and a tab the user cannot see is ignored), `shared/model/pendingTasksStore` (menu badge `pendingTasks`: own open tasks) and the task rows of the «Потребує уваги» list (dashboard key `tasks`: «Прострочено»/«Сьогодні до» for assignees, «Не виконали» with names for authors). API in `shared/api/staffTasks.ts`. Deadlines, overdue and counts come from the backend; never compute them on the frontend.
 
 Backups: `pages/backups` (state of database copies, «Зробити копію зараз», files and recent runs; root/admin); the «Сьогодні» card shows when copies are not configured or stale. API in `shared/api/backups.ts`. There is no restore in the UI: restore is a backend command (`npm run backup:restore`, see the backend `docs/backups.md`).
+
+Cash desk: `pages/cash` (menu «Каса», section «Гроші», areas `cash`/`cash_control`; tabs «Зараз» (desk cards with expected balance, tiles, per-direction table, open-shift operations with void; actions «Відкрити зміну», «Прийняти оплату» (`AcceptPaymentDialog`: child picker, then the payment form with cash and the desk preselected), «Видати кошти» (`WithdrawDialog`: expense or transfer), «Закрити зміну»; `CountDialog` counts denominations on open and close, a non-zero difference needs an explanation), «Зміни» (list with filters, `ShiftReportDialog` with Excel), «Налаштування» (`DesksSettingsTab`, `cash_control: edit`; `CorrectionDialog` also needs it)). Rights: `cash` view/edit = administrator (open/close, expenses, transfers, void in an open shift); `cash_control` view = report, alerts and badge, edit = corrections and desks. The payment form (`pages/finance/ui/CreatePaymentModal`) has «Платник», optional «Період з/по» and, for cash, «Каса» (desks with an open shift). The Today page shows «Очікують отримання» transfers for any staff (`CashTransfersBlock`, «Отримав»/«Не отримав») and cash alerts for `cash_control` (`CashAlertsBlock`, «Переглянуто»); the menu badge `pendingCash` comes from `shared/model/pendingCashStore`. Reports tab «Каса» (area `cash_control`, also enables the «Звіти» menu item) has desk, employee, direction, operation kind and category filters (lists from `cashApi.getDesks(true)`/`getRecipients(true)`, loaded only for that tab). API in `shared/api/cash.ts`. Balances, differences, totals and alerts come from the backend; never compute them on the frontend.
 
 Today page: `pages/dashboard` (menu item «Сьогодні», `GET /dashboard/today`): olive greeting hero, the «Потребує уваги» list (rows linking to the relevant pages, attention first) and `DashboardCard` info cards for payments and meals. The backend decides which keys the user gets; the page only renders the ones present. API in `shared/api/dashboard.ts`.
 

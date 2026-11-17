@@ -84,7 +84,7 @@ export const reportDefinitions: ReportDefinition[] = [
   { key: 'lessons', fileName: 'уроки', label: 'Уроки', areas: ['timetable', 'classes'], period: true, filters: ['institution', 'kind', 'group', 'teacher'] },
   { key: 'meals', fileName: 'харчування', label: 'Харчування', areas: ['meals'], period: true, filters: ['institution', 'kind', 'group'] },
   { key: 'payroll', fileName: 'зарплати', label: 'Зарплати', areas: ['payroll'], period: true, filters: ['teacher'] },
-  { key: 'cash', fileName: 'каса', label: 'Каса', areas: ['cash_control'], period: true, filters: ['desk', 'employee', 'direction', 'entryKind', 'category'] },
+  { key: 'cash', fileName: 'каса', label: 'Каса', areas: ['cash_control'], period: true, filters: ['institution', 'kind', 'group', 'child', 'desk', 'employee', 'direction', 'entryKind', 'category'] },
 ];
 
 const isoDay = (value: string) => {

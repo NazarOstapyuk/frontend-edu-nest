@@ -12,6 +12,9 @@ import { CountDialog } from './CountDialog'
 import { WithdrawDialog } from './WithdrawDialog'
 import { CorrectionDialog } from './CorrectionDialog'
 import { AcceptPaymentDialog } from './AcceptPaymentDialog'
+import { ShiftsTab } from './ShiftsTab'
+import { ShiftReportDialog } from './ShiftReportDialog'
+import { DesksSettingsTab } from './DesksSettingsTab'
 
 type CashTab = 'now' | 'shifts' | 'settings'
 
@@ -144,6 +147,12 @@ export const CashPage = () => {
     setSearchParams(next, { replace: true })
   }
 
+  const closeReport = () => {
+    const next = new URLSearchParams(searchParams)
+    next.delete('shift')
+    setSearchParams(next, { replace: true })
+  }
+
   return (
     <Box>
       <Tabs
@@ -158,8 +167,9 @@ export const CashPage = () => {
         {canControlEdit && <Tab value="settings" label="Налаштування" />}
       </Tabs>
       {tab === 'now' && <NowTab />}
-      {tab === 'shifts' && <Box />}
-      {tab === 'settings' && <Box />}
+      {tab === 'shifts' && <ShiftsTab />}
+      {tab === 'settings' && <DesksSettingsTab />}
+      <ShiftReportDialog shiftId={searchParams.get('shift')} onClose={closeReport} />
     </Box>
   )
 }

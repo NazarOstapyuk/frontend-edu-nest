@@ -5,6 +5,8 @@ import {
   type CashDeskState,
   type CashEntryView,
   type CashShiftReport,
+  type CreateCashDeskDto,
+  type UpdateCashDeskDto,
   type CreateCashCorrectionDto,
   type CreateCashEntryDto,
   type Person,
@@ -30,6 +32,11 @@ interface DeskDialogState {
   desk: CashDeskState | null;
 }
 
+interface DeskModalState {
+  isOpen: boolean;
+  desk: CashDeskState | null;
+}
+
 interface VoidDialogState {
   isOpen: boolean;
   entry: CashEntryView | null;
@@ -39,6 +46,8 @@ interface CashState {
   desks: CashDeskState[];
   shiftReports: Record<string, CashShiftReport>;
   recipients: Person[];
+  settingsDesks: CashDeskState[];
+  isSettingsLoaded: boolean;
   isLoaded: boolean;
   isLoading: boolean;
   isCreating: boolean;
@@ -49,11 +58,16 @@ interface CashState {
   correctionDialog: DeskDialogState;
   acceptDialog: DeskDialogState;
   voidDialog: VoidDialogState;
+  deskModal: DeskModalState;
   setCountDialog: (value: Partial<CountDialogState>) => void;
   setWithdrawDialog: (value: Partial<WithdrawDialogState>) => void;
   setCorrectionDialog: (value: Partial<DeskDialogState>) => void;
   setAcceptDialog: (value: Partial<DeskDialogState>) => void;
   setVoidDialog: (value: Partial<VoidDialogState>) => void;
+  setDeskModal: (value: Partial<DeskModalState>) => void;
+  fetchSettingsDesks: () => Promise<void>;
+  createDesk: (dto: CreateCashDeskDto) => Promise<void>;
+  updateDesk: (id: string, dto: UpdateCashDeskDto) => Promise<void>;
   fetchDesks: () => Promise<void>;
   reload: () => Promise<void>;
   fetchRecipients: () => Promise<void>;
@@ -80,6 +94,8 @@ export const useCashStore = create<CashState>((set, get) => ({
   desks: [],
   shiftReports: {},
   recipients: [],
+  settingsDesks: [],
+  isSettingsLoaded: false,
   isLoaded: false,
   isLoading: false,
   isCreating: false,
@@ -90,6 +106,7 @@ export const useCashStore = create<CashState>((set, get) => ({
   correctionDialog: { isOpen: false, desk: null },
   acceptDialog: { isOpen: false, desk: null },
   voidDialog: { isOpen: false, entry: null },
+  deskModal: { isOpen: false, desk: null },
 
   setCountDialog: (value) => set((state) => ({ countDialog: { ...state.countDialog, ...value } })),
   setWithdrawDialog: (value) =>
@@ -98,6 +115,42 @@ export const useCashStore = create<CashState>((set, get) => ({
     set((state) => ({ correctionDialog: { ...state.correctionDialog, ...value } })),
   setAcceptDialog: (value) => set((state) => ({ acceptDialog: { ...state.acceptDialog, ...value } })),
   setVoidDialog: (value) => set((state) => ({ voidDialog: { ...state.voidDialog, ...value } })),
+
+  setDeskModal: (value) => set((state) => ({ deskModal: { ...state.deskModal, ...value } })),
+
+  fetchSettingsDesks: async () => {
+    set({ isLoading: true });
+    try {
+      const settingsDesks = await cashApi.getDesks(true);
+      set({ settingsDesks, isSettingsLoaded: true });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  createDesk: async (dto) => {
+    set({ isCreating: true });
+    try {
+      const desk = await cashApi.createDesk(dto);
+      set((state) => ({ settingsDesks: [...state.settingsDesks, desk] }));
+      await get().reload().catch(() => undefined);
+    } finally {
+      set({ isCreating: false });
+    }
+  },
+
+  updateDesk: async (id, dto) => {
+    set({ isUpdating: true });
+    try {
+      const desk = await cashApi.updateDesk(id, dto);
+      set((state) => ({
+        settingsDesks: state.settingsDesks.map((item) => (item.id === id ? desk : item)),
+      }));
+      await get().reload().catch(() => undefined);
+    } finally {
+      set({ isUpdating: false });
+    }
+  },
 
   fetchDesks: async () => {
     set({ isLoading: true });

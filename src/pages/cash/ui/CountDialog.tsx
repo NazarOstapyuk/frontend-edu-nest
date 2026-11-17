@@ -1,4 +1,5 @@
 import { useForm, Controller, useWatch } from 'react-hook-form'
+import { useSearchParams } from 'react-router-dom'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, IconButton, TextField, Typography } from '@mui/material'
@@ -67,6 +68,7 @@ const SummaryRow = ({ label, value, color, bold }: { label: string; value: strin
 
 export const CountDialog = () => {
   const isPhone = useIsPhone()
+  const [, setSearchParams] = useSearchParams()
   const { isOpen, mode, desk } = useCashStore((s) => s.countDialog)
   const setCountDialog = useCashStore((s) => s.setCountDialog)
   const openShift = useCashStore((s) => s.openShift)
@@ -118,8 +120,15 @@ export const CountDialog = () => {
       push('Зміну відкрито', 'success')
     } else {
       if (!shift) return
-      await closeShift(shift.id, { denominations, note })
+      const report = await closeShift(shift.id, { denominations, note })
       push('Зміну закрито', 'success')
+      handleClose()
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev)
+        next.set('shift', report.shift.id)
+        return next
+      })
+      return
     }
     handleClose()
   }

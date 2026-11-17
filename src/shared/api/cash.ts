@@ -125,7 +125,7 @@ export interface CashShiftView {
   closingExpected: string | null;
   closingCounted: string | null;
   closingNote: string | null;
-  denominations: Record<string, number>;
+  denominations: Record<string, number> | null;
   totals: CashTotals;
   expected: string;
   difference: string | null;

@@ -96,6 +96,8 @@ useInstitutionStore.subscribe((state, prev) => {
         childId: undefined,
         teacherId: undefined,
         tariffId: undefined,
+        deskId: undefined,
+        employeeId: undefined,
         ...(state.selectedId ? { kind: undefined } : {}),
       },
     });

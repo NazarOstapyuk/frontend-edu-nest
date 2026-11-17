@@ -67,14 +67,14 @@ export const ShiftReportDialog = ({ shiftId, onClose }: ShiftReportDialogProps) 
   const report = current?.report ?? null
   const failed = !!current && !current.report
   const shift = report?.shift
-  const rows = shift ? Object.entries(shift.denominations).filter(([, count]) => count > 0) : []
+  const rows = shift ? Object.entries(shift.denominations ?? {}).filter(([, count]) => count > 0) : []
   const diff = shift?.difference != null ? differenceInfo(toKopecks(shift.difference)) : null
 
   const download = async () => {
     if (!shift?.closedAt) return
     setIsDownloading(true)
     try {
-      await reportsApi.download('cash', { shiftId: shift.id }, `каса-зміна-${formatDate(shift.closedAt)}`, true)
+      await reportsApi.download('cash', { shiftId: shift.id }, `каса-зміна-${formatDate(shift.openedAt)}`, true)
     } catch {
       return
     } finally {

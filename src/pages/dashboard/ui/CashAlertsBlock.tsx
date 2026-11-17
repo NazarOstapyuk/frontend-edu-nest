@@ -3,7 +3,7 @@ import { Link as RouterLink } from 'react-router-dom'
 import { Box, Button, ButtonBase, Typography } from '@mui/material'
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale'
 import { cashAlertTypeLabels, cashApi, formatMoney } from '../../../shared/api'
-import type { CashAlertView } from '../../../shared/api'
+import type { CashAlertType, CashAlertView } from '../../../shared/api'
 import { brandColors } from '../../../shared/assets/brand'
 import { formatDateTime } from '../../../shared/lib/date'
 import { cashAlertLink } from './cashAlertLink'
@@ -14,7 +14,13 @@ interface CashAlertsBlockProps {
   onAcked: (ids: string[]) => void
 }
 
-const signedAmount = (amount: string) => {
+const outgoing: CashAlertType[] = ['large_withdrawal', 'payment_void']
+const keepsSign: CashAlertType[] = ['discrepancy', 'opening_discrepancy', 'correction']
+
+const signedAmount = (type: CashAlertType, amount: string) => {
+  const plain = amount.replace(/^-/, '')
+  if (outgoing.includes(type)) return { text: formatMoney(`-${plain}`), negative: true }
+  if (!keepsSign.includes(type)) return { text: formatMoney(plain), negative: false }
   const negative = amount.startsWith('-')
   return { text: negative ? formatMoney(amount) : `+${formatMoney(amount)}`, negative }
 }
@@ -37,7 +43,7 @@ export const CashAlertsBlock = ({ alerts, onAcked }: CashAlertsBlockProps) => {
   return (
     <>
       {alerts.map((alert) => {
-        const amount = alert.amount ? signedAmount(alert.amount) : null
+        const amount = alert.amount ? signedAmount(alert.type, alert.amount) : null
         const meta = [alert.actor?.name, formatDateTime(alert.createdAt)].filter(Boolean).join(', ')
         return (
           <Box

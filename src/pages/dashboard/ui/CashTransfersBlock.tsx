@@ -75,7 +75,7 @@ export const CashTransfersBlock = ({ items, onResolved }: CashTransfersBlockProp
                 onClick={() => confirm(item).catch(() => undefined)}
                 sx={{ flex: { xs: 1, sm: 'none' } }}
               >
-                Отримав
+                Отримано
               </Button>
               <Button
                 variant="outlined"
@@ -84,7 +84,7 @@ export const CashTransfersBlock = ({ items, onResolved }: CashTransfersBlockProp
                 onClick={() => setDisputing(item)}
                 sx={{ flex: { xs: 1, sm: 'none' } }}
               >
-                Не отримав
+                Не отримано
               </Button>
             </Box>
           </Box>
@@ -92,7 +92,7 @@ export const CashTransfersBlock = ({ items, onResolved }: CashTransfersBlockProp
       </Paper>
       <ReasonDialog
         open={disputing !== null}
-        title="Не отримав"
+        title="Не отримано"
         subtitle={disputing ? `${formatMoney(disputing.amount)} від ${disputing.createdBy.name}` : undefined}
         isSaving={isSaving}
         onClose={() => setDisputing(null)}

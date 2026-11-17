@@ -11,6 +11,13 @@ import {
   type CreateCashEntryDto,
   type Person,
 } from '../../../shared/api';
+import { canAccess, useAuthStore } from '../../../entities/user';
+import { usePendingCashStore } from '../../../shared/model/pendingCashStore';
+
+const refreshCashBadge = () => {
+  if (!canAccess(useAuthStore.getState().profile, 'cash_control', 'view')) return;
+  usePendingCashStore.getState().refresh().catch(() => undefined);
+};
 
 type CountMode = 'open' | 'close';
 type WithdrawKind = 'expense' | 'transfer';
@@ -176,6 +183,7 @@ export const useCashStore = create<CashState>((set, get) => ({
     set({ isCreating: true });
     try {
       const report = await cashApi.openShift(deskId, dto);
+      refreshCashBadge();
       await get().reload().catch(() => undefined);
       return report;
     } finally {
@@ -187,6 +195,7 @@ export const useCashStore = create<CashState>((set, get) => ({
     set({ isUpdating: true });
     try {
       const report = await cashApi.closeShift(shiftId, dto);
+      refreshCashBadge();
       await get().reload().catch(() => undefined);
       return report;
     } finally {
@@ -198,6 +207,7 @@ export const useCashStore = create<CashState>((set, get) => ({
     set({ isCreating: true });
     try {
       await cashApi.createEntry(deskId, dto);
+      refreshCashBadge();
       await get().reload().catch(() => undefined);
     } finally {
       set({ isCreating: false });
@@ -208,6 +218,7 @@ export const useCashStore = create<CashState>((set, get) => ({
     set({ isCreating: true });
     try {
       await cashApi.createCorrection(deskId, dto);
+      refreshCashBadge();
       await get().reload().catch(() => undefined);
     } finally {
       set({ isCreating: false });

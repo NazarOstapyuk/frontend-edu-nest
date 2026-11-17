@@ -12,6 +12,13 @@ import {
   type FinanceEvent,
   type FinancePayment,
 } from '../../../shared/api';
+import { canAccess, useAuthStore } from '../../../entities/user';
+import { usePendingCashStore } from '../../../shared/model/pendingCashStore';
+
+const refreshCashBadge = () => {
+  if (!canAccess(useAuthStore.getState().profile, 'cash_control', 'view')) return;
+  usePendingCashStore.getState().refresh().catch(() => undefined);
+};
 
 export type VoidTarget = { kind: 'charge' | 'payment' | 'allocation'; id: string; title: string };
 
@@ -47,7 +54,7 @@ const voidRequests = {
   allocation: financeApi.voidAllocation,
 };
 
-export const useChildFinanceStore = create<ChildFinanceState>((set) => {
+export const useChildFinanceStore = create<ChildFinanceState>((set, get) => {
   const applyMutation = async (request: () => Promise<{ data: ChildFinance }>) => {
     set({ isSaving: true });
     try {
@@ -116,11 +123,19 @@ export const useChildFinanceStore = create<ChildFinanceState>((set) => {
 
     createCharge: (childId, dto) => applyMutation(() => financeApi.createCharge(childId, dto)),
 
-    createPayment: (childId, dto) => applyMutation(() => financeApi.createPayment(childId, dto)),
+    createPayment: async (childId, dto) => {
+      await applyMutation(() => financeApi.createPayment(childId, dto));
+      if (dto.method === 'cash') refreshCashBadge();
+    },
 
     allocate: (paymentId, dto) => applyMutation(() => financeApi.allocate(paymentId, dto)),
 
-    voidRecord: (target, reason) =>
-      applyMutation(() => voidRequests[target.kind](target.id, { reason })),
+    voidRecord: async (target, reason) => {
+      const isCash =
+        target.kind === 'payment' &&
+        get().finance?.payments.some((p) => p.id === target.id && p.method === 'cash');
+      await applyMutation(() => voidRequests[target.kind](target.id, { reason }));
+      if (isCash) refreshCashBadge();
+    },
   };
 });

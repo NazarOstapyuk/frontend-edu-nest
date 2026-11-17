@@ -5,7 +5,7 @@ import * as yup from 'yup'
 import { Box, Button, Dialog, DialogTitle, IconButton, TextField, Typography } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
-import { DENOMINATIONS, denominationLabel, formatMoney, toKopecks } from '../../../shared/api'
+import { DENOMINATIONS, denominationLabel, formatMoney, toKopecks, type CashShiftReport } from '../../../shared/api'
 import { useNotifyStore } from '../../../shared/model/notifyStore'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { brandColors } from '../../../shared/assets/brand'
@@ -73,6 +73,7 @@ export const CountDialog = () => {
   const setCountDialog = useCashStore((s) => s.setCountDialog)
   const openShift = useCashStore((s) => s.openShift)
   const closeShift = useCashStore((s) => s.closeShift)
+  const reload = useCashStore((s) => s.reload)
   const isCreating = useCashStore((s) => s.isCreating)
   const isUpdating = useCashStore((s) => s.isUpdating)
   const push = useNotifyStore((s) => s.push)
@@ -96,6 +97,12 @@ export const CountDialog = () => {
     if (formState.isSubmitted || getFieldState('note').isTouched) trigger('note')
   }
 
+  const refreshDesk = async (deskId: string) => {
+    await reload().catch(() => undefined)
+    const fresh = useCashStore.getState().desks.find((item) => item.id === deskId)
+    if (fresh) setCountDialog({ desk: fresh })
+  }
+
   const handleClose = () => {
     reset(makeDefaults())
     setCountDialog({ isOpen: false, desk: null })
@@ -116,11 +123,22 @@ export const CountDialog = () => {
     })
     const note = values.note.trim() || undefined
     if (mode === 'open') {
-      await openShift(desk.id, { denominations, note })
+      try {
+        await openShift(desk.id, { denominations, note })
+      } catch {
+        await refreshDesk(desk.id)
+        return
+      }
       push('Зміну відкрито', 'success')
     } else {
       if (!shift) return
-      const report = await closeShift(shift.id, { denominations, note })
+      let report: CashShiftReport
+      try {
+        report = await closeShift(shift.id, { denominations, note })
+      } catch {
+        await refreshDesk(desk.id)
+        return
+      }
       push('Зміну закрито', 'success')
       handleClose()
       setSearchParams((prev) => {

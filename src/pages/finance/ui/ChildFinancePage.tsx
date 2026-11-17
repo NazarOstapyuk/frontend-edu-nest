@@ -48,7 +48,7 @@ export const ChildFinancePage = () => {
   useEffect(() => {
     if (searchParams.get('pay') !== 'cash') return
     const deskId = searchParams.get('desk') ?? undefined
-    setCreatePaymentModal({ isOpen: true, presetMethod: 'cash', presetDeskId: deskId })
+    if (canEdit) setCreatePaymentModal({ isOpen: true, presetMethod: 'cash', presetDeskId: deskId })
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev)
@@ -58,7 +58,7 @@ export const ChildFinancePage = () => {
       },
       { replace: true },
     )
-  }, [searchParams, setSearchParams, setCreatePaymentModal])
+  }, [searchParams, setSearchParams, setCreatePaymentModal, canEdit])
 
   useEffect(() => {
     if (childId) fetchFinance(childId)

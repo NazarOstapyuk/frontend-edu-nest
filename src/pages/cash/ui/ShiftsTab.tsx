@@ -182,8 +182,8 @@ export const ShiftsTab = () => {
               </Box>
               <CardField label="Відкрито">{formatDateTime(shift.openedAt)}</CardField>
               <CardField label="Закрито">{closedCell(shift)}</CardField>
-              <CardField label="Відкрив">{shift.openedBy.name}</CardField>
-              {shift.closedBy && <CardField label="Закрив">{shift.closedBy.name}</CardField>}
+              <CardField label="Хто відкрив">{shift.openedBy.name}</CardField>
+              {shift.closedBy && <CardField label="Хто закрив">{shift.closedBy.name}</CardField>}
               <CardField label="На початок">{money(shift.openingCounted)}</CardField>
               <CardField label="Має бути">{money(shift.closingExpected ?? shift.expected)}</CardField>
               <CardField label="Фактично">{money(shift.closingCounted)}</CardField>
@@ -198,8 +198,8 @@ export const ShiftsTab = () => {
                 <TableCell>Каса</TableCell>
                 <TableCell>Відкрито</TableCell>
                 <TableCell>Закрито</TableCell>
-                <TableCell>Відкрив</TableCell>
-                <TableCell>Закрив</TableCell>
+                <TableCell>Хто відкрив</TableCell>
+                <TableCell>Хто закрив</TableCell>
                 <TableCell align="right">На початок</TableCell>
                 <TableCell align="right">Має бути</TableCell>
                 <TableCell align="right">Фактично</TableCell>

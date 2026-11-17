@@ -19,6 +19,7 @@ import {
   type CashDeskState,
   type CashDirection,
 } from '../../../shared/api'
+import { useCan } from '../../../entities/user'
 import { brandColors } from '../../../shared/assets/brand'
 import { formatDateTime } from '../../../shared/lib/date'
 import { differenceInfo, signedMoney } from '../model/cashFormat'
@@ -77,6 +78,9 @@ export const DeskCard = ({
   const balance = shift ? shift.expected : (last?.closingCounted ?? '0')
   const lastDifference = last ? differenceInfo(toKopecks(last.difference)) : null
   const hasActions = canEdit || (canControl && !!shift)
+  const canFinanceEdit = useCan('finance', 'edit')
+  const canViewChildren = useCan('children', 'view')
+  const canAcceptPayment = canEdit && canFinanceEdit && canViewChildren
 
   return (
     <Paper elevation={0} sx={{ borderRadius: '20px', boxShadow: brandColors.outline, p: { xs: 2, sm: 3 } }}>
@@ -112,7 +116,7 @@ export const DeskCard = ({
           </Box>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
             {shift
-              ? `Відповідальна особа:${shift.openedBy.name}, з ${formatDateTime(shift.openedAt)}`
+              ? `Відповідальна особа: ${shift.openedBy.name}, з ${formatDateTime(shift.openedAt)}`
               : 'Зміну не відкрито'}
           </Typography>
         </Box>
@@ -215,9 +219,11 @@ export const DeskCard = ({
           )}
           {canEdit && shift && (
             <>
-              <Button variant="outlined" onClick={onAcceptPayment}>
-                Прийняти оплату
-              </Button>
+              {canAcceptPayment && (
+                <Button variant="outlined" onClick={onAcceptPayment}>
+                  Прийняти оплату
+                </Button>
+              )}
               <Button variant="outlined" onClick={onExpense}>
                 Видати кошти
               </Button>

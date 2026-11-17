@@ -121,6 +121,11 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
     child: canListChildren,
     teacher: true,
     tariff: canListTariffs,
+    desk: false,
+    employee: false,
+    direction: false,
+    entryKind: false,
+    category: false,
   }
   const has = (filter: ReportFilter) => definition.filters.includes(filter) && available[filter]
   const showInstitution = has('institution')

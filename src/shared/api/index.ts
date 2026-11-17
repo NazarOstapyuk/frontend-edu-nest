@@ -337,6 +337,37 @@ export type { InvoiceStatus, LinkState, RequestSource, PaymentRequestView, Publi
 export { institutionsApi, institutionTypeLabels } from './institutions';
 export type { Institution, InstitutionType, CreateInstitutionDto, UpdateInstitutionDto, AssessmentLevel } from './institutions';
 export { softList } from './softList';
+export {
+  cashApi,
+  cashDirectionLabels,
+  cashEntryKindLabels,
+  cashExpenseCategoryLabels,
+  cashTransferStatusLabels,
+  cashAlertTypeLabels,
+  DENOMINATIONS,
+  denominationLabel,
+} from './cash';
+export type {
+  CashDirection,
+  CashEntryKind,
+  CashExpenseCategory,
+  CashTransferStatus,
+  CashAlertType,
+  Person,
+  CashTotals,
+  CashDeskState,
+  CashShiftView,
+  CashEntryView,
+  CashShiftReport,
+  CashAlertView,
+  UnclosedShiftView,
+  CreateCashDeskDto,
+  UpdateCashDeskDto,
+  CashCountDto,
+  CashShiftsQuery,
+  CreateCashEntryDto,
+  CreateCashCorrectionDto,
+} from './cash';
 export { dashboardApi } from './dashboard';
 export type { TodayDashboard, DashboardPaymentMethod } from './dashboard';
 export { routineApi, kyivNow } from './routine';

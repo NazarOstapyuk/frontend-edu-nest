@@ -69,6 +69,9 @@ export interface CabinetPayment {
   amount: string;
   method: PaymentMethod;
   category: FinanceCategory | null;
+  payerName: string | null;
+  periodFrom: string | null;
+  periodTo: string | null;
   allocated: string;
   free: string;
   allocations: { chargeId: string; description: string; amount: string }[];

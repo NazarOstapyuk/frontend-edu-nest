@@ -1,5 +1,7 @@
 import { axiosInstance } from './axiosInstance';
 import type { PermissionArea } from './access';
+import type { CashDirection, CashEntryKind } from './cash';
+import type { FinanceCategory } from './finance';
 
 export type ReportKey =
   | 'payments'
@@ -9,7 +11,8 @@ export type ReportKey =
   | 'assessment'
   | 'lessons'
   | 'meals'
-  | 'payroll';
+  | 'payroll'
+  | 'cash';
 export type ColumnType = 'text' | 'money' | 'number' | 'date' | 'percent';
 export interface ReportColumn {
   key: string;
@@ -42,9 +45,26 @@ export interface ReportQuery {
   teacherId?: string;
   institutionId?: string;
   tariffId?: string;
+  deskId?: string;
+  employeeId?: string;
+  direction?: CashDirection;
+  entryKind?: CashEntryKind;
+  category?: FinanceCategory;
+  shiftId?: string;
 }
 
-export type ReportFilter = 'institution' | 'kind' | 'group' | 'child' | 'teacher' | 'tariff';
+export type ReportFilter =
+  | 'institution'
+  | 'kind'
+  | 'group'
+  | 'child'
+  | 'teacher'
+  | 'tariff'
+  | 'desk'
+  | 'employee'
+  | 'direction'
+  | 'entryKind'
+  | 'category';
 
 export interface ReportDefinition {
   key: ReportKey;
@@ -64,6 +84,7 @@ export const reportDefinitions: ReportDefinition[] = [
   { key: 'lessons', fileName: 'уроки', label: 'Уроки', areas: ['timetable', 'classes'], period: true, filters: ['institution', 'kind', 'group', 'teacher'] },
   { key: 'meals', fileName: 'харчування', label: 'Харчування', areas: ['meals'], period: true, filters: ['institution', 'kind', 'group'] },
   { key: 'payroll', fileName: 'зарплати', label: 'Зарплати', areas: ['payroll'], period: true, filters: ['teacher'] },
+  { key: 'cash', fileName: 'каса', label: 'Каса', areas: ['cash_control'], period: true, filters: ['desk', 'employee', 'direction', 'entryKind', 'category'] },
 ];
 
 const isoDay = (value: string) => {

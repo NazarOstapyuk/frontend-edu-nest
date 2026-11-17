@@ -1,4 +1,5 @@
 import { axiosInstance } from './axiosInstance';
+import type { CashAlertView, CashEntryView, UnclosedShiftView } from './cash';
 
 export type DashboardPaymentMethod = 'cash' | 'bank_transfer' | 'card' | 'online';
 
@@ -28,6 +29,8 @@ export interface TodayDashboard {
       notDone: { id: string; firstName: string; lastName: string }[];
     }[];
   };
+  cash?: { alerts: CashAlertView[]; unclosed: UnclosedShiftView[] };
+  cashTransfers?: { items: CashEntryView[] };
   notes?: { groups: { id: string; name: string; pending: number; overdue: boolean }[] };
 }
 

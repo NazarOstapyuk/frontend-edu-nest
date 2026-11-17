@@ -141,6 +141,17 @@ const routeLabels: Record<string, string> = {
   'POST /backups': 'Створено резервну копію',
   'POST /payroll/:teacherId/:month/approve': 'Затверджено відомість',
   'PUT /institutions/:id/assessment-levels': 'Змінено шкалу рівнів',
+  'POST /cash/desks/:id/shifts': 'Відкрито касову зміну',
+  'POST /cash/shifts/:id/close': 'Закрито касову зміну',
+  'POST /cash/desks/:id/entries': 'Видано кошти з каси',
+  'POST /cash/desks/:id/corrections': 'Коригування каси',
+  'POST /cash/entries/:id/void': 'Скасовано касову операцію',
+  'POST /cash/entries/:id/confirm': 'Підтверджено отримання коштів',
+  'POST /cash/entries/:id/dispute': 'Не отримано кошти',
+  'POST /cash/desks': 'Створено касу',
+  'PATCH /cash/desks/:id': 'Змінено касу',
+  'POST /cash/alerts/:id/ack': 'Переглянуто сповіщення каси',
+  'POST /cash/alerts/ack-all': 'Переглянуто сповіщення каси',
 };
 
 export const actionLabel = (route: string): string => {

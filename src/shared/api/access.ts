@@ -9,6 +9,8 @@ export type PermissionArea =
   | 'meals'
   | 'payroll'
   | 'backups'
+  | 'cash'
+  | 'cash_control'
   | 'settings'
   | 'audit';
 export type PermissionLevel = 'view' | 'edit';
@@ -37,6 +39,8 @@ export const areaLabels: Record<PermissionArea, string> = {
   meals: 'Харчування',
   payroll: 'Зарплати',
   backups: 'Резервні копії',
+  cash: 'Каса',
+  cash_control: 'Контроль каси',
   settings: 'Налаштування',
   audit: 'Історія змін',
 };

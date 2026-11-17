@@ -1,7 +1,15 @@
 import { axiosInstance } from './axiosInstance';
 import type { InstitutionType } from './institutions';
 
-export type FinanceCategory = 'tuition' | 'adaptation' | 'extra_classes' | 'meals';
+export type FinanceCategory =
+  | 'tuition'
+  | 'adaptation'
+  | 'extra_classes'
+  | 'meals'
+  | 'individual_lessons'
+  | 'deposit'
+  | 'events'
+  | 'other';
 export type PaymentMethod = 'cash' | 'bank_transfer' | 'card' | 'online';
 export type ManualPaymentMethod = Exclude<PaymentMethod, 'online'>;
 export type ChargeState = 'unpaid' | 'partial' | 'paid';
@@ -18,6 +26,10 @@ export const financeCategoryLabels: Record<FinanceCategory, string> = {
   adaptation: 'Адаптація',
   extra_classes: 'Додаткові заняття',
   meals: 'Харчування',
+  individual_lessons: 'Індивідуальні заняття',
+  deposit: 'Гарантійні внески',
+  events: 'Екскурсії та заходи',
+  other: 'Інші платежі',
 };
 
 export const financeCategories = Object.keys(financeCategoryLabels) as FinanceCategory[];
@@ -91,6 +103,9 @@ export interface FinancePayment extends Voidable {
   reference: string;
   receivedAt: string;
   note: string | null;
+  payerName: string | null;
+  periodFrom: string | null;
+  periodTo: string | null;
   createdAt: string;
   createdBy: PersonRef | null;
   allocated: string;
@@ -188,6 +203,10 @@ export interface CreatePaymentDto {
   receivedAt: string;
   category?: FinanceCategory;
   note?: string;
+  cashDeskId?: string;
+  payerName?: string;
+  periodFrom?: string;
+  periodTo?: string;
   allocations?: AllocationItem[];
 }
 

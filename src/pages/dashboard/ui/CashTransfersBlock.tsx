@@ -72,7 +72,7 @@ export const CashTransfersBlock = ({ items, onResolved }: CashTransfersBlockProp
                 variant="contained"
                 disableElevation
                 disabled={busyId === item.id}
-                onClick={() => confirm(item)}
+                onClick={() => confirm(item).catch(() => undefined)}
                 sx={{ flex: { xs: 1, sm: 'none' } }}
               >
                 Отримав

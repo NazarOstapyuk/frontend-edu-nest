@@ -102,7 +102,7 @@ export const CashAlertsBlock = ({ alerts, onAcked }: CashAlertsBlockProps) => {
               size="small"
               color="inherit"
               disabled={busy}
-              onClick={() => ack([alert.id], () => cashApi.ackAlert(alert.id))}
+              onClick={() => ack([alert.id], () => cashApi.ackAlert(alert.id)).catch(() => undefined)}
               sx={{ minHeight: 40, flexShrink: 0 }}
             >
               Переглянуто
@@ -123,7 +123,7 @@ export const CashAlertsBlock = ({ alerts, onAcked }: CashAlertsBlockProps) => {
           <Button
             size="small"
             disabled={busy}
-            onClick={() => ack(alerts.map((a) => a.id), () => cashApi.ackAll())}
+            onClick={() => ack(alerts.map((a) => a.id), () => cashApi.ackAll()).catch(() => undefined)}
             sx={{ minHeight: 40 }}
           >
             Переглянуто все

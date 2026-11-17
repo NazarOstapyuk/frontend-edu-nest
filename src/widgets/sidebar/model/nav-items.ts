@@ -25,6 +25,7 @@ import RequestQuoteIcon from '@mui/icons-material/RequestQuote'
 import AssessmentIcon from '@mui/icons-material/Assessment'
 import TaskAltIcon from '@mui/icons-material/TaskAlt'
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale'
+import HelpOutlineIcon from '@mui/icons-material/HelpOutlineOutlined'
 import type { SvgIconComponent } from '@mui/icons-material'
 import type { SessionRole } from '../../../entities/user'
 import type { PermissionArea } from '../../../shared/api'
@@ -80,4 +81,5 @@ export const bottomNavItems: NavItem[] = [
   { path: '/audit', label: 'Історія змін', icon: HistoryIcon, area: 'audit', section: 'settings' },
   { path: '/backups', label: 'Резервні копії', icon: BackupIcon, area: 'backups', section: 'settings' },
   { path: '/institutions', label: 'Заклади', icon: ApartmentIcon, areas: ['settings', 'children'], section: 'settings' },
+  { path: '/help', label: 'Довідка', icon: HelpOutlineIcon, roles: ['root', 'admin', 'teacher'], section: 'settings' },
 ]

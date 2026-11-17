@@ -25,6 +25,7 @@ import { InstitutionsPage } from '../../pages/institutions'
 import { BackupsPage } from '../../pages/backups'
 import { AuditPage } from '../../pages/audit'
 import { ReportsPage } from '../../pages/reports'
+import { HelpPage } from '../../pages/help'
 import { CashPage } from '../../pages/cash'
 import { RegisterPage } from '../../pages/register'
 import { NotesPage } from '../../pages/notes'
@@ -119,6 +120,7 @@ export const router = createBrowserRouter([
                   { path: 'audit', element: <AuditPage /> },
                   { path: 'grades',    element: <EmptyPage title="Оцінки" /> },
                   { path: 'reports',   element: <ReportsPage /> },
+                  { path: 'help',      element: <HelpPage /> },
                   { path: '*',         element: <Navigate to="/" replace /> },
                 ],
               },

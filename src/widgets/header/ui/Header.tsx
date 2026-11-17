@@ -29,6 +29,7 @@ const pageTitles: Record<string, string> = {
   '/schedule':  'Розклад',
   '/grades':    'Оцінки',
   '/reports':   'Звіти',
+  '/help':      'Довідка',
 }
 
 const roleCaption = { root: 'Адміністратор', admin: 'Адміністратор', teacher: 'Педагог', parent: 'Батьки' } as const

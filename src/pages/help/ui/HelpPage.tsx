@@ -16,9 +16,10 @@ import {
 } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import SearchIcon from '@mui/icons-material/Search'
+import { canAccess, useAuthStore, type SessionProfile } from '../../../entities/user'
 import { brandColors } from '../../../shared/assets/brand'
 import { matchesSearch } from '../../../shared/lib/search'
-import { helpSections, type HelpBlock, type HelpItem } from '../model/helpContent'
+import { helpSections, type HelpBlock, type HelpItem, type HelpSection } from '../model/helpContent'
 import { HelpAnswer } from './HelpAnswer'
 
 const blockText = (block: HelpBlock) => (block.type === 'paragraph' ? block.text : block.items.join(' '))
@@ -27,12 +28,23 @@ const searchText = new Map<string, string>(
   helpSections.flatMap((section) =>
     section.items.map((item): [string, string] => [
       item.id,
-      [section.title, item.question, ...item.answer.map(blockText), ...(item.images ?? []).map((i) => i.caption)].join(' '),
+      [item.question, ...item.answer.map(blockText), ...(item.images ?? []).map((i) => i.caption)].join(' '),
     ]),
   ),
 )
 
-const itemIds = new Set(searchText.keys())
+const isAllowed = (profile: SessionProfile | null, tags: Pick<HelpItem, 'roles' | 'areas'>) =>
+  (!tags.roles && !tags.areas) ||
+  (!!profile && !!tags.roles?.includes(profile.role)) ||
+  !!tags.areas?.some((area) => canAccess(profile, area, 'view'))
+
+const visibleSections = (profile: SessionProfile | null): HelpSection[] =>
+  helpSections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => isAllowed(profile, item.roles || item.areas ? item : section)),
+    }))
+    .filter((section) => section.items.length > 0)
 
 const sectionAnchor = (id: string) => `help-section-${id}`
 
@@ -77,34 +89,41 @@ const QuestionAccordion = ({ item, expanded, onToggle }: { item: HelpItem; expan
 )
 
 export const HelpPage = () => {
-  const { hash } = useLocation()
+  const { hash, key } = useLocation()
+  const profile = useAuthStore((s) => s.profile)
+  const allowedSections = useMemo(() => visibleSections(profile), [profile])
+  const itemIds = useMemo(
+    () => new Set(allowedSections.flatMap((section) => section.items.map((item) => item.id))),
+    [allowedSections],
+  )
   const targetId = idFromHash(hash)
+  const isTarget = itemIds.has(targetId)
   const [query, setQuery] = useState('')
-  const [expanded, setExpanded] = useState<Set<string>>(() => new Set(itemIds.has(targetId) ? [targetId] : []))
-  const [handledHash, setHandledHash] = useState(hash)
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set(isTarget ? [targetId] : []))
+  const [handledKey, setHandledKey] = useState(key)
 
-  if (hash !== handledHash) {
-    setHandledHash(hash)
-    if (itemIds.has(targetId)) {
+  if (key !== handledKey) {
+    setHandledKey(key)
+    if (isTarget) {
       setQuery('')
       setExpanded((prev) => new Set(prev).add(targetId))
     }
   }
 
   useEffect(() => {
-    if (!itemIds.has(targetId)) return
+    if (!isTarget) return
     const timer = window.setTimeout(() => {
       document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }, 50)
     return () => window.clearTimeout(timer)
-  }, [targetId])
+  }, [targetId, isTarget, key])
 
   const sections = useMemo(
     () =>
-      helpSections
+      allowedSections
         .map((section) => ({ ...section, items: section.items.filter((item) => matchesSearch(query, searchText.get(item.id))) }))
         .filter((section) => section.items.length > 0),
-    [query],
+    [allowedSections, query],
   )
 
   const found = sections.reduce((sum, section) => sum + section.items.length, 0)

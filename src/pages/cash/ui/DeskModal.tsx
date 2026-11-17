@@ -89,7 +89,7 @@ export const DeskModal = () => {
               required
               fullWidth
               error={!!error}
-              helperText={error?.message ?? 'Видача від цієї суми потрапляє в сповіщення керівнику'}
+              helperText={error?.message ?? 'Видача або передача коштів від цієї суми потрапляє в сповіщення керівнику'}
               slotProps={{ htmlInput: { inputMode: 'decimal' } }}
             />
           )}

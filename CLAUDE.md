@@ -168,7 +168,8 @@ The intent is to close the gap before implementing new modules, so the stub modu
 4. `pages/<module>/index.ts`.
 5. Route in `app/router/index.tsx` (replace the `EmptyPage` stub).
 6. Menu item in `widgets/sidebar/model/nav-items.ts`.
-7. `npm run build` + `npm run lint`.
+7. Help: a new section or questions in `pages/help/model/helpContent.ts` (see Rules).
+8. `npm run build` + `npm run lint`.
 
 ## Workflow (superpowers)
 
@@ -191,6 +192,7 @@ Bug fixes and changes touching one or two files: no brainstorming or plan, imple
 
 ## Rules
 
+- Keep the in-app help (`pages/help/model/helpContent.ts`) in sync. Every change to behaviour visible to users (business rules, limits, defaults, deadlines, rights, who sees what, flows, button/tab/field labels, navigation, new or removed features) must update the matching help answers in the same commit: fix wrong statements, add new questions for new features, remove answers for removed ones, keep section `areas`/`roles` aligned with the menu. Stale screenshots (`public/help/<item-id>-<n>.webp`) are listed in the final summary so the user can retake them. Before claiming done, grep `helpContent.ts` for the changed labels and rules. If nothing in the help is affected, say so in the summary.
 - Don't change `axiosInstance`, `theme.ts`, `RequireAuth` without an explicit request. A user request to do Roadmap step 1 is such a request; the Roadmap itself is not.
 - Don't add dependencies without approval.
 - Don't commit `.env` or secrets; add new env vars to `.env.example` with the `VITE_` prefix.

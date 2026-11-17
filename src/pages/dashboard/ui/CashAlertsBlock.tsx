@@ -6,6 +6,7 @@ import { cashAlertTypeLabels, cashApi, formatMoney } from '../../../shared/api'
 import type { CashAlertView } from '../../../shared/api'
 import { brandColors } from '../../../shared/assets/brand'
 import { formatDateTime } from '../../../shared/lib/date'
+import { cashAlertLink } from './cashAlertLink'
 import { usePendingCashStore } from '../../../shared/model/pendingCashStore'
 
 interface CashAlertsBlockProps {
@@ -28,8 +29,6 @@ export const CashAlertsBlock = ({ alerts, onAcked }: CashAlertsBlockProps) => {
       await request()
       onAcked(ids)
       refreshBadge().catch(() => undefined)
-    } catch {
-      return
     } finally {
       setBusy(false)
     }
@@ -52,7 +51,7 @@ export const CashAlertsBlock = ({ alerts, onAcked }: CashAlertsBlockProps) => {
           >
             <ButtonBase
               component={RouterLink}
-              to={alert.shiftId ? `/cash?tab=shifts&shift=${alert.shiftId}` : '/cash'}
+              to={cashAlertLink(alert)}
               sx={{
                 flex: 1,
                 minWidth: 0,

@@ -21,6 +21,7 @@ import { brandColors, mascotUrl } from '../../../shared/assets/brand'
 import { DashboardCard } from './DashboardCard'
 import { formatDay, formatDateTime } from '../../../shared/lib/date'
 import { CashAlertsBlock } from './CashAlertsBlock'
+import { cashAlertLink } from './cashAlertLink'
 import { CashTransfersBlock } from './CashTransfersBlock'
 
 const methodLabels: Record<DashboardPaymentMethod, string> = {
@@ -135,8 +136,8 @@ const buildRows = (data: TodayDashboard): AttentionRow[] => {
       rows.push({
         key: `cash-unclosed-${shift.shiftId}`,
         to: '/cash',
-        title: `Каса не закрита: ${shift.deskName}, відкрила ${shift.openedBy.name} ${formatDateTime(shift.openedAt)}`,
-        meta: 'Зміну не закрито вчасно',
+        title: `Каса не закрита: ${shift.deskName}`,
+        meta: `Зміну відкрито ${formatDateTime(shift.openedAt)} · ${shift.openedBy.name}`,
         action: 'Відкрити',
         cta: 'Відкрити касу',
         icon: PointOfSaleIcon,
@@ -187,7 +188,7 @@ interface HeroProps {
   date: string
   firstName: string
   count: number
-  first?: AttentionRow
+  first?: { to: string; cta: string }
 }
 
 const Hero = ({ date, firstName, count, first }: HeroProps) => (
@@ -372,7 +373,7 @@ export const DashboardPage = () => {
         date={data.date}
         firstName={firstName}
         count={alertRows.length + cashAlerts.length}
-        first={alertRows[0] ?? (cashAlerts[0] ? { key: 'cash-alert', to: cashAlerts[0].shiftId ? `/cash?tab=shifts&shift=${cashAlerts[0].shiftId}` : '/cash', title: '', meta: '', action: '', cta: 'Відкрити касу', icon: PointOfSaleIcon, alert: true } : undefined)}
+        first={alertRows[0] ?? (cashAlerts[0] && { to: cashAlertLink(cashAlerts[0]), cta: 'Відкрити касу' })}
       />
 
       {rows.length === 0 && cashAlerts.length === 0 && cashTransfers.length === 0 && !meals && !payments && (

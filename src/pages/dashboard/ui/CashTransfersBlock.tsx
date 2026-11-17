@@ -21,8 +21,6 @@ export const CashTransfersBlock = ({ items, onResolved }: CashTransfersBlockProp
     try {
       await cashApi.confirmTransfer(item.id)
       onResolved(item.id)
-    } catch {
-      return
     } finally {
       setBusyId(null)
     }

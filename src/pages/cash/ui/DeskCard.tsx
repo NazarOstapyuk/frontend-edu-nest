@@ -112,7 +112,7 @@ export const DeskCard = ({
           </Box>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
             {shift
-              ? `Відповідальна: ${shift.openedBy.name}, з ${formatDateTime(shift.openedAt)}`
+              ? `Відповідальна особа:${shift.openedBy.name}, з ${formatDateTime(shift.openedAt)}`
               : 'Зміну не відкрито'}
           </Typography>
         </Box>

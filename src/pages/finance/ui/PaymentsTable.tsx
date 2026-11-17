@@ -40,6 +40,7 @@ const PaymentRow = ({ payment }: { payment: FinancePayment }) => {
   const setAllocateModal = useChildFinanceStore((s) => s.setAllocateModal)
   const canEdit = useCan('finance', 'edit')
   const voided = Boolean(payment.voidedAt)
+  const lines = payerLines(payment)
 
   return (
     <>
@@ -62,10 +63,10 @@ const PaymentRow = ({ payment }: { payment: FinancePayment }) => {
         </TableCell>
         <TableCell>{payment.category ? financeCategoryLabels[payment.category] : 'Без категорії'}</TableCell>
         <TableCell>
-          {payerLines(payment).length === 0
+          {lines.length === 0
             ? '—'
-            : payerLines(payment).map((line) => (
-                <Typography key={line} variant="body2" color="inherit">{line}</Typography>
+            : lines.map((line, index) => (
+                <Typography key={index} variant="body2" color="inherit">{line}</Typography>
               ))}
         </TableCell>
         <TableCell align="right">{formatMoney(payment.amount)}</TableCell>

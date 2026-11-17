@@ -25,6 +25,7 @@ interface ChildFinanceState {
   createChargeModal: { isOpen: boolean };
   createPaymentModal: PaymentModalState;
   cashDesks: CashDeskState[];
+  isLoadingDesks: boolean;
   allocateModal: { isOpen: boolean; payment: FinancePayment | null };
   voidModal: { isOpen: boolean; target: VoidTarget | null };
   setCreateChargeModal: (value: Partial<{ isOpen: boolean }>) => void;
@@ -71,6 +72,7 @@ export const useChildFinanceStore = create<ChildFinanceState>((set) => {
     createChargeModal: { isOpen: false },
     createPaymentModal: { isOpen: false },
     cashDesks: [],
+    isLoadingDesks: false,
     allocateModal: { isOpen: false, payment: null },
     voidModal: { isOpen: false, target: null },
 
@@ -99,11 +101,14 @@ export const useChildFinanceStore = create<ChildFinanceState>((set) => {
     },
 
     fetchCashDesks: async () => {
+      set({ cashDesks: [], isLoadingDesks: true });
       try {
         const desks = await cashApi.getDesks();
         set({ cashDesks: desks.filter((d) => d.isActive && d.openShift !== null) });
       } catch {
         set({ cashDesks: [] });
+      } finally {
+        set({ isLoadingDesks: false });
       }
     },
 

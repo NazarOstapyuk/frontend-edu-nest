@@ -124,6 +124,7 @@ export const CreatePaymentModal = () => {
   const presetMethod = useChildFinanceStore((s) => s.createPaymentModal.presetMethod)
   const presetDeskId = useChildFinanceStore((s) => s.createPaymentModal.presetDeskId)
   const cashDesks = useChildFinanceStore((s) => s.cashDesks)
+  const isLoadingDesks = useChildFinanceStore((s) => s.isLoadingDesks)
   const fetchCashDesks = useChildFinanceStore((s) => s.fetchCashDesks)
   const canCashView = useCan('cash', 'view')
   const canCashControlView = useCan('cash_control', 'view')
@@ -157,7 +158,7 @@ export const CreatePaymentModal = () => {
   const method = watch('method')
   const cashDeskId = watch('cashDeskId')
   const canLoadDesks = canCashView || canCashControlView || canFinanceView
-  const noDesk = method === 'cash' && cashDesks.length === 0
+  const noDesk = method === 'cash' && cashDesks.length === 0 && !isLoadingDesks
 
   const openCharges = finance ? getOpenCharges(finance) : []
   const paymentCategory = finance ? getPaymentCategory(finance, category) : undefined
@@ -229,7 +230,7 @@ export const CreatePaymentModal = () => {
       allocations: [],
     })
     setLines([])
-    setCreatePaymentModal({ isOpen: false })
+    setCreatePaymentModal({ isOpen: false, presetMethod: undefined, presetDeskId: undefined })
   }
 
   const handleSuggest = async () => {
@@ -471,7 +472,7 @@ export const CreatePaymentModal = () => {
           <Button
             onClick={handleSubmit(onSubmit)}
             variant="contained"
-            disabled={isSaving || rest < 0 || anyOver || noDesk || (method === 'cash' && !cashDeskId)}
+            disabled={isSaving || rest < 0 || anyOver || (method === 'cash' && (isLoadingDesks || noDesk || !cashDeskId))}
             sx={{ width: '100%' }}
           >
             Зберегти

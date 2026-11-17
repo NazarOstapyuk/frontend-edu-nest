@@ -1,9 +1,11 @@
 import { create } from 'zustand';
 import {
+  cashApi,
   financeApi,
   type AllocateDto,
   type AllocationSuggestion,
   type AllocationSuggestionDto,
+  type CashDeskState,
   type ChildFinance,
   type CreateChargeDto,
   type CreatePaymentDto,
@@ -13,20 +15,24 @@ import {
 
 export type VoidTarget = { kind: 'charge' | 'payment' | 'allocation'; id: string; title: string };
 
+export type PaymentModalState = { isOpen: boolean; presetMethod?: 'cash'; presetDeskId?: string };
+
 interface ChildFinanceState {
   finance: ChildFinance | null;
   history: FinanceEvent[];
   isLoading: boolean;
   isSaving: boolean;
   createChargeModal: { isOpen: boolean };
-  createPaymentModal: { isOpen: boolean };
+  createPaymentModal: PaymentModalState;
+  cashDesks: CashDeskState[];
   allocateModal: { isOpen: boolean; payment: FinancePayment | null };
   voidModal: { isOpen: boolean; target: VoidTarget | null };
   setCreateChargeModal: (value: Partial<{ isOpen: boolean }>) => void;
-  setCreatePaymentModal: (value: Partial<{ isOpen: boolean }>) => void;
+  setCreatePaymentModal: (value: Partial<PaymentModalState>) => void;
   setAllocateModal: (value: Partial<{ isOpen: boolean; payment: FinancePayment | null }>) => void;
   setVoidModal: (value: Partial<{ isOpen: boolean; target: VoidTarget | null }>) => void;
   fetchFinance: (childId: string) => Promise<void>;
+  fetchCashDesks: () => Promise<void>;
   suggestAllocation: (childId: string, dto: AllocationSuggestionDto) => Promise<AllocationSuggestion>;
   createCharge: (childId: string, dto: CreateChargeDto) => Promise<void>;
   createPayment: (childId: string, dto: CreatePaymentDto) => Promise<void>;
@@ -64,6 +70,7 @@ export const useChildFinanceStore = create<ChildFinanceState>((set) => {
     isSaving: false,
     createChargeModal: { isOpen: false },
     createPaymentModal: { isOpen: false },
+    cashDesks: [],
     allocateModal: { isOpen: false, payment: null },
     voidModal: { isOpen: false, target: null },
 
@@ -88,6 +95,15 @@ export const useChildFinanceStore = create<ChildFinanceState>((set) => {
         set({ finance, history });
       } finally {
         set({ isLoading: false });
+      }
+    },
+
+    fetchCashDesks: async () => {
+      try {
+        const desks = await cashApi.getDesks();
+        set({ cashDesks: desks.filter((d) => d.isActive && d.openShift !== null) });
+      } catch {
+        set({ cashDesks: [] });
       }
     },
 

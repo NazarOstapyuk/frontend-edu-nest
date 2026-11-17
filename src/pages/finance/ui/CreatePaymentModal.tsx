@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { Box, Button, Dialog, DialogTitle, ListSubheader, MenuItem, TextField, Typography } from '@mui/material'
+import { Link as RouterLink } from 'react-router-dom'
+import { Alert, Box, Button, Dialog, DialogTitle, Link, ListSubheader, MenuItem, TextField, Typography } from '@mui/material'
 import { useChildFinanceStore } from '../model/childFinanceStore'
 import { allocationItemSchema, amountSchema } from '../model/schemas'
 import { AllocationTable } from './AllocationTable'
@@ -21,6 +22,7 @@ import {
   type ManualPaymentMethod,
   type SuggestionLine,
 } from '../../../shared/api'
+import { useCan } from '../../../entities/user'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { DateField } from '../../../shared/ui/DateField'
 
@@ -91,6 +93,21 @@ const schema = yup.object({
     .test('not-future', 'Дата не може бути в майбутньому', (value) => !value || value <= today()),
   category: yup.string().default(''),
   note: yup.string().default('').max(1000, 'Максимум 1000 символів'),
+  payerName: yup.string().trim().required("Обов'язкове поле").max(255, 'Максимум 255 символів'),
+  periodFrom: yup.string().default(''),
+  periodTo: yup
+    .string()
+    .default('')
+    .test('period-order', 'Кінець періоду раніше початку', function (value) {
+      const from = this.parent.periodFrom as string | undefined
+      return !value || !from || value >= from
+    }),
+  cashDeskId: yup
+    .string()
+    .default('')
+    .test('desk-required', "Обов'язкове поле", function (value) {
+      return this.parent.method !== 'cash' || !!value
+    }),
   allocations: yup.array().of(allocationItemSchema).default([]),
 })
 
@@ -104,6 +121,14 @@ export const CreatePaymentModal = () => {
   const createPayment = useChildFinanceStore((s) => s.createPayment)
   const suggestAllocation = useChildFinanceStore((s) => s.suggestAllocation)
   const isSaving = useChildFinanceStore((s) => s.isSaving)
+  const presetMethod = useChildFinanceStore((s) => s.createPaymentModal.presetMethod)
+  const presetDeskId = useChildFinanceStore((s) => s.createPaymentModal.presetDeskId)
+  const cashDesks = useChildFinanceStore((s) => s.cashDesks)
+  const fetchCashDesks = useChildFinanceStore((s) => s.fetchCashDesks)
+  const canCashView = useCan('cash', 'view')
+  const canCashControlView = useCan('cash_control', 'view')
+  const canFinanceView = useCan('finance', 'view')
+  const canCashEdit = useCan('cash', 'edit')
   const [lines, setLines] = useState<SuggestionLine[]>([])
   const cleared = useRef(false)
 
@@ -116,6 +141,10 @@ export const CreatePaymentModal = () => {
       receivedAt: today(),
       category: '',
       note: '',
+      payerName: '',
+      periodFrom: '',
+      periodTo: '',
+      cashDeskId: '',
       allocations: [],
     },
     resolver: yupResolver(schema),
@@ -125,6 +154,10 @@ export const CreatePaymentModal = () => {
   const distributed = watch('allocations').reduce((acc, item) => acc + toKopecks(item.amount), 0)
   const category = watch('category')
   const amountValue = watch('amount')
+  const method = watch('method')
+  const cashDeskId = watch('cashDeskId')
+  const canLoadDesks = canCashView || canCashControlView || canFinanceView
+  const noDesk = method === 'cash' && cashDesks.length === 0
 
   const openCharges = finance ? getOpenCharges(finance) : []
   const paymentCategory = finance ? getPaymentCategory(finance, category) : undefined
@@ -146,6 +179,23 @@ export const CreatePaymentModal = () => {
   }, [isOpen, finance, setValue])
 
   useEffect(() => {
+    if (isOpen && canLoadDesks) fetchCashDesks()
+  }, [isOpen, canLoadDesks, fetchCashDesks])
+
+  useEffect(() => {
+    if (isOpen && presetMethod) setValue('method', presetMethod)
+  }, [isOpen, presetMethod, setValue])
+
+  useEffect(() => {
+    if (!isOpen) return
+    const current = getValues('cashDeskId')
+    const next =
+      cashDesks.find((d) => d.id === presetDeskId)?.id ??
+      (cashDesks.length === 1 ? cashDesks[0].id : cashDesks.find((d) => d.id === current)?.id ?? '')
+    if (next !== current) setValue('cashDeskId', next, { shouldValidate: true })
+  }, [isOpen, cashDesks, presetDeskId, getValues, setValue])
+
+  useEffect(() => {
     cleared.current = false
     setLines([])
     setValue('allocations', [])
@@ -165,7 +215,19 @@ export const CreatePaymentModal = () => {
 
   const handleClose = () => {
     cleared.current = false
-    reset({ amount: '', method: 'cash', reference: '', receivedAt: today(), category: '', note: '', allocations: [] })
+    reset({
+      amount: '',
+      method: 'cash',
+      reference: '',
+      receivedAt: today(),
+      category: '',
+      note: '',
+      payerName: '',
+      periodFrom: '',
+      periodTo: '',
+      cashDeskId: '',
+      allocations: [],
+    })
     setLines([])
     setCreatePaymentModal({ isOpen: false })
   }
@@ -189,6 +251,10 @@ export const CreatePaymentModal = () => {
       receivedAt: values.receivedAt,
       category: paymentCategory,
       note: values.note.trim() || undefined,
+      payerName: values.payerName.trim(),
+      periodFrom: values.periodFrom || undefined,
+      periodTo: values.periodTo || undefined,
+      cashDeskId: values.method === 'cash' ? values.cashDeskId : undefined,
       allocations,
     })
     handleClose()
@@ -255,6 +321,70 @@ export const CreatePaymentModal = () => {
                 error={!!error}
                 helperText={error?.message}
               />
+            )}
+          />
+        </Box>
+        {method === 'cash' && cashDesks.length === 1 && (
+          <Typography variant="body2" color="text.secondary">
+            Каса: {cashDesks[0].name}
+          </Typography>
+        )}
+        {method === 'cash' && cashDesks.length > 1 && (
+          <Controller
+            name="cashDeskId"
+            control={control}
+            render={({ field, fieldState: { error } }) => (
+              <TextField {...field} select label="Каса" fullWidth error={!!error} helperText={error?.message}>
+                {cashDesks.map((desk) => (
+                  <MenuItem key={desk.id} value={desk.id}>{desk.name}</MenuItem>
+                ))}
+              </TextField>
+            )}
+          />
+        )}
+        {noDesk && (
+          <Alert severity="warning">
+            Немає відкритої касової зміни. Відкрийте зміну на сторінці «Каса», щоб прийняти готівку.
+            {canCashEdit && (
+              <>
+                {' '}
+                <Link component={RouterLink} to="/cash" onClick={handleClose}>
+                  Перейти до каси
+                </Link>
+              </>
+            )}
+          </Alert>
+        )}
+        <Controller
+          name="payerName"
+          control={control}
+          render={({ field, fieldState: { error } }) => (
+            <TextField {...field} label="Платник" fullWidth error={!!error} helperText={error?.message} />
+          )}
+        />
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+          <Controller
+            name="periodFrom"
+            control={control}
+            render={({ field, fieldState: { error } }) => (
+              <DateField
+                {...field}
+                label="Період з"
+                fullWidth
+                error={!!error}
+                helperText={error?.message}
+                onChange={(value) => {
+                  field.onChange(value)
+                  trigger('periodTo')
+                }}
+              />
+            )}
+          />
+          <Controller
+            name="periodTo"
+            control={control}
+            render={({ field, fieldState: { error } }) => (
+              <DateField {...field} label="Період по" fullWidth error={!!error} helperText={error?.message} />
             )}
           />
         </Box>
@@ -341,7 +471,7 @@ export const CreatePaymentModal = () => {
           <Button
             onClick={handleSubmit(onSubmit)}
             variant="contained"
-            disabled={isSaving || rest < 0 || anyOver}
+            disabled={isSaving || rest < 0 || anyOver || noDesk || (method === 'cash' && !cashDeskId)}
             sx={{ width: '100%' }}
           >
             Зберегти

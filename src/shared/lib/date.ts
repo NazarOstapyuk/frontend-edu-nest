@@ -36,3 +36,9 @@ export const formatDay = (value: DateInput) => format(value, 'UTC', false)
 export const formatDate = (value: DateInput) => format(value, KYIV, false)
 
 export const formatDateTime = (value: DateInput) => format(value, KYIV, true)
+
+export const formatPeriod = (from: string | null, to: string | null) => {
+  if (from && to && from !== to) return `${formatDay(from)} – ${formatDay(to)}`
+  const single = from ?? to
+  return single ? formatDay(single) : ''
+}

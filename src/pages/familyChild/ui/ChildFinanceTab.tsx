@@ -25,6 +25,7 @@ import {
   type CabinetPayment,
   type FinanceCategory,
 } from '../../../shared/api'
+import { formatPeriod } from '../../../shared/lib/date'
 import { PayDialog } from './PayDialog'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
 import { CardField, CardList } from '../../../shared/ui/CardList'
@@ -47,6 +48,10 @@ const PaymentCard = ({ payment }: { payment: CabinetPayment }) => {
         </IconButton>
       </Box>
       <CardField label="Спосіб">{paymentMethodLabels[payment.method]}</CardField>
+      {payment.payerName && <CardField label="Платник">{payment.payerName}</CardField>}
+      {formatPeriod(payment.periodFrom, payment.periodTo) && (
+        <CardField label="Період">{formatPeriod(payment.periodFrom, payment.periodTo)}</CardField>
+      )}
       <CardField label="Призначення">{payment.category ? financeCategoryLabels[payment.category] : 'Будь-що'}</CardField>
       <CardField label="Не розподілено">{formatMoney(payment.free)}</CardField>
       <Collapse in={open} unmountOnExit>
@@ -75,10 +80,12 @@ const PaymentRow = ({ payment }: { payment: CabinetPayment }) => {
         <TableCell align="right">{formatMoney(payment.amount)}</TableCell>
         <TableCell>{paymentMethodLabels[payment.method]}</TableCell>
         <TableCell>{payment.category ? financeCategoryLabels[payment.category] : 'Будь-що'}</TableCell>
+        <TableCell>{payment.payerName ?? '—'}</TableCell>
+        <TableCell>{formatPeriod(payment.periodFrom, payment.periodTo) || '—'}</TableCell>
         <TableCell align="right">{formatMoney(payment.free)}</TableCell>
       </TableRow>
       <TableRow>
-        <TableCell colSpan={6} sx={{ py: 0, borderBottom: open ? undefined : 0 }}>
+        <TableCell colSpan={8} sx={{ py: 0, borderBottom: open ? undefined : 0 }}>
           <Collapse in={open} unmountOnExit>
             <Box sx={{ py: 1 }}>
               {payment.allocations.length === 0 && <Typography variant="body2" color="text.secondary">Ще не розподілено</Typography>}
@@ -214,12 +221,14 @@ export const ChildFinanceTab = ({ childId, finance }: { childId: string; finance
               <TableCell align="right">Сума</TableCell>
               <TableCell>Спосіб</TableCell>
               <TableCell>Призначення</TableCell>
+              <TableCell>Платник</TableCell>
+              <TableCell>Період</TableCell>
               <TableCell align="right">Не розподілено</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {finance.payments.length === 0 ? (
-              <TableRow><TableCell colSpan={6} sx={{ color: 'text.secondary' }}>Оплат немає.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} sx={{ color: 'text.secondary' }}>Оплат немає.</TableCell></TableRow>
             ) : (
               finance.payments.map((p) => <PaymentRow key={p.id} payment={p} />)
             )}

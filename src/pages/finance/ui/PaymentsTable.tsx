@@ -27,9 +27,12 @@ import {
   paymentMethodLabels,
   type FinancePayment,
 } from '../../../shared/api'
-import { formatDate } from '../../../shared/lib/date'
+import { formatDate, formatPeriod } from '../../../shared/lib/date'
 
 const voidedSx = { '& td': { color: 'text.disabled', textDecoration: 'line-through' } }
+
+const payerLines = (payment: FinancePayment) =>
+  [payment.payerName, formatPeriod(payment.periodFrom, payment.periodTo)].filter(Boolean)
 
 const PaymentRow = ({ payment }: { payment: FinancePayment }) => {
   const [open, setOpen] = useState(false)
@@ -58,6 +61,13 @@ const PaymentRow = ({ payment }: { payment: FinancePayment }) => {
           )}
         </TableCell>
         <TableCell>{payment.category ? financeCategoryLabels[payment.category] : 'Без категорії'}</TableCell>
+        <TableCell>
+          {payerLines(payment).length === 0
+            ? '—'
+            : payerLines(payment).map((line) => (
+                <Typography key={line} variant="body2" color="inherit">{line}</Typography>
+              ))}
+        </TableCell>
         <TableCell align="right">{formatMoney(payment.amount)}</TableCell>
         <TableCell align="right">{formatMoney(payment.allocated)}</TableCell>
         <TableCell>
@@ -94,7 +104,7 @@ const PaymentRow = ({ payment }: { payment: FinancePayment }) => {
         </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell colSpan={9} sx={{ py: 0, borderBottom: open ? undefined : 0 }}>
+        <TableCell colSpan={10} sx={{ py: 0, borderBottom: open ? undefined : 0 }}>
           <Collapse in={open} unmountOnExit>
             <Box sx={{ py: 2 }}>
               {payment.note && (
@@ -184,6 +194,10 @@ const PaymentCard = ({ payment }: { payment: FinancePayment }) => {
       <CardField label="Категорія">
         {payment.category ? financeCategoryLabels[payment.category] : 'Без категорії'}
       </CardField>
+      {payment.payerName && <CardField label="Платник">{payment.payerName}</CardField>}
+      {formatPeriod(payment.periodFrom, payment.periodTo) && (
+        <CardField label="Період">{formatPeriod(payment.periodFrom, payment.periodTo)}</CardField>
+      )}
       <CardField label="Сума">{formatMoney(payment.amount)}</CardField>
       <CardField label="Розподілено">{formatMoney(payment.allocated)}</CardField>
       <CardField label="Вніс">
@@ -314,6 +328,7 @@ export const PaymentsTable = ({ payments }: PaymentsTableProps) => {
           <TableCell>Спосіб</TableCell>
           <TableCell>Реквізит</TableCell>
           <TableCell>Категорія</TableCell>
+          <TableCell>Платник</TableCell>
           <TableCell align="right">Сума</TableCell>
           <TableCell align="right">Розподілено</TableCell>
           <TableCell>Вніс</TableCell>
@@ -323,7 +338,7 @@ export const PaymentsTable = ({ payments }: PaymentsTableProps) => {
       <TableBody>
         {payments.length === 0 ? (
           <TableRow>
-            <TableCell colSpan={9} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+            <TableCell colSpan={10} align="center" sx={{ py: 6, color: 'text.secondary' }}>
               Оплат ще немає.
             </TableCell>
           </TableRow>

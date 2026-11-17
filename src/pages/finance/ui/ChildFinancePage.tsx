@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Box, Button, IconButton, Tab, Tabs, Typography } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -24,6 +24,7 @@ import { HistoryButton } from '../../../widgets/auditHistory'
 export const ChildFinancePage = () => {
   const { childId } = useParams<{ childId: string }>()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const finance = useChildFinanceStore((s) => s.finance)
   const history = useChildFinanceStore((s) => s.history)
   const fetchFinance = useChildFinanceStore((s) => s.fetchFinance)
@@ -43,6 +44,21 @@ export const ChildFinancePage = () => {
       .then(({ data }) => setOnlineEnabled(data.enabled))
       .catch(() => setOnlineEnabled(false))
   }, [])
+
+  useEffect(() => {
+    if (searchParams.get('pay') !== 'cash') return
+    const deskId = searchParams.get('desk') ?? undefined
+    setCreatePaymentModal({ isOpen: true, presetMethod: 'cash', presetDeskId: deskId })
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        next.delete('pay')
+        next.delete('desk')
+        return next
+      },
+      { replace: true },
+    )
+  }, [searchParams, setSearchParams, setCreatePaymentModal])
 
   useEffect(() => {
     if (childId) fetchFinance(childId)

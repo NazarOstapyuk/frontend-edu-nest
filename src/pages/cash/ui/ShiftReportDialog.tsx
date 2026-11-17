@@ -25,7 +25,6 @@ import {
   toKopecks,
   type CashShiftReport,
 } from '../../../shared/api'
-import { useCan } from '../../../entities/user'
 import { brandColors } from '../../../shared/assets/brand'
 import { formatDate, formatDateTime } from '../../../shared/lib/date'
 import { useIsPhone } from '../../../shared/lib/useIsPhone'
@@ -48,7 +47,6 @@ interface ShiftReportDialogProps {
 
 export const ShiftReportDialog = ({ shiftId, onClose }: ShiftReportDialogProps) => {
   const isPhone = useIsPhone()
-  const canControl = useCan('cash_control', 'view')
   const [loaded, setLoaded] = useState<{ id: string; report: CashShiftReport | null } | null>(null)
   const [attempt, setAttempt] = useState(0)
   const [isDownloading, setIsDownloading] = useState(false)
@@ -65,7 +63,7 @@ export const ShiftReportDialog = ({ shiftId, onClose }: ShiftReportDialogProps) 
     }
   }, [shiftId, attempt])
 
-  const current = loaded && loaded.id === shiftId ? loaded : null
+  const current = loaded && (loaded.id === shiftId || !shiftId) ? loaded : null
   const report = current?.report ?? null
   const failed = !!current && !current.report
   const shift = report?.shift
@@ -76,7 +74,7 @@ export const ShiftReportDialog = ({ shiftId, onClose }: ShiftReportDialogProps) 
     if (!shift?.closedAt) return
     setIsDownloading(true)
     try {
-      await reportsApi.download('cash', { shiftId: shift.id }, `каса-зміна-${formatDate(shift.closedAt)}`)
+      await reportsApi.download('cash', { shiftId: shift.id }, `каса-зміна-${formatDate(shift.closedAt)}`, true)
     } catch {
       return
     } finally {
@@ -85,7 +83,9 @@ export const ShiftReportDialog = ({ shiftId, onClose }: ShiftReportDialogProps) 
   }
 
   return (
-    <Dialog open={!!shiftId} onClose={onClose} fullWidth maxWidth="md" fullScreen={isPhone}>
+    <Dialog open={!!shiftId} onClose={onClose} fullWidth maxWidth="md" fullScreen={isPhone}
+      slotProps={{ transition: { onExited: () => setLoaded(null) } }}
+    >
       <DialogTitle sx={{ fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
         {shift ? `Зміна: ${shift.deskName}` : 'Зміна'}
         <IconButton onClick={onClose} aria-label="Закрити" sx={{ minWidth: 40, minHeight: 40 }}>
@@ -98,10 +98,7 @@ export const ShiftReportDialog = ({ shiftId, onClose }: ShiftReportDialogProps) 
             severity="error"
             action={
               shiftId && (
-                <Button color="inherit" size="small" onClick={() => {
-                    setLoaded(null)
-                    setAttempt((value) => value + 1)
-                  }}>
+                <Button color="inherit" size="small" onClick={() => setAttempt((value) => value + 1)}>
                   Спробувати ще
                 </Button>
               )
@@ -173,9 +170,9 @@ export const ShiftReportDialog = ({ shiftId, onClose }: ShiftReportDialogProps) 
               </Box>
             )}
 
-            <EntriesList entries={report.entries} canEdit={false} onVoid={() => undefined} />
+            <EntriesList entries={report.entries} canEdit={false} />
 
-            {canControl && shift.closedAt && (
+            {shift.closedAt && (
               <Box>
                 <Button
                   variant="outlined"

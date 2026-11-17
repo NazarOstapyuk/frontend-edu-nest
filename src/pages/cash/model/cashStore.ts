@@ -50,6 +50,7 @@ interface CashState {
   isSettingsLoaded: boolean;
   isLoaded: boolean;
   isLoading: boolean;
+  isSettingsLoading: boolean;
   isCreating: boolean;
   isUpdating: boolean;
   isDeleting: boolean;
@@ -98,6 +99,7 @@ export const useCashStore = create<CashState>((set, get) => ({
   isSettingsLoaded: false,
   isLoaded: false,
   isLoading: false,
+  isSettingsLoading: false,
   isCreating: false,
   isUpdating: false,
   isDeleting: false,
@@ -119,12 +121,12 @@ export const useCashStore = create<CashState>((set, get) => ({
   setDeskModal: (value) => set((state) => ({ deskModal: { ...state.deskModal, ...value } })),
 
   fetchSettingsDesks: async () => {
-    set({ isLoading: true });
+    set({ isSettingsLoading: true });
     try {
       const settingsDesks = await cashApi.getDesks(true);
       set({ settingsDesks, isSettingsLoaded: true });
     } finally {
-      set({ isLoading: false });
+      set({ isSettingsLoading: false });
     }
   },
 

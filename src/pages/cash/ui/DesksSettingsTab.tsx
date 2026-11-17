@@ -24,7 +24,7 @@ export const DesksSettingsTab = () => {
   const isPhone = useIsPhone()
   const desks = useCashStore((s) => s.settingsDesks)
   const isLoaded = useCashStore((s) => s.isSettingsLoaded)
-  const isLoading = useCashStore((s) => s.isLoading)
+  const isLoading = useCashStore((s) => s.isSettingsLoading)
   const isUpdating = useCashStore((s) => s.isUpdating)
   const fetchSettingsDesks = useCashStore((s) => s.fetchSettingsDesks)
   const updateDesk = useCashStore((s) => s.updateDesk)

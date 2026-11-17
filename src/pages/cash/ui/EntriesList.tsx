@@ -118,7 +118,7 @@ const Details = ({ entry }: { entry: CashEntryView }) => {
 interface EntriesListProps {
   entries: CashEntryView[]
   canEdit: boolean
-  onVoid: (entry: CashEntryView) => void
+  onVoid?: (entry: CashEntryView) => void
 }
 
 export const EntriesList = ({ entries, canEdit, onVoid }: EntriesListProps) => {
@@ -127,7 +127,7 @@ export const EntriesList = ({ entries, canEdit, onVoid }: EntriesListProps) => {
   const empty = 'За цю зміну ще немає операцій'
   const voidButton = (entry: CashEntryView) =>
     canEdit && canVoid(entry) ? (
-      <Button size="small" color="inherit" onClick={() => onVoid(entry)}>
+      <Button size="small" color="inherit" onClick={() => onVoid?.(entry)}>
         Скасувати
       </Button>
     ) : null

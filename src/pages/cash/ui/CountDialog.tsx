@@ -127,7 +127,7 @@ export const CountDialog = () => {
         const next = new URLSearchParams(prev)
         next.set('shift', report.shift.id)
         return next
-      })
+      }, { replace: true })
       return
     }
     handleClose()

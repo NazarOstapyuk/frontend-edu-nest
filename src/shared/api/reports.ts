@@ -117,7 +117,7 @@ export const reportsApi = {
     axiosInstance
       .get<Report>(`/reports/${key}`, { params: { ...query, format: 'json' } })
       .then((response) => response.data),
-  download: async (key: ReportKey, query: ReportQuery, fileName: string) => {
+  download: async (key: ReportKey, query: ReportQuery, fileName: string, exactName = false) => {
     const { data } = await axiosInstance.get<Blob>(`/reports/${key}`, {
       params: { ...query, format: 'xlsx' },
       responseType: 'blob',
@@ -126,7 +126,7 @@ export const reportsApi = {
     const url = URL.createObjectURL(data);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${fileName}_${suffix}.xlsx`;
+    link.download = exactName ? `${fileName}.xlsx` : `${fileName}_${suffix}.xlsx`;
     document.body.appendChild(link);
     link.click();
     link.remove();

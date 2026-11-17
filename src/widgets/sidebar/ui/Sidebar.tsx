@@ -19,6 +19,7 @@ import type { SessionRole } from '../../../entities/user'
 import { usePendingNoticesStore } from '../../../shared/model/pendingNoticesStore'
 import { usePendingNotesStore } from '../../../shared/model/pendingNotesStore'
 import { usePendingTasksStore } from '../../../shared/model/pendingTasksStore'
+import { usePendingCashStore } from '../../../shared/model/pendingCashStore'
 import { BRAND_NAME, brandColors, logoUrl, mascotHeadUrl } from '../../../shared/assets/brand'
 
 export const SIDEBAR_WIDTH = 240
@@ -28,6 +29,7 @@ const NavButton = ({ item }: { item: NavItem }) => {
   const pendingNotes = usePendingNotesStore((s) => s.count)
   const openTasks = usePendingTasksStore((s) => s.open)
   const overdueTasks = usePendingTasksStore((s) => s.overdue)
+  const pendingCash = usePendingCashStore((s) => s.count)
   const pending =
     item.badge === 'pendingNotices'
       ? pendingNotices
@@ -35,7 +37,9 @@ const NavButton = ({ item }: { item: NavItem }) => {
         ? pendingNotes
         : item.badge === 'pendingTasks'
           ? openTasks
-          : 0
+          : item.badge === 'pendingCash'
+            ? pendingCash
+            : 0
   const badgeColor = item.badge === 'pendingTasks' && overdueTasks > 0 ? 'warning' : 'primary'
   return (
   <NavLink to={item.path} end={item.path === '/'} style={{ textDecoration: 'none' }}>
@@ -120,6 +124,11 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps) => {
   useEffect(() => {
     if (canSeeTasks) refreshPendingTasks().catch(() => undefined)
   }, [canSeeTasks, refreshPendingTasks])
+  const canSeeCashControl = canAccess(profile, 'cash_control', 'view')
+  const refreshPendingCash = usePendingCashStore((s) => s.refresh)
+  useEffect(() => {
+    if (canSeeCashControl) refreshPendingCash().catch(() => undefined)
+  }, [canSeeCashControl, refreshPendingCash])
   useEffect(() => {
     if (!isNarrow) onClose()
   }, [isNarrow, onClose])

@@ -13,12 +13,15 @@ import RequestQuoteIcon from '@mui/icons-material/RequestQuote'
 import BackupIcon from '@mui/icons-material/Backup'
 import EditNoteIcon from '@mui/icons-material/EditNote'
 import AssignmentIcon from '@mui/icons-material/Assignment'
+import PointOfSaleIcon from '@mui/icons-material/PointOfSale'
 import { dashboardApi, formatMoney } from '../../../shared/api'
 import type { DashboardPaymentMethod, TodayDashboard } from '../../../shared/api'
 import { useAuthStore, useCan } from '../../../entities/user'
 import { brandColors, mascotUrl } from '../../../shared/assets/brand'
 import { DashboardCard } from './DashboardCard'
-import { formatDay } from '../../../shared/lib/date'
+import { formatDay, formatDateTime } from '../../../shared/lib/date'
+import { CashAlertsBlock } from './CashAlertsBlock'
+import { CashTransfersBlock } from './CashTransfersBlock'
 
 const methodLabels: Record<DashboardPaymentMethod, string> = {
   cash: 'Готівка',
@@ -76,7 +79,7 @@ const tasksLine = (count: number) => {
 }
 
 const buildRows = (data: TodayDashboard): AttentionRow[] => {
-  const { register, notices, debts, onlinePending, payroll, backups, notes, tasks } = data
+  const { register, notices, debts, onlinePending, payroll, backups, notes, tasks, cash } = data
   const rows: AttentionRow[] = []
   if (register) {
     rows.push(
@@ -123,6 +126,20 @@ const buildRows = (data: TodayDashboard): AttentionRow[] => {
         action: 'Переглянути',
         cta: 'Відкрити завдання',
         icon: AssignmentIcon,
+        alert: true,
+      })
+    })
+  }
+  if (cash) {
+    cash.unclosed.forEach((shift) => {
+      rows.push({
+        key: `cash-unclosed-${shift.shiftId}`,
+        to: '/cash',
+        title: `Каса не закрита: ${shift.deskName}, відкрила ${shift.openedBy.name} ${formatDateTime(shift.openedAt)}`,
+        meta: 'Зміну не закрито вчасно',
+        action: 'Відкрити',
+        cta: 'Відкрити касу',
+        icon: PointOfSaleIcon,
         alert: true,
       })
     })
@@ -300,6 +317,20 @@ export const DashboardPage = () => {
     load()
   }, [load])
 
+  const removeAlerts = (ids: string[]) =>
+    setData((prev) =>
+      prev && prev.cash
+        ? { ...prev, cash: { ...prev.cash, alerts: prev.cash.alerts.filter((alert) => !ids.includes(alert.id)) } }
+        : prev,
+    )
+
+  const removeTransfer = (id: string) =>
+    setData((prev) =>
+      prev && prev.cashTransfers
+        ? { ...prev, cashTransfers: { items: prev.cashTransfers.items.filter((item) => item.id !== id) } }
+        : prev,
+    )
+
   const retry = () => {
     setIsLoading(true)
     load()
@@ -332,25 +363,35 @@ export const DashboardPage = () => {
   const rows = buildRows(data)
   const alertRows = rows.filter((row) => row.alert)
   const { meals, payments } = data
+  const cashAlerts = data.cash?.alerts ?? []
+  const cashTransfers = data.cashTransfers?.items ?? []
 
   return (
     <Box>
-      <Hero date={data.date} firstName={firstName} count={alertRows.length} first={alertRows[0]} />
+      <Hero
+        date={data.date}
+        firstName={firstName}
+        count={alertRows.length + cashAlerts.length}
+        first={alertRows[0] ?? (cashAlerts[0] ? { key: 'cash-alert', to: cashAlerts[0].shiftId ? `/cash?tab=shifts&shift=${cashAlerts[0].shiftId}` : '/cash', title: '', meta: '', action: '', cta: 'Відкрити касу', icon: PointOfSaleIcon, alert: true } : undefined)}
+      />
 
-      {rows.length === 0 && !meals && !payments && (
+      {rows.length === 0 && cashAlerts.length === 0 && cashTransfers.length === 0 && !meals && !payments && (
         <Typography color="text.secondary">Для вас поки немає карток</Typography>
       )}
 
-      {rows.length > 0 && (
+      {(rows.length > 0 || cashAlerts.length > 0) && (
         <Box sx={{ mb: 4 }}>
           <SectionTitle>Потребує уваги</SectionTitle>
           <Paper elevation={0} sx={{ borderRadius: '20px', boxShadow: brandColors.outline, overflow: 'hidden' }}>
             {rows.map((row) => (
               <Row key={row.key} row={row} />
             ))}
+            <CashAlertsBlock alerts={cashAlerts} onAcked={removeAlerts} />
           </Paper>
         </Box>
       )}
+
+      {cashTransfers.length > 0 && <CashTransfersBlock items={cashTransfers} onResolved={removeTransfer} />}
 
       {(payments || meals) && (
         <Grid container spacing={2.5}>

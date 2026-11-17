@@ -24,6 +24,7 @@ import TuneIcon from '@mui/icons-material/Tune'
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote'
 import AssessmentIcon from '@mui/icons-material/Assessment'
 import TaskAltIcon from '@mui/icons-material/TaskAlt'
+import PointOfSaleIcon from '@mui/icons-material/PointOfSale'
 import type { SvgIconComponent } from '@mui/icons-material'
 import type { SessionRole } from '../../../entities/user'
 import type { PermissionArea } from '../../../shared/api'
@@ -44,7 +45,7 @@ export interface NavItem {
   roles?: SessionRole[]
   area?: PermissionArea
   areas?: PermissionArea[]
-  badge?: 'pendingNotices' | 'pendingNotes' | 'pendingTasks'
+  badge?: 'pendingNotices' | 'pendingNotes' | 'pendingTasks' | 'pendingCash'
   section?: NavSection
 }
 
@@ -66,6 +67,7 @@ export const navItems: NavItem[] = [
   { path: '/my-classes',          label: 'Мої заняття',       icon: EventAvailableIcon, roles: ['teacher'], section: 'classes' },
   { path: '/my-lessons',         label: 'Мої уроки',         icon: MenuBookIcon,       roles: ['teacher'], section: 'classes' },
   { path: '/finance',             label: 'Фінанси',           icon: AccountBalanceWalletIcon, area: 'finance', section: 'money' },
+  { path: '/cash',                label: 'Каса',              icon: PointOfSaleIcon,    areas: ['cash', 'cash_control'], section: 'money', badge: 'pendingCash' },
   { path: '/tariffs',             label: 'Тарифи',            icon: PriceChangeIcon,    area: 'tariffs', section: 'money' },
   { path: '/payroll',            label: 'Зарплати',          icon: PaymentsIcon,       area: 'payroll', section: 'money' },
   { path: '/my-payroll',         label: 'Моя зарплата',      icon: RequestQuoteIcon,   roles: ['teacher'], section: 'money' },

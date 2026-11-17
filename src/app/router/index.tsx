@@ -25,6 +25,7 @@ import { InstitutionsPage } from '../../pages/institutions'
 import { BackupsPage } from '../../pages/backups'
 import { AuditPage } from '../../pages/audit'
 import { ReportsPage } from '../../pages/reports'
+import { CashPage } from '../../pages/cash'
 import { RegisterPage } from '../../pages/register'
 import { NotesPage } from '../../pages/notes'
 import { TasksPage } from '../../pages/tasks'
@@ -96,6 +97,7 @@ export const router = createBrowserRouter([
                   { path: 'students',            element: <ChildrenPage /> },
                   { path: 'finance',             element: <FinanceBalancesPage /> },
                   { path: 'finance/:childId',    element: <ChildFinancePage /> },
+                  { path: 'cash',                element: <CashPage /> },
                   { path: 'tariffs',             element: <TariffsPage /> },
                   { path: 'teachers',            element: <EmptyPage title="Вчителі" /> },
                   { path: 'classes',   element: <ClassesPage /> },

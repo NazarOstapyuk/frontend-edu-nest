@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Box, Paper, Skeleton, Tab, Tabs, Typography } from '@mui/material'
+import { Alert, Box, Button, Paper, Skeleton, Tab, Tabs, Typography } from '@mui/material'
 import PointOfSaleOutlinedIcon from '@mui/icons-material/PointOfSaleOutlined'
 import { useCan } from '../../../entities/user'
 import { brandColors } from '../../../shared/assets/brand'
@@ -20,6 +20,7 @@ const NowTab = () => {
   const canControl = useCan('cash_control', 'edit')
   const desks = useCashStore((s) => s.desks)
   const shiftReports = useCashStore((s) => s.shiftReports)
+  const isLoaded = useCashStore((s) => s.isLoaded)
   const isLoading = useCashStore((s) => s.isLoading)
   const isDeleting = useCashStore((s) => s.isDeleting)
   const voidDialog = useCashStore((s) => s.voidDialog)
@@ -35,8 +36,20 @@ const NowTab = () => {
     fetchDesks().catch(() => undefined)
   }, [fetchDesks])
 
-  if (isLoading && desks.length === 0) {
-    return <Skeleton variant="rounded" height={420} sx={{ borderRadius: '20px' }} />
+  if (!isLoaded) {
+    if (isLoading) return <Skeleton variant="rounded" height={420} sx={{ borderRadius: '20px' }} />
+    return (
+      <Alert
+        severity="error"
+        action={
+          <Button color="inherit" size="small" onClick={() => fetchDesks().catch(() => undefined)}>
+            Спробувати ще
+          </Button>
+        }
+      >
+        Не вдалося завантажити каси.
+      </Alert>
+    )
   }
 
   if (desks.length === 0) {

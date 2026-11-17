@@ -142,21 +142,24 @@ export const EntriesList = ({ entries, canEdit, onVoid }: EntriesListProps) => {
           items={sorted}
           getKey={(entry) => entry.id}
           empty={<Typography color="text.secondary">{empty}</Typography>}
-          renderCard={(entry) => (
-            <>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 1, mb: 1 }}>
-                <Typography sx={{ fontWeight: 800 }}>{cashEntryKindLabels[entry.kind]}</Typography>
-                <Amount entry={entry} />
-              </Box>
-              <Box sx={{ mb: 1 }}>
-                <Details entry={entry} />
-              </Box>
-              <CardField label="Час">{formatDateTime(entry.createdAt)}</CardField>
-              <CardField label="Напрям">{cashDirectionLabels[entry.direction]}</CardField>
-              <CardField label="Хто">{entry.createdBy.name}</CardField>
-              {voidButton(entry) && <Box sx={{ mt: 1 }}>{voidButton(entry)}</Box>}
-            </>
-          )}
+          renderCard={(entry) => {
+            const action = voidButton(entry)
+            return (
+              <>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 1, mb: 1 }}>
+                  <Typography sx={{ fontWeight: 800 }}>{cashEntryKindLabels[entry.kind]}</Typography>
+                  <Amount entry={entry} />
+                </Box>
+                <Box sx={{ mb: 1 }}>
+                  <Details entry={entry} />
+                </Box>
+                <CardField label="Час">{formatDateTime(entry.createdAt)}</CardField>
+                <CardField label="Напрям">{cashDirectionLabels[entry.direction]}</CardField>
+                <CardField label="Хто">{entry.createdBy.name}</CardField>
+                {action && <Box sx={{ mt: 1 }}>{action}</Box>}
+              </>
+            )
+          }}
         />
       ) : (
         <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '20px', overflowX: 'auto' }}>

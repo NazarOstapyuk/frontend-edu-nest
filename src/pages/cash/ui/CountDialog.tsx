@@ -79,7 +79,7 @@ export const CountDialog = () => {
   const expected = mode === 'close' ? (shift?.expected ?? '0') : (desk?.lastClosed?.closingCounted ?? '0')
   const expectedKopecks = toKopecks(expected)
 
-  const { control, handleSubmit, reset, setValue } = useForm<FormValues>({
+  const { control, handleSubmit, reset, setValue, trigger, getFieldState, formState } = useForm<FormValues>({
     mode: 'all',
     defaultValues: makeDefaults(),
     resolver: yupResolver(schema),
@@ -90,6 +90,10 @@ export const CountDialog = () => {
   const difference = counted - expectedKopecks
   const diff = differenceInfo(difference)
 
+  const revalidateNote = () => {
+    if (formState.isSubmitted || getFieldState('note').isTouched) trigger('note')
+  }
+
   const handleClose = () => {
     reset(makeDefaults())
     setCountDialog({ isOpen: false, desk: null })
@@ -98,6 +102,7 @@ export const CountDialog = () => {
   const step = (index: number, delta: number) => {
     const next = Math.min(MAX_COUNT, Math.max(0, countValue(counts[index]) + delta))
     setValue(`counts.${index}`, next === 0 ? '' : String(next), { shouldValidate: true })
+    revalidateNote()
   }
 
   const onSubmit = async (values: FormValues) => {
@@ -180,6 +185,10 @@ export const CountDialog = () => {
                     <TextField
                       {...field}
                       value={field.value ?? ''}
+                      onChange={(event) => {
+                        field.onChange(event)
+                        revalidateNote()
+                      }}
                       size="small"
                       placeholder="0"
                       error={!!error}

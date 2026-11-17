@@ -39,6 +39,7 @@ interface CashState {
   desks: CashDeskState[];
   shiftReports: Record<string, CashShiftReport>;
   recipients: Person[];
+  isLoaded: boolean;
   isLoading: boolean;
   isCreating: boolean;
   isUpdating: boolean;
@@ -79,6 +80,7 @@ export const useCashStore = create<CashState>((set, get) => ({
   desks: [],
   shiftReports: {},
   recipients: [],
+  isLoaded: false,
   isLoading: false,
   isCreating: false,
   isUpdating: false,
@@ -100,7 +102,7 @@ export const useCashStore = create<CashState>((set, get) => ({
   fetchDesks: async () => {
     set({ isLoading: true });
     try {
-      set(await loadState());
+      set({ ...(await loadState()), isLoaded: true });
     } finally {
       set({ isLoading: false });
     }

@@ -8,6 +8,7 @@ import {
   childrenApi,
   financeCategoryLabels,
   groupsApi,
+  paymentMethodFilterLabels,
   softList,
   tariffsApi,
   usersApi,
@@ -16,6 +17,7 @@ import {
   type CashEntryKind,
   type Child,
   type FinanceCategory,
+  type PaymentMethodFilter,
   type Person,
   type Group,
   type Tariff,
@@ -137,6 +139,7 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
     direction: true,
     entryKind: true,
     category: true,
+    method: true,
   }
   const has = (filter: ReportFilter) => definition.filters.includes(filter) && available[filter]
   const showInstitution = has('institution')
@@ -434,6 +437,24 @@ export const ReportFilters = ({ definition }: { definition: ReportDefinition }) 
             {(Object.keys(financeCategoryLabels) as FinanceCategory[]).map((k) => (
               <MenuItem key={k} value={k}>
                 {financeCategoryLabels[k]}
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
+        {has('method') && (
+          <TextField
+            select
+            label="Спосіб оплати"
+            size="small"
+            sx={{ minWidth: { sm: 180 } }}
+            value={query.method ?? ''}
+            onChange={(e) => update({ method: (e.target.value || undefined) as PaymentMethodFilter | undefined })}
+            slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}
+          >
+            <MenuItem value="">Усі</MenuItem>
+            {(Object.keys(paymentMethodFilterLabels) as PaymentMethodFilter[]).map((k) => (
+              <MenuItem key={k} value={k}>
+                {paymentMethodFilterLabels[k]}
               </MenuItem>
             ))}
           </TextField>

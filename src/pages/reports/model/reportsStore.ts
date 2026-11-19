@@ -53,6 +53,7 @@ export const useReportsStore = create<ReportsState>((set, get) => ({
     if (definition?.filters.includes('child')) next.childId = query.childId;
     if (definition?.filters.includes('teacher')) next.teacherId = query.teacherId;
     if (definition?.filters.includes('tariff')) next.tariffId = query.tariffId;
+    if (definition?.filters.includes('method')) next.method = query.method;
     set({ selected: key, query: next, report: null, loading: false, failed: false });
   },
   setQuery: (partial) => set({ query: { ...get().query, ...partial } }),

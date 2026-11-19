@@ -51,7 +51,18 @@ export interface ReportQuery {
   entryKind?: CashEntryKind;
   category?: FinanceCategory;
   shiftId?: string;
+  method?: PaymentMethodFilter;
 }
+
+export type PaymentMethodFilter = 'cash' | 'cashless' | 'card' | 'bank_transfer' | 'online';
+
+export const paymentMethodFilterLabels: Record<PaymentMethodFilter, string> = {
+  cash: 'Готівка',
+  cashless: 'Безготівкові',
+  card: 'Картка',
+  bank_transfer: 'Переказ',
+  online: 'Онлайн',
+};
 
 export type ReportFilter =
   | 'institution'
@@ -64,7 +75,8 @@ export type ReportFilter =
   | 'employee'
   | 'direction'
   | 'entryKind'
-  | 'category';
+  | 'category'
+  | 'method';
 
 export interface ReportDefinition {
   key: ReportKey;
@@ -76,7 +88,7 @@ export interface ReportDefinition {
 }
 
 export const reportDefinitions: ReportDefinition[] = [
-  { key: 'payments', fileName: 'оплати', label: 'Оплати', areas: ['finance'], period: true, filters: ['institution', 'kind', 'group', 'child'] },
+  { key: 'payments', fileName: 'оплати', label: 'Оплати', areas: ['finance'], period: true, filters: ['institution', 'kind', 'group', 'child', 'method'] },
   { key: 'charges', fileName: 'нарахування', label: 'Нарахування', areas: ['finance'], period: true, filters: ['institution', 'kind', 'group', 'child', 'tariff'] },
   { key: 'debts', fileName: 'борги', label: 'Борги', areas: ['finance'], period: false, filters: ['institution', 'kind', 'group', 'child'] },
   { key: 'attendance', fileName: 'відвідування', label: 'Відвідування', areas: ['register'], period: true, filters: ['institution', 'kind', 'group', 'child'] },

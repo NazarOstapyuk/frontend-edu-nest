@@ -319,8 +319,9 @@ export type {
   AuditEventsQuery,
   AuthEventsQuery,
 } from './audit';
-export { reportsApi, reportDefinitions, formatCell } from './reports';
+export { reportsApi, reportDefinitions, formatCell, paymentMethodFilterLabels } from './reports';
 export type {
+  PaymentMethodFilter,
   ReportKey,
   ColumnType,
   ReportColumn,
